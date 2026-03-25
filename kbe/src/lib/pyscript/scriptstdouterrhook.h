@@ -7,6 +7,13 @@
 #include "scriptobject.h"
 #include "scriptstdouterr.h"
 
+// PyEval_InitThreads() became a no-op long before 3.12 and is removed there.
+#if PY_VERSION_HEX >= 0x030B0000
+#ifndef PyEval_InitThreads
+#define PyEval_InitThreads() ((void)0)
+#endif
+#endif
+
 namespace KBEngine{ namespace script{
 
 class ScriptStdOutErrHook : public ScriptStdOutErr
