@@ -26,6 +26,7 @@
 #include <functional>
 #include <cctype>
 #include <iterator>
+#include <regex>
 #include "common/strutil.h"
 // windows include	
 #if defined( __WIN32__ ) || defined( WIN32 ) || defined( _WIN32 )
@@ -79,6 +80,23 @@
 #endif
 
 #include <signal.h>
+
+#if __cplusplus >= 201103L
+namespace std
+{
+namespace tr1
+{
+using std::bind;
+using std::function;
+using std::hash;
+using std::regex;
+using std::regex_match;
+using std::shared_ptr;
+using std::unordered_map;
+namespace placeholders = std::placeholders;
+}
+}
+#endif
 
 #if !defined( _WIN32 )
 # include <pwd.h>
@@ -213,8 +231,8 @@ typedef unsigned long											ulong;
 #define const_charptr											const char*
 #define PyObject_ptr											PyObject*
 
-#define KBEShared_ptr											std::tr1::shared_ptr
-#define KBEUnordered_map										std::tr1::unordered_map
+#define KBEShared_ptr											std::shared_ptr
+#define KBEUnordered_map										std::unordered_map
 
 /* Use correct types for x64 platforms, too */
 #if KBE_COMPILER != COMPILER_GNU
