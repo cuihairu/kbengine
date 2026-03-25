@@ -123,6 +123,7 @@ KBE_INCLUDES += -I $(KBE_ROOT)/kbe/src/lib/dependencies/curl/include
 
 LDLIBS += $(addprefix -l, $(MY_LIBS))
 LDLIBS += -lcurl
+LDLIBS += -lbrotlidec -lbrotlicommon
 
 ifndef DISABLE_WATCHERS
 CPPFLAGS += -DENABLE_WATCHERS

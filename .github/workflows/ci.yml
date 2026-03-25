@@ -30,6 +30,7 @@ jobs:
             automake \
             bison \
             build-essential \
+            libbrotli-dev \
             libbz2-dev \
             libdb-dev \
             libffi-dev \
