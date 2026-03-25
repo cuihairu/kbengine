@@ -26,8 +26,6 @@ endif
 
 # This directory must match the directory in src/build/common.mak
 LIBDIR=$(KBE_ROOT)/kbe/src/lib/bin
-PYTHON_STATIC_LIB=$(firstword $(wildcard $(KBE_ROOT)/kbe/src/lib/python/libpython*.a))
-
 all install clean full:
 	test -d $(LIBDIR) || mkdir $(LIBDIR)
 	cd dependencies/zlib && $(MAKE) $@ && if ! test -e ../../../libs/libz.a; then \cp -f "libz.a" "../../../libs"; fi
@@ -45,7 +43,7 @@ all install clean full:
 	cd dependencies/expat && $(MAKE) $@ && if ! test -e ../../../libs/libexpat.a; then \cp -f "./.libs/libexpat.a" "../../../libs"; fi
 	cd dependencies/apr-util && $(MAKE) $@ && if ! test -e ../../../libs/libaprutil-1.a; then \cp -f ".libs/libaprutil-1.a" "../../../libs"; fi
 	cd dependencies/log4cxx && $(MAKE) $@ && if ! test -e ../../../libs/liblog4cxx.a; then \cp -f "src/main/cpp/.libs/liblog4cxx.a" "../../../libs"; fi
-	cd python && $(MAKE) $@ && test -n "$(PYTHON_STATIC_LIB)" && cp -f "$(PYTHON_STATIC_LIB)" "$(KBE_ROOT)/kbe/src/libs/libpython.a" && mkdir -p "$(KBE_ROOT)/kbe/res/scripts/common/lib-dynload/" && cp -rf $(KBE_ROOT)/kbe/src/lib/python/build/lib.*/* "$(KBE_ROOT)/kbe/res/scripts/common/lib-dynload/" && rm -rf "$(KBE_ROOT)/kbe/res/scripts/common/Lib/*" && cp -rf "$(KBE_ROOT)/kbe/src/lib/python/Lib" "$(KBE_ROOT)/kbe/res/scripts/common/Lib"  
+	cd python && $(MAKE) $@ && PYTHON_STATIC_LIB=$$(ls -1 libpython*.a 2>/dev/null | head -n 1) && test -n "$$PYTHON_STATIC_LIB" && cp -f "$$PYTHON_STATIC_LIB" "$(KBE_ROOT)/kbe/src/libs/libpython.a" && mkdir -p "$(KBE_ROOT)/kbe/res/scripts/common/lib-dynload/" && cp -rf $(KBE_ROOT)/kbe/src/lib/python/build/lib.*/* "$(KBE_ROOT)/kbe/res/scripts/common/lib-dynload/" && rm -rf "$(KBE_ROOT)/kbe/res/scripts/common/Lib/*" && cp -rf "$(KBE_ROOT)/kbe/src/lib/python/Lib" "$(KBE_ROOT)/kbe/res/scripts/common/Lib"
 	cd client_lib && $(MAKE) $@
 	cd common && $(MAKE) $@
 	cd db_redis && $(MAKE) $@

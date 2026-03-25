@@ -114,6 +114,18 @@ jobs:
             /p:Configuration=Release ^
             /p:Platform=x64
 
+      - name: Build CPython runtime artifacts
+        shell: cmd
+        run: |
+          msbuild kbe\src\lib\python\PCbuild\pythoncore.vcxproj ^
+            /m ^
+            /p:Configuration=Release ^
+            /p:Platform=x64
+          if not exist kbe\src\libs mkdir kbe\src\libs
+          if not exist kbe\bin\server mkdir kbe\bin\server
+          copy /Y kbe\src\lib\python\PCbuild\amd64\python312.lib kbe\src\libs\python312.lib
+          copy /Y kbe\src\lib\python\PCbuild\amd64\python312.dll kbe\bin\server\python312.dll
+
       - name: Build Windows solution
         shell: cmd
         run: |
