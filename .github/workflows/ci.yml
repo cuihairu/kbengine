@@ -83,6 +83,14 @@ jobs:
           cd kbe\src\lib\python\PCbuild
           call build.bat -p x64 -c Release --regen
 
+      - name: Build CPython frozen module generator
+        shell: cmd
+        run: |
+          msbuild kbe\src\lib\python\PCbuild\_freeze_module.vcxproj ^
+            /m ^
+            /p:Configuration=Release ^
+            /p:Platform=x64
+
       - name: Build Windows solution
         shell: cmd
         run: |
