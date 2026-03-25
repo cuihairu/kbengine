@@ -17,6 +17,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -43,6 +48,14 @@ jobs:
             uuid-dev \
             zlib1g-dev \
             default-libmysqlclient-dev
+
+      - name: Configure embedded CPython
+        working-directory: kbe/src/lib/python
+        run: |
+          if [ ! -f Makefile ]; then
+            chmod +x configure
+            ./configure --with-build-python=python3.12
+          fi
 
       - name: Ensure mysql_config exists
         run: |
@@ -74,6 +87,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
@@ -83,13 +101,10 @@ jobs:
           cd kbe\src\lib\python\PCbuild
           call build.bat -p x64 -c Release --regen
 
-      - name: Build CPython frozen module generator
+      - name: Generate CPython getpath header
         shell: cmd
         run: |
-          msbuild kbe\src\lib\python\PCbuild\_freeze_module.vcxproj ^
-            /m ^
-            /p:Configuration=Release ^
-            /p:Platform=x64
+          py -3.12 kbe\src\lib\python\Programs\_freeze_module.py getpath kbe\src\lib\python\Modules\getpath.py kbe\src\lib\python\Python\frozen_modules\getpath.h
 
       - name: Build Windows solution
         shell: cmd
