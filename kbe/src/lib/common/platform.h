@@ -66,9 +66,9 @@
 #include <netinet/tcp.h> 
 #include <netinet/ip.h>
 #include <arpa/inet.h>
-#include <tr1/unordered_map>
-#include <tr1/functional>
-#include <tr1/memory>
+#include <unordered_map>
+#include <functional>
+#include <memory>
 #include <linux/types.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -81,22 +81,6 @@
 
 #include <signal.h>
 
-#if __cplusplus >= 201103L
-namespace std
-{
-namespace tr1
-{
-using std::bind;
-using std::function;
-using std::hash;
-using std::regex;
-using std::regex_match;
-using std::shared_ptr;
-using std::unordered_map;
-namespace placeholders = std::placeholders;
-}
-}
-#endif
 
 #if !defined( _WIN32 )
 # include <pwd.h>

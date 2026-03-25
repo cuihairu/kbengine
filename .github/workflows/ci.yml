@@ -104,11 +104,15 @@ jobs:
           cd kbe\src\lib\python\PCbuild
           call build.bat -p x64 -c Release --regen
 
-      - name: Generate CPython getpath header
+      - name: Generate CPython frozen sources
         shell: cmd
         run: |
           if not exist kbe\src\lib\python\Python\frozen_modules mkdir kbe\src\lib\python\Python\frozen_modules
-          py -3.12 kbe\src\lib\python\Programs\_freeze_module.py getpath kbe\src\lib\python\Modules\getpath.py kbe\src\lib\python\Python\frozen_modules\getpath.h
+          if not exist kbe\src\lib\python\Python\deepfreeze mkdir kbe\src\lib\python\Python\deepfreeze
+          msbuild kbe\src\lib\python\PCbuild\_freeze_module.vcxproj ^
+            /m ^
+            /p:Configuration=Release ^
+            /p:Platform=x64
 
       - name: Build Windows solution
         shell: cmd
