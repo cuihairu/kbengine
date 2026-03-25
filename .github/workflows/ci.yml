@@ -52,6 +52,9 @@ jobs:
       - name: Configure embedded CPython
         working-directory: kbe/src/lib/python
         run: |
+          if [ ! -f Modules/Setup ]; then
+            cp Modules/Setup.stdlib.in Modules/Setup
+          fi
           if [ ! -f Makefile ]; then
             chmod +x configure
             ./configure --with-build-python=python3.12
@@ -104,6 +107,7 @@ jobs:
       - name: Generate CPython getpath header
         shell: cmd
         run: |
+          if not exist kbe\src\lib\python\Python\frozen_modules mkdir kbe\src\lib\python\Python\frozen_modules
           py -3.12 kbe\src\lib\python\Programs\_freeze_module.py getpath kbe\src\lib\python\Modules\getpath.py kbe\src\lib\python\Python\frozen_modules\getpath.h
 
       - name: Build Windows solution
