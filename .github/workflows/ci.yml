@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - chore/python-3.12-support
+  pull_request:
+
+jobs:
+  linux:
+    name: Linux Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf \
+            automake \
+            bison \
+            build-essential \
+            libbz2-dev \
+            libdb-dev \
+            libffi-dev \
+            libgdbm-dev \
+            liblzma-dev \
+            libncurses5-dev \
+            libreadline-dev \
+            libsqlite3-dev \
+            libssl-dev \
+            libtool \
+            libuuid1 \
+            libxml2-dev \
+            pkg-config \
+            tk-dev \
+            uuid-dev \
+            zlib1g-dev \
+            default-libmysqlclient-dev
+
+      - name: Ensure mysql_config exists
+        run: |
+          if command -v mysql_config >/dev/null 2>&1; then
+            mysql_config --version || true
+            exit 0
+          fi
+          if command -v mariadb_config >/dev/null 2>&1; then
+            sudo ln -sf "$(command -v mariadb_config)" /usr/local/bin/mysql_config
+            mysql_config --version || true
+            exit 0
+          fi
+          echo "mysql_config not found"
+          exit 1
+
+      - name: Build Linux targets
+        env:
+          KBE_ROOT: ${{ github.workspace }}
+          KBE_CONFIG: Hybrid64
+        run: |
+          make -C kbe/src/server -j2
+
+  windows:
+    name: Windows Build
+    runs-on: windows-2022
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Windows solution
+        shell: cmd
+        run: |
+          msbuild kbe\src\kbengine.sln ^
+            /m ^
+            /p:Configuration=Release ^
+            /p:Platform=Win64
