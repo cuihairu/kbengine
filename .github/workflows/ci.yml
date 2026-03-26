@@ -20,7 +20,7 @@ jobs:
       - name: Setup Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.12.13'
 
       - name: Install build dependencies
         run: |
@@ -94,7 +94,7 @@ jobs:
       - name: Setup Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.12.13'
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -103,6 +103,7 @@ jobs:
         shell: cmd
         run: |
           cd kbe\src\lib\python\PCbuild
+          set PYTHON=%pythonLocation%\python.exe
           call build.bat -p x64 -c Release --regen
 
       - name: Generate CPython frozen sources
