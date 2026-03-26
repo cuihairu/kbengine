@@ -125,6 +125,8 @@ jobs:
             /p:Platform=x64
           if not exist kbe\src\libs mkdir kbe\src\libs
           if not exist kbe\bin\server mkdir kbe\bin\server
+          if not exist kbe\src\lib\dependencies\vsopenssl\include\openssl mkdir kbe\src\lib\dependencies\vsopenssl\include\openssl
+          xcopy /E /I /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\include\openssl kbe\src\lib\dependencies\vsopenssl\include\openssl
           copy /Y kbe\src\lib\python\PCbuild\amd64\python312.lib kbe\src\libs\python312.lib
           copy /Y kbe\src\lib\python\PCbuild\amd64\python312.dll kbe\bin\server\python312.dll
           copy /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\amd64\libcrypto.lib kbe\src\libs\libcrypto.lib
