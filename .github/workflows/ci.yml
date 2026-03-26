@@ -126,6 +126,10 @@ jobs:
           if not exist kbe\bin\server mkdir kbe\bin\server
           copy /Y kbe\src\lib\python\PCbuild\amd64\python312.lib kbe\src\libs\python312.lib
           copy /Y kbe\src\lib\python\PCbuild\amd64\python312.dll kbe\bin\server\python312.dll
+          copy /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\amd64\libcrypto.lib kbe\src\libs\libcrypto.lib
+          copy /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\amd64\libssl.lib kbe\src\libs\libssl.lib
+          copy /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\amd64\libcrypto-3.dll kbe\bin\server\libcrypto-3.dll
+          copy /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\amd64\libssl-3.dll kbe\bin\server\libssl-3.dll
 
       - name: Build Windows solution
         shell: cmd
