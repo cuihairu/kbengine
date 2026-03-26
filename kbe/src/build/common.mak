@@ -123,6 +123,7 @@ KBE_INCLUDES += -I $(KBE_ROOT)/kbe/src/lib/dependencies/curl/include
 
 LDLIBS += $(addprefix -l, $(MY_LIBS))
 LDLIBS += -lcurl
+LDLIBS += -lbrotlidec -lbrotlicommon
 
 ifndef DISABLE_WATCHERS
 CPPFLAGS += -DENABLE_WATCHERS
@@ -281,7 +282,9 @@ CXXFLAGS += -Wno-uninitialized -Wno-char-subscripts
 CXXFLAGS += -fno-strict-aliasing -Wno-non-virtual-dtor
 CXXFLAGS += -Wno-invalid-offsetof
 CXXFLAGS += -Werror
-CXXFLAGS += -std=c++11
+CXXFLAGS += -Wno-error=c++20-compat
+CXXFLAGS += -Wno-error=deprecated-declarations
+CXXFLAGS += -std=c++17
 
 CPPFLAGS += -DKBE_SERVER -MMD -DKBE_CONFIG=\"${KBE_CONFIG}\"
 

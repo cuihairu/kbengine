@@ -1,0 +1,136 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - chore/python-3.12-support
+  pull_request:
+
+jobs:
+  linux:
+    name: Linux Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf \
+            automake \
+            bison \
+            build-essential \
+            libbrotli-dev \
+            libbz2-dev \
+            libdb-dev \
+            libffi-dev \
+            libgdbm-dev \
+            liblzma-dev \
+            libncurses5-dev \
+            libreadline-dev \
+            libsqlite3-dev \
+            libssl-dev \
+            libtirpc-dev \
+            libtool \
+            libuuid1 \
+            libxml2-dev \
+            pkg-config \
+            tk-dev \
+            uuid-dev \
+            zlib1g-dev \
+            default-libmysqlclient-dev
+
+      - name: Configure embedded CPython
+        working-directory: kbe/src/lib/python
+        run: |
+          if [ ! -f Modules/Setup ]; then
+            cp Modules/Setup.stdlib.in Modules/Setup
+          fi
+          if [ ! -f Makefile ]; then
+            chmod +x configure
+            ./configure --with-build-python=python3.12
+          fi
+
+      - name: Ensure mysql_config exists
+        run: |
+          if command -v mysql_config >/dev/null 2>&1; then
+            mysql_config --version || true
+            exit 0
+          fi
+          if command -v mariadb_config >/dev/null 2>&1; then
+            sudo ln -sf "$(command -v mariadb_config)" /usr/local/bin/mysql_config
+            mysql_config --version || true
+            exit 0
+          fi
+          echo "mysql_config not found"
+          exit 1
+
+      - name: Build Linux targets
+        env:
+          KBE_ROOT: ${{ github.workspace }}
+          KBE_CONFIG: Hybrid64
+        run: |
+          make -C kbe/src/server -j2
+
+  windows:
+    name: Windows Build
+    runs-on: windows-2022
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Regenerate CPython generated sources
+        shell: cmd
+        run: |
+          cd kbe\src\lib\python\PCbuild
+          call build.bat -p x64 -c Release --regen
+
+      - name: Generate CPython frozen sources
+        shell: cmd
+        run: |
+          if not exist kbe\src\lib\python\Python\frozen_modules mkdir kbe\src\lib\python\Python\frozen_modules
+          if not exist kbe\src\lib\python\Python\deepfreeze mkdir kbe\src\lib\python\Python\deepfreeze
+          msbuild kbe\src\lib\python\PCbuild\_freeze_module.vcxproj ^
+            /m ^
+            /p:Configuration=Release ^
+            /p:Platform=x64
+
+      - name: Build CPython runtime artifacts
+        shell: cmd
+        run: |
+          msbuild kbe\src\lib\python\PCbuild\pythoncore.vcxproj ^
+            /m ^
+            /p:Configuration=Release ^
+            /p:Platform=x64
+          if not exist kbe\src\libs mkdir kbe\src\libs
+          if not exist kbe\bin\server mkdir kbe\bin\server
+          copy /Y kbe\src\lib\python\PCbuild\amd64\python312.lib kbe\src\libs\python312.lib
+          copy /Y kbe\src\lib\python\PCbuild\amd64\python312.dll kbe\bin\server\python312.dll
+
+      - name: Build Windows solution
+        shell: cmd
+        run: |
+          msbuild kbe\src\kbengine.sln ^
+            /m ^
+            /p:Configuration=Release ^
+            /p:Platform=Win64

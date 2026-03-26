@@ -3,6 +3,7 @@
 #include "baseapp.h"
 #include "archiver.h"
 #include "entity.h"
+#include <random>
 
 namespace KBEngine{	
 
@@ -80,7 +81,7 @@ void Archiver::createArchiveTable()
 	}
 
 	// 随机一下序列
-	std::random_shuffle(arEntityIDs_.begin(), arEntityIDs_.end());
+	std::shuffle(arEntityIDs_.begin(), arEntityIDs_.end(), std::mt19937(std::random_device{}()));
 }
 
 }
