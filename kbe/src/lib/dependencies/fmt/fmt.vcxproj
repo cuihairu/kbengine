@@ -19,19 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\posix.cpp" />
-    <ClCompile Include="src\format.cpp" />
+    <ClCompile Include="src\format.cc" />
+    <ClCompile Include="src\os.cc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\fmt\args.h" />
+    <ClInclude Include="include\fmt\base.h" />
+    <ClInclude Include="include\fmt\chrono.h" />
     <ClInclude Include="include\fmt\color.h" />
+    <ClInclude Include="include\fmt\compile.h" />
     <ClInclude Include="include\fmt\core.h" />
     <ClInclude Include="include\fmt\format.h" />
     <ClInclude Include="include\fmt\format-inl.h" />
+    <ClInclude Include="include\fmt\os.h" />
     <ClInclude Include="include\fmt\ostream.h" />
-    <ClInclude Include="include\fmt\posix.h" />
     <ClInclude Include="include\fmt\printf.h" />
     <ClInclude Include="include\fmt\ranges.h" />
-    <ClInclude Include="include\fmt\time.h" />
+    <ClInclude Include="include\fmt\std.h" />
+    <ClInclude Include="include\fmt\xchar.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{13E95053-54B3-497B-9DDB-3430B1C1B6BF}</ProjectGuid>
