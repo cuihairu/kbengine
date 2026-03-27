@@ -1405,7 +1405,7 @@ void Cellapp::onEntityCall(Network::Channel* pChannel, KBEngine::MemoryStream& s
 		default:
 			{
 				ERROR_MSG(fmt::format("Cellapp::onEntityCall: entitycallType {} error! must a cellType. entityID={}.\n",
-					calltype, eid));
+					static_cast<int>(calltype), eid));
 			}
 	};
 
