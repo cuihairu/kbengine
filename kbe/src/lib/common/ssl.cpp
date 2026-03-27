@@ -15,10 +15,15 @@ namespace KBEngine
 //-------------------------------------------------------------------------------------
 bool KB_SSL::initialize()
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	SSL_load_error_strings();
 	ERR_load_BIO_strings();
 	SSL_library_init();
 	OpenSSL_add_all_algorithms();
+#else
+	OPENSSL_init_ssl(0, NULL);
+	OPENSSL_init_crypto(0, NULL);
+#endif
 	return true;
 }
 
@@ -31,7 +36,7 @@ void KB_SSL::finalise()
     ::SSL_COMP_free_compression_methods();
 #endif // (OPENSSL_VERSION_NUMBER >= 0x10002000L)
 
-// after 1.1.0 no need
+// Global OpenSSL teardown is not required on 1.1.0+.
 #if (OPENSSL_VERSION_NUMBER <  0x10100000)
 // <= 1.0.1f = old api, 1.0.1g+ = new api
 #if (OPENSSL_VERSION_NUMBER <= 0x1000106f) || defined(USE_WOLFSSL)
@@ -67,13 +72,13 @@ int KB_SSL::isSSLProtocal(MemoryStream* s)
 		&& (recvData[4] == 0x00 || recvData[4] == 0x01 || recvData[4] == 0x02 || recvData[4] == 0x03)
 		&& (s->length() - recvData[1]) == 2)
 	{
-		// SSLv2 协议
+		// SSLv2 protocol.
 		return SSL2_VERSION;
 	}
 	else if (s->length() >= 47 && recvData[0] == 0x16 && recvData[1] == 0x03
 		&& (recvData[2] == 0x00 || recvData[2] == 0x01 || recvData[2] == 0x02 || recvData[2] == 0x03))
 	{
-		// SSLv3 协议
+		// SSLv3/TLS protocol family.
 		if (recvData[2] == 0x00)
 		{
 			return SSL3_VERSION;

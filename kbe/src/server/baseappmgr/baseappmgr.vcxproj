@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -139,7 +139,7 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/ignore:4049 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>openssl_uptable.obj;apr-1_d.lib;aprutil-1_d.lib;log4cxx_d.lib;expat_d.lib;Version.lib;wldap32.lib;netapi32.lib;resmgr_d.lib;server_d.lib;xml_d.lib;common_d.lib;fmt_d.lib;helper_d.lib;math_d.lib;network_d.lib;libcurl_d.lib;thread_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>apr-1_d.lib;aprutil-1_d.lib;log4cxx_d.lib;expat_d.lib;Version.lib;wldap32.lib;netapi32.lib;resmgr_d.lib;server_d.lib;xml_d.lib;common_d.lib;fmt_d.lib;helper_d.lib;math_d.lib;network_d.lib;libcurl_d.lib;thread_d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>../../libs;../../lib/dependencies/vld;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>expat_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -195,7 +195,7 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/ignore:4049 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>openssl_uptable.obj;apr-1.lib;aprutil-1.lib;log4cxx.lib;expat.lib;Version.lib;wldap32.lib;netapi32.lib;resmgr.lib;server.lib;xml.lib;common.lib;fmt.lib;helper.lib;math.lib;network.lib;libcurl.lib;thread.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>apr-1.lib;aprutil-1.lib;log4cxx.lib;expat.lib;Version.lib;wldap32.lib;netapi32.lib;resmgr.lib;server.lib;xml.lib;common.lib;fmt.lib;helper.lib;math.lib;network.lib;libcurl.lib;thread.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>../../libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>expat.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -206,7 +206,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\lib\dependencies\vsopenssl\include\openssl\applink.c" />
+    <ClCompile Include="..\..\lib\dependencies\openssl_applink.c" />
     <ClCompile Include="baseapp.cpp" />
     <ClCompile Include="baseappmgr.cpp" />
     <ClCompile Include="baseappmgr_interface.cpp" />
@@ -229,12 +229,6 @@
     <ProjectReference Include="..\..\lib\common\common.vcxproj">
       <Project>{a04109a7-46c9-42f9-ab29-8e3d84450172}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\..\lib\dependencies\vsopenssl\vcbuild\libeay32\libeay32.vcxproj">
-      <Project>{26195a87-700c-42d6-a271-20b6cacc6249}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\lib\dependencies\vsopenssl\vcbuild\ssleay32\ssleay32.vcxproj">
-      <Project>{678e55f0-e0f7-4e52-82e4-9ad50f0753b8}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\lib\entitydef\entitydef.vcxproj">
       <Project>{44fa54e8-0a60-4a6c-a449-118872e75502}</Project>

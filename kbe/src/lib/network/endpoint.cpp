@@ -257,7 +257,7 @@ int EndPoint::findIndicatedInterface(const char * spec, u_int32_t & address)
 		return -1;
 	}
 
-	// 是否指定地址
+	// Check whether the spec is already an IP address.
 	if (0 == Address::string2ip(spec, address))
 	{
 		return 0;
@@ -364,7 +364,7 @@ int EndPoint::getInterfaceAddressByMAC(const char * mac, u_int32_t & address)
 		return ret;
 	}
 
-	// mac地址转换
+	// Convert the MAC string to raw bytes.
 	unsigned char macAddress[16] = {0};
 	unsigned char macAddressIdx = 0;
 	char szTemp[2] = {0};
@@ -655,11 +655,11 @@ static long ssl_bio_callback(BIO *bio, int cmd, const char *argp, int argi, long
 
 	Packet* pPacket = (Packet*)BIO_get_callback_arg(bio);
 
-	// 类似recv， argi是buffer，argl是buffer长度，这里判断pPacket大于长度返回指定长度，小于长度则返回读取到的长度
+	// Similar to recv: argi is the buffer size. Clamp the read length to the packet payload size.
 	if ((int)pPacket->length() < argi)
 		argi = (int)pPacket->length();
 
-	// 将我们的buffer填充进去
+	// Copy packet data into the OpenSSL buffer.
 	if ((cmd & BIO_CB_RETURN) > 0)
 	{
 		memcpy((void*)argp, pPacket->data() + pPacket->rpos(), argi);
@@ -684,6 +684,9 @@ static long ssl_bio_callback(BIO *bio, int cmd, const char *argp, int argi, long
 
 bool EndPoint::setupSSL(int sslVersion, Packet* pPacket)
 {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	sslContext_ = SSL_CTX_new(TLS_server_method());
+#else
 	switch (sslVersion)
 	{
 #if (OPENSSL_VERSION_NUMBER <  0x1000207fL)
@@ -711,12 +714,39 @@ bool EndPoint::setupSSL(int sslVersion, Packet* pPacket)
 		sslContext_ = SSL_CTX_new(SSLv23_server_method());
 		break;
 	};
+#endif
 
 	if (!sslContext_)
 	{
-		ERROR_MSG(fmt::format("EndPoint::setupSSL: SSL_CTX_new(SSLv23_client_method()): {}!\n", ERR_error_string(ERR_get_error(), NULL)));
+		ERROR_MSG(fmt::format("EndPoint::setupSSL: SSL_CTX_new(server_method): {}!\n", ERR_error_string(ERR_get_error(), NULL)));
 		return false;
 	}
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	switch (sslVersion)
+	{
+#ifndef OPENSSL_NO_SSL3
+	case SSL3_VERSION:
+		SSL_CTX_set_min_proto_version(sslContext_, SSL3_VERSION);
+		SSL_CTX_set_max_proto_version(sslContext_, SSL3_VERSION);
+		break;
+#endif
+	case TLS1_VERSION:
+		SSL_CTX_set_min_proto_version(sslContext_, TLS1_VERSION);
+		SSL_CTX_set_max_proto_version(sslContext_, TLS1_VERSION);
+		break;
+	case TLS1_1_VERSION:
+		SSL_CTX_set_min_proto_version(sslContext_, TLS1_1_VERSION);
+		SSL_CTX_set_max_proto_version(sslContext_, TLS1_1_VERSION);
+		break;
+	case TLS1_2_VERSION:
+		SSL_CTX_set_min_proto_version(sslContext_, TLS1_2_VERSION);
+		SSL_CTX_set_max_proto_version(sslContext_, TLS1_2_VERSION);
+		break;
+	default:
+		break;
+	}
+#endif
 
 	SSL_CTX_set_options(sslContext_, SSL_OP_SINGLE_DH_USE | SSL_OP_SINGLE_ECDH_USE);
 

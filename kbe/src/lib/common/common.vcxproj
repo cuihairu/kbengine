@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -227,12 +227,6 @@
     <ProjectReference Include="..\dependencies\apr\apr.vcxproj">
       <Project>{c6c836e6-2899-458a-90ba-184192342d30}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\dependencies\vsopenssl\vcbuild\libeay32\libeay32.vcxproj">
-      <Project>{26195a87-700c-42d6-a271-20b6cacc6249}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\dependencies\vsopenssl\vcbuild\ssleay32\ssleay32.vcxproj">
-      <Project>{678e55f0-e0f7-4e52-82e4-9ad50f0753b8}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -243,12 +243,6 @@
     <None Include="sequence.inl" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\dependencies\vsopenssl\vcbuild\libeay32\libeay32.vcxproj">
-      <Project>{26195a87-700c-42d6-a271-20b6cacc6249}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\dependencies\vsopenssl\vcbuild\ssleay32\ssleay32.vcxproj">
-      <Project>{678e55f0-e0f7-4e52-82e4-9ad50f0753b8}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\python\PCbuild\pythoncore.vcxproj">
       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
