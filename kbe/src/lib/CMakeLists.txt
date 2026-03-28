@@ -369,6 +369,54 @@ target_include_directories(kbe_thread_task
 
 add_dependencies(kbe-bootstrap kbe_thread_task)
 
+add_library(kbe_common_deadline INTERFACE)
+
+add_library(KBEngine::common_deadline ALIAS kbe_common_deadline)
+
+target_link_libraries(kbe_common_deadline
+  INTERFACE
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_common_deadline
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_deadline)
+
+add_library(kbe_common_predicates INTERFACE)
+
+add_library(KBEngine::common_predicates ALIAS kbe_common_predicates)
+
+target_link_libraries(kbe_common_predicates
+  INTERFACE
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_common_predicates
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_predicates)
+
+add_library(kbe_common_endian INTERFACE)
+
+add_library(KBEngine::common_endian ALIAS kbe_common_endian)
+
+target_link_libraries(kbe_common_endian
+  INTERFACE
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_common_endian
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_endian)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
