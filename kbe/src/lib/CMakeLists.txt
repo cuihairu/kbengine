@@ -38,6 +38,25 @@ add_custom_target(kbe-bootstrap
   COMMENT "Initial KBEngine CMake bootstrap target"
 )
 
+add_library(kbe_common_core STATIC
+  "${KBE_SOURCE_DIR}/lib/common/base64.cpp"
+  "${KBE_SOURCE_DIR}/lib/common/sha1.cpp"
+)
+
+add_library(KBEngine::common_core ALIAS kbe_common_core)
+
+target_link_libraries(kbe_common_core
+  PUBLIC
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_common_core
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_core)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
