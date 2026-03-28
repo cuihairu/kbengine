@@ -36,6 +36,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_exception.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_interfaces.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_stats.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_error_reporter.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
@@ -74,6 +75,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::network_interfaces
     KBEngine::network_message_handler
     KBEngine::network_stats
+    KBEngine::network_error_reporter
 )
 
 gtest_discover_tests(kbe_smoke_tests)

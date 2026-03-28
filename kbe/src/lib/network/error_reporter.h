@@ -5,7 +5,14 @@
 
 #include "common/common.h"
 #include "common/timer.h"
+#if defined(KBE_CMAKE_BOOTSTRAP_ERROR_REPORTER)
+#include "network/event_dispatcher_cmake.h"
+#include <string>
+#define KBE_ERROR_REPORTER_ERROR_MSG(msg) do { (void)(msg); } while (0)
+#else
 #include "helper/debug_helper.h"
+#define KBE_ERROR_REPORTER_ERROR_MSG(msg) ERROR_MSG(msg)
+#endif
 #include "network/common.h"
 #include "network/network_exception.h"
 

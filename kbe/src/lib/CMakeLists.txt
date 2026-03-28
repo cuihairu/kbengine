@@ -689,6 +689,32 @@ target_include_directories(kbe_network_stats
 
 add_dependencies(kbe-bootstrap kbe_network_stats)
 
+add_library(kbe_network_error_reporter STATIC
+  "${KBE_SOURCE_DIR}/lib/network/error_reporter_cmake.cpp"
+)
+
+add_library(KBEngine::network_error_reporter ALIAS kbe_network_error_reporter)
+
+target_link_libraries(kbe_network_error_reporter
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_timer
+    KBEngine::network_exception
+)
+
+target_compile_definitions(kbe_network_error_reporter
+  PUBLIC
+    KBE_CMAKE_BOOTSTRAP_ERROR_REPORTER
+)
+
+target_include_directories(kbe_network_error_reporter
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_error_reporter)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
