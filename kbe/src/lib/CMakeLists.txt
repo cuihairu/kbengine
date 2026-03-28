@@ -537,6 +537,22 @@ target_include_directories(kbe_helper_event_stats
 
 add_dependencies(kbe-bootstrap kbe_helper_event_stats)
 
+add_library(kbe_helper_memory INTERFACE)
+
+add_library(KBEngine::helper_memory ALIAS kbe_helper_memory)
+
+target_link_libraries(kbe_helper_memory
+  INTERFACE
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_helper_memory
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_helper_memory)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"

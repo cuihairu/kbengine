@@ -6,7 +6,6 @@
 
 #include "common/common.h"
 #include "common/kbemalloc.h"
-#include "helper/debug_helper.h"
 
 #if KBE_PLATFORM == PLATFORM_WIN32
 #ifdef _DEBUG
