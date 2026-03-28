@@ -123,6 +123,24 @@ target_include_directories(kbe_common_md5
 
 add_dependencies(kbe-bootstrap kbe_common_md5)
 
+add_library(kbe_common_objectpool INTERFACE)
+
+add_library(KBEngine::common_objectpool ALIAS kbe_common_objectpool)
+
+target_link_libraries(kbe_common_objectpool
+  INTERFACE
+    KBEngine::build_config
+    KBEngine::common_timestamp
+    fmt::fmt
+)
+
+target_include_directories(kbe_common_objectpool
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_objectpool)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"

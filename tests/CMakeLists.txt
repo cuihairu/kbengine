@@ -9,6 +9,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_timestamp.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_timer.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_md5.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_objectpool.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
