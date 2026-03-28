@@ -8,6 +8,8 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <cassert>
+#include <cctype>
 
 namespace KBEngine{ 
 /*---------------------------------------------------------------------------------

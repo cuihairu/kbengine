@@ -57,6 +57,24 @@ target_include_directories(kbe_common_core
 
 add_dependencies(kbe-bootstrap kbe_common_core)
 
+add_library(kbe_common_strutil STATIC
+  "${KBE_SOURCE_DIR}/lib/common/strutil_core.cpp"
+)
+
+add_library(KBEngine::common_strutil ALIAS kbe_common_strutil)
+
+target_link_libraries(kbe_common_strutil
+  PUBLIC
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_common_strutil
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_strutil)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
