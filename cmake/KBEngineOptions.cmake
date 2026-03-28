@@ -2,6 +2,7 @@ option(KBE_ENABLE_WATCHERS "Enable watcher support" ON)
 option(KBE_USE_OPENSSL "Enable OpenSSL-dependent codepaths" ON)
 option(KBE_USE_LOG4CXX "Enable log4cxx-backed logging" OFF)
 option(KBE_BUILD_BOOTSTRAP_ONLY "Build only the initial CMake bootstrap targets" ON)
+option(KBE_ENABLE_TESTING "Enable KBEngine C++ unit tests" ON)
 
 set(KBE_COMMON_DEFINITIONS
   CODE_INLINE

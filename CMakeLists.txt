@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.21)
 
 project(KBEngine LANGUAGES C CXX)
 
+include(CTest)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -25,3 +27,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${KBE_ROOT_DIR}/kbe/bin/server")
 include(KBEngineDependencies)
 
 add_subdirectory(kbe/src)
+
+if(BUILD_TESTING AND KBE_ENABLE_TESTING)
+  add_subdirectory(tests)
+endif()
