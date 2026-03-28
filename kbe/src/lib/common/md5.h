@@ -3,7 +3,11 @@
 #ifndef KBENGINE_MD5_H
 #define KBENGINE_MD5_H
 
+#if defined(KBE_USE_EVP_MD5)
+#include "openssl/evp.h"
+#else
 #include "openssl/md5.h"
+#endif
 #include <string>
 
 namespace KBEngine
@@ -38,7 +42,11 @@ public:
 	bool isFinal() const{ return isFinal_; }
 
 private:
+#if defined(KBE_USE_EVP_MD5)
+	EVP_MD_CTX* state_;
+#else
 	MD5_CTX state_;
+#endif
 	unsigned char bytes_[16];
 	bool isFinal_;
 };

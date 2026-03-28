@@ -22,18 +22,6 @@ if(KBE_USE_LOG4CXX)
   )
 endif()
 
-if(KBE_USE_OPENSSL)
-  if(EXISTS "${KBE_SOURCE_DIR}/lib/dependencies/openssl/include")
-    target_include_directories(kbe_build_config INTERFACE
-      "${KBE_SOURCE_DIR}/lib/dependencies/openssl/include"
-    )
-  elseif(EXISTS "${KBE_SOURCE_DIR}/lib/dependencies/vsopenssl/include")
-    target_include_directories(kbe_build_config INTERFACE
-      "${KBE_SOURCE_DIR}/lib/dependencies/vsopenssl/include"
-    )
-  endif()
-endif()
-
 add_custom_target(kbe-bootstrap
   COMMENT "Initial KBEngine CMake bootstrap target"
 )
@@ -102,7 +90,6 @@ add_library(KBEngine::common_timer ALIAS kbe_common_timer)
 target_link_libraries(kbe_common_timer
   PUBLIC
     KBEngine::build_config
-    KBEngine::common_timestamp
 )
 
 target_include_directories(kbe_common_timer
@@ -111,6 +98,30 @@ target_include_directories(kbe_common_timer
 )
 
 add_dependencies(kbe-bootstrap kbe_common_timer)
+
+add_library(kbe_common_md5 STATIC
+  "${KBE_SOURCE_DIR}/lib/common/md5_cmake.cpp"
+)
+
+add_library(KBEngine::common_md5 ALIAS kbe_common_md5)
+
+target_link_libraries(kbe_common_md5
+  PUBLIC
+    KBEngine::build_config
+    OpenSSL::Crypto
+)
+
+target_compile_definitions(kbe_common_md5
+  PUBLIC
+    KBE_USE_EVP_MD5
+)
+
+target_include_directories(kbe_common_md5
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_md5)
 
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC

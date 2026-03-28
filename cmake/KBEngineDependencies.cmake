@@ -32,6 +32,14 @@ if(TARGET ZLIB::ZLIB)
   message(STATUS "Using system zlib target: ZLIB::ZLIB")
 endif()
 
+if(KBE_USE_OPENSSL)
+  find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
+
+  if(TARGET OpenSSL::Crypto)
+    message(STATUS "Using system OpenSSL targets: OpenSSL::Crypto/OpenSSL::SSL")
+  endif()
+endif()
+
 if(BUILD_TESTING AND KBE_ENABLE_TESTING)
   include(FetchContent)
 
