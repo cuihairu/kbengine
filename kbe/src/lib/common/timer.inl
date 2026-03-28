@@ -97,7 +97,7 @@ void TimersT< TIME_STAMP >::purgeCancelledTimes()
 
 	const int numPurged = (int)(container.end() - newEnd);
 	numCancelled_ -= numPurged;
-	KBE_ASSERT( (numCancelled_ == 0) || (numCancelled_ == 1) );
+	assert( (numCancelled_ == 0) || (numCancelled_ == 1) );
 	
 	container.erase( newEnd, container.end() );
 	timeQueue_.make_heap();
@@ -129,7 +129,7 @@ int TimersT< TIME_STAMP >::process(TimeStamp now)
 		{
 			delete pTime;
 
-			KBE_ASSERT( numCancelled_ > 0 );
+			assert( numCancelled_ > 0 );
 			--numCancelled_;
 		}
 	}
@@ -189,6 +189,11 @@ bool TimersT< TIME_STAMP >::getTimerInfo( TimerHandle handle,
 {
 	Time * pTime = static_cast< Time * >( handle.time() );
 
+	if (pTime == NULL)
+	{
+		return false;
+	}
+
 	if (!pTime->isCancelled())
 	{
 		time = pTime->time();
@@ -217,7 +222,7 @@ inline void TimeBase::cancel()
 		return;
 	}
 
-	KBE_ASSERT((state_ == TIME_PENDING) || (state_ == TIME_EXECUTING));
+	assert((state_ == TIME_PENDING) || (state_ == TIME_EXECUTING));
 	state_ = TIME_CANCELLED;
 
 	if (pHandler_){

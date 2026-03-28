@@ -7,6 +7,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_base64_sha1.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_strutil.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_timestamp.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_timer.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
@@ -21,6 +22,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::common_core
     KBEngine::common_strutil
     KBEngine::common_timestamp
+    KBEngine::common_timer
 )
 
 gtest_discover_tests(kbe_smoke_tests)

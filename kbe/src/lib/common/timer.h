@@ -4,7 +4,8 @@
 
 #include "common/common.h"
 #include "common/timestamp.h"
-#include "helper/debug_helper.h"
+
+#include <cassert>
 
 namespace KBEngine
 {
@@ -44,7 +45,7 @@ public:
 	TimerHandler() : numTimesRegistered_( 0 ) {}
 	virtual ~TimerHandler()
 	{
-		KBE_ASSERT( numTimesRegistered_ == 0 );
+		assert( numTimesRegistered_ == 0 );
 	};
 
 	virtual void handleTimeout(TimerHandle handle, void * pUser) = 0;
