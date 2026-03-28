@@ -2,6 +2,8 @@ include(GoogleTest)
 
 add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_fmt_bootstrap.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_tinyxml_bootstrap.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_zlib_bootstrap.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES

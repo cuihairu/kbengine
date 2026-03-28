@@ -11,6 +11,27 @@ target_include_directories(fmt
     "${KBE_SOURCE_DIR}/lib/dependencies/fmt/include"
 )
 
+add_library(tinyxml STATIC
+  "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml/tinystr.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml/tinyxml.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml/tinyxmlerror.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml/tinyxmlparser.cpp"
+)
+
+add_library(KBEngine::tinyxml ALIAS tinyxml)
+
+target_compile_features(tinyxml PUBLIC cxx_std_17)
+target_include_directories(tinyxml
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml"
+)
+
+find_package(ZLIB REQUIRED)
+
+if(TARGET ZLIB::ZLIB)
+  message(STATUS "Using system zlib target: ZLIB::ZLIB")
+endif()
+
 if(BUILD_TESTING AND KBE_ENABLE_TESTING)
   include(FetchContent)
 
