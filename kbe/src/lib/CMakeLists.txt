@@ -207,6 +207,25 @@ target_include_directories(kbe_common_rsa
 
 add_dependencies(kbe-bootstrap kbe_common_rsa)
 
+add_library(kbe_common_kbekey STATIC
+  "${KBE_SOURCE_DIR}/lib/common/kbekey_cmake.cpp"
+)
+
+add_library(KBEngine::common_kbekey ALIAS kbe_common_kbekey)
+
+target_link_libraries(kbe_common_kbekey
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_rsa
+)
+
+target_include_directories(kbe_common_kbekey
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_kbekey)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
