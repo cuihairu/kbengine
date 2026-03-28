@@ -187,6 +187,26 @@ target_include_directories(kbe_common_ssl
 
 add_dependencies(kbe-bootstrap kbe_common_ssl)
 
+add_library(kbe_common_rsa STATIC
+  "${KBE_SOURCE_DIR}/lib/common/rsa_cmake.cpp"
+)
+
+add_library(KBEngine::common_rsa ALIAS kbe_common_rsa)
+
+target_link_libraries(kbe_common_rsa
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_strutil
+    OpenSSL::Crypto
+)
+
+target_include_directories(kbe_common_rsa
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_rsa)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
