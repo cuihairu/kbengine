@@ -10,7 +10,7 @@ namespace KBEngine {
 // 指示是否可以通过调用RDTSC（时间戳计数器）
 // 计算时间戳。使用此的好处是，它能快速和精确的返回实际的时钟滴答
 // 。不足之处是，这并不使用SpeedStep技术来改变他们的时钟速度的CPU。
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 	//#define KBE_USE_RDTSC
 #else // unix
 	//#define KBE_USE_RDTSC
@@ -28,8 +28,9 @@ namespace KBEngine {
 
 	const char* getTimingMethodName();
 
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 
+#if KBE_PLATFORM == PLATFORM_UNIX
 	inline uint64 timestamp_rdtsc()
 	{
 		uint32 rethi, retlo;
@@ -40,6 +41,7 @@ namespace KBEngine {
 			);
 		return uint64(rethi) << 32 | retlo;
 	}
+#endif
 
 	// 使用 gettimeofday. 测试大概比RDTSC20倍-600倍。
 	// 此外，有一个问题
@@ -55,22 +57,32 @@ namespace KBEngine {
 	}
 
 #include <time.h>
+#if KBE_PLATFORM == PLATFORM_UNIX
 #include <asm/unistd.h>
+#endif
 
 	inline uint64 timestamp_gettime()
 	{
 		timespec tv;
+		#if KBE_PLATFORM == PLATFORM_UNIX
 		assert(syscall(__NR_clock_gettime, CLOCK_MONOTONIC, &tv) == 0);
+#else
+		assert(clock_gettime(CLOCK_MONOTONIC, &tv) == 0);
+#endif
 		return 1000000000ULL * tv.tv_sec + tv.tv_nsec;
 	}
 
 	inline uint64 timestamp()
 	{
-#ifdef KBE_USE_RDTSC
+#if defined(KBE_USE_RDTSC) && KBE_PLATFORM == PLATFORM_UNIX
 		return timestamp_rdtsc();
 #else // KBE_USE_RDTSC
 		if (g_timingMethod == RDTSC_TIMING_METHOD)
+#if KBE_PLATFORM == PLATFORM_UNIX
 			return timestamp_rdtsc();
+#else
+			return timestamp_gettime();
+#endif
 		else if (g_timingMethod == GET_TIME_OF_DAY_TIMING_METHOD)
 			return timestamp_gettimeofday();
 		else // GET_TIME_TIMING_METHOD

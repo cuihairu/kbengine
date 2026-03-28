@@ -75,6 +75,24 @@ target_include_directories(kbe_common_strutil
 
 add_dependencies(kbe-bootstrap kbe_common_strutil)
 
+add_library(kbe_common_timestamp STATIC
+  "${KBE_SOURCE_DIR}/lib/common/timestamp_cmake.cpp"
+)
+
+add_library(KBEngine::common_timestamp ALIAS kbe_common_timestamp)
+
+target_link_libraries(kbe_common_timestamp
+  PUBLIC
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_common_timestamp
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_timestamp)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
