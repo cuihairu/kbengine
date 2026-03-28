@@ -49,7 +49,6 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::build_config
     KBEngine::third_party
     KBEngine::common_core
-    KBEngine::common_timer
     KBEngine::common_md5
     KBEngine::common_ssl
     KBEngine::common_kbekey
@@ -63,17 +62,12 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::common_predicates
     KBEngine::common_endian
     KBEngine::thread_pool
-    KBEngine::helper_watcher
     KBEngine::helper_profile
-    KBEngine::helper_debug_option
     KBEngine::helper_event_stats
     KBEngine::helper_memory
     KBEngine::helper_profiler
-    KBEngine::network_common
-    KBEngine::network_address
     KBEngine::network_exception
     KBEngine::network_interfaces
-    KBEngine::network_message_handler
     KBEngine::network_stats
     KBEngine::network_error_reporter
 )
