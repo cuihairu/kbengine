@@ -16,6 +16,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_kbekey.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_tasks.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_version.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_blowfish.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
@@ -35,6 +36,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::common_kbekey
     KBEngine::common_tasks
     KBEngine::common_version
+    KBEngine::common_blowfish
 )
 
 gtest_discover_tests(kbe_smoke_tests)
