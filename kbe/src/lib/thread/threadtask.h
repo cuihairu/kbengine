@@ -7,7 +7,6 @@
 // #define NDEBUG
 #include "common/common.h"
 #include "common/task.h"
-#include "helper/debug_helper.h"
 
 namespace KBEngine{ namespace thread{
 
