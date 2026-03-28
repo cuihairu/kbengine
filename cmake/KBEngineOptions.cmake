@@ -1,0 +1,23 @@
+option(KBE_ENABLE_WATCHERS "Enable watcher support" ON)
+option(KBE_USE_OPENSSL "Enable OpenSSL-dependent codepaths" ON)
+option(KBE_USE_LOG4CXX "Enable log4cxx-backed logging" OFF)
+option(KBE_BUILD_BOOTSTRAP_ONLY "Build only the initial CMake bootstrap targets" ON)
+
+set(KBE_COMMON_DEFINITIONS
+  CODE_INLINE
+  KBE_USE_ASSERTS
+)
+
+if(KBE_ENABLE_WATCHERS)
+  list(APPEND KBE_COMMON_DEFINITIONS ENABLE_WATCHERS)
+endif()
+
+if(KBE_USE_OPENSSL)
+  list(APPEND KBE_COMMON_DEFINITIONS USE_OPENSSL)
+endif()
+
+if(NOT KBE_USE_LOG4CXX)
+  list(APPEND KBE_COMMON_DEFINITIONS NO_USE_LOG4CXX)
+else()
+  list(APPEND KBE_COMMON_DEFINITIONS LOG4CXX_STATIC)
+endif()
