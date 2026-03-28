@@ -31,6 +31,11 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_event_stats.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_memory.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_profiler.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_common.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_address.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_exception.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_interfaces.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_stats.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
@@ -63,6 +68,12 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::helper_event_stats
     KBEngine::helper_memory
     KBEngine::helper_profiler
+    KBEngine::network_common
+    KBEngine::network_address
+    KBEngine::network_exception
+    KBEngine::network_interfaces
+    KBEngine::network_message_handler
+    KBEngine::network_stats
 )
 
 gtest_discover_tests(kbe_smoke_tests)

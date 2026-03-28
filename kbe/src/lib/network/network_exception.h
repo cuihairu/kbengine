@@ -3,9 +3,6 @@
 #ifndef KBE_NETWORKNUB_EXCEPTION_H
 #define KBE_NETWORKNUB_EXCEPTION_H
 
-#include "common/common.h"
-#include "common/timer.h"
-#include "helper/debug_helper.h"
 #include "network/common.h"
 #include "network/address.h"
 

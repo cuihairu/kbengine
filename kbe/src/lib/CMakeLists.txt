@@ -571,6 +571,124 @@ target_include_directories(kbe_helper_profiler
 
 add_dependencies(kbe-bootstrap kbe_helper_profiler)
 
+add_library(kbe_network_common STATIC
+  "${KBE_SOURCE_DIR}/lib/network/common_cmake.cpp"
+)
+
+add_library(KBEngine::network_common ALIAS kbe_network_common)
+
+target_link_libraries(kbe_network_common
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::helper_debug_option
+)
+
+target_include_directories(kbe_network_common
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_common)
+
+add_library(kbe_network_address STATIC
+  "${KBE_SOURCE_DIR}/lib/network/address_cmake.cpp"
+)
+
+add_library(KBEngine::network_address ALIAS kbe_network_address)
+
+target_link_libraries(kbe_network_address
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_objectpool
+    KBEngine::network_common
+)
+
+target_include_directories(kbe_network_address
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_address)
+
+add_library(kbe_network_exception INTERFACE)
+
+add_library(KBEngine::network_exception ALIAS kbe_network_exception)
+
+target_link_libraries(kbe_network_exception
+  INTERFACE
+    KBEngine::build_config
+    KBEngine::common_timer
+    KBEngine::network_common
+    KBEngine::network_address
+)
+
+target_include_directories(kbe_network_exception
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_exception)
+
+add_library(kbe_network_interfaces INTERFACE)
+
+add_library(KBEngine::network_interfaces ALIAS kbe_network_interfaces)
+
+target_link_libraries(kbe_network_interfaces
+  INTERFACE
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_network_interfaces
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_interfaces)
+
+add_library(kbe_network_message_handler STATIC
+  "${KBE_SOURCE_DIR}/lib/network/message_handler_cmake.cpp"
+)
+
+add_library(KBEngine::network_message_handler ALIAS kbe_network_message_handler)
+
+target_link_libraries(kbe_network_message_handler
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_memorystream
+    KBEngine::network_common
+)
+
+target_include_directories(kbe_network_message_handler
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_message_handler)
+
+add_library(kbe_network_stats STATIC
+  "${KBE_SOURCE_DIR}/lib/network/network_stats_cmake.cpp"
+)
+
+add_library(KBEngine::network_stats ALIAS kbe_network_stats)
+
+target_link_libraries(kbe_network_stats
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_interfaces
+    KBEngine::network_message_handler
+)
+
+target_include_directories(kbe_network_stats
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_stats)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"

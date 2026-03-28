@@ -60,6 +60,8 @@ private:
 	std::vector<NetworkStatsHandler*> handlers_;
 };
 
+extern NetworkStats g_networkStats;
+
 }
 }
 #endif // KBE_NETWORK_STATS_H

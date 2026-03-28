@@ -5,7 +5,6 @@
 
 #include "common/memorystream.h"
 #include "common/smartpointer.h"
-#include "helper/debug_helper.h"
 #include "network/common.h"
 
 namespace KBEngine{
