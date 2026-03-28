@@ -1,11 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\posix.cpp" />
-    <ClCompile Include="src\format.cpp" />
+    <ClCompile Include="src\format.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\os.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\fmt\args.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fmt\base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fmt\chrono.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\fmt\color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fmt\compile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\fmt\core.h">
@@ -17,10 +33,10 @@
     <ClInclude Include="include\fmt\format-inl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\fmt\ostream.h">
+    <ClInclude Include="include\fmt\os.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\fmt\posix.h">
+    <ClInclude Include="include\fmt\ostream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\fmt\printf.h">
@@ -29,7 +45,10 @@
     <ClInclude Include="include\fmt\ranges.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\fmt\time.h">
+    <ClInclude Include="include\fmt\std.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fmt\xchar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

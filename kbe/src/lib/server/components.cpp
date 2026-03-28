@@ -886,7 +886,7 @@ bool Components::updateComponentInfos(const Components::ComponentInfos* info)
 		if(ctype != info->componentType || cid != info->cid)
 		{
 			WARNING_MSG(fmt::format("Components::updateComponentInfos: invalid component(ctype={}, cid={}).\n",
-				ctype, cid));
+				static_cast<int>(ctype), cid));
 
 			return false;
 		}

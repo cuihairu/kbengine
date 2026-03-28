@@ -29,7 +29,7 @@ bool initialize()
 		if (CURLE_OK != curlCode)
 		{
 			ERROR_MSG(fmt::format("Http::initialize: "
-				"curl_global_init error! curlCode={}\n", curlCode));
+				"curl_global_init error! curlCode={}\n", static_cast<int>(curlCode)));
 
 			return false;
 		}
@@ -115,7 +115,7 @@ Request::Status Request::setCAInfo(const std::string& cainfo)
 	CURLcode curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_CAINFO, cainfo.c_str());
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setCAInfo: error! curlCode={}\n", curlCode));
+		ERROR_MSG(fmt::format("Http::Request::setCAInfo: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -128,7 +128,7 @@ Request::Status Request::setSSLCert(const std::string& sslCert)
 	CURLcode curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_SSLCERT, sslCert.c_str());
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setSSLCert: error! curlCode={}\n", curlCode));
+		ERROR_MSG(fmt::format("Http::Request::setSSLCert: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -141,7 +141,7 @@ Request::Status Request::setSSLKey(const std::string& sslKey)
 	CURLcode curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_SSLKEY, sslKey.c_str());
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setSSLKey: error! curlCode={}\n", curlCode));
+		ERROR_MSG(fmt::format("Http::Request::setSSLKey: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -154,7 +154,7 @@ Request::Status Request::setSSLKeyPassword(const std::string& sslKeyPwd)
 	CURLcode curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_KEYPASSWD, sslKeyPwd.c_str());
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setSSLKeyPassword: error! curlCode={}\n", curlCode));
+		ERROR_MSG(fmt::format("Http::Request::setSSLKeyPassword: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -169,7 +169,7 @@ Request::Status Request::setSSLVerifyPeer(long v)
 
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setSSLVerifyPeer: error! curlCode={}\n", curlCode));
+		ERROR_MSG(fmt::format("Http::Request::setSSLVerifyPeer: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -184,7 +184,7 @@ Request::Status Request::setSSLVerifyHost(long v)
 
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setSSLVerifyHost: error! curlCode={}\n", curlCode));
+		ERROR_MSG(fmt::format("Http::Request::setSSLVerifyHost: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -206,7 +206,7 @@ Request::Status Request::setURL(const std::string& url)
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setURL: "
-			"curl_easy_setopt(CURLOPT_URL) error! curlCode={}, url={}\n", curlCode, url));
+			"curl_easy_setopt(CURLOPT_URL) error! curlCode={}, url={}\n", static_cast<int>(curlCode), url));
 
 		return INVALID_OPT;
 	}
@@ -230,7 +230,7 @@ Request::Status Request::setFollowURL(int maxRedirs)
 		if (CURLE_OK != curlCode)
 		{
 			ERROR_MSG(fmt::format("Http::Request::setFollowURL: "
-				"curl_easy_setopt(CURLOPT_MAXREDIRS) error! curlCode={}, maxRedirs={}\n", curlCode, maxRedirs));
+				"curl_easy_setopt(CURLOPT_MAXREDIRS) error! curlCode={}, maxRedirs={}\n", static_cast<int>(curlCode), maxRedirs));
 
 			return INVALID_OPT;
 		}
@@ -241,7 +241,7 @@ Request::Status Request::setFollowURL(int maxRedirs)
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setFollowURL: "
-			"curl_easy_setopt(CURLOPT_FOLLOWLOCATION) error! curlCode={}, maxRedirs={}\n", curlCode, maxRedirs));
+			"curl_easy_setopt(CURLOPT_FOLLOWLOCATION) error! curlCode={}, maxRedirs={}\n", static_cast<int>(curlCode), maxRedirs));
 
 		return INVALID_OPT;
 	}
@@ -267,7 +267,7 @@ Request::Status Request::setPostData(const void* data, unsigned int size)
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setPostData: "
-			"curl_easy_setopt(CURLOPT_POST) error! curlCode={}, size={}\n", curlCode, size));
+			"curl_easy_setopt(CURLOPT_POST) error! curlCode={}, size={}\n", static_cast<int>(curlCode), size));
 
 		return INVALID_OPT;
 	}
@@ -289,7 +289,7 @@ Request::Status Request::setPostData(const void* data, unsigned int size)
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setPostData: "
-			"curl_easy_setopt(CURLOPT_POSTFIELDS) error! curlCode={}, size={}\n", curlCode, size));
+			"curl_easy_setopt(CURLOPT_POSTFIELDS) error! curlCode={}, size={}\n", static_cast<int>(curlCode), size));
 
 		return INVALID_OPT;
 	}
@@ -298,7 +298,7 @@ Request::Status Request::setPostData(const void* data, unsigned int size)
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setPostData: "
-			"curl_easy_setopt(CURLOPT_POSTFIELDSIZE) error! curlCode={}, size={}\n", curlCode, size));
+			"curl_easy_setopt(CURLOPT_POSTFIELDSIZE) error! curlCode={}, size={}\n", static_cast<int>(curlCode), size));
 
 		return INVALID_OPT;
 	}
@@ -327,7 +327,7 @@ Request::Status Request::setHeader(const std::string& header)
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setHeader: "
-			"curl_easy_setopt(CURLOPT_HTTPHEADER) error! curlCode={}, header={}\n", curlCode, header));
+			"curl_easy_setopt(CURLOPT_HTTPHEADER) error! curlCode={}, header={}\n", static_cast<int>(curlCode), header));
 
 		return INVALID_OPT;
 	}
@@ -357,7 +357,7 @@ Request::Status Request::setHeader(const std::vector<std::string>& headers)
 		if (!headers_)
 		{
 			ERROR_MSG(fmt::format("Http::Request::setHeaders: "
-				"curl_slist_append error! curlCode={}, header={}\n", curlCode, (*iter)));
+				"curl_slist_append error! curlCode={}, header={}\n", static_cast<int>(curlCode), (*iter)));
 
 			return INVALID_OPT;
 		}
@@ -368,7 +368,7 @@ Request::Status Request::setHeader(const std::vector<std::string>& headers)
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setHeaders: "
-			"curl_easy_setopt(CURLOPT_HTTPHEADER) error! curlCode={}\n", curlCode));
+			"curl_easy_setopt(CURLOPT_HTTPHEADER) error! curlCode={}\n", static_cast<int>(curlCode)));
 
 		return INVALID_OPT;
 	}
@@ -402,7 +402,7 @@ Request::Status Request::setHeader(const std::map<std::string, std::string>& hea
 		if (!headers_)
 		{
 			ERROR_MSG(fmt::format("Http::Request::setHeaders: "
-				"curl_slist_append error! curlCode={}, header={}\n", curlCode, header));
+				"curl_slist_append error! curlCode={}, header={}\n", static_cast<int>(curlCode), header));
 
 			return INVALID_OPT;
 		}
@@ -413,7 +413,7 @@ Request::Status Request::setHeader(const std::map<std::string, std::string>& hea
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setHeaders: "
-			"curl_easy_setopt(CURLOPT_HTTPHEADER) error! curlCode={}\n", curlCode));
+			"curl_easy_setopt(CURLOPT_HTTPHEADER) error! curlCode={}\n", static_cast<int>(curlCode)));
 
 		return INVALID_OPT;
 	}
@@ -428,7 +428,7 @@ Request::Status Request::setTimeout(uint32 secs)
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setTimeout: "
-			"curl_easy_setopt(CURLOPT_TIMEOUT) error! curlCode={}, secs={}\n", curlCode, secs));
+			"curl_easy_setopt(CURLOPT_TIMEOUT) error! curlCode={}, secs={}\n", static_cast<int>(curlCode), secs));
 
 		return INVALID_OPT;
 	}
@@ -443,7 +443,7 @@ Request::Status Request::setProxy(const std::string& proxyIP, long proxyPort)
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setProxy: "
-			"curl_easy_setopt(CURLOPT_PROXYPORT) error! curlCode={}\n", curlCode));
+			"curl_easy_setopt(CURLOPT_PROXYPORT) error! curlCode={}\n", static_cast<int>(curlCode)));
 
 		return INVALID_OPT;
 	}
@@ -452,7 +452,7 @@ Request::Status Request::setProxy(const std::string& proxyIP, long proxyPort)
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::setProxy: "
-			"curl_easy_setopt(CURLOPT_PROXYPORT) error! curlCode={}\n", curlCode));
+			"curl_easy_setopt(CURLOPT_PROXYPORT) error! curlCode={}\n", static_cast<int>(curlCode)));
 
 		return INVALID_OPT;
 	}
@@ -525,7 +525,7 @@ bool Request::updateHttpCode()
 	if (CURLE_OK != curlCode)
 	{
 		ERROR_MSG(fmt::format("Http::Request::perform: "
-			"curl_easy_getinfo(CURLINFO_RESPONSE_CODE) error! curlCode={}\n", curlCode));
+			"curl_easy_getinfo(CURLINFO_RESPONSE_CODE) error! curlCode={}\n", static_cast<int>(curlCode)));
 
 		return false;
 	}

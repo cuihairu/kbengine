@@ -64,7 +64,7 @@ bool EpollPoller::doRegister(int fd, bool isRead, bool isRegister)
 				"descriptor {} ({})\n";
 		if (errno == EBADF)
 		{
-			WARNING_MSG(fmt::format(MESSAGE,
+			WARNING_MSG(fmt::format(fmt::runtime(MESSAGE),
 					(isRegister ? "add" : "remove"),
 					(isRead ? "read" : "write"),
 					fd,
@@ -72,7 +72,7 @@ bool EpollPoller::doRegister(int fd, bool isRead, bool isRegister)
 		}
 		else
 		{
-			ERROR_MSG(fmt::format(MESSAGE,
+			ERROR_MSG(fmt::format(fmt::runtime(MESSAGE),
 					(isRegister ? "add" : "remove"),
 					(isRead ? "read" : "write"),
 					fd,

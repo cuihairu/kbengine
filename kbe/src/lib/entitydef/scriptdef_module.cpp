@@ -537,7 +537,7 @@ bool ScriptDefModule::addPropertyDescription(const char* attrName,
 	if(!ignoreConflict && hasMethodName(attrName))
 	{
 		ERROR_MSG(fmt::format("ScriptDefModule::addPropertyDescription: There is a method[{}] name conflict! componentType={}.\n",
-			attrName, componentType));
+			attrName, static_cast<int>(componentType)));
 		
 		return false;
 	}
@@ -588,7 +588,7 @@ bool ScriptDefModule::addPropertyDescription(const char* attrName,
 	if(f_propertyDescription)
 	{
 		ERROR_MSG(fmt::format("ScriptDefModule::addPropertyDescription: [{}] is exist! componentType={}.\n",
-			attrName, componentType));
+			attrName, static_cast<int>(componentType)));
 
 		return false;
 	}
