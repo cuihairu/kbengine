@@ -2,7 +2,22 @@
 
 
 #include "eventhistory_stats.h"
+
+#ifdef KBE_CMAKE_BOOTSTRAP_EVENT_STATS
+#include <cassert>
+#define DEBUG_MSG(m) do { } while (0)
+#define INFO_MSG(m) do { } while (0)
+#define WARNING_MSG(m) do { } while (0)
+#define ERROR_MSG(m) do { } while (0)
+#define CRITICAL_MSG(m) do { } while (0)
+#define KBE_ASSERT(exp) assert((exp))
+namespace {
+constexpr unsigned int PACKET_MAX_SIZE_TCP = 1460u;
+constexpr unsigned int NETWORK_MESSAGE_MAX_SIZE = 65535u;
+}
+#else
 #include "profile_handler.h"
+#endif
 
 namespace KBEngine { 
 
@@ -40,17 +55,21 @@ void EventHistoryStats::trackEvent(const std::string& type, const std::string& n
 	STATS::iterator iter = stats_.find(fullname);
 	if(iter == stats_.end())
 	{
-		stats_[name].name = fullname;
-		stats_[name].size += size;
-		stats_[name].count++;
-		EventProfileHandler::triggerEvent(*this, stats_[name], size);
+		stats_[fullname].name = fullname;
+		stats_[fullname].size += size;
+		stats_[fullname].count++;
+#ifndef KBE_CMAKE_BOOTSTRAP_EVENT_STATS
+		EventProfileHandler::triggerEvent(*this, stats_[fullname], size);
+#endif
 		return;
 	}
 
 	iter->second.size += size;
 	iter->second.count++;
 	
+#ifndef KBE_CMAKE_BOOTSTRAP_EVENT_STATS
 	EventProfileHandler::triggerEvent(*this, iter->second, size);
+#endif
 }
 
 //-------------------------------------------------------------------------------------

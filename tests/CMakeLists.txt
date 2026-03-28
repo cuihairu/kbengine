@@ -28,6 +28,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_watcher.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_profile.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_debug_option.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_event_stats.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
@@ -57,6 +58,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::helper_watcher
     KBEngine::helper_profile
     KBEngine::helper_debug_option
+    KBEngine::helper_event_stats
 )
 
 gtest_discover_tests(kbe_smoke_tests)

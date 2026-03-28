@@ -514,6 +514,29 @@ target_include_directories(kbe_helper_debug_option
 
 add_dependencies(kbe-bootstrap kbe_helper_debug_option)
 
+add_library(kbe_helper_event_stats STATIC
+  "${KBE_SOURCE_DIR}/lib/helper/eventhistory_stats.cpp"
+)
+
+add_library(KBEngine::helper_event_stats ALIAS kbe_helper_event_stats)
+
+target_link_libraries(kbe_helper_event_stats
+  PUBLIC
+    KBEngine::build_config
+)
+
+target_compile_definitions(kbe_helper_event_stats
+  PUBLIC
+    KBE_CMAKE_BOOTSTRAP_EVENT_STATS
+)
+
+target_include_directories(kbe_helper_event_stats
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_helper_event_stats)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
