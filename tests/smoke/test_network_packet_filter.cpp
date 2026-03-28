@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "network/packet_filter_cmake.h"
+#include "network/packet_filter.h"
+#include "network/packet_receiver.h"
+#include "network/packet_sender.h"
 
 namespace {
 
@@ -22,6 +24,11 @@ public:
     last_userarg = userarg;
     return result;
   }
+
+  bool processSend(KBEngine::Network::Channel*, int) override
+  {
+    return true;
+  }
 };
 
 class RecordingReceiver final : public KBEngine::Network::PacketReceiver
@@ -39,6 +46,16 @@ public:
     last_packet = pPacket;
     return result;
   }
+
+  bool processRecv(bool) override
+  {
+    return true;
+  }
+
+  RecvState checkSocketErrors(int, bool) override
+  {
+    return RECV_STATE_BREAK;
+  }
 };
 
 }  // namespace
@@ -46,30 +63,30 @@ public:
 TEST(NetworkPacketFilterBootstrapTest, SendForwardsToPacketSender)
 {
   KBEngine::Network::PacketFilter filter;
-  KBEngine::Network::Channel channel;
-  KBEngine::Network::Packet packet;
   RecordingSender sender;
   sender.result = KBEngine::Network::REASON_CHANNEL_LOST;
+  auto* channel = static_cast<KBEngine::Network::Channel*>(nullptr);
+  auto* packet = static_cast<KBEngine::Network::Packet*>(nullptr);
 
-  const auto reason = filter.send(&channel, sender, &packet, 42);
+  const auto reason = filter.send(channel, sender, packet, 42);
 
   EXPECT_EQ(reason, KBEngine::Network::REASON_CHANNEL_LOST);
-  EXPECT_EQ(sender.last_channel, &channel);
-  EXPECT_EQ(sender.last_packet, &packet);
+  EXPECT_EQ(sender.last_channel, channel);
+  EXPECT_EQ(sender.last_packet, packet);
   EXPECT_EQ(sender.last_userarg, 42);
 }
 
 TEST(NetworkPacketFilterBootstrapTest, RecvForwardsToPacketReceiver)
 {
   KBEngine::Network::PacketFilter filter;
-  KBEngine::Network::Channel channel;
-  KBEngine::Network::Packet packet;
   RecordingReceiver receiver;
   receiver.result = KBEngine::Network::REASON_CORRUPTED_PACKET;
+  auto* channel = static_cast<KBEngine::Network::Channel*>(nullptr);
+  auto* packet = static_cast<KBEngine::Network::Packet*>(nullptr);
 
-  const auto reason = filter.recv(&channel, receiver, &packet);
+  const auto reason = filter.recv(channel, receiver, packet);
 
   EXPECT_EQ(reason, KBEngine::Network::REASON_CORRUPTED_PACKET);
-  EXPECT_EQ(receiver.last_channel, &channel);
-  EXPECT_EQ(receiver.last_packet, &packet);
+  EXPECT_EQ(receiver.last_channel, channel);
+  EXPECT_EQ(receiver.last_packet, packet);
 }

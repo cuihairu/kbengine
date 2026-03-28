@@ -47,8 +47,6 @@ const char * SIGNAL_NAMES[] =
 	"SIGSYS"
 };
 
-SignalHandlers g_signalHandlers;
-
 std::string SIGNAL2NAMES(int signum)
 {
 	if (signum >= SIGMIN && signum <= SIGMAX)
@@ -62,7 +60,9 @@ std::string SIGNAL2NAMES(int signum)
 void signalHandler(int signum)
 {
 	printf("SignalHandlers: receive sigNum %d.\n", signum);
-	g_signalHandlers.onSignalled(signum);
+	SignalHandlers* pSignalHandlers = SignalHandlers::getSingletonPtr();
+	if (pSignalHandlers != NULL)
+		pSignalHandlers->onSignalled(signum);
 };
 
 //-------------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ bool SignalHandlers::ignoreSignal(int sigNum)
 SignalHandler* SignalHandlers::addSignal(int sigNum, 
 	SignalHandler* pSignalHandler, int flags)
 {
-	// 允许被重置
+	// 脭脢脨铆卤禄脰脴脰脙
 	// SignalHandlerMap::iterator iter = singnalHandlerMap_.find(sigNum);
 	// KBE_ASSERT(iter == singnalHandlerMap_.end());
 
@@ -146,7 +146,7 @@ void SignalHandlers::clear()
 //-------------------------------------------------------------------------------------	
 void SignalHandlers::onSignalled(int sigNum)
 {
-	// 不要分配内存
+	// 虏禄脪陋路脰脜盲脛脷麓忙
 	KBE_ASSERT(wpos_ != 0XFF);
 	signalledArray_[wpos_++] = sigNum;
 }
@@ -160,7 +160,7 @@ bool SignalHandlers::process()
 	DEBUG_MSG(fmt::format("SignalHandlers::process: rpos={}, wpos={}.\n", rpos_, wpos_));
 
 #if KBE_PLATFORM != PLATFORM_WIN32
-	/* 如果信号有瞬时超过255触发需求，可以打开注释，将会屏蔽所有信号等执行完毕之后再执行期间触发的信号，将signalledArray_改为信号集类型
+	/* 脠莽鹿没脨脜潞脜脫脨脣虏脢卤鲁卢鹿媒255麓楼路垄脨猫脟贸拢卢驴脡脪脭麓貌驴陋脳垄脢脥拢卢陆芦禄谩脝脕卤脦脣霉脫脨脨脜潞脜碌脠脰麓脨脨脥锚卤脧脰庐潞贸脭脵脰麓脨脨脝脷录盲麓楼路垄碌脛脨脜潞脜拢卢陆芦signalledArray_赂脛脦陋脨脜潞脜录炉脌脿脨脥
 	if (wpos_ == 1 && signalledArray_[0] == SIGALRM)
 		return true;
 
@@ -170,7 +170,7 @@ bool SignalHandlers::process()
 
 	sigfillset(&mask);
 
-	// 屏蔽信号
+	// 脝脕卤脦脨脜潞脜
 	sigprocmask(SIG_BLOCK, &mask, &old_mask);
 	*/
 #endif
@@ -201,7 +201,7 @@ bool SignalHandlers::process()
 	wpos_ = 0;
 
 #if KBE_PLATFORM != PLATFORM_WIN32
-	// 恢复屏蔽
+	// 禄脰赂麓脝脕卤脦
 	/*
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
 
@@ -216,7 +216,7 @@ bool SignalHandlers::process()
 	// Wait with this mask
 	ualarm(1, 0);
 
-	// 让期间错过的信号重新触发
+	// 脠脙脝脷录盲麓铆鹿媒碌脛脨脜潞脜脰脴脨脗麓楼路垄
 	sigsuspend(&mask);
 
 	delSignal(SIGALRM);

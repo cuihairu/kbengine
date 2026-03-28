@@ -2,7 +2,15 @@
 
 #include "rsa.h"
 #include "common.h"
+#include "strutil.h"
+#ifdef KBE_CMAKE_BOOTSTRAP_RSA
+#include <cassert>
+#define KBE_ASSERT(exp) assert((exp))
+#define ERROR_MSG(msg) do { (void)(msg); } while (0)
+#define INFO_MSG(msg) do { (void)(msg); } while (0)
+#else
 #include "helper/debug_helper.h"
+#endif
 
 #include <iostream>
 #include <fstream>

@@ -49,7 +49,7 @@ INLINE EndPoint::~EndPoint()
 
 uint32 EndPoint::getRTT()
 {
-#if KBE_PLATFORM != PLATFORM_WIN32
+#if KBE_PLATFORM == PLATFORM_UNIX
 	struct tcp_info tcpinfo;
 	socklen_t len = sizeof(tcpinfo);
 
@@ -107,7 +107,7 @@ INLINE int EndPoint::setnodelay(bool nodelay)
 
 INLINE int EndPoint::setnonblocking(bool nonblocking)
 {
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 	int val = nonblocking ? O_NONBLOCK : 0;
 	return ::fcntl(socket_, F_SETFL, val);
 #else
@@ -125,6 +125,13 @@ INLINE int EndPoint::setbroadcast(bool broadcast)
 		val = 2;
 		::setsockopt(socket_, SOL_IP, IP_MULTICAST_TTL, &val, sizeof(int));
 	}
+#elif KBE_PLATFORM == PLATFORM_APPLE
+	int val;
+	if (broadcast)
+	{
+		val = 2;
+		::setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_TTL, &val, sizeof(int));
+	}
 #else
 	bool val;
 #endif
@@ -134,7 +141,7 @@ INLINE int EndPoint::setbroadcast(bool broadcast)
 
 INLINE int EndPoint::setreuseaddr(bool reuseaddr)
 {
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 	int val;
 #else
 	bool val;
@@ -154,7 +161,7 @@ INLINE int EndPoint::setlinger(uint16 onoff, uint16 linger)
 
 INLINE int EndPoint::setkeepalive(bool keepalive)
 {
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 	int val;
 #else
 	bool val;
@@ -182,6 +189,11 @@ INLINE int EndPoint::joinMulticastGroup(u_int32_t networkAddr)
 	req.imr_address.s_addr = INADDR_ANY;
 	req.imr_ifindex = 0;
 	return ::setsockopt(socket_, SOL_IP, IP_ADD_MEMBERSHIP, &req, sizeof(req));
+#elif KBE_PLATFORM == PLATFORM_APPLE
+	struct ip_mreq req;
+	req.imr_multiaddr.s_addr = networkAddr;
+	req.imr_interface.s_addr = INADDR_ANY;
+	return ::setsockopt(socket_, IPPROTO_IP, IP_ADD_MEMBERSHIP, &req, sizeof(req));
 #else
 	return -1;
 #endif
@@ -195,6 +207,11 @@ INLINE int EndPoint::quitMulticastGroup(u_int32_t networkAddr)
 	req.imr_address.s_addr = INADDR_ANY;
 	req.imr_ifindex = 0;
 	return ::setsockopt(socket_, SOL_IP, IP_DROP_MEMBERSHIP,&req, sizeof(req));
+#elif KBE_PLATFORM == PLATFORM_APPLE
+	struct ip_mreq req;
+	req.imr_multiaddr.s_addr = networkAddr;
+	req.imr_interface.s_addr = INADDR_ANY;
+	return ::setsockopt(socket_, IPPROTO_IP, IP_DROP_MEMBERSHIP, &req, sizeof(req));
 #else
 	return -1;
 #endif
@@ -223,7 +240,7 @@ INLINE int EndPoint::close()
 		return 0;
 	}
 
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 	int ret = ::close(socket_);
 #else
 	int ret = ::closesocket(socket_);
@@ -401,7 +418,7 @@ INLINE EndPoint * EndPoint::accept(u_int16_t * networkPort, u_int32_t * networkA
 	socklen_t		sinLen = sizeof(sin);
 	int ret = (int)::accept(socket_, (sockaddr*)&sin, &sinLen);
 
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 	if (ret < 0) return NULL;
 #else
 	if (ret == INVALID_SOCKET) return NULL;
@@ -440,7 +457,7 @@ INLINE int EndPoint::recv(void * gramData, int gramSize)
 	return ::recv(socket_, (char*)gramData, gramSize, 0);
 }
 
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 INLINE int EndPoint::getInterfaceFlags(char * name, int & flags)
 {
 	struct ifreq	request;
@@ -487,7 +504,11 @@ INLINE int EndPoint::getInterfaceNetmask(const char * name,
 		return -1;
 	}
 
+#if KBE_PLATFORM == PLATFORM_APPLE
+	netmask = ((sockaddr_in&)request.ifr_addr).sin_addr.s_addr;
+#else
 	netmask = ((sockaddr_in&)request.ifr_netmask).sin_addr.s_addr;
+#endif
 
 	return 0;
 }

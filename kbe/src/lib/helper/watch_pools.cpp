@@ -1,7 +1,7 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
-#include "watcher.h"
 #include "watch_pools.h"
+#include "watcher.h"
 #include "network/bundle.h"
 #include "network/address.h"
 #include "network/endpoint.h"

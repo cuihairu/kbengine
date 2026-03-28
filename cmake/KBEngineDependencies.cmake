@@ -1,15 +1,25 @@
-add_library(fmt STATIC
-  "${KBE_SOURCE_DIR}/lib/dependencies/fmt/src/format.cc"
-  "${KBE_SOURCE_DIR}/lib/dependencies/fmt/src/os.cc"
-)
+if(KBE_USING_VCPKG)
+  find_package(fmt CONFIG QUIET)
+endif()
 
-add_library(fmt::fmt ALIAS fmt)
+if(TARGET fmt::fmt)
+  message(STATUS "KBEngine: using package-provided fmt target")
+else()
+  add_library(fmt STATIC
+    "${KBE_SOURCE_DIR}/lib/dependencies/fmt/src/format.cc"
+    "${KBE_SOURCE_DIR}/lib/dependencies/fmt/src/os.cc"
+  )
 
-target_compile_features(fmt PUBLIC cxx_std_17)
-target_include_directories(fmt
-  PUBLIC
-    "${KBE_SOURCE_DIR}/lib/dependencies/fmt/include"
-)
+  add_library(fmt::fmt ALIAS fmt)
+
+  target_compile_features(fmt PUBLIC cxx_std_17)
+  target_include_directories(fmt
+    PUBLIC
+      "${KBE_SOURCE_DIR}/lib/dependencies/fmt/include"
+  )
+
+  message(STATUS "KBEngine: using vendored fmt sources")
+endif()
 
 add_library(tinyxml STATIC
   "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml/tinystr.cpp"
@@ -41,16 +51,25 @@ if(KBE_USE_OPENSSL)
 endif()
 
 if(BUILD_TESTING AND KBE_ENABLE_TESTING)
-  include(FetchContent)
+  if(KBE_USING_VCPKG)
+    find_package(GTest CONFIG QUIET)
+  endif()
 
-  set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  if(TARGET GTest::gtest_main)
+    message(STATUS "KBEngine: using package-provided GTest targets")
+  else()
+    include(FetchContent)
 
-  FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.tar.gz
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-  )
+    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-  FetchContent_MakeAvailable(googletest)
+    FetchContent_Declare(
+      googletest
+      URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.tar.gz
+      DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    )
+
+    FetchContent_MakeAvailable(googletest)
+    message(STATUS "KBEngine: using FetchContent googletest fallback")
+  endif()
 endif()

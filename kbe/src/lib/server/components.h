@@ -18,9 +18,10 @@ namespace Network
 class Channel;
 class Address;
 class NetworkInterface;
+class EventDispatcher;
 }
 
-// ComponentInfos.flags标志
+// ComponentInfos.flags卤锚脰戮
 #define COMPONENT_FLAG_NORMAL 0x00000000
 #define COMPONENT_FLAG_SHUTTINGDOWN 0x00000001
 
@@ -54,8 +55,8 @@ public:
 			appFlags = APP_FLAGS_NONE;
 		}
 
-		KBEShared_ptr<Network::Address> pIntAddr, pExtAddr;		// 内部和外部地址
-		char externalAddressEx[MAX_NAME + 1];					// 强制暴露给外部的公网地址, 详见配置中的externalAddressEx
+		KBEShared_ptr<Network::Address> pIntAddr, pExtAddr;		// 脛脷虏驴潞脥脥芒虏驴碌脴脰路
+		char externalAddressEx[MAX_NAME + 1];					// 脟驴脰脝卤漏脗露赂酶脥芒虏驴碌脛鹿芦脥酶碌脴脰路, 脧锚录没脜盲脰脙脰脨碌脛externalAddressEx
 
 		int32 uid;
 		COMPONENT_ID cid;
@@ -66,7 +67,7 @@ public:
 		COMPONENT_TYPE componentType;
 		uint32 flags;
 
-		// 进程状态
+		// 陆酶鲁脤脳麓脤卢
 		COMPONENT_STATE state;
 
 		float cpu;
@@ -80,7 +81,7 @@ public:
 
 	typedef std::vector<ComponentInfos> COMPONENTS;
 
-	/** 组件添加删除handler */
+	/** 脳茅录镁脤铆录脫脡戮鲁媒handler */
 	class ComponentsNotificationHandler
 	{
 	public:
@@ -118,7 +119,7 @@ public:
 	Components::COMPONENTS& getComponents(COMPONENT_TYPE componentType);
 
 	/** 
-		查找组件
+		虏茅脮脪脳茅录镁
 	*/
 	Components::ComponentInfos* findComponent(COMPONENT_TYPE componentType, int32 uid, COMPONENT_ID componentID);
 	Components::ComponentInfos* findComponent(COMPONENT_TYPE componentType, COMPONENT_ID componentID);
@@ -127,7 +128,7 @@ public:
 	Components::ComponentInfos* findComponent(Network::Address* pAddress);
 
 	/** 
-		通过进程id寻找本地组件
+		脥篓鹿媒陆酶鲁脤id脩掳脮脪卤戮碌脴脳茅录镁
 	*/
 	Components::ComponentInfos* findLocalComponent(uint32 pid);
 
@@ -140,27 +141,27 @@ public:
 	ORDER_LOG& getLoginappGroupOrderLog(){ return _loginappGrouplOrderLog; }
 	
 	/** 
-		检查所有的组件， 防止有重复的uuid， 此时应该报错.
+		录矛虏茅脣霉脫脨碌脛脳茅录镁拢卢 路脌脰鹿脫脨脰脴赂麓碌脛uuid拢卢 麓脣脢卤脫娄赂脙卤篓麓铆.
 	*/
 	bool checkComponents(int32 uid, COMPONENT_ID componentID, uint32 pid);
 
 	/** 
-		设置用于接收组件通知的处理器实例
+		脡猫脰脙脫脙脫脷陆脫脢脮脳茅录镁脥篓脰陋碌脛麓娄脌铆脝梅脢碌脌媒
 	*/
 	void pHandler(ComponentsNotificationHandler* ph){ _pHandler = ph; };
 
 	/** 
-		检查某个组件端口是否有效.
+		录矛虏茅脛鲁赂枚脳茅录镁露脣驴脷脢脟路帽脫脨脨搂.
 	*/
 	bool updateComponentInfos(const Components::ComponentInfos* info);
 
 	/** 
-		是否是本地组件.
+		脢脟路帽脢脟卤戮碌脴脳茅录镁.
 	*/
 	bool isLocalComponent(const Components::ComponentInfos* info);
 
 	/** 
-		是否本地组件是否在运行中.
+		脢脟路帽卤戮碌脴脳茅录镁脢脟路帽脭脷脭脣脨脨脰脨.
 	*/
 	const Components::ComponentInfos* lookupLocalComponentRunning(uint32 pid);
 
@@ -176,12 +177,12 @@ public:
 	Network::Channel* getLoggerChannel();
 
 	/**
-		统计某个UID下的所有组件数量
+		脥鲁录脝脛鲁赂枚UID脧脗碌脛脣霉脫脨脳茅录镁脢媒脕驴
 	*/
 	size_t getGameSrvComponentsSize(int32 uid);
 
 	/** 
-		获取游戏服务端必要组件的注册数量。
+		禄帽脠隆脫脦脧路路镁脦帽露脣卤脴脪陋脳茅录镁碌脛脳垄虏谩脢媒脕驴隆拢
 	*/
 	size_t getGameSrvComponentsSize();
 
@@ -224,8 +225,8 @@ private:
 
 	Network::NetworkInterface*				_pNetworkInterface;
 	
-	// 组件的全局启动次序log和组(相同的组件为一组， 如：所有baseapp为一个组)启动次序log
-	// 注意:中途有死掉的app组件这里log并不去做减操作, 从使用意图来看也没有必要做这个匹配。
+	// 脳茅录镁碌脛脠芦戮脰脝么露炉麓脦脨貌log潞脥脳茅(脧脿脥卢碌脛脳茅录镁脦陋脪禄脳茅拢卢 脠莽拢潞脣霉脫脨baseapp脦陋脪禄赂枚脳茅)脝么露炉麓脦脨貌log
+	// 脳垄脪芒:脰脨脥戮脫脨脣脌碌么碌脛app脳茅录镁脮芒脌茂log虏垄虏禄脠楼脳枚录玫虏脵脳梅, 麓脫脢鹿脫脙脪芒脥录脌麓驴麓脪虏脙禄脫脨卤脴脪陋脳枚脮芒赂枚脝楼脜盲隆拢
 	ORDER_LOG								_globalOrderLog;
 	ORDER_LOG								_baseappGrouplOrderLog;
 	ORDER_LOG								_cellappGrouplOrderLog;
@@ -233,10 +234,10 @@ private:
 
 	ComponentsNotificationHandler*			_pHandler;
 
-	// 本组件的类别
+	// 卤戮脳茅录镁碌脛脌脿卤冒
 	COMPONENT_TYPE							componentType_;
 
-	// 本组件的ID
+	// 卤戮脳茅录镁碌脛ID
 	COMPONENT_ID							componentID_;	
 
 	uint8									state_;

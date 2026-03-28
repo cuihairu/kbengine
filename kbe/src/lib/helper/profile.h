@@ -5,12 +5,24 @@
 
 #ifdef KBE_CMAKE_BOOTSTRAP_PROFILE
 #include <cassert>
+#ifndef DEBUG_MSG
 #define DEBUG_MSG(m) do { } while (0)
+#endif
+#ifndef INFO_MSG
 #define INFO_MSG(m) do { } while (0)
+#endif
+#ifndef WARNING_MSG
 #define WARNING_MSG(m) do { } while (0)
+#endif
+#ifndef ERROR_MSG
 #define ERROR_MSG(m) do { } while (0)
+#endif
+#ifndef CRITICAL_MSG
 #define CRITICAL_MSG(m) do { } while (0)
+#endif
+#ifndef KBE_ASSERT
 #define KBE_ASSERT(exp) assert((exp))
+#endif
 #else
 #include "debug_helper.h"
 #endif

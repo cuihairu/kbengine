@@ -1,8 +1,8 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
 
-#include "serverconfig.h"
 #include "network/common.h"
+#include "serverconfig.h"
 #include "network/address.h"
 #include "resmgr/resmgr.h"
 #include "common/kbekey.h"
@@ -64,7 +64,7 @@ bool ServerConfig::loadConfig(std::string fileName)
 	
 	if(xml->getRootNode() == NULL)
 	{
-		// root节点下没有子节点了
+		// root陆脷碌茫脧脗脙禄脫脨脳脫陆脷碌茫脕脣
 		return true;
 	}
 
@@ -107,7 +107,7 @@ bool ServerConfig::loadConfig(std::string fileName)
 					{
 						Network::g_trace_packet_disables.push_back(c);
 						
-						// 不debug加密包
+						// 虏禄debug录脫脙脺掳眉
 						if(c == "Encrypted::packets")
 							Network::g_trace_encrypted_packet = false;
 					}
@@ -981,7 +981,7 @@ bool ServerConfig::loadConfig(std::string fileName)
 					else
 						missingFields.push_back("pure");
 
-					// 默认库不允许是纯净库，引擎需要创建实体表
+					// 脛卢脠脧驴芒虏禄脭脢脨铆脢脟麓驴戮禄驴芒拢卢脪媒脟忙脨猫脪陋麓麓陆篓脢碌脤氓卤铆
 					if (name == "default")
 						pDBInfo->isPure = false;
 
@@ -1094,7 +1094,7 @@ bool ServerConfig::loadConfig(std::string fileName)
 	
 					if (pDBInfo == &dbinfo)
 					{
-						// 检查不能在不同的接口中使用相同的数据库与相同的表
+						// 录矛虏茅虏禄脛脺脭脷虏禄脥卢碌脛陆脫驴脷脰脨脢鹿脫脙脧脿脥卢碌脛脢媒戮脻驴芒脫毛脧脿脥卢碌脛卤铆
 						std::vector<DBInterfaceInfo>::iterator dbinfo_iter = _dbmgrInfo.dbInterfaceInfos.begin();
 						for (; dbinfo_iter != _dbmgrInfo.dbInterfaceInfos.end(); ++dbinfo_iter)
 						{
@@ -1669,7 +1669,7 @@ uint32 ServerConfig::tcp_SOMAXCONN(COMPONENT_TYPE componentType)
 //-------------------------------------------------------------------------------------	
 void ServerConfig::_updateEmailInfos()
 {
-	// 如果小于64则表示目前还是明文密码
+	// 脠莽鹿没脨隆脫脷64脭貌卤铆脢戮脛驴脟掳禄鹿脢脟脙梅脦脛脙脺脗毛
 	if(emailServerInfo_.password.size() < 64)
 	{
 		WARNING_MSG(fmt::format("ServerConfig::loadConfig: email password(email_service.xml) is not encrypted!\nplease use password(rsa):\n{}\n"

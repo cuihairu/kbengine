@@ -16,6 +16,12 @@ target_include_directories(kbe_build_config INTERFACE
   "${KBE_SOURCE_DIR}/lib/dependencies/curl/include"
 )
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  target_compile_options(kbe_build_config INTERFACE
+    -Wno-undefined-var-template
+  )
+endif()
+
 if(KBE_USE_LOG4CXX)
   target_include_directories(kbe_build_config INTERFACE
     "${KBE_SOURCE_DIR}/lib/dependencies/log4cxx/src/main/include"
@@ -64,7 +70,7 @@ target_include_directories(kbe_common_strutil
 add_dependencies(kbe-bootstrap kbe_common_strutil)
 
 add_library(kbe_common_timestamp STATIC
-  "${KBE_SOURCE_DIR}/lib/common/timestamp_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/common/timestamp.cpp"
 )
 
 add_library(KBEngine::common_timestamp ALIAS kbe_common_timestamp)
@@ -100,7 +106,7 @@ target_include_directories(kbe_common_timer
 add_dependencies(kbe-bootstrap kbe_common_timer)
 
 add_library(kbe_common_md5 STATIC
-  "${KBE_SOURCE_DIR}/lib/common/md5_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/common/md5.cpp"
 )
 
 add_library(KBEngine::common_md5 ALIAS kbe_common_md5)
@@ -188,7 +194,7 @@ target_include_directories(kbe_common_ssl
 add_dependencies(kbe-bootstrap kbe_common_ssl)
 
 add_library(kbe_common_rsa STATIC
-  "${KBE_SOURCE_DIR}/lib/common/rsa_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/common/rsa.cpp"
 )
 
 add_library(KBEngine::common_rsa ALIAS kbe_common_rsa)
@@ -200,6 +206,11 @@ target_link_libraries(kbe_common_rsa
     OpenSSL::Crypto
 )
 
+target_compile_definitions(kbe_common_rsa
+  PRIVATE
+    KBE_CMAKE_BOOTSTRAP_RSA
+)
+
 target_include_directories(kbe_common_rsa
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
@@ -208,7 +219,7 @@ target_include_directories(kbe_common_rsa
 add_dependencies(kbe-bootstrap kbe_common_rsa)
 
 add_library(kbe_common_kbekey STATIC
-  "${KBE_SOURCE_DIR}/lib/common/kbekey_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/common/kbekey.cpp"
 )
 
 add_library(KBEngine::common_kbekey ALIAS kbe_common_kbekey)
@@ -219,6 +230,11 @@ target_link_libraries(kbe_common_kbekey
     KBEngine::common_rsa
 )
 
+target_compile_definitions(kbe_common_kbekey
+  PRIVATE
+    KBE_CMAKE_BOOTSTRAP_KBEKEY
+)
+
 target_include_directories(kbe_common_kbekey
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
@@ -227,7 +243,7 @@ target_include_directories(kbe_common_kbekey
 add_dependencies(kbe-bootstrap kbe_common_kbekey)
 
 add_library(kbe_common_tasks STATIC
-  "${KBE_SOURCE_DIR}/lib/common/tasks_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/common/tasks.cpp"
 )
 
 add_library(KBEngine::common_tasks ALIAS kbe_common_tasks)
@@ -245,7 +261,7 @@ target_include_directories(kbe_common_tasks
 add_dependencies(kbe-bootstrap kbe_common_tasks)
 
 add_library(kbe_common_version STATIC
-  "${KBE_SOURCE_DIR}/lib/common/kbeversion_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/common/kbeversion.cpp"
 )
 
 add_library(KBEngine::common_version ALIAS kbe_common_version)
@@ -263,7 +279,7 @@ target_include_directories(kbe_common_version
 add_dependencies(kbe-bootstrap kbe_common_version)
 
 add_library(kbe_common_blowfish STATIC
-  "${KBE_SOURCE_DIR}/lib/common/blowfish_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/common/blowfish.cpp"
 )
 
 add_library(KBEngine::common_blowfish ALIAS kbe_common_blowfish)
@@ -277,6 +293,7 @@ target_link_libraries(kbe_common_blowfish
 target_compile_definitions(kbe_common_blowfish
   PRIVATE
     OPENSSL_SUPPRESS_DEPRECATED
+    KBE_CMAKE_BOOTSTRAP_BLOWFISH
 )
 
 target_include_directories(kbe_common_blowfish
@@ -571,8 +588,37 @@ target_include_directories(kbe_helper_profiler
 
 add_dependencies(kbe-bootstrap kbe_helper_profiler)
 
+add_library(kbe_helper_debug_helper STATIC
+  "${KBE_SOURCE_DIR}/lib/helper/debug_helper.cpp"
+)
+
+add_library(KBEngine::helper_debug_helper ALIAS kbe_helper_debug_helper)
+
+target_link_libraries(kbe_helper_debug_helper
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_common
+    KBEngine::network_address
+    KBEngine::thread_primitives
+    KBEngine::common_objectpool
+    KBEngine::common_memorystream
+)
+
+target_compile_definitions(kbe_helper_debug_helper
+  PRIVATE
+    KBE_CMAKE_BOOTSTRAP_DEBUG_HELPER
+)
+
+target_include_directories(kbe_helper_debug_helper
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_helper_debug_helper)
+
 add_library(kbe_network_common STATIC
-  "${KBE_SOURCE_DIR}/lib/network/common_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/network/common.cpp"
 )
 
 add_library(KBEngine::network_common ALIAS kbe_network_common)
@@ -581,7 +627,17 @@ target_link_libraries(kbe_network_common
   PUBLIC
     KBEngine::build_config
   PRIVATE
+    KBEngine::common_ssl
+    KBEngine::network_address
+    KBEngine::network_endpoint
+    KBEngine::network_tcp_packet
+    KBEngine::network_udp_packet
     KBEngine::helper_debug_option
+)
+
+target_compile_definitions(kbe_network_common
+  PRIVATE
+    KBE_CMAKE_BOOTSTRAP_NETWORK_COMMON
 )
 
 target_include_directories(kbe_network_common
@@ -592,7 +648,7 @@ target_include_directories(kbe_network_common
 add_dependencies(kbe-bootstrap kbe_network_common)
 
 add_library(kbe_network_address STATIC
-  "${KBE_SOURCE_DIR}/lib/network/address_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/network/address.cpp"
 )
 
 add_library(KBEngine::network_address ALIAS kbe_network_address)
@@ -603,6 +659,7 @@ target_link_libraries(kbe_network_address
   PRIVATE
     KBEngine::common_objectpool
     KBEngine::network_common
+    KBEngine::helper_debug_helper
 )
 
 target_include_directories(kbe_network_address
@@ -667,7 +724,7 @@ target_include_directories(kbe_network_packet
 add_dependencies(kbe-bootstrap kbe_network_packet)
 
 add_library(kbe_network_message_handler STATIC
-  "${KBE_SOURCE_DIR}/lib/network/message_handler_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/network/message_handler.cpp"
 )
 
 add_library(KBEngine::network_message_handler ALIAS kbe_network_message_handler)
@@ -676,8 +733,15 @@ target_link_libraries(kbe_network_message_handler
   PUBLIC
     KBEngine::build_config
   PRIVATE
+    KBEngine::common_md5
     KBEngine::common_memorystream
     KBEngine::network_common
+    KBEngine::network_channel
+    KBEngine::network_packet_receiver
+    KBEngine::network_fixed_messages
+    KBEngine::helper_watcher
+    KBEngine::xml
+    KBEngine::resmgr
 )
 
 target_include_directories(kbe_network_message_handler
@@ -688,7 +752,7 @@ target_include_directories(kbe_network_message_handler
 add_dependencies(kbe-bootstrap kbe_network_message_handler)
 
 add_library(kbe_network_stats STATIC
-  "${KBE_SOURCE_DIR}/lib/network/network_stats_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/network/network_stats.cpp"
 )
 
 add_library(KBEngine::network_stats ALIAS kbe_network_stats)
@@ -709,7 +773,7 @@ target_include_directories(kbe_network_stats
 add_dependencies(kbe-bootstrap kbe_network_stats)
 
 add_library(kbe_network_error_reporter STATIC
-  "${KBE_SOURCE_DIR}/lib/network/error_reporter_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/network/error_reporter.cpp"
 )
 
 add_library(KBEngine::network_error_reporter ALIAS kbe_network_error_reporter)
@@ -720,10 +784,12 @@ target_link_libraries(kbe_network_error_reporter
   PRIVATE
     KBEngine::common_timer
     KBEngine::network_exception
+    KBEngine::network_address
+    KBEngine::network_event_dispatcher
 )
 
 target_compile_definitions(kbe_network_error_reporter
-  PUBLIC
+  PRIVATE
     KBE_CMAKE_BOOTSTRAP_ERROR_REPORTER
 )
 
@@ -735,7 +801,7 @@ target_include_directories(kbe_network_error_reporter
 add_dependencies(kbe-bootstrap kbe_network_error_reporter)
 
 add_library(kbe_network_packet_filter STATIC
-  "${KBE_SOURCE_DIR}/lib/network/packet_filter_cmake.cpp"
+  "${KBE_SOURCE_DIR}/lib/network/packet_filter.cpp"
 )
 
 add_library(KBEngine::network_packet_filter ALIAS kbe_network_packet_filter)
@@ -746,6 +812,9 @@ target_link_libraries(kbe_network_packet_filter
     KBEngine::common_smartpointer
   PRIVATE
     KBEngine::network_common
+    KBEngine::network_channel
+    KBEngine::network_packet_receiver
+    KBEngine::network_packet_sender
 )
 
 target_include_directories(kbe_network_packet_filter
@@ -754,6 +823,175 @@ target_include_directories(kbe_network_packet_filter
 )
 
 add_dependencies(kbe-bootstrap kbe_network_packet_filter)
+
+set(KBE_EVENT_POLLER_SOURCES
+  "${KBE_SOURCE_DIR}/lib/network/event_poller.cpp"
+  "${KBE_SOURCE_DIR}/lib/network/poller_select.cpp"
+)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND KBE_EVENT_POLLER_SOURCES
+    "${KBE_SOURCE_DIR}/lib/network/poller_epoll.cpp"
+  )
+endif()
+
+add_library(kbe_network_event_poller STATIC
+  ${KBE_EVENT_POLLER_SOURCES}
+)
+
+add_library(KBEngine::network_event_poller ALIAS kbe_network_event_poller)
+
+target_link_libraries(kbe_network_event_poller
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::helper_profile
+    KBEngine::thread_concurrency
+)
+
+target_include_directories(kbe_network_event_poller
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_event_poller)
+
+add_library(kbe_math STATIC
+  "${KBE_SOURCE_DIR}/lib/math/math.cpp"
+)
+
+add_library(KBEngine::math ALIAS kbe_math)
+
+target_link_libraries(kbe_math
+  PUBLIC
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_math
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite"
+)
+
+add_dependencies(kbe-bootstrap kbe_math)
+
+add_library(kbe_resmgr STATIC
+  "${KBE_SOURCE_DIR}/lib/resmgr/resmgr.cpp"
+  "${KBE_SOURCE_DIR}/lib/resmgr/resourceobject.cpp"
+)
+
+add_library(KBEngine::resmgr ALIAS kbe_resmgr)
+
+target_link_libraries(kbe_resmgr
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_smartpointer
+    KBEngine::common_timer
+    KBEngine::helper_debug_option
+    KBEngine::helper_watcher
+    KBEngine::thread_primitives
+    KBEngine::xml
+)
+
+target_include_directories(kbe_resmgr
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_resmgr)
+
+add_library(kbe_network_tcp_packet STATIC
+  "${KBE_SOURCE_DIR}/lib/network/tcp_packet.cpp"
+)
+
+add_library(KBEngine::network_tcp_packet ALIAS kbe_network_tcp_packet)
+
+target_link_libraries(kbe_network_tcp_packet
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::network_packet
+    KBEngine::network_endpoint
+  PRIVATE
+    KBEngine::helper_debug_helper
+)
+
+target_include_directories(kbe_network_tcp_packet
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_tcp_packet)
+
+add_library(kbe_network_udp_packet STATIC
+  "${KBE_SOURCE_DIR}/lib/network/udp_packet.cpp"
+)
+
+add_library(KBEngine::network_udp_packet ALIAS kbe_network_udp_packet)
+
+target_link_libraries(kbe_network_udp_packet
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::network_packet
+    KBEngine::network_endpoint
+  PRIVATE
+    KBEngine::helper_debug_helper
+)
+
+target_include_directories(kbe_network_udp_packet
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_udp_packet)
+
+add_library(kbe_network_event_dispatcher STATIC
+  "${KBE_SOURCE_DIR}/lib/network/event_dispatcher.cpp"
+)
+
+add_library(KBEngine::network_event_dispatcher ALIAS kbe_network_event_dispatcher)
+
+target_link_libraries(kbe_network_event_dispatcher
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_tasks
+    KBEngine::common_timer
+    KBEngine::network_interfaces
+    KBEngine::network_common
+    KBEngine::network_event_poller
+    KBEngine::network_error_reporter
+    KBEngine::helper_profile
+)
+
+target_include_directories(kbe_network_event_dispatcher
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_event_dispatcher)
+
+add_library(kbe_network_endpoint STATIC
+  "${KBE_SOURCE_DIR}/lib/network/endpoint.cpp"
+)
+
+add_library(KBEngine::network_endpoint ALIAS kbe_network_endpoint)
+
+target_link_libraries(kbe_network_endpoint
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::network_address
+    KBEngine::network_common
+    OpenSSL::SSL
+    OpenSSL::Crypto
+)
+
+target_include_directories(kbe_network_endpoint
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_endpoint)
 
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
@@ -777,6 +1015,922 @@ if(KBE_BUILD_LEGACY_XML_TARGET)
   add_dependencies(kbe-bootstrap kbe_xml)
 endif()
 
-if(NOT KBE_BUILD_BOOTSTRAP_ONLY)
-  message(STATUS "Full KBEngine CMake targets are not migrated yet; bootstrap mode is recommended.")
-endif()
+# ---------------------------------------------------------------------------
+# Network: fixed_messages
+# ---------------------------------------------------------------------------
+add_library(kbe_network_fixed_messages STATIC
+  "${KBE_SOURCE_DIR}/lib/network/fixed_messages.cpp"
+)
+
+add_library(KBEngine::network_fixed_messages ALIAS kbe_network_fixed_messages)
+
+target_link_libraries(kbe_network_fixed_messages
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_common
+    KBEngine::resmgr
+    KBEngine::xml
+)
+
+target_include_directories(kbe_network_fixed_messages
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_fixed_messages)
+
+# ---------------------------------------------------------------------------
+# Server: machine_infos
+# ---------------------------------------------------------------------------
+add_library(kbe_server_machine_infos STATIC
+  "${KBE_SOURCE_DIR}/lib/server/machine_infos.cpp"
+)
+
+add_library(KBEngine::server_machine_infos ALIAS kbe_server_machine_infos)
+
+target_link_libraries(kbe_server_machine_infos
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_common
+    KBEngine::network_address
+    KBEngine::thread_primitives
+    KBEngine::common_objectpool
+    KBEngine::common_memorystream
+)
+
+target_include_directories(kbe_server_machine_infos
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_machine_infos)
+
+# ---------------------------------------------------------------------------
+# Server: serverconfig
+# ---------------------------------------------------------------------------
+add_library(kbe_server_serverconfig STATIC
+  "${KBE_SOURCE_DIR}/lib/server/serverconfig.cpp"
+)
+
+add_library(KBEngine::server_serverconfig ALIAS kbe_server_serverconfig)
+
+target_link_libraries(kbe_server_serverconfig
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_common
+    KBEngine::network_address
+    KBEngine::resmgr
+    KBEngine::common_kbekey
+    KBEngine::common_version
+    KBEngine::xml
+    KBEngine::common_timer
+    KBEngine::common_tasks
+    KBEngine::thread_primitives
+)
+
+target_include_directories(kbe_server_serverconfig
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_serverconfig)
+
+# ---------------------------------------------------------------------------
+# Server: shutdowner
+# ---------------------------------------------------------------------------
+add_library(kbe_server_shutdowner STATIC
+  "${KBE_SOURCE_DIR}/lib/server/shutdowner.cpp"
+)
+
+add_library(KBEngine::server_shutdowner ALIAS kbe_server_shutdowner)
+
+target_link_libraries(kbe_server_shutdowner
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::server_serverconfig
+    KBEngine::network_event_dispatcher
+    KBEngine::common_timer
+)
+
+target_include_directories(kbe_server_shutdowner
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_shutdowner)
+
+# ---------------------------------------------------------------------------
+# Server: signal_handler (stub)
+# ---------------------------------------------------------------------------
+add_library(kbe_server_signal_handler STATIC
+  "${KBE_SOURCE_DIR}/lib/server/signal_handler.cpp"
+)
+
+add_library(KBEngine::server_signal_handler ALIAS kbe_server_signal_handler)
+
+target_link_libraries(kbe_server_signal_handler
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_tasks
+    KBEngine::network_event_dispatcher
+)
+
+target_include_directories(kbe_server_signal_handler
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_signal_handler)
+
+# ---------------------------------------------------------------------------
+# Server: common
+# ---------------------------------------------------------------------------
+add_library(kbe_server_common STATIC
+  "${KBE_SOURCE_DIR}/lib/server/common.cpp"
+)
+
+add_library(KBEngine::server_common ALIAS kbe_server_common)
+
+target_link_libraries(kbe_server_common
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_md5
+    KBEngine::server_serverconfig
+    KBEngine::server_machine_infos
+    KBEngine::helper_sys_info
+)
+
+target_include_directories(kbe_server_common
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_common)
+
+# ===========================================================================
+# Network: ikcp (self-contained C protocol implementation)
+# ===========================================================================
+add_library(kbe_network_ikcp STATIC
+  "${KBE_SOURCE_DIR}/lib/network/ikcp.c"
+)
+
+add_library(KBEngine::network_ikcp ALIAS kbe_network_ikcp)
+
+target_link_libraries(kbe_network_ikcp
+  PUBLIC
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_network_ikcp
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_ikcp)
+
+# ---------------------------------------------------------------------------
+# Network: packet_reader
+# ---------------------------------------------------------------------------
+add_library(kbe_network_packet_reader STATIC
+  "${KBE_SOURCE_DIR}/lib/network/packet_reader.cpp"
+)
+
+add_library(KBEngine::network_packet_reader ALIAS kbe_network_packet_reader)
+
+target_link_libraries(kbe_network_packet_reader
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_memorystream
+    KBEngine::helper_debug_helper
+)
+
+target_include_directories(kbe_network_packet_reader
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_packet_reader)
+
+# ---------------------------------------------------------------------------
+# Network: packet_sender
+# ---------------------------------------------------------------------------
+add_library(kbe_network_packet_sender STATIC
+  "${KBE_SOURCE_DIR}/lib/network/packet_sender.cpp"
+)
+
+add_library(KBEngine::network_packet_sender ALIAS kbe_network_packet_sender)
+
+target_link_libraries(kbe_network_packet_sender
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_common
+    KBEngine::network_address
+    KBEngine::network_endpoint
+    KBEngine::helper_debug_helper
+    OpenSSL::SSL
+)
+
+target_include_directories(kbe_network_packet_sender
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_packet_sender)
+
+# ---------------------------------------------------------------------------
+# Network: encryption_filter
+# ---------------------------------------------------------------------------
+add_library(kbe_network_encryption_filter STATIC
+  "${KBE_SOURCE_DIR}/lib/network/encryption_filter.cpp"
+)
+
+add_library(KBEngine::network_encryption_filter ALIAS kbe_network_encryption_filter)
+
+target_link_libraries(kbe_network_encryption_filter
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::network_packet_filter
+  PRIVATE
+    KBEngine::network_common
+    OpenSSL::SSL
+)
+
+target_include_directories(kbe_network_encryption_filter
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_encryption_filter)
+
+# ---------------------------------------------------------------------------
+# Network: websocket_protocol
+# ---------------------------------------------------------------------------
+add_library(kbe_network_websocket_protocol STATIC
+  "${KBE_SOURCE_DIR}/lib/network/websocket_protocol.cpp"
+)
+
+add_library(KBEngine::network_websocket_protocol ALIAS kbe_network_websocket_protocol)
+
+target_link_libraries(kbe_network_websocket_protocol
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::helper_debug_helper
+)
+
+target_include_directories(kbe_network_websocket_protocol
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_websocket_protocol)
+
+# ---------------------------------------------------------------------------
+# Network: delayed_channels
+# ---------------------------------------------------------------------------
+add_library(kbe_network_delayed_channels STATIC
+  "${KBE_SOURCE_DIR}/lib/network/delayed_channels.cpp"
+)
+
+add_library(KBEngine::network_delayed_channels ALIAS kbe_network_delayed_channels)
+
+target_link_libraries(kbe_network_delayed_channels
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_tasks
+    KBEngine::common_smartpointer
+)
+
+target_include_directories(kbe_network_delayed_channels
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_delayed_channels)
+
+# ---------------------------------------------------------------------------
+# Network: packet_receiver (base class for tcp/udp receivers)
+# ---------------------------------------------------------------------------
+add_library(kbe_network_packet_receiver STATIC
+  "${KBE_SOURCE_DIR}/lib/network/packet_receiver.cpp"
+)
+
+add_library(KBEngine::network_packet_receiver ALIAS kbe_network_packet_receiver)
+
+target_link_libraries(kbe_network_packet_receiver
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_common
+    KBEngine::network_tcp_packet
+    KBEngine::helper_debug_helper
+)
+
+target_include_directories(kbe_network_packet_receiver
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_packet_receiver)
+
+# ---------------------------------------------------------------------------
+# Network: tcp_packet_receiver
+# ---------------------------------------------------------------------------
+add_library(kbe_network_tcp_packet_receiver STATIC
+  "${KBE_SOURCE_DIR}/lib/network/tcp_packet_receiver.cpp"
+)
+
+add_library(KBEngine::network_tcp_packet_receiver ALIAS kbe_network_tcp_packet_receiver)
+
+target_link_libraries(kbe_network_tcp_packet_receiver
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_common
+    KBEngine::network_tcp_packet
+    KBEngine::helper_debug_helper
+)
+
+target_include_directories(kbe_network_tcp_packet_receiver
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_tcp_packet_receiver)
+
+# ---------------------------------------------------------------------------
+# Network: tcp_packet_sender
+# ---------------------------------------------------------------------------
+add_library(kbe_network_tcp_packet_sender STATIC
+  "${KBE_SOURCE_DIR}/lib/network/tcp_packet_sender.cpp"
+)
+
+add_library(KBEngine::network_tcp_packet_sender ALIAS kbe_network_tcp_packet_sender)
+
+target_link_libraries(kbe_network_tcp_packet_sender
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_common
+    KBEngine::network_tcp_packet
+    KBEngine::network_endpoint
+    KBEngine::helper_debug_helper
+)
+
+target_include_directories(kbe_network_tcp_packet_sender
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_tcp_packet_sender)
+
+# ---------------------------------------------------------------------------
+# Network: udp_packet_receiver
+# ---------------------------------------------------------------------------
+add_library(kbe_network_udp_packet_receiver STATIC
+  "${KBE_SOURCE_DIR}/lib/network/udp_packet_receiver.cpp"
+)
+
+add_library(KBEngine::network_udp_packet_receiver ALIAS kbe_network_udp_packet_receiver)
+
+target_link_libraries(kbe_network_udp_packet_receiver
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_common
+    KBEngine::network_udp_packet
+    KBEngine::helper_debug_helper
+)
+
+target_include_directories(kbe_network_udp_packet_receiver
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_udp_packet_receiver)
+
+# ---------------------------------------------------------------------------
+# Network: udp_packet_sender
+# ---------------------------------------------------------------------------
+add_library(kbe_network_udp_packet_sender STATIC
+  "${KBE_SOURCE_DIR}/lib/network/udp_packet_sender.cpp"
+)
+
+add_library(KBEngine::network_udp_packet_sender ALIAS kbe_network_udp_packet_sender)
+
+target_link_libraries(kbe_network_udp_packet_sender
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::network_common
+    KBEngine::network_udp_packet
+    KBEngine::network_endpoint
+    KBEngine::network_ikcp
+    KBEngine::helper_debug_helper
+)
+
+target_include_directories(kbe_network_udp_packet_sender
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_udp_packet_sender)
+
+# ---------------------------------------------------------------------------
+# Network: kcp_packet_reader / kcp_packet_receiver / kcp_packet_sender
+# ---------------------------------------------------------------------------
+add_library(kbe_network_kcp_packet_reader STATIC
+  "${KBE_SOURCE_DIR}/lib/network/kcp_packet_reader.cpp"
+)
+add_library(KBEngine::network_kcp_packet_reader ALIAS kbe_network_kcp_packet_reader)
+target_link_libraries(kbe_network_kcp_packet_reader
+  PUBLIC KBEngine::build_config
+)
+target_include_directories(kbe_network_kcp_packet_reader
+  PUBLIC "${KBE_SOURCE_DIR}/lib"
+)
+add_dependencies(kbe-bootstrap kbe_network_kcp_packet_reader)
+
+add_library(kbe_network_kcp_packet_receiver STATIC
+  "${KBE_SOURCE_DIR}/lib/network/kcp_packet_receiver.cpp"
+)
+add_library(KBEngine::network_kcp_packet_receiver ALIAS kbe_network_kcp_packet_receiver)
+target_link_libraries(kbe_network_kcp_packet_receiver
+  PUBLIC KBEngine::build_config
+  PRIVATE KBEngine::network_ikcp KBEngine::helper_debug_helper
+)
+target_include_directories(kbe_network_kcp_packet_receiver
+  PUBLIC "${KBE_SOURCE_DIR}/lib"
+)
+add_dependencies(kbe-bootstrap kbe_network_kcp_packet_receiver)
+
+add_library(kbe_network_kcp_packet_sender STATIC
+  "${KBE_SOURCE_DIR}/lib/network/kcp_packet_sender.cpp"
+)
+add_library(KBEngine::network_kcp_packet_sender ALIAS kbe_network_kcp_packet_sender)
+target_link_libraries(kbe_network_kcp_packet_sender
+  PUBLIC KBEngine::build_config
+  PRIVATE KBEngine::network_ikcp KBEngine::helper_debug_helper
+)
+target_include_directories(kbe_network_kcp_packet_sender
+  PUBLIC "${KBE_SOURCE_DIR}/lib"
+)
+add_dependencies(kbe-bootstrap kbe_network_kcp_packet_sender)
+
+# ---------------------------------------------------------------------------
+# Network: websocket_packet_reader / websocket_packet_filter
+# ---------------------------------------------------------------------------
+add_library(kbe_network_websocket_packet_reader STATIC
+  "${KBE_SOURCE_DIR}/lib/network/websocket_packet_reader.cpp"
+)
+add_library(KBEngine::network_websocket_packet_reader ALIAS kbe_network_websocket_packet_reader)
+target_link_libraries(kbe_network_websocket_packet_reader
+  PUBLIC KBEngine::build_config
+  PRIVATE KBEngine::helper_debug_helper
+)
+target_include_directories(kbe_network_websocket_packet_reader
+  PUBLIC "${KBE_SOURCE_DIR}/lib"
+)
+add_dependencies(kbe-bootstrap kbe_network_websocket_packet_reader)
+
+add_library(kbe_network_websocket_packet_filter STATIC
+  "${KBE_SOURCE_DIR}/lib/network/websocket_packet_filter.cpp"
+)
+add_library(KBEngine::network_websocket_packet_filter ALIAS kbe_network_websocket_packet_filter)
+target_link_libraries(kbe_network_websocket_packet_filter
+  PUBLIC KBEngine::build_config
+  PRIVATE KBEngine::network_packet_filter KBEngine::network_websocket_protocol KBEngine::helper_debug_helper
+)
+target_include_directories(kbe_network_websocket_packet_filter
+  PUBLIC "${KBE_SOURCE_DIR}/lib"
+)
+add_dependencies(kbe-bootstrap kbe_network_websocket_packet_filter)
+
+# ---------------------------------------------------------------------------
+# Network: bundle (key milestone: part of circular dependency chain)
+# ---------------------------------------------------------------------------
+add_library(kbe_network_bundle STATIC
+  "${KBE_SOURCE_DIR}/lib/network/bundle.cpp"
+)
+
+add_library(KBEngine::network_bundle ALIAS kbe_network_bundle)
+
+target_link_libraries(kbe_network_bundle
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_objectpool
+    KBEngine::common_memorystream
+    KBEngine::network_tcp_packet
+    KBEngine::network_udp_packet
+    KBEngine::network_endpoint
+  PRIVATE
+    KBEngine::helper_debug_helper
+    KBEngine::helper_profile
+    KBEngine::network_packet_sender
+    KBEngine::network_stats
+    KBEngine::common_blowfish
+)
+
+target_include_directories(kbe_network_bundle
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_bundle)
+
+# ---------------------------------------------------------------------------
+# Network: channel (key milestone: part of circular dependency chain)
+# ---------------------------------------------------------------------------
+add_library(kbe_network_channel STATIC
+  "${KBE_SOURCE_DIR}/lib/network/channel.cpp"
+)
+
+add_library(KBEngine::network_channel ALIAS kbe_network_channel)
+
+target_link_libraries(kbe_network_channel
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::network_bundle
+    KBEngine::network_ikcp
+    KBEngine::network_packet_reader
+  PRIVATE
+    KBEngine::common_ssl
+    KBEngine::network_tcp_packet_receiver
+    KBEngine::network_tcp_packet_sender
+    KBEngine::network_udp_packet_receiver
+    KBEngine::network_kcp_packet_sender
+    KBEngine::network_kcp_packet_receiver
+    KBEngine::network_kcp_packet_reader
+    KBEngine::network_websocket_protocol
+    KBEngine::network_websocket_packet_reader
+    KBEngine::network_websocket_packet_filter
+    KBEngine::network_packet_sender
+    KBEngine::network_stats
+    KBEngine::helper_profile
+)
+
+target_include_directories(kbe_network_channel
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_channel)
+
+# ---------------------------------------------------------------------------
+# Network: network_interface (THE key milestone: unlocks server layer)
+# ---------------------------------------------------------------------------
+add_library(kbe_network_interface STATIC
+  "${KBE_SOURCE_DIR}/lib/network/network_interface.cpp"
+  "${KBE_SOURCE_DIR}/lib/network/listener_receiver.cpp"
+  "${KBE_SOURCE_DIR}/lib/network/listener_udp_receiver.cpp"
+  "${KBE_SOURCE_DIR}/lib/network/listener_tcp_receiver.cpp"
+)
+
+add_library(KBEngine::network_interface ALIAS kbe_network_interface)
+
+target_link_libraries(kbe_network_interface
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::network_channel
+    KBEngine::network_bundle
+  PRIVATE
+    KBEngine::network_delayed_channels
+    KBEngine::network_packet_receiver
+    KBEngine::network_tcp_packet_receiver
+    KBEngine::network_event_dispatcher
+    KBEngine::network_stats
+    KBEngine::network_message_handler
+)
+
+target_include_directories(kbe_network_interface
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_interface)
+
+# ---------------------------------------------------------------------------
+# Network: bundle_broadcast
+# ---------------------------------------------------------------------------
+add_library(kbe_network_bundle_broadcast STATIC
+  "${KBE_SOURCE_DIR}/lib/network/bundle_broadcast.cpp"
+)
+
+add_library(KBEngine::network_bundle_broadcast ALIAS kbe_network_bundle_broadcast)
+
+target_link_libraries(kbe_network_bundle_broadcast
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::network_bundle
+    KBEngine::network_endpoint
+  PRIVATE
+    KBEngine::network_interface
+    KBEngine::network_message_handler
+)
+
+target_include_directories(kbe_network_bundle_broadcast
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_bundle_broadcast)
+
+# ---------------------------------------------------------------------------
+# Helper: profile_handler
+# ---------------------------------------------------------------------------
+add_library(kbe_helper_profile_handler STATIC
+  "${KBE_SOURCE_DIR}/lib/helper/profile_handler.cpp"
+)
+
+add_library(KBEngine::helper_profile_handler ALIAS kbe_helper_profile_handler)
+
+target_link_libraries(kbe_helper_profile_handler
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_timer
+    KBEngine::common_tasks
+    KBEngine::helper_debug_helper
+    KBEngine::helper_profile
+    KBEngine::network_interface
+    KBEngine::network_address
+    KBEngine::network_message_handler
+    KBEngine::network_bundle
+)
+
+target_include_directories(kbe_helper_profile_handler
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_helper_profile_handler)
+
+# ---------------------------------------------------------------------------
+# Helper: sys_info
+# ---------------------------------------------------------------------------
+add_library(kbe_helper_sys_info STATIC
+  "${KBE_SOURCE_DIR}/lib/helper/sys_info.cpp"
+)
+
+add_library(KBEngine::helper_sys_info ALIAS kbe_helper_sys_info)
+
+target_link_libraries(kbe_helper_sys_info
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::helper_debug_helper
+)
+
+target_compile_definitions(kbe_helper_sys_info
+  PRIVATE
+    KBE_CMAKE_BOOTSTRAP_SYS_INFO
+)
+
+target_include_directories(kbe_helper_sys_info
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_helper_sys_info)
+
+# ---------------------------------------------------------------------------
+# Helper: watch_pools
+# ---------------------------------------------------------------------------
+add_library(kbe_helper_watch_pools STATIC
+  "${KBE_SOURCE_DIR}/lib/helper/watch_pools.cpp"
+)
+
+add_library(KBEngine::helper_watch_pools ALIAS kbe_helper_watch_pools)
+
+target_link_libraries(kbe_helper_watch_pools
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::helper_watcher
+  PRIVATE
+    KBEngine::network_bundle
+    KBEngine::network_address
+    KBEngine::network_endpoint
+    KBEngine::network_tcp_packet
+    KBEngine::network_udp_packet
+    KBEngine::network_tcp_packet_receiver
+    KBEngine::network_udp_packet_receiver
+)
+
+target_include_directories(kbe_helper_watch_pools
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_helper_watch_pools)
+
+# ---------------------------------------------------------------------------
+# Server: components bootstrap support
+# ---------------------------------------------------------------------------
+add_library(kbe_server_components_bootstrap_support STATIC
+  "${KBE_SOURCE_DIR}/lib/server/components_interface_bootstrap.cpp"
+  "${KBE_SOURCE_DIR}/lib/server/components_bootstrap_support.cpp"
+)
+
+target_link_libraries(kbe_server_components_bootstrap_support
+  PUBLIC
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_server_components_bootstrap_support
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_components_bootstrap_support)
+
+# ---------------------------------------------------------------------------
+# Server: components
+# ---------------------------------------------------------------------------
+add_library(kbe_server_components STATIC
+  "${KBE_SOURCE_DIR}/lib/server/components.cpp"
+)
+
+add_library(KBEngine::server_components ALIAS kbe_server_components)
+
+target_link_libraries(kbe_server_components
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_tasks
+    KBEngine::common_timer
+    KBEngine::common_smartpointer
+    KBEngine::helper_debug_helper
+    KBEngine::helper_sys_info
+    KBEngine::server_serverconfig
+    KBEngine::network_channel
+    KBEngine::network_address
+    KBEngine::network_bundle
+    KBEngine::network_bundle_broadcast
+    KBEngine::network_tcp_packet
+    KBEngine::network_udp_packet
+    KBEngine::network_interface
+    kbe_server_components_bootstrap_support
+  PRIVATE
+    KBEngine::network_endpoint
+)
+
+target_include_directories(kbe_server_components
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_components)
+
+# ---------------------------------------------------------------------------
+# Server: component_active_report_handler
+# ---------------------------------------------------------------------------
+add_library(kbe_server_component_active_report_handler STATIC
+  "${KBE_SOURCE_DIR}/lib/server/component_active_report_handler.cpp"
+)
+
+add_library(KBEngine::server_component_active_report_handler ALIAS kbe_server_component_active_report_handler)
+
+target_link_libraries(kbe_server_component_active_report_handler
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_timer
+    KBEngine::common_tasks
+    KBEngine::network_bundle
+    KBEngine::network_interface
+    KBEngine::server_components
+)
+
+target_include_directories(kbe_server_component_active_report_handler
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_component_active_report_handler)
+
+# ---------------------------------------------------------------------------
+# Server: script_timers
+# ---------------------------------------------------------------------------
+add_library(kbe_server_script_timers STATIC
+  "${KBE_SOURCE_DIR}/lib/server/script_timers.cpp"
+)
+
+add_library(KBEngine::server_script_timers ALIAS kbe_server_script_timers)
+
+target_link_libraries(kbe_server_script_timers
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_timer
+    KBEngine::server_serverconfig
+)
+
+target_include_directories(kbe_server_script_timers
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_script_timers)
+
+# ---------------------------------------------------------------------------
+# Server: globaldata_server
+# ---------------------------------------------------------------------------
+add_library(kbe_server_globaldata_server STATIC
+  "${KBE_SOURCE_DIR}/lib/server/globaldata_server.cpp"
+)
+
+add_library(KBEngine::server_globaldata_server ALIAS kbe_server_globaldata_server)
+
+target_link_libraries(kbe_server_globaldata_server
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::server_components
+    KBEngine::network_channel
+)
+
+target_include_directories(kbe_server_globaldata_server
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_globaldata_server)
+
+# ---------------------------------------------------------------------------
+# Server: sendmail_threadtasks (header-only, all methods inline)
+# ---------------------------------------------------------------------------
+add_library(kbe_server_sendmail INTERFACE)
+
+add_library(KBEngine::server_sendmail ALIAS kbe_server_sendmail)
+
+target_link_libraries(kbe_server_sendmail
+  INTERFACE
+    KBEngine::build_config
+    KBEngine::thread_task
+    KBEngine::network_address
+)
+
+target_include_directories(kbe_server_sendmail
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_sendmail)
+
+# ---------------------------------------------------------------------------
+# Server: pendingLoginmgr
+# ---------------------------------------------------------------------------
+add_library(kbe_server_pending_loginmgr STATIC
+  "${KBE_SOURCE_DIR}/lib/server/pendingLoginmgr.cpp"
+)
+
+add_library(KBEngine::server_pending_loginmgr ALIAS kbe_server_pending_loginmgr)
+
+target_link_libraries(kbe_server_pending_loginmgr
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_tasks
+    KBEngine::common_timer
+    KBEngine::network_channel
+    KBEngine::network_interface
+  PRIVATE
+    KBEngine::helper_profile
+)
+
+target_include_directories(kbe_server_pending_loginmgr
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_pending_loginmgr)
+
+# ---------------------------------------------------------------------------
+# Server: forward_messagebuffer
+# ---------------------------------------------------------------------------
+add_library(kbe_server_forward_messagebuffer STATIC
+  "${KBE_SOURCE_DIR}/lib/server/forward_messagebuffer.cpp"
+)
+
+add_library(KBEngine::server_forward_messagebuffer ALIAS kbe_server_forward_messagebuffer)
+
+target_link_libraries(kbe_server_forward_messagebuffer
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_tasks
+    KBEngine::network_bundle
+    KBEngine::network_channel
+    KBEngine::network_interface
+    KBEngine::server_components
+)
+
+target_include_directories(kbe_server_forward_messagebuffer
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_server_forward_messagebuffer)

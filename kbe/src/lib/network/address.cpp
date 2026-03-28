@@ -36,9 +36,6 @@ void Address::reclaimPoolObject(Address* obj)
 //-------------------------------------------------------------------------------------
 void Address::destroyObjPool()
 {
-	DEBUG_MSG(fmt::format("Address::destroyObjPool(): size {}.\n",
-		_g_objPool.size()));
-
 	_g_objPool.destroy();
 }
 
@@ -162,7 +159,7 @@ int Address::ip2string(u_int32_t address, char * string)
 	p3 = (address & 0xffff) >> 8;
 	p4 = (address & 0xff);
 	
-	return sprintf(string, "%d.%d.%d.%d", p1, p2, p3, p4);
+	return snprintf(string, 32, "%d.%d.%d.%d", p1, p2, p3, p4);
 }
 
 }

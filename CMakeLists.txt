@@ -10,7 +10,18 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+set(KBE_USING_VCPKG OFF)
+if(DEFINED CMAKE_TOOLCHAIN_FILE AND CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg[\\\\/]scripts[\\\\/]buildsystems[\\\\/]vcpkg\\.cmake$")
+  set(KBE_USING_VCPKG ON)
+elseif(DEFINED VCPKG_TARGET_TRIPLET)
+  set(KBE_USING_VCPKG ON)
+endif()
+
 include(KBEngineOptions)
+
+if(KBE_USING_VCPKG)
+  message(STATUS "KBEngine: vcpkg toolchain detected")
+endif()
 
 if(MSVC)
   add_compile_options(/utf-8)

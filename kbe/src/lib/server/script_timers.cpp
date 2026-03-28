@@ -3,10 +3,6 @@
 
 #include "script_timers.h"
 #include "server/serverapp.h"
-#include "pyscript/pickler.h"
-#include "pyscript/script.h"
-#include "pyscript/pyobject_pointer.h"
-#include "common/smartpointer.h"
 
 namespace KBEngine
 {
@@ -247,6 +243,5 @@ ScriptID getIDForHandle( ScriptTimers * pTimers,
 }
 
 }
-
 
 

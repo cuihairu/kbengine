@@ -3,15 +3,18 @@
 
 #include "event_poller.h"
 #include "poller_select.h"
-#include "poller_epoll.h"
 #include "helper/profile.h"
 
 namespace KBEngine { 
 namespace Network
 {
 	
-#if KBE_PLATFORM != PLATFORM_WIN32
+#if KBE_PLATFORM == PLATFORM_UNIX
 #define HAS_EPOLL
+#endif
+
+#ifdef HAS_EPOLL
+#include "poller_epoll.h"
 #endif
 
 //-------------------------------------------------------------------------------------

@@ -49,16 +49,22 @@ void NetworkStats::removeHandler(NetworkStatsHandler* pHandler)
 void NetworkStats::trackMessage(S_OP op, const MessageHandler& msgHandler, uint32 size)
 {
 	MessageHandler* pMsgHandler = const_cast<MessageHandler*>(&msgHandler);
+	Stats& stats = stats_[msgHandler.name];
+	stats.name = msgHandler.name;
 
 	if(op == SEND)
 	{
 		pMsgHandler->send_size += size;
 		pMsgHandler->send_count++;
+		stats.send_size += size;
+		stats.send_count++;
 	}
 	else
 	{
 		pMsgHandler->recv_size += size;
 		pMsgHandler->recv_count++;
+		stats.recv_size += size;
+		stats.recv_count++;
 	}
 
 	std::vector<NetworkStatsHandler*>::iterator iter = handlers_.begin();

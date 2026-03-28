@@ -1,7 +1,262 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
-
 #include "debug_helper.h"
+
+#ifdef KBE_CMAKE_BOOTSTRAP_DEBUG_HELPER
+
+#include "common/memorystream.h"
+
+namespace KBEngine {
+
+template<>
+DebugHelper* Singleton<DebugHelper>::singleton_ = nullptr;
+
+DebugHelper::DebugHelper() :
+_logfile(nullptr),
+_currFile(),
+_currFuncName(),
+_currLine(0),
+loggerAddr_(),
+logMutex(),
+bufferedLogPackets_(),
+hasBufferedLogPackets_(0),
+pNetworkInterface_(nullptr),
+pDispatcher_(nullptr),
+scriptMsgType_(0),
+noSyncLog_(false),
+canLogFile_(true),
+loseLoggerTime_(0),
+#if KBE_PLATFORM == PLATFORM_WIN32
+mainThreadID_(GetCurrentThreadId()),
+#else
+mainThreadID_(pthread_self()),
+#endif
+memoryStreamPool_("DebugHelperMemoryStream"),
+childThreadBufferedLogPackets_()
+{
+}
+
+DebugHelper::~DebugHelper()
+{
+}
+
+void DebugHelper::initialize(COMPONENT_TYPE)
+{
+	if (!getSingletonPtr())
+	{
+		new DebugHelper();
+	}
+}
+
+void DebugHelper::finalise(bool destroy)
+{
+	if (!getSingletonPtr())
+	{
+		return;
+	}
+
+	getSingleton().clearBufferedLog(destroy);
+
+	if (destroy)
+	{
+		delete getSingletonPtr();
+		singleton_ = nullptr;
+	}
+}
+
+std::string DebugHelper::getLogName()
+{
+	return "";
+}
+
+void DebugHelper::lockthread()
+{
+	logMutex.lockMutex();
+}
+
+void DebugHelper::unlockthread()
+{
+	logMutex.unlockMutex();
+}
+
+void DebugHelper::pNetworkInterface(Network::NetworkInterface* ni)
+{
+	pNetworkInterface_ = ni;
+}
+
+void DebugHelper::pDispatcher(Network::EventDispatcher* dispatcher)
+{
+	pDispatcher_ = dispatcher;
+}
+
+Network::Channel* DebugHelper::pLoggerChannel()
+{
+	return nullptr;
+}
+
+namespace {
+void write_debug_line(FILE* stream, const std::string& s)
+{
+	if (!s.empty())
+	{
+		std::fwrite(s.data(), 1, s.size(), stream);
+	}
+}
+}
+
+void DebugHelper::print_msg(const std::string& s)
+{
+	write_debug_line(stdout, s);
+}
+
+void DebugHelper::debug_msg(const std::string& s)
+{
+	write_debug_line(stdout, s);
+}
+
+void DebugHelper::error_msg(const std::string& s)
+{
+	write_debug_line(stderr, s);
+}
+
+void DebugHelper::info_msg(const std::string& s)
+{
+	write_debug_line(stdout, s);
+}
+
+void DebugHelper::warning_msg(const std::string& s)
+{
+	write_debug_line(stderr, s);
+}
+
+void DebugHelper::critical_msg(const std::string& s)
+{
+	write_debug_line(stderr, s);
+}
+
+void DebugHelper::script_info_msg(const std::string& s)
+{
+	write_debug_line(stdout, s);
+}
+
+void DebugHelper::script_error_msg(const std::string& s)
+{
+	write_debug_line(stderr, s);
+}
+
+void DebugHelper::backtrace_msg()
+{
+}
+
+void DebugHelper::onMessage(uint32, const char*, uint32)
+{
+}
+
+void DebugHelper::registerLogger(Network::MessageID, Network::Address*)
+{
+}
+
+void DebugHelper::unregisterLogger(Network::MessageID, Network::Address*)
+{
+}
+
+void DebugHelper::onNoLogger()
+{
+}
+
+void DebugHelper::changeLogger(const std::string&)
+{
+}
+
+void DebugHelper::closeLogger()
+{
+}
+
+void DebugHelper::clearBufferedLog(bool)
+{
+	while (!bufferedLogPackets_.empty())
+	{
+		bufferedLogPackets_.pop();
+	}
+
+	while (!childThreadBufferedLogPackets_.empty())
+	{
+		MemoryStream* pMemoryStream = childThreadBufferedLogPackets_.front();
+		childThreadBufferedLogPackets_.pop();
+		delete pMemoryStream;
+	}
+
+	hasBufferedLogPackets_ = 0;
+	noSyncLog_ = true;
+	canLogFile_ = true;
+}
+
+void DebugHelper::set_errorcolor()
+{
+}
+
+void DebugHelper::set_normalcolor()
+{
+}
+
+void DebugHelper::set_warningcolor()
+{
+}
+
+void DebugHelper::setScriptMsgType(int msgtype)
+{
+	scriptMsgType_ = msgtype;
+}
+
+void DebugHelper::resetScriptMsgType()
+{
+	scriptMsgType_ = 0;
+}
+
+void DebugHelper::shouldWriteToSyslog(bool)
+{
+}
+
+void DebugHelper::sync()
+{
+}
+
+void DebugHelper::printBufferedLogs()
+{
+}
+
+bool DebugHelper::canLog(int)
+{
+	return true;
+}
+
+int KBELOG_TYPE_MAPPING(int type)
+{
+	return type;
+}
+
+void vutf8printf(FILE *out, const char *str, va_list* ap)
+{
+	vfprintf(out, str, *ap);
+}
+
+void utf8printf(FILE *out, const char *str, ...)
+{
+	va_list ap;
+	va_start(ap, str);
+	vutf8printf(out, str, &ap);
+	va_end(ap);
+}
+
+void myassert(const char* exp, const char * func, const char * file, unsigned int line)
+{
+	fprintf(stderr, "ASSERT: %s in %s at %s:%u\n", exp, func, file, line);
+}
+
+} // namespace KBEngine
+
+#else
+
 #include "profile.h"
 #include "common/common.h"
 #include "common/timer.h"
@@ -503,10 +758,10 @@ void DebugHelper::sync()
 		return;
 	}
 
-	// 将子线程日志放入bufferedLogPackets_
+	// 陆芦脳脫脧脽鲁脤脠脮脰戮路脜脠毛bufferedLogPackets_
 	while (childThreadBufferedLogPackets_.size() > 0)
 	{
-		// 从主对象池取出一个对象，将子线程中对象vector内存交换进去
+		// 麓脫脰梅露脭脧贸鲁脴脠隆鲁枚脪禄赂枚露脭脧贸拢卢陆芦脳脫脧脽鲁脤脰脨露脭脧贸vector脛脷麓忙陆禄禄禄陆酶脠楼
 		MemoryStream* pMemoryStream = childThreadBufferedLogPackets_.front();
 		childThreadBufferedLogPackets_.pop();
 
@@ -517,17 +772,17 @@ void DebugHelper::sync()
 		pBundle->finiCurrPacket();
 		pBundle->newPacket();
 
-		// 将他们的内存交换进去
+		// 陆芦脣没脙脟碌脛脛脷麓忙陆禄禄禄陆酶脠楼
 		pBundle->pCurrPacket()->swap(*pMemoryStream);
 		pBundle->currMsgLength(pBundle->currMsgLength() + pBundle->pCurrPacket()->length());
 
-		// 将所有对象交还给对象池
+		// 陆芦脣霉脫脨露脭脧贸陆禄禄鹿赂酶露脭脧贸鲁脴
 		memoryStreamPool_.reclaimObject(pMemoryStream);
 	}
 
 	if (Network::Address::NONE == loggerAddr_)
 	{
-		// 如果超过300秒没有找到logger，那么强制清理内存
+		// 脠莽鹿没鲁卢鹿媒300脙毛脙禄脫脨脮脪碌陆logger拢卢脛脟脙麓脟驴脰脝脟氓脌铆脛脷麓忙
 		if (timestamp() - loseLoggerTime_ > uint64(300 * stampsPerSecond()))
 		{
 			clearBufferedLog();
@@ -605,7 +860,7 @@ void DebugHelper::sync()
 		--hasBufferedLogPackets_;
 	}
 
-	// 这里需要延时发送，否则在发送过程中产生错误，导致日志输出会出现死锁
+	// 脮芒脌茂脨猫脪陋脩脫脢卤路垄脣脥拢卢路帽脭貌脭脷路垄脣脥鹿媒鲁脤脰脨虏煤脡煤麓铆脦贸拢卢碌录脰脗脠脮脰戮脢盲鲁枚禄谩鲁枚脧脰脣脌脣酶
 	if(bundles.size() > 0 && !pLoggerChannel->sending())
 		pLoggerChannel->delayedSend();
 
@@ -778,10 +1033,10 @@ void DebugHelper::printBufferedLogs()
 	KBE_LOG4CXX_PRINT(g_logger, std::string("The following logs sent to logger failed:\n"));
 #endif
 
-	// 将子线程日志放入bufferedLogPackets_
+	// 陆芦脳脫脧脽鲁脤脠脮脰戮路脜脠毛bufferedLogPackets_
 	while (childThreadBufferedLogPackets_.size() > 0)
 	{
-		// 从主对象池取出一个对象，将子线程中对象vector内存交换进去
+		// 麓脫脰梅露脭脧贸鲁脴脠隆鲁枚脪禄赂枚露脭脧贸拢卢陆芦脳脫脧脽鲁脤脰脨露脭脧贸vector脛脷麓忙陆禄禄禄陆酶脠楼
 		MemoryStream* pMemoryStream = childThreadBufferedLogPackets_.front();
 		childThreadBufferedLogPackets_.pop();
 
@@ -792,11 +1047,11 @@ void DebugHelper::printBufferedLogs()
 		pBundle->finiCurrPacket();
 		pBundle->newPacket();
 
-		// 将他们的内存交换进去
+		// 陆芦脣没脙脟碌脛脛脷麓忙陆禄禄禄陆酶脠楼
 		pBundle->pCurrPacket()->swap(*pMemoryStream);
 		pBundle->currMsgLength(pBundle->currMsgLength() + pBundle->pCurrPacket()->length());
 
-		// 将所有对象交还给对象池
+		// 陆芦脣霉脫脨露脭脧贸陆禄禄鹿赂酶露脭脧贸鲁脴
 		memoryStreamPool_.reclaimObject(pMemoryStream);
 	}
 
@@ -996,7 +1251,7 @@ void DebugHelper::script_info_msg(const std::string& s)
 
 	onMessage(KBELOG_TYPE_MAPPING(scriptMsgType_), s.c_str(), (uint32)s.size());
 
-	// 如果是用户手动设置的也输出为错误信息
+	// 脠莽鹿没脢脟脫脙禄搂脢脰露炉脡猫脰脙碌脛脪虏脢盲鲁枚脦陋麓铆脦贸脨脜脧垄
 	if(log4cxx::ScriptLevel::SCRIPT_ERR == scriptMsgType_)
 	{
 		set_errorcolor();
@@ -1203,5 +1458,7 @@ void DebugHelper::closeLogger()
 
 
 }
+
+#endif
 
 

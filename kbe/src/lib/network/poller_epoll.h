@@ -5,7 +5,7 @@
 
 #include "event_poller.h"
 
-#if KBE_PLATFORM != PLATFORM_WIN32
+#if KBE_PLATFORM == PLATFORM_UNIX
 #define HAS_EPOLL
 #endif
 

@@ -157,7 +157,7 @@ bool UDPPacketSender::processSend(Channel* pChannel, int userarg)
 			{
 				if (pChannel->isExternal())
 				{
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 					this->dispatcher().errorReporter().reportException(reason, pEndpoint_->addr(), "UDPPacketSender::processSend(external)",
 						fmt::format(", errno: {}", errno).c_str());
 #else
@@ -167,7 +167,7 @@ bool UDPPacketSender::processSend(Channel* pChannel, int userarg)
 			}
 				else
 				{
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 					this->dispatcher().errorReporter().reportException(reason, pEndpoint_->addr(), "UDPPacketSender::processSend(internal)",
 						fmt::format(", errno: {}, {}", errno, pChannel->c_str()).c_str());
 #else

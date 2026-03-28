@@ -31,6 +31,8 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_event_stats.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_memory.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_profiler.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_debug_helper.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_sys_info.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_common.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_address.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_packet.cpp"
@@ -39,11 +41,58 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_stats.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_error_reporter.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_packet_filter.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_event_poller.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_math.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_resmgr.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_event_dispatcher.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_endpoint.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_fixed_messages.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_machine_infos.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_serverconfig.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_shutdowner.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_signal_handler.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_common.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_ikcp.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_bundle_broadcast.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_profile_handler.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_watch_pools.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_components.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_id_component_querier.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_component_active_report_handler.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_packet_reader.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_packet_sender.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_encryption_filter.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_websocket_protocol.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_delayed_channels.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_packet_receiver.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_tcp_packet_receiver.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_tcp_packet_sender.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_udp_packet_receiver.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_udp_packet_sender.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_kcp_packet_reader.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_kcp_packet_receiver.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_kcp_packet_sender.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_websocket_packet_reader.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_websocket_packet_filter.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_bundle.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_channel.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_interface.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_script_timers.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_globaldata_server.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_sendmail.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_pending_loginmgr.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_forward_messagebuffer.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/bin"
 )
+
+if(APPLE)
+  target_link_options(kbe_smoke_tests PRIVATE
+    LINKER:-no_warn_duplicate_libraries
+  )
+endif()
 
 target_link_libraries(kbe_smoke_tests
   PRIVATE
@@ -68,12 +117,53 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::helper_event_stats
     KBEngine::helper_memory
     KBEngine::helper_profiler
+    KBEngine::helper_debug_helper
     KBEngine::network_exception
     KBEngine::network_interfaces
     KBEngine::network_packet
     KBEngine::network_stats
     KBEngine::network_error_reporter
     KBEngine::network_packet_filter
+    KBEngine::network_event_poller
+    KBEngine::math
+    KBEngine::resmgr
+    KBEngine::network_event_dispatcher
+    KBEngine::network_endpoint
+    KBEngine::network_fixed_messages
+    KBEngine::server_machine_infos
+    KBEngine::server_serverconfig
+    KBEngine::server_shutdowner
+    KBEngine::server_signal_handler
+    KBEngine::server_common
+    KBEngine::network_ikcp
+    KBEngine::network_packet_reader
+    KBEngine::network_packet_sender
+    KBEngine::network_encryption_filter
+    KBEngine::network_websocket_protocol
+    KBEngine::network_delayed_channels
+    KBEngine::network_packet_receiver
+    KBEngine::network_tcp_packet_receiver
+    KBEngine::network_tcp_packet_sender
+    KBEngine::network_udp_packet_receiver
+    KBEngine::network_udp_packet_sender
+    KBEngine::network_kcp_packet_reader
+    KBEngine::network_kcp_packet_receiver
+    KBEngine::network_kcp_packet_sender
+    KBEngine::network_websocket_packet_reader
+    KBEngine::network_websocket_packet_filter
+    KBEngine::network_bundle
+    KBEngine::network_channel
+    KBEngine::network_interface
+    KBEngine::network_bundle_broadcast
+    KBEngine::helper_profile_handler
+    KBEngine::helper_watch_pools
+    KBEngine::server_components
+    KBEngine::server_component_active_report_handler
+    KBEngine::server_script_timers
+    KBEngine::server_globaldata_server
+    KBEngine::server_sendmail
+    KBEngine::server_pending_loginmgr
+    KBEngine::server_forward_messagebuffer
 )
 
 gtest_discover_tests(kbe_smoke_tests)

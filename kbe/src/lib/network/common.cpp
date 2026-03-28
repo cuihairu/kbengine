@@ -3,16 +3,19 @@
 
 #include "common.h"
 #include "common/ssl.h"
+#ifndef KBE_CMAKE_BOOTSTRAP_NETWORK_COMMON
 #include "network/http_utility.h"
 #include "network/channel.h"
 #include "network/bundle.h"
-#include "network/tcp_packet.h"
-#include "network/udp_packet.h"
 #include "network/message_handler.h"
 #include "network/tcp_packet_receiver.h"
 #include "network/udp_packet_receiver.h"
-#include "network/address.h"
 #include "helper/watcher.h"
+#endif
+#include "network/tcp_packet.h"
+#include "network/udp_packet.h"
+#include "network/address.h"
+#include "network/endpoint.h"
 
 namespace KBEngine { 
 namespace Network
@@ -25,7 +28,7 @@ int8 g_channelExternalEncryptType = 0;
 
 uint32 g_SOMAXCONN = 5;
 
-// UDP参数
+// UDP tuning values
 uint32						g_rudp_intWritePacketsQueueSize = 65535;
 uint32						g_rudp_intReadPacketsQueueSize = 65535;
 uint32						g_rudp_extWritePacketsQueueSize = 65535;
@@ -60,7 +63,7 @@ uint32						g_extSendWindowBytesOverflow = 65535;
 uint32						g_intSentWindowBytesOverflow = 0;
 uint32						g_extSentWindowBytesOverflow = 0;
 
-// 通道发送超时重试
+// Channel resend timeouts and retry counts
 uint32						g_intReSendInterval = 10;
 uint32						g_intReSendRetries = 0;
 uint32						g_extReSendInterval = 10;
@@ -72,6 +75,9 @@ std::string					g_sslPrivateKey = "";
 
 bool initializeWatcher()
 {
+#ifdef KBE_CMAKE_BOOTSTRAP_NETWORK_COMMON
+	return true;
+#else
 	WATCH_OBJECT("network/numPacketsSent", g_numPacketsSent);
 	WATCH_OBJECT("network/numPacketsReceived", g_numPacketsReceived);
 	WATCH_OBJECT("network/numBytesSent", g_numBytesSent);
@@ -85,10 +91,17 @@ bool initializeWatcher()
 	}
 
 	return true;
+#endif
 }
 
 void destroyObjPool()
 {
+#ifdef KBE_CMAKE_BOOTSTRAP_NETWORK_COMMON
+	TCPPacket::destroyObjPool();
+	UDPPacket::destroyObjPool();
+	EndPoint::destroyObjPool();
+	Address::destroyObjPool();
+#else
 	Bundle::destroyObjPool();
 	Channel::destroyObjPool();
 	TCPPacket::destroyObjPool();
@@ -97,23 +110,32 @@ void destroyObjPool()
 	Address::destroyObjPool();
 	TCPPacketReceiver::destroyObjPool();
 	UDPPacketReceiver::destroyObjPool();
+#endif
 }
 
 bool initialize()
 {
+#ifdef KBE_CMAKE_BOOTSTRAP_NETWORK_COMMON
+	return KB_SSL::initialize();
+#else
 	return KB_SSL::initialize() && Http::initialize();
+#endif
 }
 
 void finalise(void)
 {
+#ifndef KBE_CMAKE_BOOTSTRAP_NETWORK_COMMON
 	Http::finalise();
+#endif
 	KB_SSL::finalise();
 
+#ifndef KBE_CMAKE_BOOTSTRAP_NETWORK_COMMON
 #ifdef ENABLE_WATCHERS
 	WatcherPaths::finalise();
 #endif
 
 	MessageHandlers::finalise();
+#endif
 	
 	Network::destroyObjPool();
 }

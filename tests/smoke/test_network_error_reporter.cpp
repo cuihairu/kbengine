@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "network/event_dispatcher.h"
 #include "network/error_reporter.h"
 
 TEST(NetworkErrorReporterBootstrapTest, RecordsFirstErrorByAddressAndMessage)

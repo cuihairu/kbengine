@@ -1,7 +1,10 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
+#include "common/common.h"
 #include "blowfish.h"
+#ifndef KBE_CMAKE_BOOTSTRAP_BLOWFISH
 #include "helper/debug_helper.h"
+#endif
 #include "openssl/rand.h"
 
 namespace KBEngine { 
@@ -32,8 +35,10 @@ KBEBlowfish::KBEBlowfish(int keySize):
 
 	if (this->init())
 	{
+#ifndef KBE_CMAKE_BOOTSTRAP_BLOWFISH
 		DEBUG_MSG(fmt::format("KBEBlowfish::KBEBlowfish(): Using Blowfish key: {}\n", 
 			this->strBlowFishKey()));
+#endif
 	}
 }
 
@@ -56,9 +61,11 @@ bool KBEBlowfish::init()
 	}
 	else
 	{
+#ifndef KBE_CMAKE_BOOTSTRAP_BLOWFISH
 		ERROR_MSG(fmt::format("KBEBlowfish::init: "
 			"invalid length {}\n",
 			keySize_));
+#endif
 
 		isGood_ = false;
 	}
@@ -74,7 +81,7 @@ const char * KBEBlowfish::strBlowFishKey() const
 
 	for (int i=0; i < keySize_; i++)
 	{
-		c += sprintf(c, "%02hhX ", (unsigned char)key_[i]);
+		c += snprintf(c, static_cast<size_t>(buf + sizeof(buf) - c), "%02hhX ", (unsigned char)key_[i]);
 	}
 
 	c[-1] = '\0';
@@ -85,12 +92,15 @@ const char * KBEBlowfish::strBlowFishKey() const
 int KBEBlowfish::encrypt( const unsigned char * src, unsigned char * dest,
 	int length )
 {
-	// BLOCK_SIZE的整数倍
+	// BLOCK_SIZE碌脛脮没脢媒卤露
 	if(length % BLOCK_SIZE != 0)
 	{
+#ifndef KBE_CMAKE_BOOTSTRAP_BLOWFISH
 		CRITICAL_MSG(fmt::format("Blowfish::encrypt: "
 			"Input length ({}) is not a multiple of block size ({})\n",
 			length, (int)(BLOCK_SIZE)));
+#endif
+		return -1;
 	}
 
 	uint64 * pPrevBlock = NULL;
@@ -118,9 +128,11 @@ int KBEBlowfish::decrypt( const unsigned char * src, unsigned char * dest,
 {
 	if (length % BLOCK_SIZE != 0)
 	{
+#ifndef KBE_CMAKE_BOOTSTRAP_BLOWFISH
 		ERROR_MSG(fmt::format("Blowfish::decrypt: "
 			"Input stream size ({}) is not a multiple of the block size ({})\n",
 			length, (int)(BLOCK_SIZE)));
+#endif
 
 		return -1;
 	}

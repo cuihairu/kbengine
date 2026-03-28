@@ -2,6 +2,187 @@
 
 #include "sys_info.h"
 
+#ifdef KBE_CMAKE_BOOTSTRAP_SYS_INFO
+
+#include <algorithm>
+#include <cerrno>
+#include <thread>
+#include <vector>
+
+#include <signal.h>
+#include <unistd.h>
+
+#if KBE_PLATFORM == PLATFORM_APPLE
+#include <ifaddrs.h>
+#include <net/if_dl.h>
+#endif
+
+namespace KBEngine
+{
+KBE_SINGLETON_INIT(SystemInfo);
+
+SystemInfo g_SystemInfo;
+
+SystemInfo::SystemInfo()
+{
+	totalmem_ = 0;
+}
+
+SystemInfo::~SystemInfo()
+{
+	clear();
+}
+
+void SystemInfo::clear()
+{
+}
+
+bool SystemInfo::_autocreate()
+{
+	return true;
+}
+
+bool SystemInfo::hasProcess(uint32 pid)
+{
+	if(pid == 0)
+	{
+		pid = (uint32)getProcessPID();
+	}
+
+	if(::kill((pid_t)pid, 0) == 0)
+	{
+		return true;
+	}
+
+	return errno == EPERM;
+}
+
+void SystemInfo::update()
+{
+}
+
+uint32 SystemInfo::countCPU()
+{
+	const unsigned int count = std::thread::hardware_concurrency();
+	return count > 0 ? count : 1;
+}
+
+SystemInfo::PROCESS_INFOS SystemInfo::getProcessInfo(uint32 pid)
+{
+	if(pid == 0)
+	{
+		pid = (uint32)getProcessPID();
+	}
+
+	PROCESS_INFOS infos;
+	infos.cpu = getCPUPerByPID(pid);
+	infos.memused = getMemUsedByPID(pid);
+	infos.error = !hasProcess(pid);
+	return infos;
+}
+
+float SystemInfo::getCPUPer()
+{
+	return 0.f;
+}
+
+float SystemInfo::getCPUPerByPID(uint32 pid)
+{
+	(void)pid;
+	return 0.f;
+}
+
+SystemInfo::MEM_INFOS SystemInfo::getMemInfos()
+{
+	MEM_INFOS infos = {0, 0, 0};
+
+#if defined(_SC_PHYS_PAGES) && defined(_SC_PAGE_SIZE)
+	const long pageSize = ::sysconf(_SC_PAGE_SIZE);
+	const long totalPages = ::sysconf(_SC_PHYS_PAGES);
+	if(pageSize > 0 && totalPages > 0)
+	{
+		infos.total = (uint64)pageSize * (uint64)totalPages;
+	}
+#endif
+
+#if defined(_SC_AVPHYS_PAGES) && defined(_SC_PAGE_SIZE)
+	const long availPages = ::sysconf(_SC_AVPHYS_PAGES);
+	const long pageSize2 = ::sysconf(_SC_PAGE_SIZE);
+	if(availPages > 0 && pageSize2 > 0)
+	{
+		infos.free = (uint64)pageSize2 * (uint64)availPages;
+	}
+#endif
+
+	if(infos.total >= infos.free)
+	{
+		infos.used = infos.total - infos.free;
+	}
+
+	return infos;
+}
+
+uint64 SystemInfo::totalmem()
+{
+	if(totalmem_ == 0)
+	{
+		totalmem_ = getMemInfos().total;
+	}
+
+	return totalmem_;
+}
+
+uint64 SystemInfo::getMemUsedByPID(uint32 pid)
+{
+	(void)pid;
+	return 0;
+}
+
+std::vector< std::string > SystemInfo::getMacAddresses()
+{
+	std::vector< std::string > mac_addresses;
+
+#if KBE_PLATFORM == PLATFORM_APPLE
+	struct ifaddrs* interfaces = NULL;
+	if(::getifaddrs(&interfaces) != 0)
+	{
+		return mac_addresses;
+	}
+
+	for(struct ifaddrs* iter = interfaces; iter != NULL; iter = iter->ifa_next)
+	{
+		if(iter->ifa_addr == NULL || iter->ifa_addr->sa_family != AF_LINK)
+		{
+			continue;
+		}
+
+		const sockaddr_dl* sdl = reinterpret_cast<const sockaddr_dl*>(iter->ifa_addr);
+		if(sdl->sdl_alen != 6)
+		{
+			continue;
+		}
+
+		const unsigned char* base = reinterpret_cast<const unsigned char*>(LLADDR(sdl));
+		char MAC[19];
+		std::snprintf(MAC, sizeof(MAC), "%02x:%02x:%02x:%02x:%02x:%02x",
+			base[0], base[1], base[2], base[3], base[4], base[5]);
+
+		if(std::find(mac_addresses.begin(), mac_addresses.end(), MAC) == mac_addresses.end())
+		{
+			mac_addresses.push_back(MAC);
+		}
+	}
+
+	::freeifaddrs(interfaces);
+#endif
+
+	return mac_addresses;
+}
+
+}
+
+#else
+
 extern "C"
 {
 #include "sigar.h"
@@ -58,7 +239,7 @@ SystemInfo::SystemInfo()
 {
 	totalmem_ = 0;
 
-	// 不要在初始化中做这件事情，因为全局静态变量这里可能在main之前被调用一次
+	// 虏禄脪陋脭脷鲁玫脢录禄炉脰脨脳枚脮芒录镁脢脗脟茅拢卢脪貌脦陋脠芦戮脰戮虏脤卢卤盲脕驴脮芒脌茂驴脡脛脺脭脷main脰庐脟掳卤禄碌梅脫脙脪禄麓脦
 	//_autocreate();
 	//getCPUPer();
 	//getProcessInfo();
@@ -513,3 +694,4 @@ std::vector< std::string > SystemInfo::getMacAddresses()
 //-------------------------------------------------------------------------------------
 } 
 
+#endif
