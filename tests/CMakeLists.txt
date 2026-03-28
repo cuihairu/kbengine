@@ -33,6 +33,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_profiler.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_common.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_address.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_packet.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_exception.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_interfaces.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_stats.cpp"
@@ -69,6 +70,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::helper_profiler
     KBEngine::network_exception
     KBEngine::network_interfaces
+    KBEngine::network_packet
     KBEngine::network_stats
     KBEngine::network_error_reporter
     KBEngine::network_packet_filter

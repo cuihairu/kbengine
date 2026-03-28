@@ -647,6 +647,25 @@ target_include_directories(kbe_network_interfaces
 
 add_dependencies(kbe-bootstrap kbe_network_interfaces)
 
+add_library(kbe_network_packet INTERFACE)
+
+add_library(KBEngine::network_packet ALIAS kbe_network_packet)
+
+target_link_libraries(kbe_network_packet
+  INTERFACE
+    KBEngine::build_config
+    KBEngine::common_memorystream
+    KBEngine::common_smartpointer
+    KBEngine::network_common
+)
+
+target_include_directories(kbe_network_packet
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_packet)
+
 add_library(kbe_network_message_handler STATIC
   "${KBE_SOURCE_DIR}/lib/network/message_handler_cmake.cpp"
 )
