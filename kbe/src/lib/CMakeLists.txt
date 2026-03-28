@@ -38,7 +38,7 @@ add_custom_target(kbe-bootstrap
   COMMENT "Initial KBEngine CMake bootstrap target"
 )
 
-if(KBE_BUILD_LEGACY_XML_TARGET AND NOT APPLE)
+if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
   )
@@ -58,8 +58,6 @@ if(KBE_BUILD_LEGACY_XML_TARGET AND NOT APPLE)
   )
 
   add_dependencies(kbe-bootstrap kbe_xml)
-elseif(KBE_BUILD_LEGACY_XML_TARGET AND APPLE)
-  message(STATUS "Skipping legacy lib/xml target on Apple until common/helper/network portability is improved.")
 endif()
 
 if(NOT KBE_BUILD_BOOTSTRAP_ONLY)

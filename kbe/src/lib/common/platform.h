@@ -628,8 +628,8 @@ inline const char * getUsername()
 
 	return username;
 #else
-	char * pUsername = cuserid(NULL);
-	return pUsername ? pUsername : "";
+	struct passwd *pwd = getpwuid(geteuid());
+	return pwd ? pwd->pw_name : "";
 #endif
 }
 
@@ -675,7 +675,7 @@ inline uint32 getSystemTimeDiff(uint32 oldTime, uint32 newTime)
 /* get system time */
 inline void kbe_timeofday(long *sec, long *usec)
 {
-#if defined(__unix)
+#if defined(__unix) || defined(__APPLE__)
 	struct timeval time;
 	gettimeofday(&time, NULL);
 	if (sec) *sec = time.tv_sec;
