@@ -141,6 +141,31 @@ target_include_directories(kbe_common_objectpool
 
 add_dependencies(kbe-bootstrap kbe_common_objectpool)
 
+add_library(kbe_common_memorystream STATIC
+  "${KBE_SOURCE_DIR}/lib/common/memorystream.cpp"
+)
+
+add_library(KBEngine::common_memorystream ALIAS kbe_common_memorystream)
+
+target_link_libraries(kbe_common_memorystream
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_objectpool
+    fmt::fmt
+)
+
+target_compile_definitions(kbe_common_memorystream
+  PUBLIC
+    KBE_CMAKE_BOOTSTRAP_MEMORYSTREAM
+)
+
+target_include_directories(kbe_common_memorystream
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_memorystream)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"

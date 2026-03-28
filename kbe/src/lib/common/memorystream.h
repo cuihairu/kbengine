@@ -5,7 +5,19 @@
 
 #include "common/common.h"
 #include "common/objectpool.h"
+#if defined(KBE_CMAKE_BOOTSTRAP_MEMORYSTREAM)
+#include <cstdio>
+inline void kbe_memorystream_bootstrap_log(const std::string& msg) { std::fprintf(stderr, "%s", msg.c_str()); }
+inline void kbe_memorystream_bootstrap_log(const char* msg) { std::fprintf(stderr, "%s", msg); }
+#define KBE_MEMORYSTREAM_ERROR(msg) kbe_memorystream_bootstrap_log(msg)
+#define KBE_MEMORYSTREAM_DEBUG(msg) kbe_memorystream_bootstrap_log(msg)
+#define KBE_MEMORYSTREAM_ASSERT(expr) assert((expr))
+#else
 #include "helper/debug_helper.h"
+#define KBE_MEMORYSTREAM_ERROR(msg) ERROR_MSG(msg)
+#define KBE_MEMORYSTREAM_DEBUG(msg) DEBUG_MSG(msg)
+#define KBE_MEMORYSTREAM_ASSERT(expr) KBE_ASSERT(expr)
+#endif
 #include "common/memorystream_converter.h"
 	
 namespace KBEngine{
@@ -21,7 +33,7 @@ class MemoryStreamException
 
         void PrintPosError() const
         {
-			ERROR_MSG(what());
+			KBE_MEMORYSTREAM_ERROR(what());
         }
 
 		std::string what() const
@@ -48,7 +60,7 @@ public:
 
 	void PrintPosError() const
 	{
-		ERROR_MSG(what());
+		KBE_MEMORYSTREAM_ERROR(what());
 	}
 
 	std::string what() const
@@ -516,7 +528,7 @@ public:
 
     void resize(size_t newsize)
     {
-    	KBE_ASSERT(newsize <= MAX_SIZE);
+    	KBE_MEMORYSTREAM_ASSERT(newsize <= MAX_SIZE);
         data_.resize(newsize);
         rpos_ = 0;
         wpos_ = size();
@@ -524,13 +536,13 @@ public:
 
     void data_resize(size_t newsize)
     {
-    	KBE_ASSERT(newsize <= MAX_SIZE);
+    	KBE_MEMORYSTREAM_ASSERT(newsize <= MAX_SIZE);
         data_.resize(newsize);
     }
 
     void reserve(size_t ressize)
     {
-    	KBE_ASSERT(ressize <= MAX_SIZE);
+    	KBE_MEMORYSTREAM_ASSERT(ressize <= MAX_SIZE);
 
         if (ressize > size())
             data_.reserve(ressize);
@@ -741,7 +753,7 @@ public:
 		}
 
 		fbuffer += " \n";
-        DEBUG_MSG(fbuffer.c_str());
+        KBE_MEMORYSTREAM_DEBUG(fbuffer.c_str());
 
 		rpos_ = trpos;
     }
@@ -763,7 +775,7 @@ public:
 		}
 
 		fbuffer += " \n";
-        DEBUG_MSG(fbuffer.c_str());
+        KBE_MEMORYSTREAM_DEBUG(fbuffer.c_str());
 
 		rpos_ = trpos;
     }
@@ -829,7 +841,7 @@ public:
 
 		fbuffer += "\n";
 
-		DEBUG_MSG(fbuffer.c_str());
+		KBE_MEMORYSTREAM_DEBUG(fbuffer.c_str());
 
 		rpos_ = trpos;
     }
@@ -944,6 +956,7 @@ inline void MemoryStream::read_skip<std::string>()
 // 从对象池中创建与回收 
 #define NEW_MEMORY_STREAM() MemoryStream::createPoolObject(OBJECTPOOL_POINT)
 #define DELETE_MEMORY_STREAM(obj) { MemoryStream::reclaimPoolObject(obj); obj = NULL; }
+
 
 }
 #endif

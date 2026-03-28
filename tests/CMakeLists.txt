@@ -10,6 +10,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_timer.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_md5.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_objectpool.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_memorystream.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
@@ -23,9 +24,9 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::third_party
     KBEngine::common_core
     KBEngine::common_strutil
-    KBEngine::common_timestamp
     KBEngine::common_timer
     KBEngine::common_md5
+    KBEngine::common_memorystream
 )
 
 gtest_discover_tests(kbe_smoke_tests)
