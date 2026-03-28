@@ -38,6 +38,30 @@ add_custom_target(kbe-bootstrap
   COMMENT "Initial KBEngine CMake bootstrap target"
 )
 
+if(KBE_BUILD_LEGACY_XML_TARGET AND NOT APPLE)
+  add_library(kbe_xml STATIC
+    "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
+  )
+
+  add_library(KBEngine::xml ALIAS kbe_xml)
+
+  target_link_libraries(kbe_xml
+    PUBLIC
+      KBEngine::build_config
+      KBEngine::tinyxml
+      fmt::fmt
+  )
+
+  target_include_directories(kbe_xml
+    PUBLIC
+      "${KBE_SOURCE_DIR}/lib"
+  )
+
+  add_dependencies(kbe-bootstrap kbe_xml)
+elseif(KBE_BUILD_LEGACY_XML_TARGET AND APPLE)
+  message(STATUS "Skipping legacy lib/xml target on Apple until common/helper/network portability is improved.")
+endif()
+
 if(NOT KBE_BUILD_BOOTSTRAP_ONLY)
   message(STATUS "Full KBEngine CMake targets are not migrated yet; bootstrap mode is recommended.")
 endif()

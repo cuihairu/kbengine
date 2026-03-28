@@ -48,6 +48,32 @@
 #include <functional>
 #include <memory>
 #define _SCL_SECURE_NO_WARNINGS
+#elif defined(__APPLE__)
+// apple include
+#include <errno.h>
+#include <float.h>
+#include <pthread.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <signal.h>
+#include <netdb.h>
+#include <iconv.h>
+#include <langinfo.h>   /* CODESET */
+#include <stdint.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <netinet/ip.h>
+#include <arpa/inet.h>
+#include <unordered_map>
+#include <functional>
+#include <memory>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/uio.h>
+#include <sys/resource.h>
 #else
 // linux include
 #include <errno.h>
