@@ -3,7 +3,17 @@
 #define KBE_HELPER_WATCHER_H
 
 #include "common/common.h"
+#ifdef KBE_CMAKE_BOOTSTRAP_WATCHER
+#include <cassert>
+#define DEBUG_MSG(m) do { } while (0)
+#define INFO_MSG(m) do { } while (0)
+#define WARNING_MSG(m) do { } while (0)
+#define ERROR_MSG(m) do { } while (0)
+#define CRITICAL_MSG(m) do { } while (0)
+#define KBE_ASSERT(exp) assert((exp))
+#else
 #include "helper/debug_helper.h"
+#endif
 #include "common/smartpointer.h"
 #include "common/singleton.h"
 #include "common/memorystream.h"

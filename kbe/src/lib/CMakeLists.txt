@@ -443,6 +443,32 @@ target_include_directories(kbe_thread_pool
 
 add_dependencies(kbe-bootstrap kbe_thread_pool)
 
+add_library(kbe_helper_watcher STATIC
+  "${KBE_SOURCE_DIR}/lib/helper/watcher.cpp"
+)
+
+add_library(KBEngine::helper_watcher ALIAS kbe_helper_watcher)
+
+target_link_libraries(kbe_helper_watcher
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_strutil
+    KBEngine::common_memorystream
+    KBEngine::common_smartpointer
+)
+
+target_compile_definitions(kbe_helper_watcher
+  PUBLIC
+    KBE_CMAKE_BOOTSTRAP_WATCHER
+)
+
+target_include_directories(kbe_helper_watcher
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_helper_watcher)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
