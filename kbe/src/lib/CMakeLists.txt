@@ -715,6 +715,27 @@ target_include_directories(kbe_network_error_reporter
 
 add_dependencies(kbe-bootstrap kbe_network_error_reporter)
 
+add_library(kbe_network_packet_filter STATIC
+  "${KBE_SOURCE_DIR}/lib/network/packet_filter_cmake.cpp"
+)
+
+add_library(KBEngine::network_packet_filter ALIAS kbe_network_packet_filter)
+
+target_link_libraries(kbe_network_packet_filter
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_smartpointer
+  PRIVATE
+    KBEngine::network_common
+)
+
+target_include_directories(kbe_network_packet_filter
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_packet_filter)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
