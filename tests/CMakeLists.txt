@@ -41,9 +41,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::common_timer
     KBEngine::common_md5
     KBEngine::common_ssl
-    KBEngine::common_rsa
     KBEngine::common_kbekey
-    KBEngine::common_tasks
     KBEngine::common_version
     KBEngine::common_blowfish
     KBEngine::common_smartpointer
