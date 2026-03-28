@@ -553,6 +553,24 @@ target_include_directories(kbe_helper_memory
 
 add_dependencies(kbe-bootstrap kbe_helper_memory)
 
+add_library(kbe_helper_profiler STATIC
+  "${KBE_SOURCE_DIR}/lib/helper/profiler.cpp"
+)
+
+add_library(KBEngine::helper_profiler ALIAS kbe_helper_profiler)
+
+target_link_libraries(kbe_helper_profiler
+  PUBLIC
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_helper_profiler
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_helper_profiler)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
