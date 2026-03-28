@@ -469,6 +469,33 @@ target_include_directories(kbe_helper_watcher
 
 add_dependencies(kbe-bootstrap kbe_helper_watcher)
 
+add_library(kbe_helper_profile STATIC
+  "${KBE_SOURCE_DIR}/lib/helper/profile.cpp"
+)
+
+add_library(KBEngine::helper_profile ALIAS kbe_helper_profile)
+
+target_link_libraries(kbe_helper_profile
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_timer
+    KBEngine::common_timestamp
+    KBEngine::helper_watcher
+)
+
+target_compile_definitions(kbe_helper_profile
+  PUBLIC
+    KBE_CMAKE_BOOTSTRAP_PROFILE
+)
+
+target_include_directories(kbe_helper_profile
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_helper_profile)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"

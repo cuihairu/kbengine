@@ -26,6 +26,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_endian.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_thread_pool.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_watcher.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_helper_profile.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
@@ -53,6 +54,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::common_endian
     KBEngine::thread_pool
     KBEngine::helper_watcher
+    KBEngine::helper_profile
 )
 
 gtest_discover_tests(kbe_smoke_tests)

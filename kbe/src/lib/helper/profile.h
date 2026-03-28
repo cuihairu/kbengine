@@ -3,7 +3,17 @@
 #ifndef KBENGINE_PROFILE_H
 #define KBENGINE_PROFILE_H
 
+#ifdef KBE_CMAKE_BOOTSTRAP_PROFILE
+#include <cassert>
+#define DEBUG_MSG(m) do { } while (0)
+#define INFO_MSG(m) do { } while (0)
+#define WARNING_MSG(m) do { } while (0)
+#define ERROR_MSG(m) do { } while (0)
+#define CRITICAL_MSG(m) do { } while (0)
+#define KBE_ASSERT(exp) assert((exp))
+#else
 #include "debug_helper.h"
+#endif
 #include "common/common.h"
 #include "common/timer.h"
 #include "common/timestamp.h"
