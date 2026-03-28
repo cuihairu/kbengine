@@ -14,6 +14,8 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_ssl.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_rsa.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_kbekey.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_tasks.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_version.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
@@ -31,6 +33,8 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::common_ssl
     KBEngine::common_rsa
     KBEngine::common_kbekey
+    KBEngine::common_tasks
+    KBEngine::common_version
 )
 
 gtest_discover_tests(kbe_smoke_tests)
