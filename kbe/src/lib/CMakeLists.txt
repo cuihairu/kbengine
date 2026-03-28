@@ -319,6 +319,22 @@ target_include_directories(kbe_common_smartpointer
 
 add_dependencies(kbe-bootstrap kbe_common_smartpointer)
 
+add_library(kbe_thread_primitives INTERFACE)
+
+add_library(KBEngine::thread_primitives ALIAS kbe_thread_primitives)
+
+target_link_libraries(kbe_thread_primitives
+  INTERFACE
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_thread_primitives
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_thread_primitives)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
