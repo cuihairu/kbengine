@@ -166,6 +166,27 @@ target_include_directories(kbe_common_memorystream
 
 add_dependencies(kbe-bootstrap kbe_common_memorystream)
 
+add_library(kbe_common_ssl STATIC
+  "${KBE_SOURCE_DIR}/lib/common/ssl.cpp"
+)
+
+add_library(KBEngine::common_ssl ALIAS kbe_common_ssl)
+
+target_link_libraries(kbe_common_ssl
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_memorystream
+    OpenSSL::SSL
+    OpenSSL::Crypto
+)
+
+target_include_directories(kbe_common_ssl
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_ssl)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
