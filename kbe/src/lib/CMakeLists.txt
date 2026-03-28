@@ -286,6 +286,39 @@ target_include_directories(kbe_common_blowfish
 
 add_dependencies(kbe-bootstrap kbe_common_blowfish)
 
+add_library(kbe_common_refcountable INTERFACE)
+
+add_library(KBEngine::common_refcountable ALIAS kbe_common_refcountable)
+
+target_link_libraries(kbe_common_refcountable
+  INTERFACE
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_common_refcountable
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_refcountable)
+
+add_library(kbe_common_smartpointer INTERFACE)
+
+add_library(KBEngine::common_smartpointer ALIAS kbe_common_smartpointer)
+
+target_link_libraries(kbe_common_smartpointer
+  INTERFACE
+    KBEngine::build_config
+    KBEngine::common_refcountable
+)
+
+target_include_directories(kbe_common_smartpointer
+  INTERFACE
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_common_smartpointer)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
