@@ -15,13 +15,13 @@ class InitProgressHandler : public Task
 public:
 	InitProgressHandler(Network::NetworkInterface & networkInterface);
 	~InitProgressHandler();
-	
+
 	bool process();
 
 	void setAutoLoadState(int8 state);
 
-	/** 网络接口
-		数据库中查询的自动entity加载信息返回
+	/** 缃戠粶鎺ュ彛
+		鏁版嵁搴撲腑鏌ヨ鐨勮嚜鍔╡ntity鍔犺浇淇℃伅杩斿洖
 	*/
 	void onEntityAutoLoadCBFromDBMgr(Network::Channel* pChannel, MemoryStream& s);
 

@@ -12,7 +12,7 @@
 #include "../../server/dbmgr/dbmgr_interface.h"
 #include "../../server/loginapp/loginapp_interface.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
 InitProgressHandler::InitProgressHandler(Network::NetworkInterface & networkInterface):
@@ -133,7 +133,7 @@ bool InitProgressHandler::process()
 
 		SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 
-		// 所有脚本都加载完毕
+		// 鎵�鏈夎剼鏈兘鍔犺浇瀹屾瘯
 		PyObject* pyResult = PyObject_CallMethod(Cellapp::getSingleton().getEntryScript().get(),
 			const_cast<char*>("onInit"),
 			const_cast<char*>("i"),
@@ -152,16 +152,16 @@ bool InitProgressHandler::process()
 
 	if(PyObject_HasAttrString(Cellapp::getSingleton().getEntryScript().get(), "onReadyForLogin") > 0)
 	{
-		// 所有脚本都加载完毕
-		PyObject* pyResult = PyObject_CallMethod(Cellapp::getSingleton().getEntryScript().get(), 
-											const_cast<char*>("onReadyForLogin"), 
-											const_cast<char*>("i"), 
+		// 鎵�鏈夎剼鏈兘鍔犺浇瀹屾瘯
+		PyObject* pyResult = PyObject_CallMethod(Cellapp::getSingleton().getEntryScript().get(),
+											const_cast<char*>("onReadyForLogin"),
+											const_cast<char*>("i"),
 											g_componentGroupOrder);
 
 		if(pyResult != NULL)
 		{
 			completed = (pyResult == Py_True);
-			
+
 			if(!completed)
 			{
 				v = (float)PyFloat_AsDouble(pyResult);
@@ -190,7 +190,7 @@ bool InitProgressHandler::process()
 		v = 100.f;
 		completed = true;
 	}
-	
+
 	if(v >= 0.9999f)
 	{
 		v = 100.f;

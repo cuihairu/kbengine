@@ -13,7 +13,7 @@ KBEngine is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
- 
+
 You should have received a copy of the GNU Lesser General Public License
 along with KBEngine.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -82,13 +82,13 @@ createToCellappIndex_(0)
 
 	int rid = ScriptTimersUtil::addTimer(&pTimers,
 			0.1f, 0.f,
-			0, pHandler);	
+			0, pHandler);
 
 	KBE_ASSERT(rid > 0);
 }
 
 //-------------------------------------------------------------------------------------
-Space::~Space()  
+Space::~Space()
 {
 }
 

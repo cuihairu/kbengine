@@ -41,7 +41,7 @@ void CColorListBox::MeasureItem(LPMEASUREITEMSTRUCT lpMIS)
 	GetText( nItem, sLabel );
 	GetItemRect(nItem, rcLabel);
 
-// Using the flags below, calculate the required rectangle for 
+// Using the flags below, calculate the required rectangle for
 // the text and set the item height for this specific item based
 // on the return value (new height).
 

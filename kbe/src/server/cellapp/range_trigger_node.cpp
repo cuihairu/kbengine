@@ -9,7 +9,7 @@
 #include "range_trigger_node.inl"
 #endif
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ void RangeTriggerNode::onRemove()
 {
 	CoordinateNode::onRemove();
 
-	// 既然自己都要删除了，通知pRangeTrigger_卸载
+	// 鏃㈢劧鑷繁閮借鍒犻櫎浜嗭紝閫氱煡pRangeTrigger_鍗歌浇
 	if (pRangeTrigger_)
 		pRangeTrigger_->uninstall();
 }
@@ -67,7 +67,7 @@ void RangeTriggerNode::onRemove()
 //-------------------------------------------------------------------------------------
 void RangeTriggerNode::onParentRemove(CoordinateNode* pParentNode)
 {
-	// 既然自己都要删除了，通知pRangeTrigger_卸载
+	// 鏃㈢劧鑷繁閮借鍒犻櫎浜嗭紝閫氱煡pRangeTrigger_鍗歌浇
 	if (pRangeTrigger_)
 		pRangeTrigger_->uninstall();
 }
@@ -86,30 +86,30 @@ bool RangeTriggerNode::wasInYRange(CoordinateNode * pNode)
 }
 
 //-------------------------------------------------------------------------------------
-float RangeTriggerNode::xx() const 
+float RangeTriggerNode::xx() const
 {
 	if (hasFlags(COORDINATE_NODE_FLAG_REMOVED | COORDINATE_NODE_FLAG_REMOVING) || pRangeTrigger_ == NULL)
 		return -FLT_MAX;
 
-	return pRangeTrigger_->origin()->xx() + range_xz_; 
+	return pRangeTrigger_->origin()->xx() + range_xz_;
 }
 
 //-------------------------------------------------------------------------------------
-float RangeTriggerNode::yy() const 
+float RangeTriggerNode::yy() const
 {
 	if (hasFlags(COORDINATE_NODE_FLAG_REMOVED | COORDINATE_NODE_FLAG_REMOVING) || pRangeTrigger_ == NULL)
 		return -FLT_MAX;
 
-	return pRangeTrigger_->origin()->yy() + range_y_; 
+	return pRangeTrigger_->origin()->yy() + range_y_;
 }
 
 //-------------------------------------------------------------------------------------
-float RangeTriggerNode::zz() const 
+float RangeTriggerNode::zz() const
 {
 	if (hasFlags(COORDINATE_NODE_FLAG_REMOVED | COORDINATE_NODE_FLAG_REMOVING) || pRangeTrigger_ == NULL)
 		return -FLT_MAX;
 
-	return pRangeTrigger_->origin()->zz() + range_xz_; 
+	return pRangeTrigger_->origin()->zz() + range_xz_;
 }
 
 //-------------------------------------------------------------------------------------

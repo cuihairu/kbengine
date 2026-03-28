@@ -7,7 +7,7 @@
 #include "thread/threadtask.h"
 #include "helper/debug_helper.h"
 
-namespace KBEngine{ 
+namespace KBEngine{
 
 class LoadNavmeshTask : public thread::TPTask
 {

@@ -7,7 +7,7 @@
 #include "helper/debug_helper.h"
 #include "common/common.h"
 // #define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
@@ -20,7 +20,7 @@ class Backuper
 public:
 	Backuper();
 	~Backuper();
-	
+
 	void tick();
 
 	void createBackupTable();
@@ -28,7 +28,7 @@ public:
 	bool backup(Entity& entity, MemoryStream& s);
 
 private:
-	// ÔÚ´ËÁĞ±íÖĞµÄentity½«½øĞĞ±¸·İ²Ù×÷
+	// åœ¨æ­¤åˆ—è¡¨ä¸­çš„entityå°†è¿›è¡Œå¤‡ä»½æ“ä½œ
 	std::vector<ENTITY_ID>		backupEntityIDs_;
 
 	float						backupRemainder_;

@@ -17,14 +17,14 @@ INLINE void Witness::pEntity(Entity* pEntity)
 
 //-------------------------------------------------------------------------------------
 INLINE float Witness::viewRadius() const
-{ 
-	return viewRadius_; 
+{
+	return viewRadius_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE float Witness::viewHysteresisArea() const
-{ 
-	return viewHysteresisArea_; 
+{
+	return viewHysteresisArea_;
 }
 
 //-------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ INLINE EntityRef* Witness::getViewEntityRef(ENTITY_ID entityID)
 	{
 		return iter->second;
 	}
-	
+
 	return NULL;
 }
 
@@ -44,10 +44,10 @@ INLINE bool Witness::entityInView(ENTITY_ID entityID)
 {
 	EntityRef* pEntityRef = getViewEntityRef(entityID);
 
-	if(pEntityRef == NULL || pEntityRef->pEntity() == NULL || pEntityRef->flags() == ENTITYREF_FLAG_UNKONWN || 
+	if(pEntityRef == NULL || pEntityRef->pEntity() == NULL || pEntityRef->flags() == ENTITYREF_FLAG_UNKONWN ||
 		(pEntityRef->flags() & (ENTITYREF_FLAG_ENTER_CLIENT_PENDING | ENTITYREF_FLAG_LEAVE_CLIENT_PENDING)) > 0)
 		return false;
-		
+
 	return true;
 }
 
@@ -65,8 +65,8 @@ INLINE ViewTrigger* Witness::pViewHysteresisAreaTrigger()
 
 //-------------------------------------------------------------------------------------
 INLINE Witness::VIEW_ENTITIES_MAP& Witness::viewEntitiesMap()
-{ 
-	return viewEntities_map_; 
+{
+	return viewEntities_map_;
 }
 
 //-------------------------------------------------------------------------------------

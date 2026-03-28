@@ -14,7 +14,7 @@ public:
 
 // Dialog Data
 	enum { IDD = IDD_DEBUG };
-	
+
 	CEdit* displaybufferWnd(){ return &m_displaybuffer; }
 	CEdit* sendbufferWnd(){ return &m_sendbuffer; }
 protected:

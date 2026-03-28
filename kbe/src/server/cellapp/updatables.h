@@ -6,10 +6,10 @@
 // common include
 #include "helper/debug_helper.h"
 #include "common/common.h"
-#include "updatable.h"	
+#include "updatable.h"
 // #define NDEBUG
-// windows include	
-#if KBE_PLATFORM == PLATFORM_WIN32	
+// windows include
+#if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif

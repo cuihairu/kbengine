@@ -19,32 +19,32 @@
 #include "baseappmgr/baseappmgr_interface.h"
 #include "cellappmgr/cellappmgr_interface.h"
 #include "loginapp/loginapp_interface.h"
-#include "dbmgr/dbmgr_interface.h"	
+#include "dbmgr/dbmgr_interface.h"
 
-#ifdef _WIN32  
-#include <direct.h>  
-#include <io.h>  
-#elif _LINUX  
-#include <stdarg.h>  
-#include <sys/stat.h>  
-#endif  
+#ifdef _WIN32
+#include <direct.h>
+#include <io.h>
+#elif _LINUX
+#include <stdarg.h>
+#include <sys/stat.h>
+#endif
 
 #if KBE_PLATFORM == PLATFORM_WIN32
-#define KBE_ACCESS _access  
-#define KBE_MKDIR(a) _mkdir((a))  
+#define KBE_ACCESS _access
+#define KBE_MKDIR(a) _mkdir((a))
 #else
-#define KBE_ACCESS access  
-#define KBE_MKDIR(a) KBE_UNIX_MKDIR((a))  
+#define KBE_ACCESS access
+#define KBE_MKDIR(a) KBE_UNIX_MKDIR((a))
 
 int KBE_UNIX_MKDIR(const char* a)
 {
 	umask(0);
 	return mkdir((a), 0755);
 }
-#endif  
+#endif
 
 namespace KBEngine{
-	
+
 ServerConfig g_serverConfig;
 KBE_SINGLETON_INIT(KBCMD);
 
@@ -64,13 +64,13 @@ KBCMD::~KBCMD()
 	mainProcessTimer_.cancel();
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void KBCMD::onShutdownBegin()
 {
 	PythonApp::onShutdownBegin();
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void KBCMD::onShutdownEnd()
 {
 	PythonApp::onShutdownEnd();
@@ -115,7 +115,7 @@ bool KBCMD::initializeBegin()
 bool KBCMD::inInitialize()
 {
 	PythonApp::inInitialize();
-	// π„≤•◊‘º∫µƒµÿ÷∑∏¯Õ¯…œ…œµƒÀ˘”–kbemachine
+	// ÂπøÊí≠Ëá™Â∑±ÁöÑÂú∞ÂùÄÁªôÁΩë‰∏ä‰∏äÁöÑÊâÄÊúâkbemachine
 	Components::getSingleton().pHandler(this);
 	return true;
 }
@@ -132,19 +132,19 @@ bool KBCMD::initializeEnd()
 	return true;
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 bool KBCMD::installPyModules()
 {
 	onInstallPyModules();
 	return true;
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 void KBCMD::onInstallPyModules()
 {
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 bool KBCMD::initDB()
 {
 	return true;
@@ -172,7 +172,7 @@ int KBCMD::creatDir(const char *pDir)
 	pszDir = strdup(pDir);
 	iLen = strlen(pszDir);
 
-	// ¥¥Ω®÷–º‰ƒø¬º  
+	// ÂàõÂª∫‰∏≠Èó¥ÁõÆÂΩï
 	for (i = 0; i < iLen; i++)
 	{
 		if (pszDir[i] == '\\' || pszDir[i] == '/')
@@ -182,7 +182,7 @@ int KBCMD::creatDir(const char *pDir)
 
 			pszDir[i] = '\0';
 
-			//»Áπ˚≤ª¥Ê‘⁄,¥¥Ω®  
+			//Â¶ÇÊûú‰∏çÂ≠òÂú®,ÂàõÂª∫
 			iRet = KBE_ACCESS(pszDir, 0);
 			if (iRet != 0)
 			{
@@ -197,7 +197,7 @@ int KBCMD::creatDir(const char *pDir)
 				}
 			}
 
-			//÷ß≥÷linux,Ω´À˘”–\ªª≥…/  
+			//ÊîØÊåÅlinux,Â∞ÜÊâÄÊúâ\Êç¢Êàê/
 			pszDir[i] = '/';
 		}
 	}

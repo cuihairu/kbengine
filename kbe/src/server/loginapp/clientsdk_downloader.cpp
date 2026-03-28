@@ -7,7 +7,7 @@
 
 #include "client_lib/client_interface.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------
@@ -60,16 +60,16 @@ DWORD ClientSDKDownloader::startWindowsProcessGenSDK(const std::string& file)
 	std::string str = binPath_;
 	str += "/kbcmd.exe";
 
-	// ÓÃË«ÒıºÅ°ÑÃüÁîĞĞÀ¨ÆğÀ´£¬ÒÔ±ÜÃâÂ·¾¶ÖĞ´æÔÚ¿Õ¸ñ£¬´Ó¶øÖ´ĞĞ´íÎó
+	// ç”¨åŒå¼•å·æŠŠå‘½ä»¤è¡Œæ‹¬èµ·æ¥ï¼Œä»¥é¿å…è·¯å¾„ä¸­å­˜åœ¨ç©ºæ ¼ï¼Œä»è€Œæ‰§è¡Œé”™è¯¯
 	str = "\"" + str + "\"";
 
-	// ‰ˆ¼Ó²ÎÊı
+	// å¢—åŠ å‚æ•°
 	str += fmt::format(" --clientsdk={} --outpath={}", options_, file);
 
 	wchar_t* szCmdline = KBEngine::strutil::char2wchar(str.c_str());
 
-	// Ê¹ÓÃmachineµ±Ç°µÄ¹¤×÷Ä¿Â¼×÷ÎªĞÂ½ø³ÌµÄ¹¤×÷Ä¿Â¼£¬
-	// ÎªÒ»Ğ©ÓëÏà¶ÔÄ¿Â¼µÄÎÄ¼ş²Ù×÷²Ù×÷Ò»ÖÂµÄ¹¤×÷Ä¿Â¼£¨ÈçÈÕÖ¾£©
+	// ä½¿ç”¨machineå½“å‰çš„å·¥ä½œç›®å½•ä½œä¸ºæ–°è¿›ç¨‹çš„å·¥ä½œç›®å½•ï¼Œ
+	// ä¸ºä¸€äº›ä¸ç›¸å¯¹ç›®å½•çš„æ–‡ä»¶æ“ä½œæ“ä½œä¸€è‡´çš„å·¥ä½œç›®å½•ï¼ˆå¦‚æ—¥å¿—ï¼‰
 	wchar_t currdir[1024];
 	GetCurrentDirectory(sizeof(currdir), currdir);
 
@@ -110,7 +110,7 @@ uint16 ClientSDKDownloader::starLinuxProcessGenSDK(const std::string& file)
 	{
 		std::string cmdLine = binPath_ + "kbcmd";
 
-		// ¸Ä±äµ±Ç°Ä¿Â¼£¬ÒÔÈÃ³öÎÊÌâµÄÊ±ºòcoreÄÜÔÚ´Ë´¦Éú³É
+		// æ”¹å˜å½“å‰ç›®å½•ï¼Œä»¥è®©å‡ºé—®é¢˜çš„æ—¶å€™coreèƒ½åœ¨æ­¤å¤„ç”Ÿæˆ
 		//chdir(bin_path.c_str());
 
 		const char *argv[6];
@@ -173,7 +173,7 @@ bool ClientSDKDownloader::loadSDKDatas()
 		if (pid_ <= 0)
 			return false;
 
-		// ±ØĞëkbcmd½ø³ÌÒÑ¾­½áÊø
+		// å¿…é¡»kbcmdè¿›ç¨‹å·²ç»ç»“æŸ
 		SystemInfo::PROCESS_INFOS sysinfos = SystemInfo::getSingleton().getProcessInfo(pid_);
 		if (!sysinfos.error)
 			return false;

@@ -7,7 +7,7 @@
 #include "coordinate_system.inl"
 #endif
 
-namespace KBEngine{	
+namespace KBEngine{
 
 bool CoordinateSystem::hasY = false;
 
@@ -52,8 +52,8 @@ CoordinateSystem::~CoordinateSystem()
 
 			pNode = pNextNode;
 		}
-		
-		// ÉÏÃæÒÑ¾­Ïú»Ù¹ýÁË
+
+		// ä¸Šé¢å·²ç»é”€æ¯è¿‡äº†
 		first_x_coordinateNode_ = NULL;
 		first_y_coordinateNode_ = NULL;
 		first_z_coordinateNode_ = NULL;
@@ -65,7 +65,7 @@ CoordinateSystem::~CoordinateSystem()
 //-------------------------------------------------------------------------------------
 bool CoordinateSystem::insert(CoordinateNode* pNode)
 {
-	// Èç¹ûÁ´±íÊÇ¿ÕµÄ, ³õÊ¼µÚÒ»¸öºÍ×îºóÒ»¸öxz½ÚµãÎª¸Ã½Úµã
+	// å¦‚æžœé“¾è¡¨æ˜¯ç©ºçš„, åˆå§‹ç¬¬ä¸€ä¸ªå’Œæœ€åŽä¸€ä¸ªxzèŠ‚ç‚¹ä¸ºè¯¥èŠ‚ç‚¹
 	if(isEmpty())
 	{
 		first_x_coordinateNode_ = pNode;
@@ -87,8 +87,8 @@ bool CoordinateSystem::insert(CoordinateNode* pNode)
 		pNode->pCoordinateSystem(this);
 
 		size_ = 1;
-		
-		// Ö»ÓÐÒ»¸ö½Úµã²»ÐèÒª¸üÐÂ
+
+		// åªæœ‰ä¸€ä¸ªèŠ‚ç‚¹ä¸éœ€è¦æ›´æ–°
 		// update(pNode);
 		pNode->resetOld();
 		return true;
@@ -110,7 +110,7 @@ bool CoordinateSystem::insert(CoordinateNode* pNode)
 		pNode->pNextY(first_y_coordinateNode_);
 		first_y_coordinateNode_ = pNode;
 	}
-	
+
 	pNode->z(first_z_coordinateNode_->z());
 	first_z_coordinateNode_->pPrevZ(pNode);
 	pNode->pNextZ(first_z_coordinateNode_);
@@ -129,11 +129,11 @@ bool CoordinateSystem::remove(CoordinateNode* pNode)
 	pNode->addFlags(COORDINATE_NODE_FLAG_REMOVING);
 	pNode->onRemove();
 	update(pNode);
-	
+
 	pNode->addFlags(COORDINATE_NODE_FLAG_REMOVED);
 
-	// ÓÉÓÚÔÚupdate¹ý³ÌÖÐ¿ÉÄÜ»áÒòÎª¶à¼¶updateµÄ½øÐÐµ¼ÖÂCOORDINATE_NODE_FLAG_PENDING±êÖ¾±»È¡Ïû£¬Òò´Ë´Ë´¦²¢²»ÄÜºÜºÃµÄÅÐ¶Ï
-	// ³ý·ÇÊµÏÖÁË±ê¼ÇµÄ¼ÆÊýÆ÷£¬ÕâÀïÇ¿ÖÆËùÓÐµÄÐÐÎª¶¼·ÅÈëdels_£¬ ÓÉreleaseNodesÔÚspaceÖÐ½øÐÐµ÷ÓÃÍ³Ò»ÊÍ·Å
+	// ç”±äºŽåœ¨updateè¿‡ç¨‹ä¸­å¯èƒ½ä¼šå› ä¸ºå¤šçº§updateçš„è¿›è¡Œå¯¼è‡´COORDINATE_NODE_FLAG_PENDINGæ ‡å¿—è¢«å–æ¶ˆï¼Œå› æ­¤æ­¤å¤„å¹¶ä¸èƒ½å¾ˆå¥½çš„åˆ¤æ–­
+	// é™¤éžå®žçŽ°äº†æ ‡è®°çš„è®¡æ•°å™¨ï¼Œè¿™é‡Œå¼ºåˆ¶æ‰€æœ‰çš„è¡Œä¸ºéƒ½æ”¾å…¥dels_ï¼Œ ç”±releaseNodesåœ¨spaceä¸­è¿›è¡Œè°ƒç”¨ç»Ÿä¸€é‡Šæ”¾
 	if(true /*pNode->hasFlags(COORDINATE_NODE_FLAG_PENDING)*/)
 	{
 		std::list<CoordinateNode*>::iterator iter = std::find(dels_.begin(), dels_.end(), pNode);
@@ -189,7 +189,7 @@ bool CoordinateSystem::removeReal(CoordinateNode* pNode)
 		return true;
 	}
 
-	// Èç¹ûÊÇµÚÒ»¸ö½Úµã
+	// å¦‚æžœæ˜¯ç¬¬ä¸€ä¸ªèŠ‚ç‚¹
 	if(first_x_coordinateNode_ == pNode)
 	{
 		first_x_coordinateNode_ = first_x_coordinateNode_->pNextX();
@@ -209,7 +209,7 @@ bool CoordinateSystem::removeReal(CoordinateNode* pNode)
 
 	if(CoordinateSystem::hasY)
 	{
-		// Èç¹ûÊÇµÚÒ»¸ö½Úµã
+		// å¦‚æžœæ˜¯ç¬¬ä¸€ä¸ªèŠ‚ç‚¹
 		if(first_y_coordinateNode_ == pNode)
 		{
 			first_y_coordinateNode_ = first_y_coordinateNode_->pNextY();
@@ -228,7 +228,7 @@ bool CoordinateSystem::removeReal(CoordinateNode* pNode)
 		}
 	}
 
-	// Èç¹ûÊÇµÚÒ»¸ö½Úµã
+	// å¦‚æžœæ˜¯ç¬¬ä¸€ä¸ªèŠ‚ç‚¹
 	if(first_z_coordinateNode_ == pNode)
 	{
 		first_z_coordinateNode_ = first_z_coordinateNode_->pNextZ();
@@ -253,7 +253,7 @@ bool CoordinateSystem::removeReal(CoordinateNode* pNode)
 	pNode->pPrevZ(NULL);
 	pNode->pNextZ(NULL);
 	pNode->pCoordinateSystem(NULL);
-	
+
 	releases_.push_back(pNode);
 
 	--size_;
@@ -545,7 +545,7 @@ void CoordinateSystem::update(CoordinateNode* pNode)
 	DEBUG_MSG(fmt::format("CoordinateSystem::update enter:[{:p}]:  ({}  {}  {})\n", (void*)pNode, pNode->xx(), pNode->yy(), pNode->zz()));
 #endif
 
-	// Ã»ÓÐ¼ÆÊýÆ÷Ö§³Ö£¬Õâ¸ö±ê¼ÇºÜ¿ÉÄÜÖÐÍ¾±»update×Ó·ÖÖ§È¡Ïû£¬Òò´ËÃ»ÓÐÒâÒå
+	// æ²¡æœ‰è®¡æ•°å™¨æ”¯æŒï¼Œè¿™ä¸ªæ ‡è®°å¾ˆå¯èƒ½ä¸­é€”è¢«updateå­åˆ†æ”¯å–æ¶ˆï¼Œå› æ­¤æ²¡æœ‰æ„ä¹‰
 	//pNode->addFlags(COORDINATE_NODE_FLAG_PENDING);
 
 	++updating_;

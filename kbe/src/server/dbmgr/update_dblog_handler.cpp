@@ -8,10 +8,10 @@
 #include "server/serverconfig.h"
 #include "thread/threadpool.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
-UpdateDBServerLogHandler::UpdateDBServerLogHandler() : 
+UpdateDBServerLogHandler::UpdateDBServerLogHandler() :
 pTimerHandle_(NULL)
 {
 	pTimerHandle_ = new TimerHandle();
@@ -40,9 +40,9 @@ void UpdateDBServerLogHandler::cancel()
 void UpdateDBServerLogHandler::handleTimeout(TimerHandle, void * arg)
 {
 	std::string dbInterfaceName = "default";
-	
+
 	DBUtil::pThreadPool(dbInterfaceName)->
-		addTask(new DBTaskServerLog());	
+		addTask(new DBTaskServerLog());
 }
 
 //-------------------------------------------------------------------------------------

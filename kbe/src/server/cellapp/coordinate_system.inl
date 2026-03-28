@@ -3,7 +3,7 @@
 
 namespace KBEngine{
 
-	
+
 //-------------------------------------------------------------------------------------
 INLINE CoordinateNode * CoordinateSystem::pFirstXNode() const { return first_x_coordinateNode_; }
 
@@ -17,8 +17,8 @@ INLINE CoordinateNode * CoordinateSystem::pFirstZNode() const { return first_z_c
 INLINE uint32 CoordinateSystem::size() const{ return size_; }
 
 //-------------------------------------------------------------------------------------
-INLINE bool CoordinateSystem::isEmpty() const 
-{ 
+INLINE bool CoordinateSystem::isEmpty() const
+{
 	return first_x_coordinateNode_ == NULL && first_y_coordinateNode_ == NULL && first_z_coordinateNode_ == NULL;
 }
 

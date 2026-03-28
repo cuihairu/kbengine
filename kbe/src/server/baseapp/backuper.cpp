@@ -5,7 +5,7 @@
 #include "server/serverconfig.h"
 #include <random>
 
-namespace KBEngine{	
+namespace KBEngine{
 float backupPeriod = 0.0;
 
 //-------------------------------------------------------------------------------------
@@ -28,44 +28,44 @@ void Backuper::tick()
 	if (periodInTicks == 0)
 		return;
 
-	// ÕâÀï¶Ô±¸·İµÄentity×öÒ»ÏÂ·ÖÅú²Ù×÷
-	// ´ó¸ÅËã·¨ÊÇÅäÖÃÉÏÌîĞ´µÄ±¸·İÖÜÆÚ»»Ëã³ÉtickÊıÁ¿£¬ Ã¿¸ötick±¸·İÒ»²¿·Öentity
+	// è¿™é‡Œå¯¹å¤‡ä»½çš„entityåšä¸€ä¸‹åˆ†æ‰¹æ“ä½œ
+	// å¤§æ¦‚ç®—æ³•æ˜¯é…ç½®ä¸Šå¡«å†™çš„å¤‡ä»½å‘¨æœŸæ¢ç®—æˆtickæ•°é‡ï¼Œ æ¯ä¸ªtickå¤‡ä»½ä¸€éƒ¨åˆ†entity
 	float numToBackUpFloat = float(Baseapp::getSingleton().pEntities()->size()) / periodInTicks + backupRemainder_;
 
-	// ±¾´Î±¸·İµÄÊıÁ¿
+	// æœ¬æ¬¡å¤‡ä»½çš„æ•°é‡
 	int numToBackUp = int(numToBackUpFloat);
 
-	// ¼ÆËã³ö¾«¶Èµ¼ÖÂµÄËğÊ§ÊıÁ¿
+	// è®¡ç®—å‡ºç²¾åº¦å¯¼è‡´çš„æŸå¤±æ•°é‡
 	backupRemainder_ = numToBackUpFloat - numToBackUp;
 
-	// Èç¹û±¸·İ±íÖĞÃ»ÓĞÄÚÈİÁËÔòÖØĞÂ²úÉúÒ»·İĞÂµÄ
+	// å¦‚æœå¤‡ä»½è¡¨ä¸­æ²¡æœ‰å†…å®¹äº†åˆ™é‡æ–°äº§ç”Ÿä¸€ä»½æ–°çš„
 	if (backupEntityIDs_.empty())
 	{
 		this->createBackupTable();
 	}
 
 	MemoryStream* s = MemoryStream::createPoolObject(OBJECTPOOL_POINT);
-	
+
 	while((numToBackUp > 0) && !backupEntityIDs_.empty())
 	{
 		Entity * pEntity = Baseapp::getSingleton().findEntity(backupEntityIDs_.back());
 		backupEntityIDs_.pop_back();
-		
+
 		if (pEntity && backup(*pEntity, *s))
 		{
 			--numToBackUp;
 		}
-		
+
 		s->clear(false);
 	}
-	
+
 	MemoryStream::reclaimPoolObject(s);
 }
 
 //-------------------------------------------------------------------------------------
 bool Backuper::backup(Entity& entity, MemoryStream& s)
 {
-	// ÕâÀï¿ªÊ¼½«ĞèÒª±¸·İµÄÊı¾İĞ´ÈëÁ÷
+	// è¿™é‡Œå¼€å§‹å°†éœ€è¦å¤‡ä»½çš„æ•°æ®å†™å…¥æµ
 	entity.writeBackupData(&s);
 
 	if(entity.shouldAutoBackup() == KBE_NEXT_ONLY)
@@ -89,7 +89,7 @@ void Backuper::createBackupTable()
 			backupEntityIDs_.push_back(iter->first);
 	}
 
-	// Ëæ»úÒ»ÏÂĞòÁĞ
+	// éšæœºä¸€ä¸‹åºåˆ—
 	std::shuffle(backupEntityIDs_.begin(), backupEntityIDs_.end(), std::mt19937(std::random_device{}()));
 }
 

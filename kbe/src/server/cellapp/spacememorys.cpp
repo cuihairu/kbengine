@@ -1,7 +1,7 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
-#include "spacememorys.h"	
-namespace KBEngine{	
+#include "spacememorys.h"
+namespace KBEngine{
 SpaceMemorys::SPACEMEMORYS SpaceMemorys::spaces_;
 
 //-------------------------------------------------------------------------------------
@@ -38,10 +38,10 @@ SpaceMemory* SpaceMemorys::createNewSpace(SPACE_ID spaceID, const std::string& s
 		ERROR_MSG(fmt::format("Spaces::createNewSpace: space {} is exist! scriptModuleName={}\n", spaceID, scriptModuleName));
 		return NULL;
 	}
-	
+
 	SpaceMemory* space = new SpaceMemory(spaceID, scriptModuleName);
 	spaces_[spaceID].reset(space);
-	
+
 	DEBUG_MSG(fmt::format("Spaces::createNewSpace: new space({}) {}.\n", scriptModuleName, spaceID));
 	return space;
 }
@@ -54,7 +54,7 @@ bool SpaceMemorys::destroySpace(SPACE_ID spaceID, ENTITY_ID entityID)
 	SpaceMemory* pSpace = SpaceMemorys::findSpace(spaceID);
 	if(!pSpace)
 		return true;
-	
+
 	if(pSpace->isDestroyed())
 		return true;
 
@@ -64,7 +64,7 @@ bool SpaceMemorys::destroySpace(SPACE_ID spaceID, ENTITY_ID entityID)
 		return false;
 	}
 
-	// ÑÓÊ±Ò»¶ÎÊ±¼äÔÙÏú»Ù
+	// å»¶æ—¶ä¸€æ®µæ—¶é—´å†é”€æ¯
 	//spaces_.erase(spaceID);
 	return true;
 }
@@ -75,7 +75,7 @@ SpaceMemory* SpaceMemorys::findSpace(SPACE_ID spaceID)
 	SPACEMEMORYS::iterator iter = spaces_.find(spaceID);
 	if(iter != spaces_.end())
 		return iter->second.get();
-	
+
 	return NULL;
 }
 

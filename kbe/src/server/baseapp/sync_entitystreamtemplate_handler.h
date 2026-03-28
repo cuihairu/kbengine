@@ -7,7 +7,7 @@
 #include "helper/debug_helper.h"
 #include "common/common.h"
 // #define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
@@ -20,7 +20,7 @@ class SyncEntityStreamTemplateHandler : public Task
 public:
 	SyncEntityStreamTemplateHandler(Network::NetworkInterface & networkInterface);
 	~SyncEntityStreamTemplateHandler();
-	
+
 	bool process();
 private:
 	Network::NetworkInterface & networkInterface_;

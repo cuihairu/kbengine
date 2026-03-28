@@ -58,9 +58,9 @@ int KBENGINE_MAIN(int argc, char* argv[])
 	rlimit rlimitData = { RLIM_INFINITY, RLIM_INFINITY };
 	setrlimit(RLIMIT_CORE, &rlimitData);
 #endif
-	
+
 	ENGINE_COMPONENT_INFO& info = g_kbeSrvConfig.getKBMachine();
-	int ret = kbeMainT<Machine>(argc, argv, MACHINE_TYPE, info.externalTcpPorts_min, 
+	int ret = kbeMainT<Machine>(argc, argv, MACHINE_TYPE, info.externalTcpPorts_min,
 		info.externalTcpPorts_max, -1, -1, "", 0, 0, info.internalInterface);
-	return ret; 
+	return ret;
 }

@@ -5,7 +5,7 @@
 
 #include "controller.h"
 #include "updatable.h"
-#include "pyscript/scriptobject.h"	
+#include "pyscript/scriptobject.h"
 #include "math/math.h"
 
 namespace KBEngine{
@@ -15,20 +15,20 @@ class MoveToPointHandler : public Updatable
 public:
 	enum MoveType
 	{
-		MOVE_TYPE_POINT = 0,		// ³£¹æÀàĞÍ
-		MOVE_TYPE_ENTITY = 1,		// ·¶Î§´¥·¢Æ÷ÀàĞÍ
-		MOVE_TYPE_NAV = 2,			// ÒÆ¶¯¿ØÖÆÆ÷ÀàĞÍ
+		MOVE_TYPE_POINT = 0,		// å¸¸è§„ç±»å‹
+		MOVE_TYPE_ENTITY = 1,		// èŒƒå›´è§¦å‘å™¨ç±»å‹
+		MOVE_TYPE_NAV = 2,			// ç§»åŠ¨æ§åˆ¶å™¨ç±»å‹
 	};
 
 	void addToStream(KBEngine::MemoryStream& s);
 	void createFromStream(KBEngine::MemoryStream& s);
 
-	MoveToPointHandler(KBEShared_ptr<Controller>& pController, int layer, const Position3D& destPos, float velocity, float distance, bool faceMovement, 
+	MoveToPointHandler(KBEShared_ptr<Controller>& pController, int layer, const Position3D& destPos, float velocity, float distance, bool faceMovement,
 		bool moveVertically, PyObject* userarg);
 
 	MoveToPointHandler();
 	virtual ~MoveToPointHandler();
-	
+
 	virtual bool update();
 
 	virtual const Position3D& destPos() { return destPos_; }
@@ -50,16 +50,16 @@ public:
 
 protected:
 	Position3D destPos_;
-	float velocity_;			// ËÙ¶È
-	bool faceMovement_;			// ÊÇ·ñ²»¸Ä±äÃæÏòÒÆ¶¯
-	bool moveVertically_;		// trueÔò¿ÉÒÔ·ÉÆğÀ´ÒÆ¶¯·ñÔòÌùµØ
+	float velocity_;			// é€Ÿåº¦
+	bool faceMovement_;			// æ˜¯å¦ä¸æ”¹å˜é¢å‘ç§»åŠ¨
+	bool moveVertically_;		// trueåˆ™å¯ä»¥é£èµ·æ¥ç§»åŠ¨å¦åˆ™è´´åœ°
 	PyObject* pyuserarg_;
 	float distance_;
 	KBEShared_ptr<Controller> pController_;
 	int layer_;
 	bool isDestroyed_;
 };
- 
+
 }
 #endif // KBE_MOVETOPOINTHANDLER_H
 

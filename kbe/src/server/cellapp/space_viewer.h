@@ -10,7 +10,7 @@
 #include "helper/eventhistory_stats.h"
 #include "network/interfaces.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 namespace Network
 {
 class NetworkInterface;
@@ -35,14 +35,14 @@ public:
 		Position3D position;
 		Direction3D direction;
 
-		// ¸üĞÂĞòÁĞºÅ£¬ ËùÓĞÊµÌå¶¼¸üĞÂÍê±ÏÔòĞòÁĞºÅ+1£¬ ÔÚÄ³Ğ©Ê±ºòÁ¿±È½Ï´óµÄÇé¿öÃ¿´Îµü´úÒ»²¿·ÖÊµÌå¸üĞÂ
+		// æ›´æ–°åºåˆ—å·ï¼Œ æ‰€æœ‰å®ä½“éƒ½æ›´æ–°å®Œæ¯•åˆ™åºåˆ—å·+1ï¼Œ åœ¨æŸäº›æ—¶å€™é‡æ¯”è¾ƒå¤§çš„æƒ…å†µæ¯æ¬¡è¿­ä»£ä¸€éƒ¨åˆ†å®ä½“æ›´æ–°
 		int updateVersion;
 	};
 
 public:
 	SpaceViewer();
 	virtual ~SpaceViewer();
-	
+
 	virtual void timeout();
 	virtual void sendStream(MemoryStream* s, int type);
 
@@ -53,7 +53,7 @@ public:
 	}
 
 protected:
-	// ¸Ä±äÁË²é¿´spaceµÄcell
+	// æ”¹å˜äº†æŸ¥çœ‹spaceçš„cell
 	void onChangedSpaceOrCell();
 	void resetViewer();
 
@@ -62,7 +62,7 @@ protected:
 
 	Network::Address addr_;
 
-	// µ±Ç°Ëù²é¿´µÄspaceºÍcell
+	// å½“å‰æ‰€æŸ¥çœ‹çš„spaceå’Œcell
 	SPACE_ID spaceID_;
 	CELL_ID cellID_;
 
@@ -70,7 +70,7 @@ protected:
 
 	int updateType_;
 
-	// ¸üĞÂĞòÁĞºÅ£¬ ËùÓĞÊµÌå¶¼¸üĞÂÍê±ÏÔòĞòÁĞºÅ+1£¬ ÔÚÄ³Ğ©Ê±ºòÁ¿±È½Ï´óµÄÇé¿öÃ¿´Îµü´úÒ»²¿·ÖÊµÌå¸üĞÂ
+	// æ›´æ–°åºåˆ—å·ï¼Œ æ‰€æœ‰å®ä½“éƒ½æ›´æ–°å®Œæ¯•åˆ™åºåˆ—å·+1ï¼Œ åœ¨æŸäº›æ—¶å€™é‡æ¯”è¾ƒå¤§çš„æƒ…å†µæ¯æ¬¡è¿­ä»£ä¸€éƒ¨åˆ†å®ä½“æ›´æ–°
 	int lastUpdateVersion_;
 };
 

@@ -13,7 +13,7 @@
 #include "../../server/dbmgr/dbmgr_interface.h"
 #include "../../server/loginapp/loginapp_interface.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
 InitProgressHandler::InitProgressHandler(Network::NetworkInterface & networkInterface):
@@ -52,8 +52,8 @@ void InitProgressHandler::start()
 
 //-------------------------------------------------------------------------------------
 void InitProgressHandler::setAutoLoadState(int8 state)
-{ 
-	autoLoadState_ = state; 
+{
+	autoLoadState_ = state;
 
 	if(state == 1)
 		pEntityAutoLoader_ = NULL;
@@ -153,7 +153,7 @@ bool InitProgressHandler::process()
 	if(delayTicks_++ < 1)
 		return true;
 
-	// 只有第一个baseapp上会创建EntityAutoLoader来自动加载数据库实体
+	// 鍙湁绗竴涓猙aseapp涓婁細鍒涘缓EntityAutoLoader鏉ヨ嚜鍔ㄥ姞杞芥暟鎹簱瀹炰綋
 	if(g_componentGroupOrder == 1)
 	{
 		if(autoLoadState_ == -1)
@@ -164,11 +164,11 @@ bool InitProgressHandler::process()
 		}
 		else if(autoLoadState_ == 0)
 		{
-			// 必须等待EntityAutoLoader执行完毕
-			// EntityAutoLoader执行完毕会设置autoLoadState_ = 1
+			// 蹇呴』绛夊緟EntityAutoLoader鎵ц瀹屾瘯
+			// EntityAutoLoader鎵ц瀹屾瘯浼氳缃產utoLoadState_ = 1
 			if(!pEntityAutoLoader_->process())
 				setAutoLoadState(1);
-			
+
 			return true;
 		}
 	}
@@ -181,10 +181,10 @@ bool InitProgressHandler::process()
 
 		SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 
-		// 所有脚本都加载完毕
-		PyObject* pyResult = PyObject_CallMethod(Baseapp::getSingleton().getEntryScript().get(), 
-											const_cast<char*>("onBaseAppReady"), 
-											const_cast<char*>("O"), 
+		// 鎵�鏈夎剼鏈兘鍔犺浇瀹屾瘯
+		PyObject* pyResult = PyObject_CallMethod(Baseapp::getSingleton().getEntryScript().get(),
+											const_cast<char*>("onBaseAppReady"),
+											const_cast<char*>("O"),
 											PyBool_FromLong((g_componentGroupOrder == 1) ? 1 : 0));
 
 		if(pyResult != NULL)
@@ -202,16 +202,16 @@ bool InitProgressHandler::process()
 	{
 		SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 
-		// 回调获得是否能够登录
-		PyObject* pyResult = PyObject_CallMethod(Baseapp::getSingleton().getEntryScript().get(), 
-											const_cast<char*>("onReadyForLogin"), 
-											const_cast<char*>("O"), 
+		// 鍥炶皟鑾峰緱鏄惁鑳藉鐧诲綍
+		PyObject* pyResult = PyObject_CallMethod(Baseapp::getSingleton().getEntryScript().get(),
+											const_cast<char*>("onReadyForLogin"),
+											const_cast<char*>("O"),
 											PyBool_FromLong((g_componentGroupOrder == 1) ? 1 : 0));
 
 		if(pyResult != NULL)
 		{
 			completed = (pyResult == Py_True);
-			
+
 			if(!completed)
 			{
 				v = (float)PyFloat_AsDouble(pyResult);
@@ -240,7 +240,7 @@ bool InitProgressHandler::process()
 		v = 100.f;
 		completed = true;
 	}
-	
+
 	if(v >= 0.9999f)
 	{
 		v = 100.f;

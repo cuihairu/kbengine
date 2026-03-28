@@ -50,10 +50,10 @@ BOOL CStartServerLayoutWindow::OnInitDialog()
 	loadHistory();
 
 	DWORD dwStyle = m_list.GetExtendedStyle();
-	dwStyle |= LVS_EX_FULLROWSELECT;					//Ñ¡ÖÐÄ³ÐÐÊ¹ÕûÐÐ¸ßÁÁ£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
-	dwStyle |= LVS_EX_GRIDLINES;						//Íø¸ñÏß£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
+	dwStyle |= LVS_EX_FULLROWSELECT;					//é€‰ä¸­æŸè¡Œä½¿æ•´è¡Œé«˜äº®ï¼ˆåªé€‚ç”¨ä¸Žreporté£Žæ ¼çš„listctrlï¼‰
+	dwStyle |= LVS_EX_GRIDLINES;						//ç½‘æ ¼çº¿ï¼ˆåªé€‚ç”¨ä¸Žreporté£Žæ ¼çš„listctrlï¼‰
 	//dwStyle |= LVS_EX_ONECLICKACTIVATE;
-	m_list.SetExtendedStyle(dwStyle);				//ÉèÖÃÀ©Õ¹·ç¸ñ
+	m_list.SetExtendedStyle(dwStyle);				//è®¾ç½®æ‰©å±•é£Žæ ¼
 
 	int idx = 0;
 	m_list.InsertColumn(idx++, _T("componentType"),				LVCFMT_CENTER,	200);
@@ -103,7 +103,7 @@ BOOL CStartServerLayoutWindow::OnInitDialog()
 
 void CStartServerLayoutWindow::saveHistory()
 {
-    //´´½¨Ò»¸öXMLµÄÎÄµµ¶ÔÏó¡£
+    //åˆ›å»ºä¸€ä¸ªXMLçš„æ–‡æ¡£å¯¹è±¡ã€‚
     TiXmlDocument *pDocument = new TiXmlDocument();
 
 	int i = 0;
@@ -168,18 +168,18 @@ void CStartServerLayoutWindow::loadHistory()
 	TiXmlNode* node = rootElement->FirstChild();
 	if(node)
 	{
-		do																				
-		{																				
+		do
+		{
 			std::string c = node->FirstChild()->Value();
 			wchar_t* strCommand = KBEngine::strutil::char2wchar(c.c_str());
 			m_historyCommand.push_back(strCommand);
 			free(strCommand);
-		}while((node = node->NextSibling()));												
+		}while((node = node->NextSibling()));
 	}
 
 	pDocument->Clear();
 	delete pDocument;
-}	
+}
 
 // CStartServerLayoutWindow message handlers
 
@@ -205,10 +205,10 @@ void CStartServerLayoutWindow::OnBnClickedButton1()
 		AfxMessageBox(L"address error!");
 		return;
 	}
-	
+
 	char strip[256];
 	sprintf_s(strip, 256, "%d.%d.%d.%d", ips[0],ips[1],ips[2],ips[3]);
-	
+
 	KBEngine::u_int16_t port = 0;
 	CString sport;
 	m_port.GetWindowTextW(sport);
@@ -239,7 +239,7 @@ void CStartServerLayoutWindow::OnBnClickedButton1()
 			break;
 		}
 	}
-	
+
 	if(!found)
 	{
 		m_historyCommand.push_front(wcommand);
@@ -303,14 +303,14 @@ void CStartServerLayoutWindow::OnCbnSelchangeCombo1()
 		return;
 
 	m_layoutlist.GetLBText(m_layoutlist.GetEditSel(), s);
-	
+
 	if(s.GetLength() <= 0 )
 		return;
 
 	m_list.DeleteAllItems();
 
 	char* cs = KBEngine::strutil::wchar2char(s.GetBuffer(0));
-	KBEUnordered_map< std::string, std::vector<CStartServerWindow::LAYOUT_ITEM> >::iterator iter = 
+	KBEUnordered_map< std::string, std::vector<CStartServerWindow::LAYOUT_ITEM> >::iterator iter =
 		static_cast<CStartServerWindow*>(this->GetParent())->layouts_.find(cs);
 
 	free(cs);
@@ -339,10 +339,10 @@ void CStartServerLayoutWindow::OnCbnSelchangeCombo1()
 void CStartServerLayoutWindow::OnBnClickedButton3()
 {
 	// TODO: Add your control notification handler code here
-	POSITION pos = m_list.GetFirstSelectedItemPosition(); 
+	POSITION pos = m_list.GetFirstSelectedItemPosition();
 
-	if(NULL == pos) 
-		return; 
+	if(NULL == pos)
+		return;
 
 	int nItem = m_list.GetNextSelectedItem(pos);
 
@@ -364,12 +364,12 @@ void CStartServerLayoutWindow::OnBnClickedButton3()
 		return;
 
 	m_layoutlist.GetLBText(m_layoutlist.GetEditSel(), s);
-	
+
 	if(s.GetLength() <= 0 )
 		return;
 
 	cs = KBEngine::strutil::wchar2char(s.GetBuffer(0));
-	KBEUnordered_map< std::string, std::vector<CStartServerWindow::LAYOUT_ITEM> >::iterator iter = 
+	KBEUnordered_map< std::string, std::vector<CStartServerWindow::LAYOUT_ITEM> >::iterator iter =
 		static_cast<CStartServerWindow*>(this->GetParent())->layouts_.find(cs);
 
 	free(cs);
@@ -384,7 +384,7 @@ void CStartServerLayoutWindow::OnBnClickedButton3()
 	for(; iter1 != iter->second.end(); iter1++)
 	{
 		CStartServerWindow::LAYOUT_ITEM& item = (*iter1);
-		
+
 		if(item.addr == item1.addr && item.componentName == item1.componentName)
 		{
 			found = true;
@@ -421,7 +421,7 @@ void CStartServerLayoutWindow::OnBnClickedButton4()
 	m_layoutlist.DeleteString(m_layoutlist.GetCurSel());
 
 	char* cs = KBEngine::strutil::wchar2char(s.GetBuffer(0));
-	KBEUnordered_map< std::string, std::vector<CStartServerWindow::LAYOUT_ITEM> >::iterator iter = 
+	KBEUnordered_map< std::string, std::vector<CStartServerWindow::LAYOUT_ITEM> >::iterator iter =
 		static_cast<CStartServerWindow*>(this->GetParent())->layouts_.find(cs);
 
 	free(cs);

@@ -38,7 +38,7 @@ PyObject* EntityComponent::onScriptGetAttribute(PyObject* attr)
 
 		if (pOwner)
 		{
-			// Èç¹ûÊÇghostµ÷ÓÃdef·½·¨ÔòÐèÒªrpcµ÷ÓÃ¡£
+			// å¦‚æžœæ˜¯ghostè°ƒç”¨defæ–¹æ³•åˆ™éœ€è¦rpcè°ƒç”¨ã€‚
 			if (!pOwner->isReal())
 			{
 				MethodDescription* pMethodDescription = const_cast<ScriptDefModule*>(pComponentDescrs_)->findCellMethodDescription(ccattr);

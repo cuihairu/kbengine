@@ -2,7 +2,7 @@
 
 
 #include "cellapp.h"
-#include "spacememory.h"	
+#include "spacememory.h"
 #include "entity.h"
 #include "space_viewer.h"
 #include "network/network_interface.h"
@@ -16,7 +16,7 @@
 #include "helper/profile.h"
 #include "server/serverconfig.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 
 //-------------------------------------------------------------------------------------
 SpaceViewers::SpaceViewers():
@@ -79,7 +79,7 @@ void SpaceViewers::handleTimeout(TimerHandle handle, void * arg)
 	std::map< Network::Address, SpaceViewer>::iterator iter = spaceViews_.begin();
 	for (; iter != spaceViews_.end(); )
 	{
-		// Èç¹û¸ÃviewerµØÖ·ÕÒ²»µ½ÁËÔò½«Æä²Á³ı
+		// å¦‚æœè¯¥vieweråœ°å€æ‰¾ä¸åˆ°äº†åˆ™å°†å…¶æ“¦é™¤
 		Network::Channel* pChannel = Cellapp::getSingleton().networkInterface().findChannel(iter->second.addr());
 		if (pChannel == NULL)
 		{
@@ -149,10 +149,10 @@ void SpaceViewer::timeout()
 {
 	switch (updateType_)
 	{
-	case 0: // ³õÊ¼»¯
+	case 0: // åˆå§‹åŒ–
 		initClient();
 		break;
-	default: // ¸üĞÂÊµÌå
+	default: // æ›´æ–°å®ä½“
 		updateClient();
 	};
 }
@@ -186,7 +186,7 @@ void SpaceViewer::initClient()
 {
 	MemoryStream s;
 
-	// ÏÈÏÂ·¢½Å±¾ID¶ÔÓ¦½Å±¾Ä£¿éµÄÃû³Æ£¬±ãÓÚ½µµÍºóÃæÊµÌåÍ¬²½Á¿£¬ÊµÌåÖ»Í¬²½id¹ıÈ¥
+	// å…ˆä¸‹å‘è„šæœ¬IDå¯¹åº”è„šæœ¬æ¨¡å—çš„åç§°ï¼Œä¾¿äºé™ä½åé¢å®ä½“åŒæ­¥é‡ï¼Œå®ä½“åªåŒæ­¥idè¿‡å»
 	const EntityDef::SCRIPT_MODULES& scriptModules = EntityDef::getScriptModules();
 	s << (uint32)scriptModules.size();
 
@@ -199,7 +199,7 @@ void SpaceViewer::initClient()
 
 	sendStream(&s, updateType_);
 
-	// ¸Ä±äÎª¸üĞÂÊµÌå
+	// æ”¹å˜ä¸ºæ›´æ–°å®ä½“
 	updateType_ = 1;
 
 	lastUpdateVersion_ = 0;
@@ -217,18 +217,18 @@ void SpaceViewer::updateClient()
 		return;
 	}
 
-	// ×î¶àÃ¿´Î¸üĞÂ500¸öÊµÌå
+	// æœ€å¤šæ¯æ¬¡æ›´æ–°500ä¸ªå®ä½“
 	const int MAX_UPDATE_COUNT = 100;
 	int updateCount = 0;
 
-	// »ñÈ¡±¾´ÎÓëÉÏ´Î½á¹ûµÄ²îÖµ£¬½«²îÖµ·ÅÈëstreamÖĞ¸üĞÂµ½¿Í»§¶Ë
-	// ²îÖµ°üÀ¨ĞÂÔöµÄÊµÌå£¬ÒÔ¼°ÒÑ¾­ÓĞµÄÊµÌåµÄÎ»ÖÃ±ä»¯
+	// è·å–æœ¬æ¬¡ä¸ä¸Šæ¬¡ç»“æœçš„å·®å€¼ï¼Œå°†å·®å€¼æ”¾å…¥streamä¸­æ›´æ–°åˆ°å®¢æˆ·ç«¯
+	// å·®å€¼åŒ…æ‹¬æ–°å¢çš„å®ä½“ï¼Œä»¥åŠå·²ç»æœ‰çš„å®ä½“çš„ä½ç½®å˜åŒ–
 	MemoryStream s;
 
 	Entities<Entity>* pEntities = Cellapp::getSingleton().pEntities();
 	Entities<Entity>::ENTITYS_MAP& entitiesMap = pEntities->getEntities();
 
-	// ÏÈ¼ì²éÒÑ¾­¼àÊÓµÄÊµÌå£¬¶ÔÓÚ°æ±¾ºÅ½ÏµÍµÄÓÅÏÈ¸üĞÂ
+	// å…ˆæ£€æŸ¥å·²ç»ç›‘è§†çš„å®ä½“ï¼Œå¯¹äºç‰ˆæœ¬å·è¾ƒä½çš„ä¼˜å…ˆæ›´æ–°
 	if (updateCount < MAX_UPDATE_COUNT)
 	{
 		std::map< ENTITY_ID, ViewEntity >::iterator viewerIter = viewedEntities.begin();
@@ -246,14 +246,14 @@ void SpaceViewer::updateClient()
 
 			Entities<Entity>::ENTITYS_MAP::iterator iter = entitiesMap.find(viewerIter->first);
 
-			// ÕÒ²»µ½ÊµÌå£¬ ËµÃ÷ÒÑ¾­Ïú»Ù»òÕßÅÜµ½ÆäËû½ø³ÌÁË
-			// Èç¹ûÔÚÆäËû½ø³Ì£¬ ÆäËû½ø³Ì»á½«Æä¸üĞÂµ½¿Í»§¶Ë
+			// æ‰¾ä¸åˆ°å®ä½“ï¼Œ è¯´æ˜å·²ç»é”€æ¯æˆ–è€…è·‘åˆ°å…¶ä»–è¿›ç¨‹äº†
+			// å¦‚æœåœ¨å…¶ä»–è¿›ç¨‹ï¼Œ å…¶ä»–è¿›ç¨‹ä¼šå°†å…¶æ›´æ–°åˆ°å®¢æˆ·ç«¯
 			if (iter == entitiesMap.end())
 			{
 				s << viewerIter->first;
-				s << false; // trueÎª¸üĞÂ£¬ falseÎªÏú»Ù
+				s << false; // trueä¸ºæ›´æ–°ï¼Œ falseä¸ºé”€æ¯
 
-				// ½«Æä´ÓviewedEntitiesÉ¾³ı
+				// å°†å…¶ä»viewedEntitiesåˆ é™¤
 				viewedEntities.erase(viewerIter++);
 			}
 			else
@@ -261,7 +261,7 @@ void SpaceViewer::updateClient()
 				Entity* pEntity = static_cast<Entity*>(iter->second.get());
 				if (pEntity->spaceID() != spaceID_)
 				{
-					// ½«Æä´ÓviewedEntitiesÉ¾³ı
+					// å°†å…¶ä»viewedEntitiesåˆ é™¤
 					viewedEntities.erase(viewerIter++);
 					continue;
 				}
@@ -269,14 +269,14 @@ void SpaceViewer::updateClient()
 				/*
 				if (pEntity->cellID() != cellID_)
 				{
-					// ½«Æä´ÓviewedEntitiesÉ¾³ı
+					// å°†å…¶ä»viewedEntitiesåˆ é™¤
 					viewedEntities.erase(viewerIter++);
 					continue;
 				}
 				*/
 
-				// ÓĞĞÂÔöµÄÊµÌå»òÕßÒÑ¾­¹Û²ìµ½µÄÊµÌå£¬¼ì²éÎ»ÖÃ±ä»¯
-				// Èç¹ûÃ»ÓĞ±ä»¯Ôòpass
+				// æœ‰æ–°å¢çš„å®ä½“æˆ–è€…å·²ç»è§‚å¯Ÿåˆ°çš„å®ä½“ï¼Œæ£€æŸ¥ä½ç½®å˜åŒ–
+				// å¦‚æœæ²¡æœ‰å˜åŒ–åˆ™pass
 				if ((viewEntity.position - pEntity->position()).length() <= 0.0004f &&
 					(viewEntity.direction.dir - pEntity->direction().dir).length() <= 0.0004f)
 				{
@@ -290,7 +290,7 @@ void SpaceViewer::updateClient()
 				++viewEntity.updateVersion;
 
 				s << viewEntity.entityID;
-				s << true; // trueÎª¸üĞÂ£¬ falseÎªÏú»Ù
+				s << true; // trueä¸ºæ›´æ–°ï¼Œ falseä¸ºé”€æ¯
 				s << pEntity->pScriptModule()->getUType();
 				s << viewEntity.position.x << viewEntity.position.y << viewEntity.position.z;
 				s << viewEntity.direction.roll() << viewEntity.direction.pitch() << viewEntity.direction.yaw();
@@ -301,7 +301,7 @@ void SpaceViewer::updateClient()
 		}
 	}
 
-	// ÔÙ¼ì²éÊÇ·ñÓĞĞÂÔöµÄÊµÌå
+	// å†æ£€æŸ¥æ˜¯å¦æœ‰æ–°å¢çš„å®ä½“
 	if (updateCount < MAX_UPDATE_COUNT)
 	{
 		Entities<Entity>::ENTITYS_MAP::iterator iter = entitiesMap.begin();
@@ -334,7 +334,7 @@ void SpaceViewer::updateClient()
 			++updateCount;
 
 			s << viewEntity.entityID;
-			s << true; // trueÎª¸üĞÂ£¬ falseÎªÏú»Ù
+			s << true; // trueä¸ºæ›´æ–°ï¼Œ falseä¸ºé”€æ¯
 			s << pEntity->pScriptModule()->getUType();
 			s << viewEntity.position.x << viewEntity.position.y << viewEntity.position.z;
 			s << viewEntity.direction.roll() << viewEntity.direction.pitch() << viewEntity.direction.yaw();
@@ -343,7 +343,7 @@ void SpaceViewer::updateClient()
 
 	sendStream(&s, updateType_);
 
-	// Èç¹ûÈ«²¿¸üĞÂÍê±Ï£¬¸ü»»°æ±¾ºÅ
+	// å¦‚æœå…¨éƒ¨æ›´æ–°å®Œæ¯•ï¼Œæ›´æ¢ç‰ˆæœ¬å·
 	if (updateCount < MAX_UPDATE_COUNT)
 		++lastUpdateVersion_;
 }

@@ -56,7 +56,7 @@ DBTask::~DBTask()
 bool DBTask::send(Network::Bundle* pBundle)
 {
 	Network::Channel* pChannel = Dbmgr::getSingleton().networkInterface().findChannel(addr_);
-	
+
 	if(pChannel){
 		pChannel->send(pBundle);
 	}
@@ -181,7 +181,7 @@ thread::TPTask::TPTaskState DBTaskExecuteRawDatabaseCommandByEntity::presentMain
 {
 	DEBUG_MSG(fmt::format("Dbmgr::ExecuteRawDatabaseCommandByEntity::presentMainThread: {}.\n", sdatas_.c_str()));
 
-	// Èç¹û²»ÐèÒª»Øµ÷Ôò½áÊø
+	// 如果不需要回调则结束
 	if(callbackID_ <= 0)
 		return EntityDBTask::presentMainThread();
 
@@ -222,7 +222,7 @@ thread::TPTask::TPTaskState DBTaskExecuteRawDatabaseCommandByEntity::presentMain
 	}
 	else
 	{
-		// Ö»ÄÜÓÉ×Ô¼º·¢³ö
+		// 只能由自己发出
 		KBE_ASSERT(componentID_ == g_componentID);
 
 		MemoryStream* pMemoryStream = MemoryStream::createPoolObject(OBJECTPOOL_POINT);
@@ -245,7 +245,7 @@ thread::TPTask::TPTaskState DBTaskExecuteRawDatabaseCommand::presentMainThread()
 {
 	DEBUG_MSG(fmt::format("Dbmgr::DBTaskExecuteRawDatabaseCommand::presentMainThread: {}.\n", sdatas_.c_str()));
 
-	// Èç¹û²»ÐèÒª»Øµ÷Ôò½áÊø
+	// 如果不需要回调则结束
 	if(callbackID_ <= 0)
 		return thread::TPTask::TPTASK_STATE_COMPLETED;
 
@@ -286,7 +286,7 @@ thread::TPTask::TPTaskState DBTaskExecuteRawDatabaseCommand::presentMainThread()
 	}
 	else
 	{
-		// Ö»ÄÜÓÉ×Ô¼º·¢³ö
+		// 只能由自己发出
 		KBE_ASSERT(componentID_ == g_componentID);
 
 		MemoryStream* pMemoryStream = MemoryStream::createPoolObject(OBJECTPOOL_POINT);
@@ -305,8 +305,8 @@ thread::TPTask::TPTaskState DBTaskExecuteRawDatabaseCommand::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskWriteEntity::DBTaskWriteEntity(const Network::Address& addr, 
-									 COMPONENT_ID componentID, ENTITY_ID eid, 
+DBTaskWriteEntity::DBTaskWriteEntity(const Network::Address& addr,
+									 COMPONENT_ID componentID, ENTITY_ID eid,
 									 DBID entityDBID, MemoryStream& datas):
 EntityDBTask(addr, datas, eid, entityDBID),
 componentID_(componentID),
@@ -358,11 +358,11 @@ bool DBTaskWriteEntity::db_thread_process()
 	{
 		success_ = false;
 
-		// ÏÈÐ´log£¬ Èç¹ûÐ´Ê§°ÜÔò¿ÉÄÜÕâ¸öentityÒÑ¾­ÔÚÏß
+		// 先写log， 如果写失败则可能这个entity已经在线
 		KBEEntityLogTable* pELTable = static_cast<KBEEntityLogTable*>(entityTables.findKBETable(KBE_TABLE_PERFIX "_entitylog"));
 		KBE_ASSERT(pELTable);
 
-		success_ = pELTable->logEntity(pdbi_, inet_ntoa((struct in_addr&)ip), port, entityDBID_, 
+		success_ = pELTable->logEntity(pdbi_, inet_ntoa((struct in_addr&)ip), port, entityDBID_,
 			componentID_, eid_, pModule->getUType());
 
 		if(!success_)
@@ -380,11 +380,11 @@ thread::TPTask::TPTaskState DBTaskWriteEntity::presentMainThread()
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
 	DEBUG_MSG(fmt::format("Dbmgr::writeEntity: {0}({1}).\n", pModule->getName(), entityDBID_));
 
-	// ·µ»ØÐ´entityµÄ½á¹û£¬ ³É¹¦»òÕßÊ§°Ü
+	// 返回写entity的结果， 成功或者失败
 
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 	(*pBundle).newMessage(BaseappInterface::onWriteToDBCallback);
-	BaseappInterface::onWriteToDBCallbackArgs5::staticAddToBundle((*pBundle), 
+	BaseappInterface::onWriteToDBCallbackArgs5::staticAddToBundle((*pBundle),
 		eid_, entityDBID_, pdbi_->dbIndex(), callbackID_, success_);
 
 	if(!this->send(pBundle))
@@ -392,13 +392,13 @@ thread::TPTask::TPTaskState DBTaskWriteEntity::presentMainThread()
 		ERROR_MSG(fmt::format("DBTaskWriteEntity::presentMainThread: channel({0}) not found.\n", addr_.c_str()));
 		Network::Bundle::reclaimPoolObject(pBundle);
 	}
-	
+
 	return EntityDBTask::presentMainThread();
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskRemoveEntity::DBTaskRemoveEntity(const Network::Address& addr, 
-									 COMPONENT_ID componentID, ENTITY_ID eid, 
+DBTaskRemoveEntity::DBTaskRemoveEntity(const Network::Address& addr,
+									 COMPONENT_ID componentID, ENTITY_ID eid,
 									 DBID entityDBID, MemoryStream& datas):
 EntityDBTask(addr, datas, eid, entityDBID),
 componentID_(componentID),
@@ -437,7 +437,7 @@ thread::TPTask::TPTaskState DBTaskRemoveEntity::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskDeleteEntityByDBID::DBTaskDeleteEntityByDBID(const Network::Address& addr, COMPONENT_ID componentID, 
+DBTaskDeleteEntityByDBID::DBTaskDeleteEntityByDBID(const Network::Address& addr, COMPONENT_ID componentID,
 		DBID entityDBID, CALLBACK_ID callbackID, ENTITY_SCRIPT_UID sid):
 DBTask(addr),
 componentID_(componentID),
@@ -471,7 +471,7 @@ bool DBTaskDeleteEntityByDBID::db_thread_process()
 
 	haslog = pELTable->queryEntity(pdbi_, entityDBID_, entitylog, pModule->getUType());
 
-	// Èç¹ûÓÐÔÚÏß¼ÍÂ¼
+	// 如果有在线纪录
 	if(haslog)
 	{
 		success_ = false;
@@ -491,7 +491,7 @@ thread::TPTask::TPTaskState DBTaskDeleteEntityByDBID::presentMainThread()
 {
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
 
-	DEBUG_MSG(fmt::format("Dbmgr::DBTaskDeleteEntityByDBID: {}({}), entityInAppID({}).\n", 
+	DEBUG_MSG(fmt::format("Dbmgr::DBTaskDeleteEntityByDBID: {}({}), entityInAppID({}).\n",
 		pModule->getName(), entityDBID_, entityInAppID_));
 
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
@@ -509,7 +509,7 @@ thread::TPTask::TPTaskState DBTaskDeleteEntityByDBID::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskEntityAutoLoad::DBTaskEntityAutoLoad(const Network::Address& addr, COMPONENT_ID componentID, 
+DBTaskEntityAutoLoad::DBTaskEntityAutoLoad(const Network::Address& addr, COMPONENT_ID componentID,
 		ENTITY_SCRIPT_UID entityType, ENTITY_ID start, ENTITY_ID end):
 DBTask(addr),
 componentID_(componentID),
@@ -541,7 +541,7 @@ thread::TPTask::TPTaskState DBTaskEntityAutoLoad::presentMainThread()
 
 	if(size > 0)
 	{
-		DEBUG_MSG(fmt::format("Dbmgr::DBTaskEntityAutoLoad: {}, size({}).\n", 
+		DEBUG_MSG(fmt::format("Dbmgr::DBTaskEntityAutoLoad: {}, size({}).\n",
 			pModule->getName(), size));
 	}
 
@@ -566,7 +566,7 @@ thread::TPTask::TPTaskState DBTaskEntityAutoLoad::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskLookUpEntityByDBID::DBTaskLookUpEntityByDBID(const Network::Address& addr, COMPONENT_ID componentID, 
+DBTaskLookUpEntityByDBID::DBTaskLookUpEntityByDBID(const Network::Address& addr, COMPONENT_ID componentID,
 		DBID entityDBID, CALLBACK_ID callbackID, ENTITY_SCRIPT_UID sid):
 DBTask(addr),
 componentID_(componentID),
@@ -598,7 +598,7 @@ bool DBTaskLookUpEntityByDBID::db_thread_process()
 
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
 
-	// Èç¹ûÓÐÔÚÏß¼ÍÂ¼
+	// 如果有在线纪录
 	if(pELTable->queryEntity(pdbi_, entityDBID_, entitylog, pModule->getUType()))
 	{
 		if(entitylog.serverGroupID != (COMPONENT_ID)getUserUID())
@@ -609,7 +609,7 @@ bool DBTaskLookUpEntityByDBID::db_thread_process()
 			serverGroupID_ = entitylog.serverGroupID;
 			return false;
 		}
-		
+
 		success_ = true;
 		entityInAppID_ = entitylog.componentID;
 		entityID_ = entitylog.entityID;
@@ -626,16 +626,16 @@ bool DBTaskLookUpEntityByDBID::db_thread_process()
 thread::TPTask::TPTaskState DBTaskLookUpEntityByDBID::presentMainThread()
 {
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
-	
-	DEBUG_MSG(fmt::format("Dbmgr::DBTaskLookUpEntityByDBID: {}({}), entityInAppID({}).\n", 
+
+	DEBUG_MSG(fmt::format("Dbmgr::DBTaskLookUpEntityByDBID: {}({}), entityInAppID({}).\n",
 		pModule->getName(), entityDBID_, entityInAppID_));
 
 	if(serverGroupID_ > 0)
 	{
-		ERROR_MSG(fmt::format("DBTaskLookUpEntityByDBID::presentMainThread: entitylog({}) serverGroupID not match. serverGroupID={}, self={}\n", 
+		ERROR_MSG(fmt::format("DBTaskLookUpEntityByDBID::presentMainThread: entitylog({}) serverGroupID not match. serverGroupID={}, self={}\n",
 			entityDBID_, serverGroupID_, (uint64)getUserUID()));
 	}
-	
+
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 	(*pBundle).newMessage(BaseappInterface::lookUpEntityByDBIDCB);
 
@@ -651,11 +651,11 @@ thread::TPTask::TPTaskState DBTaskLookUpEntityByDBID::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskCreateAccount::DBTaskCreateAccount(const Network::Address& addr, 
+DBTaskCreateAccount::DBTaskCreateAccount(const Network::Address& addr,
 										 std::string& registerName,
-										 std::string& accountName, 
-										 std::string& password, 
-										 std::string& postdatas, 
+										 std::string& accountName,
+										 std::string& password,
+										 std::string& postdatas,
 										std::string& getdatas):
 DBTask(addr),
 registerName_(registerName),
@@ -681,7 +681,7 @@ bool DBTaskCreateAccount::db_thread_process()
 }
 
 //-------------------------------------------------------------------------------------
-bool DBTaskCreateAccount::writeAccount(DBInterface* pdbi, const std::string& accountName, 
+bool DBTaskCreateAccount::writeAccount(DBInterface* pdbi, const std::string& accountName,
 									   const std::string& passwd, const std::string& datas, ACCOUNT_INFOS& info)
 {
 	info.dbid = 0;
@@ -690,8 +690,8 @@ bool DBTaskCreateAccount::writeAccount(DBInterface* pdbi, const std::string& acc
 		return false;
 	}
 
-	// Ñ°ÕÒdblogÊÇ·ñÓÐ´ËÕËºÅ£¬ Èç¹ûÓÐÔò´´½¨Ê§°Ü
-	// Èç¹ûÃ»ÓÐÔòÏòaccount±íÐÂ½¨Ò»¸öentityÊý¾ÝÍ¬Ê±ÔÚaccountlog±íÐ´ÈëÒ»¸ölog¹ØÁªdbid
+	// 寻找dblog是否有此账号， 如果有则创建失败
+	// 如果没有则向account表新建一个entity数据同时在accountlog表写入一个log关联dbid
 	EntityTables& entityTables = EntityTables::findByInterfaceName(pdbi->name());
 	KBEAccountTable* pTable = static_cast<KBEAccountTable*>(entityTables.findKBETable(KBE_TABLE_PERFIX "_accountinfos"));
 	KBE_ASSERT(pTable);
@@ -699,7 +699,7 @@ bool DBTaskCreateAccount::writeAccount(DBInterface* pdbi, const std::string& acc
 	ScriptDefModule* pModule = EntityDef::findScriptModule(DBUtil::accountScriptName());
 	if(pModule == NULL)
 	{
-		ERROR_MSG(fmt::format("DBTaskCreateAccount::writeAccount(): not found account script[{}], create[{}] error!\n", 
+		ERROR_MSG(fmt::format("DBTaskCreateAccount::writeAccount(): not found account script[{}], create[{}] error!\n",
 			DBUtil::accountScriptName(), accountName));
 
 		return false;
@@ -709,7 +709,7 @@ bool DBTaskCreateAccount::writeAccount(DBInterface* pdbi, const std::string& acc
 	{
 		if(pdbi->getlasterror() > 0)
 		{
-			WARNING_MSG(fmt::format("DBTaskCreateAccount::writeAccount({}): queryAccount error: {}\n", 
+			WARNING_MSG(fmt::format("DBTaskCreateAccount::writeAccount({}): queryAccount error: {}\n",
 				accountName, pdbi->getstrerror()));
 		}
 
@@ -724,10 +724,10 @@ bool DBTaskCreateAccount::writeAccount(DBInterface* pdbi, const std::string& acc
 	}
 
 	DBID entityDBID = info.dbid;
-	
+
 	if(entityDBID == 0)
 	{
-		// ·ÀÖ¹¶àÏß³ÌÎÊÌâ£¬ ÕâÀï×öÒ»¸ö¿½±´¡£
+		// 防止多线程问题， 这里做一个拷贝。
 		MemoryStream copyAccountDefMemoryStream(pTable->accountDefMemoryStream());
 
 		entityDBID = EntityTables::findByInterfaceName(pdbi->name()).writeEntity(pdbi, 0, -1,
@@ -747,14 +747,14 @@ bool DBTaskCreateAccount::writeAccount(DBInterface* pdbi, const std::string& acc
 	info.password = passwd;
 	info.dbid = entityDBID;
 	info.datas = datas;
-	
+
 	if(!hasset)
 	{
 		if(!pTable->logAccount(pdbi, info))
 		{
 			if(pdbi->getlasterror() > 0)
 			{
-				WARNING_MSG(fmt::format("DBTaskCreateAccount::writeAccount(): logAccount error:{}\n", 
+				WARNING_MSG(fmt::format("DBTaskCreateAccount::writeAccount(): logAccount error:{}\n",
 					pdbi->getstrerror()));
 			}
 
@@ -767,7 +767,7 @@ bool DBTaskCreateAccount::writeAccount(DBInterface* pdbi, const std::string& acc
 		{
 			if(pdbi->getlasterror() > 0)
 			{
-				WARNING_MSG(fmt::format("DBTaskCreateAccount::writeAccount(): logAccount error:{}\n", 
+				WARNING_MSG(fmt::format("DBTaskCreateAccount::writeAccount(): logAccount error:{}\n",
 					pdbi->getstrerror()));
 			}
 
@@ -814,11 +814,11 @@ std::string genmail_code(const std::string& str)
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskCreateMailAccount::DBTaskCreateMailAccount(const Network::Address& addr, 
+DBTaskCreateMailAccount::DBTaskCreateMailAccount(const Network::Address& addr,
 										 std::string& registerName,
-										 std::string& accountName, 
-										 std::string& password, 
-										 std::string& postdatas, 
+										 std::string& accountName,
+										 std::string& password,
+										 std::string& postdatas,
 										std::string& getdatas):
 DBTask(addr),
 registerName_(registerName),
@@ -845,33 +845,33 @@ bool DBTaskCreateMailAccount::db_thread_process()
 		return false;
 	}
 
-	// Ñ°ÕÒdblogÊÇ·ñÓÐ´ËÕËºÅ£¬ Èç¹ûÓÐÔò´´½¨Ê§°Ü
+	// 寻找dblog是否有此账号， 如果有则创建失败
 	EntityTables& entityTables = EntityTables::findByInterfaceName(pdbi_->name());
 	KBEAccountTable* pTable = static_cast<KBEAccountTable*>(entityTables.findKBETable(KBE_TABLE_PERFIX "_accountinfos"));
 	KBE_ASSERT(pTable);
-	
+
 	info.flags = 0;
 	if(pTable->queryAccount(pdbi_, accountName_, info)  && (info.flags & ACCOUNT_FLAG_NOT_ACTIVATED) <= 0)
 	{
 		if(pdbi_->getlasterror() > 0)
 		{
-			WARNING_MSG(fmt::format("DBTaskCreateMailAccount::db_thread_process(): queryAccount error: {}\n", 
+			WARNING_MSG(fmt::format("DBTaskCreateMailAccount::db_thread_process(): queryAccount error: {}\n",
 				pdbi_->getstrerror()));
 		}
 
 		return false;
 	}
 
-	// Éú³É¼¤»îÂë²¢´æ´¢¼¤»îÂëµ½Êý¾Ý¿â
-	// ·¢ËÍsmtpÓÊ¼þµ½ÓÊÏä£¬ ÓÃ»§µã»÷È·ÈÏºó¼´¿É¼¤»î
+	// 生成激活码并存储激活码到数据库
+	// 发送smtp邮件到邮箱， 用户点击确认后即可激活
 	std::string codestr = genmail_code(password_);
 	KBEEmailVerificationTable* pTable1 = static_cast<KBEEmailVerificationTable*>(entityTables.findKBETable(KBE_TABLE_PERFIX "_email_verification"));
 	KBE_ASSERT(pTable1);
-	
+
 	info.datas = getdatas_;
 	info.name = registerName_;
 	info.password = password_;
-	info.flags |= ACCOUNT_FLAG_NOT_ACTIVATED; 
+	info.flags |= ACCOUNT_FLAG_NOT_ACTIVATED;
 	info.email = info.name;
 	info.dbid = KBEngine::genUUID64();
 
@@ -881,14 +881,14 @@ bool DBTaskCreateMailAccount::db_thread_process()
 	}
 	catch (...)
 	{
-		WARNING_MSG(fmt::format("DBTaskCreateMailAccount::db_thread_process(): logAccount(" KBE_TABLE_PERFIX "_accountinfos) error: {}\n{}\n", 
+		WARNING_MSG(fmt::format("DBTaskCreateMailAccount::db_thread_process(): logAccount(" KBE_TABLE_PERFIX "_accountinfos) error: {}\n{}\n",
 			pdbi_->getstrerror(), pdbi_->lastquery()));
 	}
 
 	password_ = KBE_MD5::getDigest(password_.data(), (int)password_.length());
 	getdatas_ = codestr;
 
-	success_ = pTable1->logAccount(pdbi_, (int8)KBEEmailVerificationTable::V_TYPE_CREATEACCOUNT, 
+	success_ = pTable1->logAccount(pdbi_, (int8)KBEEmailVerificationTable::V_TYPE_CREATEACCOUNT,
 		registerName_, password_, getdatas_);
 
 	return false;
@@ -919,7 +919,7 @@ thread::TPTask::TPTaskState DBTaskCreateMailAccount::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskActivateAccount::DBTaskActivateAccount(const Network::Address& addr, 
+DBTaskActivateAccount::DBTaskActivateAccount(const Network::Address& addr,
 										 std::string& code):
 DBTask(addr),
 code_(code),
@@ -937,7 +937,7 @@ bool DBTaskActivateAccount::db_thread_process()
 {
 	ACCOUNT_INFOS info;
 
-	KBEEmailVerificationTable* pTable1 = 
+	KBEEmailVerificationTable* pTable1 =
 		static_cast<KBEEmailVerificationTable*>(EntityTables::findByInterfaceName(pdbi_->name()).findKBETable(KBE_TABLE_PERFIX "_email_verification"));
 
 	KBE_ASSERT(pTable1);
@@ -945,7 +945,7 @@ bool DBTaskActivateAccount::db_thread_process()
 	success_ = pTable1->activateAccount(pdbi_, code_, info);
 	if(!success_)
 	{
-		ERROR_MSG(fmt::format("DBTaskActivateAccount::db_thread_process(): activateAccount({1}) error: {0}\n", 
+		ERROR_MSG(fmt::format("DBTaskActivateAccount::db_thread_process(): activateAccount({1}) error: {0}\n",
 				pdbi_->getstrerror(), code_));
 		return false;
 	}
@@ -1006,10 +1006,10 @@ bool DBTaskReqAccountResetPassword::db_thread_process()
 
 	if(info.dbid == 0 || info.flags != ACCOUNT_FLAG_NORMAL)
 		return false;
-	
-	// Éú³É¼¤»îÂë²¢´æ´¢¼¤»îÂëµ½Êý¾Ý¿â
-	// ·¢ËÍsmtpÓÊ¼þµ½ÓÊÏä£¬ ÓÃ»§µã»÷È·ÈÏºó¼´¿É¼¤»î
-	KBEEmailVerificationTable* pTable1 = 
+
+	// 生成激活码并存储激活码到数据库
+	// 发送smtp邮件到邮箱， 用户点击确认后即可激活
+	KBEEmailVerificationTable* pTable1 =
 		static_cast<KBEEmailVerificationTable*>(entityTables.findKBETable(KBE_TABLE_PERFIX "_email_verification"));
 	KBE_ASSERT(pTable1);
 
@@ -1048,7 +1048,7 @@ thread::TPTask::TPTaskState DBTaskReqAccountResetPassword::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskAccountResetPassword::DBTaskAccountResetPassword(const Network::Address& addr, std::string& accountName, 
+DBTaskAccountResetPassword::DBTaskAccountResetPassword(const Network::Address& addr, std::string& accountName,
 		std::string& newpassword, std::string& code):
 DBTask(addr),
 code_(code),
@@ -1097,7 +1097,7 @@ thread::TPTask::TPTaskState DBTaskAccountResetPassword::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskReqAccountBindEmail::DBTaskReqAccountBindEmail(const Network::Address& addr, ENTITY_ID entityID, std::string& accountName, 
+DBTaskReqAccountBindEmail::DBTaskReqAccountBindEmail(const Network::Address& addr, ENTITY_ID entityID, std::string& accountName,
 		std::string password,std::string& email):
 DBTask(addr),
 code_(),
@@ -1123,8 +1123,8 @@ bool DBTaskReqAccountBindEmail::db_thread_process()
 		return false;
 	}
 
-	// Éú³É¼¤»îÂë²¢´æ´¢¼¤»îÂëµ½Êý¾Ý¿â
-	// ·¢ËÍsmtpÓÊ¼þµ½ÓÊÏä£¬ ÓÃ»§µã»÷È·ÈÏºó¼´¿É¼¤»î
+	// 生成激活码并存储激活码到数据库
+	// 发送smtp邮件到邮箱， 用户点击确认后即可激活
 	KBEEmailVerificationTable* pTable1 = static_cast<KBEEmailVerificationTable*>(
 		EntityTables::findByInterfaceName(pdbi_->name()).findKBETable(KBE_TABLE_PERFIX "_email_verification"));
 
@@ -1140,7 +1140,7 @@ bool DBTaskReqAccountBindEmail::db_thread_process()
 //-------------------------------------------------------------------------------------
 thread::TPTask::TPTaskState DBTaskReqAccountBindEmail::presentMainThread()
 {
-	DEBUG_MSG(fmt::format("Dbmgr::DBTaskReqAccountBindEmail: code({}), success={}.\n", 
+	DEBUG_MSG(fmt::format("Dbmgr::DBTaskReqAccountBindEmail: code({}), success={}.\n",
 		code_, success_));
 
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
@@ -1151,7 +1151,7 @@ thread::TPTask::TPTaskState DBTaskReqAccountBindEmail::presentMainThread()
 	if(!success_)
 		failedcode = SERVER_ERR_OP_FAILED;
 
-	(*pBundle) << entityID_; 
+	(*pBundle) << entityID_;
 	(*pBundle) << accountName_;
 	(*pBundle) << email_;
 	(*pBundle) << failedcode;
@@ -1167,7 +1167,7 @@ thread::TPTask::TPTaskState DBTaskReqAccountBindEmail::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskAccountBindEmail::DBTaskAccountBindEmail(const Network::Address& addr, std::string& accountName, 
+DBTaskAccountBindEmail::DBTaskAccountBindEmail(const Network::Address& addr, std::string& accountName,
 		std::string& code):
 DBTask(addr),
 code_(code),
@@ -1196,7 +1196,7 @@ bool DBTaskAccountBindEmail::db_thread_process()
 //-------------------------------------------------------------------------------------
 thread::TPTask::TPTaskState DBTaskAccountBindEmail::presentMainThread()
 {
-	DEBUG_MSG(fmt::format("Dbmgr::DBTaskAccountBindEmail: code({}), success={}.\n", 
+	DEBUG_MSG(fmt::format("Dbmgr::DBTaskAccountBindEmail: code({}), success={}.\n",
 		code_, success_));
 
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
@@ -1215,7 +1215,7 @@ thread::TPTask::TPTaskState DBTaskAccountBindEmail::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskAccountNewPassword::DBTaskAccountNewPassword(const Network::Address& addr, ENTITY_ID entityID, std::string& accountName, 
+DBTaskAccountNewPassword::DBTaskAccountNewPassword(const Network::Address& addr, ENTITY_ID entityID, std::string& accountName,
 		std::string& oldpassword_, std::string& newpassword):
 DBTask(addr),
 accountName_(accountName),
@@ -1329,18 +1329,18 @@ bool DBTaskQueryAccount::db_thread_process()
 	info.dbid = dbid_;
 	info.datas = "";
 
-	// ÎªÁËÃ¿´Î¶¼ÄÜ»ñµÃbindataÒò´ËÕâÀïÐèÒªÃ¿´Î¶¼²éÑ¯
+	// 为了每次都能获得bindata因此这里需要每次都查询
 	//if(dbid_ == 0)
 	{
 		if(!pTable->queryAccount(pdbi_, accountName_, info))
 		{
 			error_ = "pTable->queryAccount() failed!";
-			
+
 			if(pdbi_->getlasterror() > 0)
 			{
 				error_ += pdbi_->getstrerror();
 			}
-	
+
 			return false;
 		}
 
@@ -1380,13 +1380,13 @@ bool DBTaskQueryAccount::db_thread_process()
 
 	success_ = false;
 
-	// ÏÈÐ´log£¬ Èç¹ûÐ´Ê§°ÜÔò¿ÉÄÜÕâ¸öentityÒÑ¾­ÔÚÏß
+	// 先写log， 如果写失败则可能这个entity已经在线
 	KBEEntityLogTable* pELTable = static_cast<KBEEntityLogTable*>
 		(entityTables.findKBETable(KBE_TABLE_PERFIX "_entitylog"));
-	
+
 	KBE_ASSERT(pELTable);
-	
-	success_ = pELTable->logEntity(pdbi_, inet_ntoa((struct in_addr&)ip_), port_, dbid_, 
+
+	success_ = pELTable->logEntity(pdbi_, inet_ntoa((struct in_addr&)ip_), port_, dbid_,
 		componentID_, entityID_, pModule->getUType());
 
 	if(!success_ && pdbi_->getlasterror() > 0)
@@ -1405,7 +1405,7 @@ bool DBTaskQueryAccount::db_thread_process()
 //-------------------------------------------------------------------------------------
 thread::TPTask::TPTaskState DBTaskQueryAccount::presentMainThread()
 {
-	DEBUG_MSG(fmt::format("Dbmgr::queryAccount: {}, success={}, flags={}, deadline={}.\n", 
+	DEBUG_MSG(fmt::format("Dbmgr::queryAccount: {}, success={}, flags={}, deadline={}.\n",
 		 accountName_.c_str(), success_, flags_, deadline_));
 
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
@@ -1464,7 +1464,7 @@ thread::TPTask::TPTaskState DBTaskAccountOnline::presentMainThread()
 	DEBUG_MSG(fmt::format("Dbmgr::onAccountOnline: componentID:{}, entityID:{}.\n", componentID_, EntityDBTask_entityID()));
 
 	/*
-	// Èç¹ûÃ»ÓÐÁ¬½ÓdbÔò´ÓlogÖÐ²éÕÒÕËºÅÊÇ·ñ»¹ÔÚÏß
+	// 如果没有连接db则从log中查找账号是否还在线
 	if(!pDBInterface_)
 	{
 		PROXICES_ONLINE_LOG::iterator iter = proxicesOnlineLogs_.find(accountName_);
@@ -1516,12 +1516,12 @@ thread::TPTask::TPTaskState DBTaskEntityOffline::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskAccountLogin::DBTaskAccountLogin(const Network::Address& addr, 
-									   std::string& loginName, 
-									   std::string& accountName, 
-									   std::string& password, 
+DBTaskAccountLogin::DBTaskAccountLogin(const Network::Address& addr,
+									   std::string& loginName,
+									   std::string& accountName,
+									   std::string& password,
 									   SERVER_ERROR_CODE retcode,
-									   std::string& postdatas, 
+									   std::string& postdatas,
 									   std::string& getdatas,
 									   bool needCheckPassword) :
 DBTask(addr),
@@ -1549,7 +1549,7 @@ DBTaskAccountLogin::~DBTaskAccountLogin()
 //-------------------------------------------------------------------------------------
 bool DBTaskAccountLogin::db_thread_process()
 {
-	// Èç¹ûInterfacesÒÑ¾­ÅÐ¶Ï²»³É¹¦¾ÍÃ»±ØÒª¼ÌÐøÏÂÈ¥
+	// 如果Interfaces已经判断不成功就没必要继续下去
 	if(retcode_ != SERVER_SUCCESS)
 	{
 		ERROR_MSG(fmt::format("DBTaskAccountLogin::db_thread_process(): interfaces report failed(errcode={})!\n", retcode_));
@@ -1569,7 +1569,7 @@ bool DBTaskAccountLogin::db_thread_process()
 
 	if(pModule == NULL)
 	{
-		ERROR_MSG(fmt::format("DBTaskAccountLogin::db_thread_process(): not found account script[{}], login[{}] failed!\n", 
+		ERROR_MSG(fmt::format("DBTaskAccountLogin::db_thread_process(): not found account script[{}], login[{}] failed!\n",
 			DBUtil::accountScriptName(), accountName_));
 
 		retcode_ = SERVER_ERR_SRV_NO_READY;
@@ -1599,7 +1599,7 @@ bool DBTaskAccountLogin::db_thread_process()
 		{
 			if (email_isvalid(accountName_.c_str()))
 			{
-				ERROR_MSG(fmt::format("DBTaskAccountLogin::db_thread_process(): account[{}] is email, autocreate failed!\n", 
+				ERROR_MSG(fmt::format("DBTaskAccountLogin::db_thread_process(): account[{}] is email, autocreate failed!\n",
 					accountName_));
 
 				retcode_ = SERVER_ERR_CANNOT_USE_MAIL;
@@ -1607,8 +1607,8 @@ bool DBTaskAccountLogin::db_thread_process()
 			}
 		}
 
-		if (g_kbeSrvConfig.getDBMgr().notFoundAccountAutoCreate || 
-			(g_kbeSrvConfig.interfacesAddrs().size() > 0 && !needCheckPassword_/*µÚÈý·½´¦Àí³É¹¦Ôò×Ô¶¯´´½¨ÕËºÅ*/))
+		if (g_kbeSrvConfig.getDBMgr().notFoundAccountAutoCreate ||
+			(g_kbeSrvConfig.interfacesAddrs().size() > 0 && !needCheckPassword_/*第三方处理成功则自动创建账号*/))
 		{
 			if(!DBTaskCreateAccount::writeAccount(pdbi_, accountName_, password_, postdatas_, info) || info.dbid == 0 || info.flags != ACCOUNT_FLAG_NORMAL)
 			{
@@ -1619,14 +1619,14 @@ bool DBTaskAccountLogin::db_thread_process()
 				return false;
 			}
 
-			INFO_MSG(fmt::format("DBTaskAccountLogin::db_thread_process(): not found account[{}], autocreate successfully!\n", 
+			INFO_MSG(fmt::format("DBTaskAccountLogin::db_thread_process(): not found account[{}], autocreate successfully!\n",
 				accountName_));
 
 			info.password = KBE_MD5::getDigest(password_.data(), (int)password_.length());
 		}
 		else
 		{
-			ERROR_MSG(fmt::format("DBTaskAccountLogin::db_thread_process(): not found account[{}], login failed!\n", 
+			ERROR_MSG(fmt::format("DBTaskAccountLogin::db_thread_process(): not found account[{}], login failed!\n",
 				accountName_));
 
 			retcode_ = SERVER_ERR_NOT_FOUND_ACCOUNT;
@@ -1658,12 +1658,12 @@ bool DBTaskAccountLogin::db_thread_process()
 	KBEEntityLogTable::EntityLog entitylog;
 	bool success = !pELTable->queryEntity(pdbi_, info.dbid, entitylog, pModule->getUType());
 
-	// Èç¹ûÓÐÔÚÏß¼ÍÂ¼
+	// 如果有在线纪录
 	if(!success)
 	{
 		componentID_ = entitylog.componentID;
 		entityID_ = entitylog.entityID;
-		
+
 		if(entitylog.serverGroupID != (uint64)getUserUID())
 		{
 			serverGroupID_ = entitylog.serverGroupID;
@@ -1684,7 +1684,7 @@ bool DBTaskAccountLogin::db_thread_process()
 //-------------------------------------------------------------------------------------
 thread::TPTask::TPTaskState DBTaskAccountLogin::presentMainThread()
 {
-	DEBUG_MSG(fmt::format("Dbmgr::onAccountLogin:loginName={}, accountName={}, success={}, componentID={}, entityID={}, dbid={}, flags={}, deadline={}.\n", 
+	DEBUG_MSG(fmt::format("Dbmgr::onAccountLogin:loginName={}, accountName={}, success={}, componentID={}, entityID={}, dbid={}, flags={}, deadline={}.\n",
 		loginName_,
 		accountName_,
 		retcode_,
@@ -1697,14 +1697,14 @@ thread::TPTask::TPTaskState DBTaskAccountLogin::presentMainThread()
 
 	if(serverGroupID_ > 0)
 	{
-		ERROR_MSG(fmt::format("DBTaskAccountLogin::presentMainThread: entitylog serverGroupID not match. loginName={}, accountName={}, self={}\n", 
+		ERROR_MSG(fmt::format("DBTaskAccountLogin::presentMainThread: entitylog serverGroupID not match. loginName={}, accountName={}, self={}\n",
 			loginName_, accountName_, serverGroupID_, (uint64)getUserUID()));
-		
+
 		componentID_ = 0;
 		entityID_ = 0;
 	}
-	
-	// Ò»¸öÓÃ»§µÇÂ¼£¬ ¹¹ÔìÒ»¸öÊý¾Ý¿â²éÑ¯Ö¸Áî²¢¼ÓÈëµ½Ö´ÐÐ¶ÓÁÐ£¬ Ö´ÐÐÍê±Ï½«½á¹û·µ»Ø¸øloginapp
+
+	// 一个用户登录， 构造一个数据库查询指令并加入到执行队列， 执行完毕将结果返回给loginapp
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 	(*pBundle).newMessage(LoginappInterface::onLoginAccountQueryResultFromDbmgr);
 
@@ -1713,7 +1713,7 @@ thread::TPTask::TPTaskState DBTaskAccountLogin::presentMainThread()
 	(*pBundle) << accountName_;
 	(*pBundle) << password_;
 	(*pBundle) << needCheckPassword_;
-	(*pBundle) << componentID_;   // Èç¹û´óÓÚ0Ôò±íÊ¾ÕËºÅ»¹´æ»îÔÚÄ³¸öbaseappÉÏ
+	(*pBundle) << componentID_;   // 如果大于0则表示账号还存活在某个baseapp上
 	(*pBundle) << entityID_;
 	(*pBundle) << dbid_;
 	(*pBundle) << flags_;
@@ -1730,7 +1730,7 @@ thread::TPTask::TPTaskState DBTaskAccountLogin::presentMainThread()
 }
 
 //-------------------------------------------------------------------------------------
-DBTaskQueryEntity::DBTaskQueryEntity(const Network::Address& addr, int8 queryMode, std::string& entityType, DBID dbid, 
+DBTaskQueryEntity::DBTaskQueryEntity(const Network::Address& addr, int8 queryMode, std::string& entityType, DBID dbid,
 		COMPONENT_ID componentID, CALLBACK_ID callbackID, ENTITY_ID entityID):
 EntityDBTask(addr, entityID, dbid),
 queryMode_(queryMode),
@@ -1764,7 +1764,7 @@ bool DBTaskQueryEntity::db_thread_process()
 
 	if(success_)
 	{
-		// ÏÈÐ´log£¬ Èç¹ûÐ´Ê§°ÜÔò¿ÉÄÜÕâ¸öentityÒÑ¾­ÔÚÏß
+		// 先写log， 如果写失败则可能这个entity已经在线
 		KBEEntityLogTable* pELTable = static_cast<KBEEntityLogTable*>
 			(entityTables.findKBETable(KBE_TABLE_PERFIX "_entitylog"));
 
@@ -1772,7 +1772,7 @@ bool DBTaskQueryEntity::db_thread_process()
 
 		try
 		{
-			success_ = pELTable->logEntity(pdbi_, addr_.ipAsString(), addr_.port, dbid_, 
+			success_ = pELTable->logEntity(pdbi_, addr_.ipAsString(), addr_.port, dbid_,
 				componentID_, entityID_, pModule->getUType());
 		}
 		catch (std::exception & e)
@@ -1810,14 +1810,14 @@ bool DBTaskQueryEntity::db_thread_process()
 			}
 
 			wasActive_ = true;
-			
+
 			if(entitylog.serverGroupID != (uint64)getUserUID())
 			{
 				success_ = false;
 				serverGroupID_ = entitylog.serverGroupID;
 				return false;
 			}
-			
+
 			wasActiveCID_ = entitylog.componentID;
 			wasActiveEntityID_ = entitylog.entityID;
 		}
@@ -1829,7 +1829,7 @@ bool DBTaskQueryEntity::db_thread_process()
 //-------------------------------------------------------------------------------------
 thread::TPTask::TPTaskState DBTaskQueryEntity::presentMainThread()
 {
-	DEBUG_MSG(fmt::format("Dbmgr::DBTaskQueryEntity: {}, dbid={}, entityID={}, wasActive={}, queryMode={}, componentID={}, success={}.\n", 
+	DEBUG_MSG(fmt::format("Dbmgr::DBTaskQueryEntity: {}, dbid={}, entityID={}, wasActive={}, queryMode={}, componentID={}, success={}.\n",
 		entityType_, dbid_, entityID_, wasActive_, ((int)queryMode_), componentID_, success_));
 
 	if(serverGroupID_ > 0)
@@ -1837,7 +1837,7 @@ thread::TPTask::TPTaskState DBTaskQueryEntity::presentMainThread()
 		ERROR_MSG(fmt::format("DBTaskQueryEntity::presentMainThread: entitylog serverGroupID not match. {}, dbid={}, serverGroupID={}£¬ currentServerGroupID={}!\n",
 			entityType_, dbid_, serverGroupID_, (uint64)getUserUID()));
 	}
-	
+
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 
 	if(queryMode_ == 0)
@@ -1893,7 +1893,7 @@ bool DBTaskServerLog::db_thread_process()
 	EntityTables& entityTables = EntityTables::findByInterfaceName(pdbi_->name());
 	KBEServerLogTable* pTable = static_cast<KBEServerLogTable*>(entityTables.findKBETable(KBE_TABLE_PERFIX "_serverlog"));
 	KBE_ASSERT(pTable);
-	
+
 	pTable->updateServer(pdbi_);
 	return false;
 }
@@ -1923,7 +1923,7 @@ bool DBTaskEraseBaseappEntityLog::db_thread_process()
 {
 	EntityTables& entityTables = EntityTables::findByInterfaceName(pdbi_->name());
 	KBEEntityLogTable* pELTable = static_cast<KBEEntityLogTable*>(entityTables.findKBETable(KBE_TABLE_PERFIX "_entitylog"));
-	
+
 	if (!pELTable)
 	{
 		success_ = true;

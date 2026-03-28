@@ -16,7 +16,7 @@ class DataDownloads
 public:
 	DataDownloads();
 	~DataDownloads();
-	
+
 	int16 pushDownload(DataDownload* pdl);
 
 	void onDownloadCompleted(DataDownload* pdl);
@@ -37,7 +37,7 @@ public:
 		DATA_DOWNLOAD_STREAM_STRING = 2
 	};
 
-	static DataDownload * create(DataDownloadType dltype, PyObjectPtr objptr, 
+	static DataDownload * create(DataDownloadType dltype, PyObjectPtr objptr,
 			const std::string & desc, int16 id);
 
 };

@@ -16,7 +16,7 @@ public:
 
 // Dialog Data
 	enum { IDD = IDD_STARTSERVER };
-	
+
 	BOOL OnInitDialog();
 
 	void loadLayouts();

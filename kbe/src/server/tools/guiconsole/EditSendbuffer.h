@@ -10,7 +10,7 @@ class CEditSendbuffer : public CEdit
 public:
 	CEditSendbuffer();
 	virtual ~CEditSendbuffer();
-	
+
 	BOOL PreTranslateMessage(MSG* pMsg);
 protected:
 	DECLARE_MESSAGE_MAP()

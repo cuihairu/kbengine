@@ -1,7 +1,7 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
 
-namespace KBEngine { 
+namespace KBEngine {
 
 //-------------------------------------------------------------------------------------
 INLINE EntityCall* Entity::cellEntityCall(void) const
@@ -17,38 +17,38 @@ INLINE void Entity::cellEntityCall(EntityCall* entityCall)
 
 //-------------------------------------------------------------------------------------
 INLINE EntityCall* Entity::clientEntityCall() const
-{ 
-	return clientEntityCall_; 
+{
+	return clientEntityCall_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE void Entity::clientEntityCall(EntityCall* entityCall)
-{ 
-	clientEntityCall_ = entityCall; 
+{
+	clientEntityCall_ = entityCall;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE PyObject* Entity::getCellData(void) const
-{ 
-	return cellDataDict_; 
+{
+	return cellDataDict_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE bool Entity::creatingCell(void) const
-{ 
-	return creatingCell_; 
+{
+	return creatingCell_;
 }
 
 //-------------------------------------------------------------------------------------
-INLINE bool Entity::hasDB() const 
+INLINE bool Entity::hasDB() const
 {
-	return hasDB_; 
+	return hasDB_;
 }
 
 //-------------------------------------------------------------------------------------
-INLINE void Entity::hasDB(bool has) 
+INLINE void Entity::hasDB(bool has)
 {
-	hasDB_ = has; 
+	hasDB_ = has;
 }
 
 //-------------------------------------------------------------------------------------

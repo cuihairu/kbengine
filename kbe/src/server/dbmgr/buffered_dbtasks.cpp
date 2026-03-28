@@ -25,8 +25,8 @@ Buffered_DBTasks::~Buffered_DBTasks()
 //-------------------------------------------------------------------------------------
 bool Buffered_DBTasks::hasTask_(DBID dbid)
 {
-	std::pair<DBID_TASKS_MAP::iterator, DBID_TASKS_MAP::iterator> range = 
-		dbid_tasks_.equal_range(dbid);  
+	std::pair<DBID_TASKS_MAP::iterator, DBID_TASKS_MAP::iterator> range =
+		dbid_tasks_.equal_range(dbid);
 
 	if (range.first != range.second)
 	{
@@ -39,8 +39,8 @@ bool Buffered_DBTasks::hasTask_(DBID dbid)
 //-------------------------------------------------------------------------------------
 bool Buffered_DBTasks::hasTask_(ENTITY_ID entityID)
 {
-	std::pair<ENTITYID_TASKS_MAP::iterator, ENTITYID_TASKS_MAP::iterator> range = 
-		entityid_tasks_.equal_range(entityID);  
+	std::pair<ENTITYID_TASKS_MAP::iterator, ENTITYID_TASKS_MAP::iterator> range =
+		entityid_tasks_.equal_range(entityID);
 
 	if (range.first != range.second)
 	{
@@ -55,7 +55,7 @@ void Buffered_DBTasks::addTask(EntityDBTask* pTask)
 {
 	mutex_.lockMutex();
 	pTask->pBuffered_DBTasks(this);
-	
+
 	if(pTask->EntityDBTask_entityDBID() <= 0)
 	{
 		if(hasTask_(pTask->EntityDBTask_entityID()))
@@ -65,7 +65,7 @@ void Buffered_DBTasks::addTask(EntityDBTask* pTask)
 			return;
 		}
 
-		entityid_tasks_.insert(std::make_pair(pTask->EntityDBTask_entityID(), 
+		entityid_tasks_.insert(std::make_pair(pTask->EntityDBTask_entityID(),
 			static_cast<EntityDBTask *>(NULL)));
 	}
 	else
@@ -77,7 +77,7 @@ void Buffered_DBTasks::addTask(EntityDBTask* pTask)
 			return;
 		}
 
-		dbid_tasks_.insert(std::make_pair(pTask->EntityDBTask_entityDBID(), 
+		dbid_tasks_.insert(std::make_pair(pTask->EntityDBTask_entityDBID(),
 			static_cast<EntityDBTask *>(NULL)));
 	}
 
@@ -92,24 +92,24 @@ EntityDBTask* Buffered_DBTasks::tryGetNextTask(EntityDBTask* pTask)
 
 	if(g_kbeSrvConfig.getDBMgr().debugDBMgr)
 	{
-		DEBUG_MSG(fmt::format("Buffered_DBTasks::tryGetNextTask(): finiTask(dbid={}, entityID={}\ndbidlist={}\nentityidlist={})\n", 
-			pTask->EntityDBTask_entityDBID(), pTask->EntityDBTask_entityID(), printBuffered_dbid_(), printBuffered_entityID_())); 
+		DEBUG_MSG(fmt::format("Buffered_DBTasks::tryGetNextTask(): finiTask(dbid={}, entityID={}\ndbidlist={}\nentityidlist={})\n",
+			pTask->EntityDBTask_entityDBID(), pTask->EntityDBTask_entityID(), printBuffered_dbid_(), printBuffered_entityID_()));
 	}
 
 	EntityDBTask * pNextTask = NULL;
-	
+
 	if(pTask->EntityDBTask_entityDBID() <= 0)
 	{
-		std::pair<ENTITYID_TASKS_MAP::iterator, ENTITYID_TASKS_MAP::iterator> range = 
-			entityid_tasks_.equal_range(pTask->EntityDBTask_entityID());  
+		std::pair<ENTITYID_TASKS_MAP::iterator, ENTITYID_TASKS_MAP::iterator> range =
+			entityid_tasks_.equal_range(pTask->EntityDBTask_entityID());
 
-		// Èç¹ûÃ»ÓÐÈÎÎñÔòÍË³ö
+		// å¦‚æžœæ²¡æœ‰ä»»åŠ¡åˆ™é€€å‡º
 		if (range.first == range.second)
 		{
 			mutex_.unlockMutex();
 			return NULL;
 		}
-		
+
 		ENTITYID_TASKS_MAP::iterator nextIter = range.first;
 		++nextIter;
 
@@ -122,16 +122,16 @@ EntityDBTask* Buffered_DBTasks::tryGetNextTask(EntityDBTask* pTask)
 	}
 	else
 	{
-		std::pair<DBID_TASKS_MAP::iterator, DBID_TASKS_MAP::iterator> range = 
-			dbid_tasks_.equal_range(pTask->EntityDBTask_entityDBID());  
+		std::pair<DBID_TASKS_MAP::iterator, DBID_TASKS_MAP::iterator> range =
+			dbid_tasks_.equal_range(pTask->EntityDBTask_entityDBID());
 
-		// Èç¹ûÃ»ÓÐÈÎÎñÔòÍË³ö
+		// å¦‚æžœæ²¡æœ‰ä»»åŠ¡åˆ™é€€å‡º
 		if (range.first == range.second)
 		{
 			mutex_.unlockMutex();
 			return NULL;
 		}
-		
+
 		DBID_TASKS_MAP::iterator nextIter = range.first;
 		++nextIter;
 
@@ -142,11 +142,11 @@ EntityDBTask* Buffered_DBTasks::tryGetNextTask(EntityDBTask* pTask)
 
 		dbid_tasks_.erase( range.first );
 	}
-	
+
 	if(pNextTask != NULL)
 	{
-		INFO_MSG(fmt::format("Buffered_DBTasks::onFiniTask: Playing buffered task for entityID={}, dbid={}, dbid_tasks_size={}, entityid_tasks_size={}.\n", 
-			pNextTask->EntityDBTask_entityID(), pNextTask->EntityDBTask_entityDBID(), 
+		INFO_MSG(fmt::format("Buffered_DBTasks::onFiniTask: Playing buffered task for entityID={}, dbid={}, dbid_tasks_size={}, entityid_tasks_size={}.\n",
+			pNextTask->EntityDBTask_entityID(), pNextTask->EntityDBTask_entityDBID(),
 			dbid_tasks_.size(), entityid_tasks_.size()));
 	}
 
@@ -180,21 +180,21 @@ std::string Buffered_DBTasks::printBuffered_dbid_()
 {
 	std::string ret;
 
-    for (DBID_TASKS_MAP::iterator iter = dbid_tasks_.begin(); iter != dbid_tasks_.end(); iter = dbid_tasks_.upper_bound(iter->first))  
-    {  
-        std::pair<DBID_TASKS_MAP::iterator, DBID_TASKS_MAP::iterator> res = dbid_tasks_.equal_range(iter->first);  
+    for (DBID_TASKS_MAP::iterator iter = dbid_tasks_.begin(); iter != dbid_tasks_.end(); iter = dbid_tasks_.upper_bound(iter->first))
+    {
+        std::pair<DBID_TASKS_MAP::iterator, DBID_TASKS_MAP::iterator> res = dbid_tasks_.equal_range(iter->first);
 		int count = 0;
 
-        for (DBID_TASKS_MAP::iterator i = res.first; i != res.second; ++i)  
-        {  
+        for (DBID_TASKS_MAP::iterator i = res.first; i != res.second; ++i)
+        {
 			if (i == dbid_tasks_.end())
 				break;
 
 			++count;
-        } 
+        }
 
 		ret += fmt::format("{}:{}, ", iter->first, count);
-    }  
+    }
 
 	return ret;
 }
@@ -204,21 +204,21 @@ std::string Buffered_DBTasks::printBuffered_entityID_()
 {
 	std::string ret;
 
-    for (ENTITYID_TASKS_MAP::iterator iter = entityid_tasks_.begin(); iter != entityid_tasks_.end(); iter = entityid_tasks_.upper_bound(iter->first))  
-    {  
+    for (ENTITYID_TASKS_MAP::iterator iter = entityid_tasks_.begin(); iter != entityid_tasks_.end(); iter = entityid_tasks_.upper_bound(iter->first))
+    {
 		int count = 0;
-        std::pair<ENTITYID_TASKS_MAP::iterator, ENTITYID_TASKS_MAP::iterator> res = entityid_tasks_.equal_range(iter->first);  
+        std::pair<ENTITYID_TASKS_MAP::iterator, ENTITYID_TASKS_MAP::iterator> res = entityid_tasks_.equal_range(iter->first);
 
-        for (ENTITYID_TASKS_MAP::iterator i = res.first; i != res.second; ++i)  
-        {  
+        for (ENTITYID_TASKS_MAP::iterator i = res.first; i != res.second; ++i)
+        {
 			if (i == entityid_tasks_.end())
 				break;
 
 			++count;
-        }  
+        }
 
 		ret += fmt::format("{}:{}, ", iter->first, count);
-    }  
+    }
 
 	return ret;
 }

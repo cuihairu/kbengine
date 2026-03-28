@@ -1,6 +1,6 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
-// logger需要增加吞吐量
+// logger闇�瑕佸鍔犲悶鍚愰噺
 #define PACKET_MAX_SIZE_TCP 65535
 
 #include "common/common.h"
@@ -61,9 +61,9 @@ int KBENGINE_MAIN(int argc, char* argv[])
 	rlimit rlimitData = { RLIM_INFINITY, RLIM_INFINITY };
 	setrlimit(RLIMIT_CORE, &rlimitData);
 #endif
-	
+
 	ENGINE_COMPONENT_INFO& info = g_kbeSrvConfig.getLogger();
-	int ret = kbeMainT<Logger>(argc, argv, LOGGER_TYPE, info.externalTcpPorts_min, 
+	int ret = kbeMainT<Logger>(argc, argv, LOGGER_TYPE, info.externalTcpPorts_min,
 		info.externalTcpPorts_max, -1, -1, info.externalInterface, 0, 0, info.internalInterface);
-	return ret; 
+	return ret;
 }

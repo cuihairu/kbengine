@@ -9,77 +9,77 @@
 #ifndef KBE_INTERFACES_TOOL_INTERFACE_H
 #define KBE_INTERFACES_TOOL_INTERFACE_H
 
-// common include	
+// common include
 #if defined(INTERFACES)
 #include "interfaces.h"
 #endif
 #include "interfaces_interface_macros.h"
 #include "network/interface_defs.h"
 //#define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine{
 
 /**
-	InterfacesÏûÏ¢ºê£¬  ²ÎÊıÎªÁ÷£¬ ĞèÒª×Ô¼º½â¿ª
+	Interfacesæ¶ˆæ¯å®ï¼Œ  å‚æ•°ä¸ºæµï¼Œ éœ€è¦è‡ªå·±è§£å¼€
 */
 
 /**
-	InterfacesËùÓĞÏûÏ¢½Ó¿ÚÔÚ´Ë¶¨Òå
+	Interfacesæ‰€æœ‰æ¶ˆæ¯æ¥å£åœ¨æ­¤å®šä¹‰
 */
 NETWORK_INTERFACE_DECLARE_BEGIN(InterfacesInterface)
-	// Ä³app×¢²á×Ô¼ºµÄ½Ó¿ÚµØÖ·µ½±¾app
+	// æŸappæ³¨å†Œè‡ªå·±çš„æ¥å£åœ°å€åˆ°æœ¬app
 	INTERFACES_MESSAGE_DECLARE_ARGS11(onRegisterNewApp,						NETWORK_VARIABLE_MESSAGE,
-									int32,									uid, 
+									int32,									uid,
 									std::string,							username,
-									COMPONENT_TYPE,							componentType, 
-									COMPONENT_ID,							componentID, 
+									COMPONENT_TYPE,							componentType,
+									COMPONENT_ID,							componentID,
 									COMPONENT_ORDER,						globalorderID,
 									COMPONENT_ORDER,						grouporderID,
-									uint32,									intaddr, 
+									uint32,									intaddr,
 									uint16,									intport,
-									uint32,									extaddr, 
+									uint32,									extaddr,
 									uint16,									extport,
 									std::string,							extaddrEx)
 
-	// ÇëÇó´´½¨ÕËºÅ¡£
+	// è¯·æ±‚åˆ›å»ºè´¦å·ã€‚
 	INTERFACES_MESSAGE_DECLARE_STREAM(reqCreateAccount,						NETWORK_VARIABLE_MESSAGE)
 
-	// µÇÂ½ÕËºÅ¡£
+	// ç™»é™†è´¦å·ã€‚
 	INTERFACES_MESSAGE_DECLARE_STREAM(onAccountLogin,						NETWORK_VARIABLE_MESSAGE)
 
-	// ³äÖµÇëÇó
+	// å……å€¼è¯·æ±‚
 	INTERFACES_MESSAGE_DECLARE_STREAM(charge,								NETWORK_VARIABLE_MESSAGE)
 
-	// Ä³appÖ÷¶¯ÇëÇólook¡£
+	// æŸappä¸»åŠ¨è¯·æ±‚lookã€‚
 	INTERFACES_MESSAGE_DECLARE_ARGS0(lookApp,								NETWORK_FIXED_MESSAGE)
 
-	// Ä³¸öappÏò±¾app¸æÖª´¦ÓÚ»î¶¯×´Ì¬¡£
+	// æŸä¸ªappå‘æœ¬appå‘ŠçŸ¥å¤„äºæ´»åŠ¨çŠ¶æ€ã€‚
 	INTERFACES_MESSAGE_DECLARE_ARGS2(onAppActiveTick,						NETWORK_FIXED_MESSAGE,
-										COMPONENT_TYPE,						componentType, 
+										COMPONENT_TYPE,						componentType,
 										COMPONENT_ID,						componentID)
 
-	// ÇëÇó¹Ø±Õ·şÎñÆ÷
+	// è¯·æ±‚å…³é—­æœåŠ¡å™¨
 	INTERFACES_MESSAGE_DECLARE_STREAM(reqCloseServer,						NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇó²éÑ¯watcherÊı¾İ
+	// è¯·æ±‚æŸ¥è¯¢watcheræ•°æ®
 	INTERFACES_MESSAGE_DECLARE_STREAM(queryWatcher,							NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇó²Á³ı¿Í»§¶ËÇëÇóÈÎÎñ¡£
+	// è¯·æ±‚æ“¦é™¤å®¢æˆ·ç«¯è¯·æ±‚ä»»åŠ¡ã€‚
 	INTERFACES_MESSAGE_DECLARE_ARGS1(eraseClientReq,						NETWORK_VARIABLE_MESSAGE,
 										std::string,						logkey)
 
-	// ¿ªÊ¼profile
+	// å¼€å§‹profile
 	INTERFACES_MESSAGE_DECLARE_STREAM(startProfile,							NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇóÇ¿ÖÆÉ±ËÀµ±Ç°app
+	// è¯·æ±‚å¼ºåˆ¶æ€æ­»å½“å‰app
 	INTERFACES_MESSAGE_DECLARE_STREAM(reqKillServer,						NETWORK_VARIABLE_MESSAGE)
 
-	// executeRawDatabaseCommand´ÓdbmgrµÄ»Øµ÷
+	// executeRawDatabaseCommandä»dbmgrçš„å›è°ƒ
 	INTERFACES_MESSAGE_DECLARE_STREAM(onExecuteRawDatabaseCommandCB,		NETWORK_VARIABLE_MESSAGE)
 
 NETWORK_INTERFACE_DECLARE_END()

@@ -9,7 +9,7 @@
 #include "../../server/baseapp/baseapp_interface.h"
 #include "../../server/cellapp/cellapp_interface.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
 RestoreEntityHandler::RestoreEntityHandler(COMPONENT_ID cellappID, Network::NetworkInterface & networkInterface):
@@ -124,28 +124,28 @@ bool RestoreEntityHandler::process()
 
 	int count = 0;
 
-	//  ◊œ»–Ë“™’“µΩ’‚∏ˆcell…œµƒspace
+	// È¶ñÂÖàÈúÄË¶ÅÊâæÂà∞Ëøô‰∏™cell‰∏äÁöÑspace
 	// KBE_ASSERT(restoreSpaces_.size() > 0);
-	// »Áπ˚spaceEntity≤ª‘⁄’‚∏ˆbaseapp…œ¥¥Ω®‘ÚºÃ–¯µ»¥˝
-	// µ±spaceEntityµƒcell¥¥Ω®∫√¡À÷Æ∫Ûª·π„≤•∏¯À˘”–µƒbaseapp£¨ √ø∏ˆbaseapp
-	// »•≈–∂œ «∑Ò”––Ë“™ª÷∏¥µƒentity
+	// Â¶ÇÊûúspaceEntity‰∏çÂú®Ëøô‰∏™baseapp‰∏äÂàõÂª∫ÂàôÁªßÁª≠Á≠âÂæÖ
+	// ÂΩìspaceEntityÁöÑcellÂàõÂª∫Â•Ω‰∫Ü‰πãÂêé‰ºöÂπøÊí≠ÁªôÊâÄÊúâÁöÑbaseappÔºå ÊØè‰∏™baseapp
+	// ÂéªÂà§Êñ≠ÊòØÂê¶ÊúâÈúÄË¶ÅÊÅ¢Â§çÁöÑentity
 	if(restoreSpaces_.size() > 0)
 	{
 		if(timestamp() - tickReport_ > uint64( 3 * stampsPerSecond() ))
 		{
 			tickReport_ = timestamp();
-			INFO_MSG(fmt::format("RestoreEntityHandler::process({2}): wait for localSpace to get cell!, entitiesSize({0}), spaceSize={1}\n", 
+			INFO_MSG(fmt::format("RestoreEntityHandler::process({2}): wait for localSpace to get cell!, entitiesSize({0}), spaceSize={1}\n",
 				entities_.size(), restoreSpaces_.size(), cellappID_));
 		}
 
 		int spaceCellCount = 0;
 
-		// ±ÿ–Îµ»¥˝spaceª÷∏¥
+		// ÂøÖÈ°ªÁ≠âÂæÖspaceÊÅ¢Â§ç
 		std::vector<RestoreData>::iterator restoreSpacesIter = restoreSpaces_.begin();
 		for(; restoreSpacesIter != restoreSpaces_.end(); ++restoreSpacesIter)
 		{
 			Entity* pEntity = Baseapp::getSingleton().findEntity((*restoreSpacesIter).id);
-			
+
 			if(pEntity)
 			{
 				if(++count > (int)g_kbeSrvConfig.getBaseApp().entityRestoreSize)
@@ -180,11 +180,11 @@ bool RestoreEntityHandler::process()
 				ERROR_MSG(fmt::format("RestoreEntityHandler::process({}): lose space({}).\n", cellappID_, (*restoreSpacesIter).id));
 			}
 		}
-		
+
 		if(spaceCellCount != (int)restoreSpaces_.size())
 			return true;
 
-		// Õ®÷™∆‰À˚baseapp£¨ spaceª÷∏¥¡Àcell
+		// ÈÄöÁü•ÂÖ∂‰ªñbaseappÔºå spaceÊÅ¢Â§ç‰∫Ücell
 		if(!broadcastOtherBaseapps_)
 		{
 			broadcastOtherBaseapps_ = true;
@@ -216,10 +216,10 @@ bool RestoreEntityHandler::process()
 				for(; comsiter != cts.end(); ++comsiter)
 				{
 					pChannel = (*comsiter).pChannel;
-					
+
 					if(pChannel)
 					{
-						INFO_MSG(fmt::format("RestoreEntityHandler::process({4}): broadcast baseapp[{0}, {1}], spaceID[{2}], utype[{3}]...\n", 
+						INFO_MSG(fmt::format("RestoreEntityHandler::process({4}): broadcast baseapp[{0}, {1}], spaceID[{2}], utype[{3}]...\n",
 							(*comsiter).cid, pChannel->c_str(), spaceID, utype, cellappID_));
 
 						Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
@@ -237,14 +237,14 @@ bool RestoreEntityHandler::process()
 		if(timestamp() - tickReport_ > uint64( 3 * stampsPerSecond() ))
 		{
 			tickReport_ = timestamp();
-			INFO_MSG(fmt::format("RestoreEntityHandler::process({}): wait for otherBaseappSpaces to get cell!, entitiesSize({}), spaceSize={}\n", 
+			INFO_MSG(fmt::format("RestoreEntityHandler::process({}): wait for otherBaseappSpaces to get cell!, entitiesSize({}), spaceSize={}\n",
 				cellappID_, entities_.size(), spaceIDs_.size()));
 		}
 
 		return true;
 	}
 
-	// ª÷∏¥∆‰À˚entity
+	// ÊÅ¢Â§çÂÖ∂‰ªñentity
 	std::vector<RestoreData>::iterator iter = entities_.begin();
 	for(; iter != entities_.end(); )
 	{
@@ -273,7 +273,7 @@ bool RestoreEntityHandler::process()
 				if(!data.creatingCell)
 				{
 					data.creatingCell = true;
-					
+
 					EntityCallAbstract* cellEntityCall = NULL;
 					std::vector<RestoreData>::iterator restoreSpacesIter = restoreSpaces_.begin();
 					for(; restoreSpacesIter != restoreSpaces_.end(); ++restoreSpacesIter)
@@ -285,7 +285,7 @@ bool RestoreEntityHandler::process()
 							break;
 						}
 					}
-					
+
 					if(cellEntityCall == NULL)
 					{
 						restoreSpacesIter = otherRestoredSpaces_.begin();
@@ -308,7 +308,7 @@ bool RestoreEntityHandler::process()
 						ENTITY_ID delID = pEntity->id();
 
 						pEntity->destroy();
-						WARNING_MSG(fmt::format("RestoreEntityHandler::process({}): not fount spaceCell, killed pEntity({})!", 
+						WARNING_MSG(fmt::format("RestoreEntityHandler::process({}): not fount spaceCell, killed pEntity({})!",
 							cellappID_, delID));
 
 						if(Baseapp::getSingleton().findEntity(delID) == NULL)
@@ -338,7 +338,7 @@ bool RestoreEntityHandler::process()
 				(*restoreSpacesIter).cell = NULL;
 			}
 		}
-		
+
 		otherRestoredSpaces_.clear();
 
 		inProcess_ = false;
@@ -370,7 +370,7 @@ void RestoreEntityHandler::onRestoreSpaceCellFromOtherBaseapp(COMPONENT_ID basea
 		ScriptDefModule* sm = EntityDef::findScriptModule(utype);
 		if(sm == NULL)
 		{
-			ERROR_MSG(fmt::format("RestoreEntityHandler::onRestoreSpaceCellFromOtherBaseapp({}): not found utype {}!\n", 
+			ERROR_MSG(fmt::format("RestoreEntityHandler::onRestoreSpaceCellFromOtherBaseapp({}): not found utype {}!\n",
 				cellappID_, utype));
 		}
 		else

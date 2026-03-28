@@ -2,7 +2,7 @@
 
 #include "kbcmd.h"
 #include "client_sdk.h"
-#include "client_sdk_unity.h"	
+#include "client_sdk_unity.h"
 #include "client_sdk_ue4.h"
 #include "entitydef/entitydef.h"
 #include "entitydef/scriptdef_module.h"
@@ -22,7 +22,7 @@
 #include "dbmgr/dbmgr_interface.h"
 #include "loginapp/loginapp_interface.h"
 
-namespace KBEngine {	
+namespace KBEngine {
 
 //-------------------------------------------------------------------------------------
 ClientSDK::ClientSDK():
@@ -209,7 +209,7 @@ bool ClientSDK::create(const std::string& path)
 
 	if (!writeCustomDataTypes())
 		return false;
-	
+
 	const EntityDef::SCRIPT_MODULES& scriptModules = EntityDef::getScriptModules();
 	EntityDef::SCRIPT_MODULES::const_iterator moduleIter = scriptModules.begin();
 	for (; moduleIter != scriptModules.end(); ++moduleIter)
@@ -250,7 +250,7 @@ bool ClientSDK::copyPluginsSourceToPath(const std::string& path)
 	wpath = strutil::char2wchar(basepath_.c_str());
 	std::wstring destPath = wpath;
 	free(wpath);
-	
+
 	std::vector<std::wstring> results;
 	if (!Resmgr::getSingleton().listPathRes(sourcePath, L"*", results))
 		return false;
@@ -296,7 +296,7 @@ bool ClientSDK::copyPluginsSourceToPath(const std::string& path)
 		}
 
 		basepath.erase(fpos, basepath.size() - fpos);
-		
+
 		ccattr = strutil::wchar2char(basepath.c_str());
 		std::string currbasepath = ccattr;
 		free(ccattr);
@@ -835,7 +835,7 @@ bool ClientSDK::writeEntityCall(ScriptDefModule* pScriptDefModule)
 
 	std::string newModuleName;
 
-	// ÏÈÐ´BaseEntityCall
+	// å…ˆå†™BaseEntityCall
 	if(!writeBaseEntityCallBegin(pScriptDefModule))
 		return false;
 
@@ -934,7 +934,7 @@ bool ClientSDK::writeEntityCall(ScriptDefModule* pScriptDefModule)
 	headerfileBody_ += fmt::format("\n");
 	sourcefileBody_ += fmt::format("\n");
 
-	// ÔÙÐ´CellEntityCall
+	// å†å†™CellEntityCall
 	if (!writeCellEntityCallBegin(pScriptDefModule))
 		return false;
 
@@ -1370,7 +1370,7 @@ bool ClientSDK::writeTypes()
 	}
 
 	if (!writeTypesEnd())
-		return false; 
+		return false;
 
 	return saveFile();
 }
@@ -1411,7 +1411,7 @@ bool ClientSDK::writeEntityModule(ScriptDefModule* pEntityScriptDefModule)
 
 	if (!writeEntityProcessMessagesMethod(pEntityScriptDefModule))
 		return false;
-	
+
 	if (!writeEntityModuleEnd(pEntityScriptDefModule))
 		return false;
 
@@ -1608,7 +1608,7 @@ bool ClientSDK::writeEntityMethods(ScriptDefModule* pEntityScriptDefModule,
 			if (pDataType->type() == DATA_TYPE_FIXEDARRAY)
 			{
 				FixedArrayType* pFixedArrayType = static_cast<FixedArrayType*>(pDataType);
-				
+
 				std::string argsTypeBody;
 				if (!writeEntityMethodArgs_ARRAY(pFixedArrayType, argsTypeBody, pFixedArrayType->aliasName()))
 				{

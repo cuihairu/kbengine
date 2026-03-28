@@ -6,7 +6,7 @@
 #include "controller.h"
 #include "updatable.h"
 #include "rotator_handler.h"
-#include "pyscript/scriptobject.h"	
+#include "pyscript/scriptobject.h"
 
 namespace KBEngine{
 
@@ -15,12 +15,12 @@ class TurnController : public Controller
 public:
 	TurnController(Entity* pEntity, RotatorHandler* pRotatorHandler = NULL, uint32 id = 0);
 	virtual ~TurnController();
-	
+
 	void pRotatorHandler(RotatorHandler* pRotatorHandler)
 	{
 		pRotatorHandler_ = pRotatorHandler;
 	}
-	
+
 	virtual void destroy();
 	virtual void addToStream(KBEngine::MemoryStream& s);
 	virtual void createFromStream(KBEngine::MemoryStream& s);

@@ -25,8 +25,8 @@ public:
 	INLINE void pRangeTrigger(RangeTrigger* pRangeTrigger);
 
 	/**
-		(À©Õ¹×ø±ê)
-		x && zÓÉ²»Í¬µÄÓ¦ÓÃÊµÏÖ(´Ó²»Í¬´¦»ñÈ¡)
+		(æ‰©å±•åæ ‡)
+		x && zç”±ä¸åŒçš„åº”ç”¨å®ç°(ä»ä¸åŒå¤„è·å–)
 	*/
 	virtual float xx() const;
 	virtual float yy() const;
@@ -41,14 +41,14 @@ public:
 	INLINE bool wasInZRange(CoordinateNode * pNode);
 
 	virtual void resetOld()
-	{ 
+	{
 		CoordinateNode::resetOld();
 		old_range_xz_ = range_xz_;
 		old_range_y_ = range_y_;
 	}
 
 	/**
-		¸¸½ÚµãÉ¾³ı
+		çˆ¶èŠ‚ç‚¹åˆ é™¤
 	*/
 	virtual void onParentRemove(CoordinateNode* pParentNode);
 
@@ -57,8 +57,8 @@ public:
 	void onTriggerUninstall();
 
 	/**
-		Ä³¸ö½Úµã±ä¶¯¾­¹ıÁË±¾½Úµã
-		@isfront: ÏòÇ°ÒÆ¶¯»¹ÊÇÏòºóÒÆ¶¯
+		æŸä¸ªèŠ‚ç‚¹å˜åŠ¨ç»è¿‡äº†æœ¬èŠ‚ç‚¹
+		@isfront: å‘å‰ç§»åŠ¨è¿˜æ˜¯å‘åç§»åŠ¨
 	*/
 	virtual void onNodePassX(CoordinateNode* pNode, bool isfront);
 	virtual void onNodePassY(CoordinateNode* pNode, bool isfront);

@@ -9,72 +9,72 @@
 #ifndef KBE_MACHINE_INTERFACE_H
 #define KBE_MACHINE_INTERFACE_H
 
-// common include	
+// common include
 #if defined(MACHINE)
 #include "machine.h"
 #endif
 #include "machine_interface_macros.h"
 #include "network/interface_defs.h"
 //#define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine{
 
 /**
-	machineËùÓĞÏûÏ¢½Ó¿ÚÔÚ´Ë¶¨Òå
+	machineæ‰€æœ‰æ¶ˆæ¯æ¥å£åœ¨æ­¤å®šä¹‰
 */
 NETWORK_INTERFACE_DECLARE_BEGIN(MachineInterface)
-	// ÆäËû×é¼şÏòapp¹ã²¥×Ô¼ºµÄ½Ó¿ÚµØÖ·
+	// å…¶ä»–ç»„ä»¶å‘appå¹¿æ’­è‡ªå·±çš„æ¥å£åœ°å€
 	MACHINE_MESSAGE_DECLARE_ARGS25(onBroadcastInterface,			NETWORK_VARIABLE_MESSAGE,
-									int32,							uid, 
+									int32,							uid,
 									std::string,					username,
-									COMPONENT_TYPE,					componentType, 
-									COMPONENT_ID,					componentID, 
-									COMPONENT_ID,					componentIDEx, 
-									COMPONENT_ORDER,				globalorderid, 
-									COMPONENT_ORDER,				grouporderid, 
+									COMPONENT_TYPE,					componentType,
+									COMPONENT_ID,					componentID,
+									COMPONENT_ID,					componentIDEx,
+									COMPONENT_ORDER,				globalorderid,
+									COMPONENT_ORDER,				grouporderid,
 									COMPONENT_GUS,					gus,
-									uint32,							intaddr, 
+									uint32,							intaddr,
 									uint16,							intport,
-									uint32,							extaddr, 
+									uint32,							extaddr,
 									uint16,							extport,
 									std::string,					extaddrEx,
 									uint32,							pid,
-									float,							cpu, 
-									float,							mem, 
+									float,							cpu,
+									float,							mem,
 									uint32,							usedmem,
 									int8,							state,
-									uint32,							machineID, 
+									uint32,							machineID,
 									uint64,							extradata,
 									uint64,							extradata1,
 									uint64,							extradata2,
 									uint64,							extradata3,
 									uint32,							backRecvAddr,
 									uint16,							backRecvPort)
-	
-	// ÆäËû×é¼şÏòappÇëÇó»ñÈ¡Ä³¸ö×é¼şÀà±ğµÄµØÖ·
+
+	// å…¶ä»–ç»„ä»¶å‘appè¯·æ±‚è·å–æŸä¸ªç»„ä»¶ç±»åˆ«çš„åœ°å€
 	MACHINE_MESSAGE_DECLARE_ARGS7(onFindInterfaceAddr,				NETWORK_VARIABLE_MESSAGE,
-									int32,							uid, 
+									int32,							uid,
 									std::string,					username,
-									COMPONENT_TYPE,					componentType, 
-									COMPONENT_ID,					componentID, 
+									COMPONENT_TYPE,					componentType,
+									COMPONENT_ID,					componentID,
 									COMPONENT_TYPE,					findComponentType,
-									uint32,							addr, 
+									uint32,							addr,
 									uint16,							finderRecvPort)
-						
-	// ²éÑ¯ËùÓĞ½Ó¿ÚĞÅÏ¢
+
+	// æŸ¥è¯¢æ‰€æœ‰æ¥å£ä¿¡æ¯
 	MACHINE_MESSAGE_DECLARE_ARGS3(onQueryAllInterfaceInfos,			NETWORK_VARIABLE_MESSAGE,
-									int32,							uid, 
+									int32,							uid,
 									std::string,					username,
 									uint16,							finderRecvPort)
-		
-	// ²éÑ¯ËùÓĞmachine½ø³Ì
+
+	// æŸ¥è¯¢æ‰€æœ‰machineè¿›ç¨‹
 	MACHINE_MESSAGE_DECLARE_ARGS3(onQueryMachines,					NETWORK_VARIABLE_MESSAGE,
-									int32,							uid, 
+									int32,							uid,
 									std::string,					username,
 									uint16,							finderRecvPort)
 
@@ -85,25 +85,25 @@ NETWORK_INTERFACE_DECLARE_BEGIN(MachineInterface)
 									uint16,							finderRecvPort,
 									int,							macMD5,
 									int32,							pid)
-	// Ä³appÖ÷¶¯ÇëÇólook¡£
+	// æŸappä¸»åŠ¨è¯·æ±‚lookã€‚
 	MACHINE_MESSAGE_DECLARE_ARGS0(lookApp,							NETWORK_FIXED_MESSAGE)
 
-	// Ä³¸öappÇëÇó²é¿´¸Ãapp¸ºÔØ×´Ì¬¡£
+	// æŸä¸ªappè¯·æ±‚æŸ¥çœ‹è¯¥appè´Ÿè½½çŠ¶æ€ã€‚
 	MACHINE_MESSAGE_DECLARE_ARGS0(queryLoad,						NETWORK_FIXED_MESSAGE)
 
-	// Æô¶¯·şÎñÆ÷
+	// å¯åŠ¨æœåŠ¡å™¨
 	MACHINE_MESSAGE_DECLARE_STREAM(startserver,						NETWORK_VARIABLE_MESSAGE)
 
-	// ¹Ø±Õ·şÎñÆ÷
+	// å…³é—­æœåŠ¡å™¨
 	MACHINE_MESSAGE_DECLARE_STREAM(stopserver,						NETWORK_VARIABLE_MESSAGE)
 
-	// ¹Ø±Õ·şÎñÆ÷
+	// å…³é—­æœåŠ¡å™¨
 	MACHINE_MESSAGE_DECLARE_STREAM(killserver,						NETWORK_VARIABLE_MESSAGE)
 
-	// ÉèÖÃflags
+	// è®¾ç½®flags
 	MACHINE_MESSAGE_DECLARE_STREAM(setflags,						NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇóÇ¿ÖÆÉ±ËÀµ±Ç°app
+	// è¯·æ±‚å¼ºåˆ¶æ€æ­»å½“å‰app
 	MACHINE_MESSAGE_DECLARE_STREAM(reqKillServer,					NETWORK_VARIABLE_MESSAGE)
 
 NETWORK_INTERFACE_DECLARE_END()

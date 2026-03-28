@@ -3,8 +3,8 @@
 
 #ifndef KBE_BOTS_H
 #define KBE_BOTS_H
-	
-// common include	
+
+// common include
 #include "profile.h"
 #include "create_and_login_handler.h"
 #include "common/timer.h"
@@ -12,7 +12,7 @@
 #include "network/endpoint.h"
 #include "helper/debug_helper.h"
 #include "helper/script_loglevel.h"
-#include "xml/xml.h"	
+#include "xml/xml.h"
 #include "common/singleton.h"
 #include "common/smartpointer.h"
 #include "common/timer.h"
@@ -25,12 +25,12 @@
 #include "entitydef/entitydef.h"
 
 //#define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine{
 
 class ClientObject;
@@ -40,8 +40,8 @@ class TelnetServer;
 class Bots  : public ClientApp
 {
 public:
-	Bots(Network::EventDispatcher& dispatcher, 
-		Network::NetworkInterface& ninterface, 
+	Bots(Network::EventDispatcher& dispatcher,
+		Network::NetworkInterface& ninterface,
 		COMPONENT_TYPE componentType,
 		COMPONENT_ID componentID);
 
@@ -62,39 +62,39 @@ public:
 	virtual void handleTimeout(TimerHandle, void * pUser);
 	virtual void handleGameTick();
 
-	static Bots& getSingleton(){ 
-		return *static_cast<Bots*>(ClientApp::getSingletonPtr()); 
+	static Bots& getSingleton(){
+		return *static_cast<Bots*>(ClientApp::getSingletonPtr());
 	}
 
 	/**
-		ÉèÖÃ½Å±¾Êä³öÀàĞÍÇ°×º
+		è®¾ç½®è„šæœ¬è¾“å‡ºç±»å‹å‰ç¼€
 	*/
 	static PyObject* __py_setScriptLogType(PyObject* self, PyObject* args);
 
 	bool run(void);
 
 	/**
-		ÓÉentityCallÀ´³¢ÊÔ»ñÈ¡Ò»¸öchannelµÄÊµÀı
+		ç”±entityCallæ¥å°è¯•è·å–ä¸€ä¸ªchannelçš„å®ä¾‹
 	*/
 	virtual Network::Channel* findChannelByEntityCall(EntityCallAbstract& entityCall);
 
 	/**
-	Í¨¹ıentityµÄID³¢ÊÔÑ°ÕÒËüµÄÊµÀı
+	é€šè¿‡entityçš„IDå°è¯•å¯»æ‰¾å®ƒçš„å®ä¾‹
 	*/
 	virtual PyObject* tryGetEntity(COMPONENT_ID componentID, ENTITY_ID entityID);
 
-	/** ÍøÂç½Ó¿Ú
-		Ä³¸öappÇëÇó²é¿´¸Ãapp
+	/** ç½‘ç»œæ¥å£
+		æŸä¸ªappè¯·æ±‚æŸ¥çœ‹è¯¥app
 	*/
 	virtual void lookApp(Network::Channel* pChannel);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó¹Ø±Õ·şÎñÆ÷
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚å…³é—­æœåŠ¡å™¨
 	*/
 	virtual void reqCloseServer(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó¹Ø±Õ·şÎñÆ÷
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚å…³é—­æœåŠ¡å™¨
 	*/
 	void reqKillServer(Network::Channel* pChannel, MemoryStream& s);
 
@@ -121,145 +121,145 @@ public:
 
 	static PyObject* __py_addBots(PyObject* self, PyObject* args);
 
-	/** ÍøÂç½Ó¿Ú
-	   Ìí¼Óbots
-	   @total uint32: ×Ü¹²Ìí¼ÓµÄ¸öÊı
-	   @ticknum uint32: Ã¿¸ötickÌí¼Ó¶àÉÙ¸ö
-	   @ticktime float: Ò»¸ötickµÄÊ±¼ä
+	/** ç½‘ç»œæ¥å£
+	   æ·»åŠ bots
+	   @total uint32: æ€»å…±æ·»åŠ çš„ä¸ªæ•°
+	   @ticknum uint32: æ¯ä¸ªtickæ·»åŠ å¤šå°‘ä¸ª
+	   @ticktime float: ä¸€ä¸ªtickçš„æ—¶é—´
 	*/
 	virtual void addBots(Network::Channel * pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		Ä³¸öappÏò±¾app¸æÖª´¦ÓÚ»î¶¯×´Ì¬¡£
+	/** ç½‘ç»œæ¥å£
+		æŸä¸ªappå‘æœ¬appå‘ŠçŸ¥å¤„äºæ´»åŠ¨çŠ¶æ€ã€‚
 	*/
 	void onAppActiveTick(Network::Channel* pChannel, COMPONENT_TYPE componentType, COMPONENT_ID componentID);
 
 	virtual void onHelloCB_(Network::Channel* pChannel, const std::string& verInfo,
-		const std::string& scriptVerInfo, const std::string& protocolMD5, 
+		const std::string& scriptVerInfo, const std::string& protocolMD5,
 		const std::string& entityDefMD5, COMPONENT_TYPE componentType);
 
-	/** ÍøÂç½Ó¿Ú
-		ºÍ·şÎñ¶ËµÄ°æ±¾²»Æ¥Åä
+	/** ç½‘ç»œæ¥å£
+		å’ŒæœåŠ¡ç«¯çš„ç‰ˆæœ¬ä¸åŒ¹é…
 	*/
 	virtual void onVersionNotMatch(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		ºÍ·şÎñ¶ËµÄ½Å±¾²ã°æ±¾²»Æ¥Åä
+	/** ç½‘ç»œæ¥å£
+		å’ŒæœåŠ¡ç«¯çš„è„šæœ¬å±‚ç‰ˆæœ¬ä¸åŒ¹é…
 	*/
 	virtual void onScriptVersionNotMatch(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		´´½¨ÕËºÅ³É¹¦ºÍÊ§°Ü»Øµ÷
-	   @failedcode: Ê§°Ü·µ»ØÂë NETWORK_ERR_SRV_NO_READY:·şÎñÆ÷Ã»ÓĞ×¼±¸ºÃ, 
-									NETWORK_ERR_ACCOUNT_CREATE:´´½¨Ê§°Ü£¨ÒÑ¾­´æÔÚ£©, 
-									NETWORK_SUCCESS:ÕËºÅ´´½¨³É¹¦
+	/** ç½‘ç»œæ¥å£
+		åˆ›å»ºè´¦å·æˆåŠŸå’Œå¤±è´¥å›è°ƒ
+	   @failedcode: å¤±è´¥è¿”å›ç  NETWORK_ERR_SRV_NO_READY:æœåŠ¡å™¨æ²¡æœ‰å‡†å¤‡å¥½,
+									NETWORK_ERR_ACCOUNT_CREATE:åˆ›å»ºå¤±è´¥ï¼ˆå·²ç»å­˜åœ¨ï¼‰,
+									NETWORK_SUCCESS:è´¦å·åˆ›å»ºæˆåŠŸ
 
 									SERVER_ERROR_CODE failedcode;
-		@¶ş½øÖÆ¸½´øÊı¾İ:¶ş½øÖÆ¶îÍâÊı¾İ: uint32³¤¶È + bytearray
+		@äºŒè¿›åˆ¶é™„å¸¦æ•°æ®:äºŒè¿›åˆ¶é¢å¤–æ•°æ®: uint32é•¿åº¦ + bytearray
 	*/
 	virtual void onCreateAccountResult(Network::Channel * pChannel, MemoryStream& s);
 
 	Network::EventPoller* pEventPoller(){ return pEventPoller_; }
 
-	/** ÍøÂç½Ó¿Ú
-	   µÇÂ¼Ê§°Ü»Øµ÷
-	   @failedcode: Ê§°Ü·µ»ØÂë NETWORK_ERR_SRV_NO_READY:·şÎñÆ÷Ã»ÓĞ×¼±¸ºÃ, 
-									NETWORK_ERR_SRV_OVERLOAD:·şÎñÆ÷¸ºÔØ¹ıÖØ, 
-									NETWORK_ERR_NAME_PASSWORD:ÓÃ»§Ãû»òÕßÃÜÂë²»ÕıÈ·
+	/** ç½‘ç»œæ¥å£
+	   ç™»å½•å¤±è´¥å›è°ƒ
+	   @failedcode: å¤±è´¥è¿”å›ç  NETWORK_ERR_SRV_NO_READY:æœåŠ¡å™¨æ²¡æœ‰å‡†å¤‡å¥½,
+									NETWORK_ERR_SRV_OVERLOAD:æœåŠ¡å™¨è´Ÿè½½è¿‡é‡,
+									NETWORK_ERR_NAME_PASSWORD:ç”¨æˆ·åæˆ–è€…å¯†ç ä¸æ­£ç¡®
 	*/
 	virtual void onLoginFailed(Network::Channel * pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-	   µÇÂ¼³É¹¦
-	   @ip: ·şÎñÆ÷ipµØÖ·
-	   @port: ·şÎñÆ÷¶Ë¿Ú
+	/** ç½‘ç»œæ¥å£
+	   ç™»å½•æˆåŠŸ
+	   @ip: æœåŠ¡å™¨ipåœ°å€
+	   @port: æœåŠ¡å™¨ç«¯å£
 	*/
 	virtual void onLoginSuccessfully(Network::Channel * pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-	   µÇÂ¼Ê§°Ü»Øµ÷
-	   @failedcode: Ê§°Ü·µ»ØÂë NETWORK_ERR_SRV_NO_READY:·şÎñÆ÷Ã»ÓĞ×¼±¸ºÃ, 
-									NETWORK_ERR_ILLEGAL_LOGIN:·Ç·¨µÇÂ¼, 
-									NETWORK_ERR_NAME_PASSWORD:ÓÃ»§Ãû»òÕßÃÜÂë²»ÕıÈ·
+	/** ç½‘ç»œæ¥å£
+	   ç™»å½•å¤±è´¥å›è°ƒ
+	   @failedcode: å¤±è´¥è¿”å›ç  NETWORK_ERR_SRV_NO_READY:æœåŠ¡å™¨æ²¡æœ‰å‡†å¤‡å¥½,
+									NETWORK_ERR_ILLEGAL_LOGIN:éæ³•ç™»å½•,
+									NETWORK_ERR_NAME_PASSWORD:ç”¨æˆ·åæˆ–è€…å¯†ç ä¸æ­£ç¡®
 	*/
 	virtual void onLoginBaseappFailed(Network::Channel * pChannel, SERVER_ERROR_CODE failedcode);
 
-	/** ÍøÂç½Ó¿Ú
-	   ÖØµÇÂ½baseapp³É¹¦
+	/** ç½‘ç»œæ¥å£
+	   é‡ç™»é™†baseappæˆåŠŸ
 	*/
 	virtual void onReloginBaseappSuccessfully(Network::Channel * pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		·şÎñÆ÷¶ËÒÑ¾­´´½¨ÁËÒ»¸öÓë¿Í»§¶Ë¹ØÁªµÄ´úÀíEntity
-	   ÔÚµÇÂ¼Ê±Ò²¿É±í´ï³É¹¦»Øµ÷
-	   @datas: ÕËºÅentityµÄĞÅÏ¢
+	/** ç½‘ç»œæ¥å£
+		æœåŠ¡å™¨ç«¯å·²ç»åˆ›å»ºäº†ä¸€ä¸ªä¸å®¢æˆ·ç«¯å…³è”çš„ä»£ç†Entity
+	   åœ¨ç™»å½•æ—¶ä¹Ÿå¯è¡¨è¾¾æˆåŠŸå›è°ƒ
+	   @datas: è´¦å·entityçš„ä¿¡æ¯
 	*/
-	virtual void onCreatedProxies(Network::Channel * pChannel, uint64 rndUUID, 
+	virtual void onCreatedProxies(Network::Channel * pChannel, uint64 rndUUID,
 		ENTITY_ID eid, std::string& entityType);
 
-	/** ÍøÂç½Ó¿Ú
-		·şÎñÆ÷ÉÏµÄentityÒÑ¾­½øÈëÓÎÏ·ÊÀ½çÁË
+	/** ç½‘ç»œæ¥å£
+		æœåŠ¡å™¨ä¸Šçš„entityå·²ç»è¿›å…¥æ¸¸æˆä¸–ç•Œäº†
 	*/
 	virtual void onEntityEnterWorld(Network::Channel * pChannel, MemoryStream& s);
 
 
-	/** ÍøÂç½Ó¿Ú
-		·şÎñÆ÷ÉÏµÄentityÒÑ¾­Àë¿ªÓÎÏ·ÊÀ½çÁË
+	/** ç½‘ç»œæ¥å£
+		æœåŠ¡å™¨ä¸Šçš„entityå·²ç»ç¦»å¼€æ¸¸æˆä¸–ç•Œäº†
 	*/
 	virtual void onEntityLeaveWorld(Network::Channel * pChannel, ENTITY_ID eid);
 	virtual void onEntityLeaveWorldOptimized(Network::Channel * pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		¸æËß¿Í»§¶ËÄ³¸öentityÏú»ÙÁË£¬ ´ËÀàentityÍ¨³£ÊÇ»¹Î´onEntityEnterWorld
+	/** ç½‘ç»œæ¥å£
+		å‘Šè¯‰å®¢æˆ·ç«¯æŸä¸ªentityé”€æ¯äº†ï¼Œ æ­¤ç±»entityé€šå¸¸æ˜¯è¿˜æœªonEntityEnterWorld
 	*/
 	virtual void onEntityDestroyed(Network::Channel * pChannel, ENTITY_ID eid);
 
-	/** ÍøÂç½Ó¿Ú
-		·şÎñÆ÷ÉÏµÄentityÒÑ¾­½øÈëspaceÁË
+	/** ç½‘ç»œæ¥å£
+		æœåŠ¡å™¨ä¸Šçš„entityå·²ç»è¿›å…¥spaceäº†
 	*/
 	virtual void onEntityEnterSpace(Network::Channel * pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		·şÎñÆ÷ÉÏµÄentityÒÑ¾­Àë¿ªspaceÁË
+	/** ç½‘ç»œæ¥å£
+		æœåŠ¡å™¨ä¸Šçš„entityå·²ç»ç¦»å¼€spaceäº†
 	*/
 	virtual void onEntityLeaveSpace(Network::Channel * pChannel, ENTITY_ID eid);
 
-	/** ÍøÂç½Ó¿Ú
-		Ô¶³Ìµ÷ÓÃentityµÄ·½·¨ 
+	/** ç½‘ç»œæ¥å£
+		è¿œç¨‹è°ƒç”¨entityçš„æ–¹æ³•
 	*/
 	virtual void onRemoteMethodCall(Network::Channel* pChannel, MemoryStream& s);
 	virtual void onRemoteMethodCallOptimized(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-	   ±»Ìß³ö·şÎñÆ÷
+	/** ç½‘ç»œæ¥å£
+	   è¢«è¸¢å‡ºæœåŠ¡å™¨
 	*/
 	virtual void onKicked(Network::Channel * pChannel, SERVER_ERROR_CODE failedcode);
 
-	/** ÍøÂç½Ó¿Ú
-		·şÎñÆ÷¸üĞÂentityÊôĞÔ
+	/** ç½‘ç»œæ¥å£
+		æœåŠ¡å™¨æ›´æ–°entityå±æ€§
 	*/
 	virtual void onUpdatePropertys(Network::Channel* pChannel, MemoryStream& s);
 	virtual void onUpdatePropertysOptimized(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		·şÎñÆ÷¸üĞÂavatar»ù´¡Î»ÖÃºÍ³¯Ïò
+	/** ç½‘ç»œæ¥å£
+		æœåŠ¡å™¨æ›´æ–°avataråŸºç¡€ä½ç½®å’Œæœå‘
 	*/
 	virtual void onUpdateBasePos(Network::Channel* pChannel, float x, float y, float z);
 	virtual void onUpdateBasePosXZ(Network::Channel* pChannel, float x, float z);
 	virtual void onUpdateBaseDir(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		·şÎñÆ÷Ç¿ÖÆÉèÖÃentityµÄÎ»ÖÃÓë³¯Ïò
+	/** ç½‘ç»œæ¥å£
+		æœåŠ¡å™¨å¼ºåˆ¶è®¾ç½®entityçš„ä½ç½®ä¸æœå‘
 	*/
 	virtual void onSetEntityPosAndDir(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		·şÎñÆ÷¸üĞÂVolatileData
+	/** ç½‘ç»œæ¥å£
+		æœåŠ¡å™¨æ›´æ–°VolatileData
 	*/
 	virtual void onUpdateData(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		·ÇÓÅ»¯¸ß¾«¶ÈÍ¬²½
+	/** ç½‘ç»œæ¥å£
+		éä¼˜åŒ–é«˜ç²¾åº¦åŒæ­¥
 	*/
 	virtual void onUpdateData_ypr(Network::Channel* pChannel, MemoryStream& s);
 	virtual void onUpdateData_yp(Network::Channel* pChannel, MemoryStream& s);
@@ -287,8 +287,8 @@ public:
 	virtual void onUpdateData_xyz_p(Network::Channel* pChannel, MemoryStream& s);
 	virtual void onUpdateData_xyz_r(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		ÓÅ»¯µÄÎ»ÖÃÍ¬²½
+	/** ç½‘ç»œæ¥å£
+		ä¼˜åŒ–çš„ä½ç½®åŒæ­¥
 	*/
 	virtual void onUpdateData_ypr_optimized(Network::Channel* pChannel, MemoryStream& s);
 	virtual void onUpdateData_yp_optimized(Network::Channel* pChannel, MemoryStream& s);
@@ -316,47 +316,47 @@ public:
 	virtual void onUpdateData_xyz_p_optimized(Network::Channel* pChannel, MemoryStream& s);
 	virtual void onUpdateData_xyz_r_optimized(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		download stream¿ªÊ¼ÁË 
+	/** ç½‘ç»œæ¥å£
+		download streamå¼€å§‹äº†
 	*/
 	virtual void onStreamDataStarted(Network::Channel* pChannel, int16 id, uint32 datasize, std::string& descr);
 
-	/** ÍøÂç½Ó¿Ú
-		½ÓÊÕµ½streamData
+	/** ç½‘ç»œæ¥å£
+		æ¥æ”¶åˆ°streamData
 	*/
 	virtual void onStreamDataRecv(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		download streamÍê³ÉÁË 
+	/** ç½‘ç»œæ¥å£
+		download streamå®Œæˆäº†
 	*/
 	virtual void onStreamDataCompleted(Network::Channel* pChannel, int16 id);
 
-	/** ÍøÂç½Ó¿Ú
-		spaceÏà¹Ø²Ù×÷½Ó¿Ú
-		·şÎñ¶ËÌí¼ÓÁËÄ³¸öspaceµÄ¼¸ºÎÓ³Éä
+	/** ç½‘ç»œæ¥å£
+		spaceç›¸å…³æ“ä½œæ¥å£
+		æœåŠ¡ç«¯æ·»åŠ äº†æŸä¸ªspaceçš„å‡ ä½•æ˜ å°„
 	*/
 	virtual void initSpaceData(Network::Channel* pChannel, MemoryStream& s);
 	virtual void setSpaceData(Network::Channel* pChannel, SPACE_ID spaceID, const std::string& key, const std::string& value);
 	virtual void delSpaceData(Network::Channel* pChannel, SPACE_ID spaceID, const std::string& key);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó²é¿´watcher
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚æŸ¥çœ‹watcher
 	*/
 	void queryWatcher(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		consoleÇëÇó¿ªÊ¼profile
+	/** ç½‘ç»œæ¥å£
+		consoleè¯·æ±‚å¼€å§‹profile
 	*/
 	void startProfile(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 	virtual void startProfile_(Network::Channel* pChannel, std::string profileName, int8 profileType, uint32 timelen);
 
-	/** ÍøÂç½Ó¿Ú
-	    ·şÎñÆ÷¸æËß¿Í»§¶Ë£ºÄãµ±Ç°£¨È¡Ïû£©¿ØÖÆË­µÄÎ»ÒÆÍ¬²½
+	/** ç½‘ç»œæ¥å£
+	    æœåŠ¡å™¨å‘Šè¯‰å®¢æˆ·ç«¯ï¼šä½ å½“å‰ï¼ˆå–æ¶ˆï¼‰æ§åˆ¶è°çš„ä½ç§»åŒæ­¥
 	*/
 	virtual void onControlEntity(Network::Channel* pChannel, int32 entityID, int8 isControlled);
 
-	/** ÍøÂç½Ó¿Ú
-		·şÎñÆ÷ĞÄÌø·µ»Ø
+	/** ç½‘ç»œæ¥å£
+		æœåŠ¡å™¨å¿ƒè·³è¿”å›
 	*/
 	void onAppActiveTickCB(Network::Channel* pChannel);
 
@@ -365,12 +365,12 @@ protected:
 
 	CLIENTS													clients_;
 
-	// consoleÇëÇó´´½¨µ½·şÎñ¶ËµÄbotsÊıÁ¿
+	// consoleè¯·æ±‚åˆ›å»ºåˆ°æœåŠ¡ç«¯çš„botsæ•°é‡
 	uint32													reqCreateAndLoginTotalCount_;
 	uint32													reqCreateAndLoginTickCount_;
 	float													reqCreateAndLoginTickTime_;
 
-	// ´¦Àí´´½¨ÓëµÇÂ¼µÄhandler
+	// å¤„ç†åˆ›å»ºä¸ç™»å½•çš„handler
 	CreateAndLoginHandler*									pCreateAndLoginHandler_;
 
 	Network::EventPoller*									pEventPoller_;

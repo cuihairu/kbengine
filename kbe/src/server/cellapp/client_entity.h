@@ -3,8 +3,8 @@
 
 #ifndef KBE_CLIENT_ENTITY_H
 #define KBE_CLIENT_ENTITY_H
-	
-// common include	
+
+// common include
 #include "common/common.h"
 //#include "network/channel.h"
 #include "pyscript/scriptobject.h"
@@ -15,17 +15,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <iostream>	
-#include <map>	
-#include <vector>	
-// windows include	
+#include <iostream>
+#include <map>
+#include <vector>
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
-#include <time.h> 
+#include <time.h>
 #else
 // linux include
 #include <errno.h>
 #endif
-	
+
 namespace KBEngine{
 
 namespace Network
@@ -40,7 +40,7 @@ class PropertyDescription;
 
 class ClientEntityComponent : public script::ScriptObject
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
 	INSTANCE_SCRIPT_HREADER(ClientEntityComponent, ScriptObject)
 public:
 	ClientEntityComponent(PropertyDescription* pComponentPropertyDescription, ClientEntity* pClientEntity);
@@ -50,12 +50,12 @@ public:
 	ScriptDefModule* pComponentScriptDefModule();
 
 	/**
-		½Å±¾ÇëÇó»ñÈ¡ÊôĞÔ»òÕß·½·¨
+		è„šæœ¬è¯·æ±‚è·å–å±æ€§æˆ–è€…æ–¹æ³•
 	*/
 	PyObject* onScriptGetAttribute(PyObject* attr);
 
 	/**
-		»ñµÃ¶ÔÏóµÄÃèÊö
+		è·å¾—å¯¹è±¡çš„æè¿°
 	*/
 	PyObject* tp_repr();
 	PyObject* tp_str();
@@ -70,24 +70,24 @@ protected:
 
 class ClientEntity : public script::ScriptObject
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
 	INSTANCE_SCRIPT_HREADER(ClientEntity, ScriptObject)
 public:
 	ClientEntity(ENTITY_ID srcEntityID, ENTITY_ID clientEntityID);
-	
+
 	~ClientEntity();
-	
-	/** 
-		½Å±¾ÇëÇó»ñÈ¡ÊôĞÔ»òÕß·½·¨ 
+
+	/**
+		è„šæœ¬è¯·æ±‚è·å–å±æ€§æˆ–è€…æ–¹æ³•
 	*/
-	PyObject* onScriptGetAttribute(PyObject* attr);						
-			
-	/** 
-		»ñµÃ¶ÔÏóµÄÃèÊö 
+	PyObject* onScriptGetAttribute(PyObject* attr);
+
+	/**
+		è·å¾—å¯¹è±¡çš„æè¿°
 	*/
 	PyObject* tp_repr();
 	PyObject* tp_str();
-	
+
 	void c_str(char* s, size_t size);
 
 	ENTITY_ID srcEntityID() const {

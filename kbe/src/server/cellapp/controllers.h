@@ -3,7 +3,7 @@
 #ifndef KBE_CONTROLLERS_H
 #define KBE_CONTROLLERS_H
 
-#include "controller.h"	
+#include "controller.h"
 
 namespace KBEngine{
 
@@ -16,7 +16,7 @@ public:
 	bool add(KBEShared_ptr<Controller> pController);
 	bool remove(KBEShared_ptr<Controller> pController);
 	bool remove(uint32 id);
-	
+
 	void clear();
 
 	uint32 freeID() { return ++lastid_; }

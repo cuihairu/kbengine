@@ -3,7 +3,7 @@
 #ifndef KBE_NAVIGATEHANDLER_H
 #define KBE_NAVIGATEHANDLER_H
 
-#include "move_controller.h"	
+#include "move_controller.h"
 #include "math/math.h"
 #include "navigation/navigation_handle.h"
 
@@ -12,13 +12,13 @@ namespace KBEngine{
 class NavigateHandler : public MoveToPointHandler
 {
 public:
-	NavigateHandler(KBEShared_ptr<Controller>& pController, const Position3D& destPos, float velocity, float distance, bool faceMovement, 
+	NavigateHandler(KBEShared_ptr<Controller>& pController, const Position3D& destPos, float velocity, float distance, bool faceMovement,
 		float maxMoveDistance, VECTOR_POS3D_PTR paths_ptr,
 		PyObject* userarg);
 
 	NavigateHandler();
 	virtual ~NavigateHandler();
-	
+
 	void addToStream(KBEngine::MemoryStream& s);
 	void createFromStream(KBEngine::MemoryStream& s);
 
@@ -34,7 +34,7 @@ protected:
 
 	float maxMoveDistance_;
 };
- 
+
 }
 #endif // KBE_NAVIGATEHANDLER_H
 

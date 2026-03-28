@@ -7,7 +7,7 @@
 #include "helper/console_helper.h"
 
 namespace KBEngine{
-	
+
 //-------------------------------------------------------------------------------------
 LogWatcher::LogWatcher()
 {
@@ -26,7 +26,7 @@ void LogWatcher::reset()
 	{
 		filterOptions_.componentBitmap[i] = 0;
 	}
-	
+
 	filterOptions_.uid = 0;
 	filterOptions_.logtypes = 0;
 	filterOptions_.globalOrder = 0;
@@ -57,7 +57,7 @@ bool LogWatcher::createFromStream(MemoryStream * s)
 bool LogWatcher::updateSetting(MemoryStream * s)
 {
 	reset();
-	
+
 	(*s) >> filterOptions_.uid;
 	(*s) >> filterOptions_.logtypes;
 	(*s) >> filterOptions_.globalOrder;
@@ -67,7 +67,7 @@ bool LogWatcher::updateSetting(MemoryStream * s)
 
 	int8 count = 0;
 	(*s) >> count;
-	
+
 	for(int8 i=0; i<count; ++i)
 	{
 		COMPONENT_TYPE type;

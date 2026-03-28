@@ -33,8 +33,8 @@ ServerConfig g_serverConfig;
 KBE_SINGLETON_INIT(Dbmgr);
 
 //-------------------------------------------------------------------------------------
-Dbmgr::Dbmgr(Network::EventDispatcher& dispatcher, 
-			 Network::NetworkInterface& ninterface, 
+Dbmgr::Dbmgr(Network::EventDispatcher& dispatcher,
+			 Network::NetworkInterface& ninterface,
 			 COMPONENT_TYPE componentType,
 			 COMPONENT_ID componentID):
 	PythonApp(dispatcher, ninterface, componentType, componentID),
@@ -77,7 +77,7 @@ ShutdownHandler::CAN_SHUTDOWN_STATE Dbmgr::canShutdown()
 {
 	if (getEntryScript().get() && PyObject_HasAttrString(getEntryScript().get(), "onReadyForShutDown") > 0)
 	{
-		// À˘”–Ω≈±æ∂ºº”‘ÿÕÍ±œ
+		// ÊâÄÊúâËÑöÊú¨ÈÉΩÂä†ËΩΩÂÆåÊØï
 		PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
 			const_cast<char*>("onReadyForShutDown"),
 			const_cast<char*>(""));
@@ -146,17 +146,17 @@ ShutdownHandler::CAN_SHUTDOWN_STATE Dbmgr::canShutdown()
 	return ShutdownHandler::CAN_SHUTDOWN_STATE_TRUE;
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Dbmgr::onShutdownBegin()
 {
 	PythonApp::onShutdownBegin();
 
-	// Õ®÷™Ω≈±æ
+	// ÈÄöÁü•ËÑöÊú¨
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 	SCRIPT_OBJECT_CALL_ARGS0(getEntryScript().get(), const_cast<char*>("onDBMgrShutDown"), false);
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Dbmgr::onShutdownEnd()
 {
 	PythonApp::onShutdownEnd();
@@ -211,11 +211,11 @@ void Dbmgr::handleTimeout(TimerHandle handle, void * arg)
 void Dbmgr::handleMainTick()
 {
 	AUTO_SCOPED_PROFILE("mainTick");
-	
+
 	 // time_t t = ::time(NULL);
 	 // static int kbeTime = 0;
 	 // DEBUG_MSG(fmt::format("Dbmgr::handleGameTick[{}]:{}\n", t, ++kbeTime));
-	
+
 	threadPool_.onMainThreadTick();
 	DBUtil::handleMainTick();
 	networkInterface().processChannels(&DbmgrInterface::messageHandlers);
@@ -224,7 +224,7 @@ void Dbmgr::handleMainTick()
 //-------------------------------------------------------------------------------------
 void Dbmgr::handleCheckStatusTick()
 {
-	// ºÏ≤È∂™ ßµƒ◊Èº˛Ω¯≥Ã£¨»Áπ˚‘⁄“ª∂Œ ±º‰÷Æƒ⁄»‘»ªŒﬁ∑®∑¢œ÷£¨–Ë“™«Â¿Ì ˝æ›ø‚÷–entitylog
+	// Ê£ÄÊü•‰∏¢Â§±ÁöÑÁªÑ‰ª∂ËøõÁ®ãÔºåÂ¶ÇÊûúÂú®‰∏ÄÊÆµÊó∂Èó¥‰πãÂÜÖ‰ªçÁÑ∂Êó†Ê≥ïÂèëÁé∞ÔºåÈúÄË¶ÅÊ∏ÖÁêÜÊï∞ÊçÆÂ∫ì‰∏≠entitylog
 	if (loseBaseappts_.size() > 0)
 	{
 		std::map<COMPONENT_ID, uint64>::iterator iter = loseBaseappts_.begin();
@@ -266,7 +266,7 @@ bool Dbmgr::initializeBegin()
 //-------------------------------------------------------------------------------------
 bool Dbmgr::inInitialize()
 {
-	// ≥ı ºªØÀ˘”–¿©’πƒ£øÈ
+	// ÂàùÂßãÂåñÊâÄÊúâÊâ©Â±ïÊ®°Âùó
 	// assets/scripts/
 	if (!PythonApp::inInitialize())
 		return false;
@@ -284,14 +284,14 @@ bool Dbmgr::initializeEnd()
 {
 	PythonApp::initializeEnd();
 
-	// ÃÌº”“ª∏ˆtimer£¨ √ø√ÎºÏ≤È“ª–©◊¥Ã¨
+	// Ê∑ªÂä†‰∏Ä‰∏™timerÔºå ÊØèÁßíÊ£ÄÊü•‰∏Ä‰∫õÁä∂ÊÄÅ
 	loopCheckTimerHandle_ = this->dispatcher().addTimer(1000000, this,
 							reinterpret_cast<void *>(TIMEOUT_CHECK_STATUS));
 
 	mainProcessTimer_ = this->dispatcher().addTimer(1000000 / 50, this,
 							reinterpret_cast<void *>(TIMEOUT_TICK));
 
-	// ÃÌº”globalData, baseAppData, cellAppData÷ß≥÷
+	// Ê∑ªÂä†globalData, baseAppData, cellAppDataÊîØÊåÅ
 	pGlobalData_ = new GlobalDataServer(GlobalDataServer::GLOBAL_DATA);
 	pBaseAppData_ = new GlobalDataServer(GlobalDataServer::BASEAPP_DATA);
 	pCellAppData_ = new GlobalDataServer(GlobalDataServer::CELLAPP_DATA);
@@ -300,14 +300,14 @@ bool Dbmgr::initializeEnd()
 	pBaseAppData_->addConcernComponentType(BASEAPP_TYPE);
 	pCellAppData_->addConcernComponentType(CELLAPP_TYPE);
 
-	INFO_MSG(fmt::format("Dbmgr::initializeEnd: digest({})\n", 
+	INFO_MSG(fmt::format("Dbmgr::initializeEnd: digest({})\n",
 		EntityDef::md5().getDigestStr()));
-	
+
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 
-	// À˘”–Ω≈±æ∂ºº”‘ÿÕÍ±œ
-	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(), 
-										const_cast<char*>("onDBMgrReady"), 
+	// ÊâÄÊúâËÑöÊú¨ÈÉΩÂä†ËΩΩÂÆåÊØï
+	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
+										const_cast<char*>("onDBMgrReady"),
 										const_cast<char*>(""));
 
 	if(pyResult != NULL)
@@ -323,7 +323,7 @@ bool Dbmgr::initializeEnd()
 		g_kbeSrvConfig.getDBMgr().telnet_port);
 
 	Components::getSingleton().extraData4(pTelnetServer_->port());
-	
+
 	return ret && initInterfacesHandler() && initDB();
 }
 
@@ -339,7 +339,7 @@ bool Dbmgr::uninstallPyModules()
 	return script::entitydef::uninstallModule() && PythonApp::uninstallPyModules();
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 void Dbmgr::onInstallPyModules()
 {
 	PyObject * module = getScript().getModule();
@@ -355,7 +355,7 @@ void Dbmgr::onInstallPyModules()
 	APPEND_SCRIPT_MODULE_METHOD(module,		executeRawDatabaseCommand,		__py_executeRawDatabaseCommand,		METH_VARARGS,	0);
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 bool Dbmgr::initInterfacesHandler()
 {
 	std::vector< Network::Address > addresses = g_kbeSrvConfig.interfacesAddrs();
@@ -401,13 +401,13 @@ bool Dbmgr::initInterfacesHandler()
 	return pInterfacesHandlers_.size() > 0;
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 bool Dbmgr::initDB()
 {
 	ScriptDefModule* pModule = EntityDef::findScriptModule(DBUtil::accountScriptName());
 	if(pModule == NULL)
 	{
-		ERROR_MSG(fmt::format("Dbmgr::initDB(): not found account script[{}]!\n", 
+		ERROR_MSG(fmt::format("Dbmgr::initDB(): not found account script[{}]!\n",
 			DBUtil::accountScriptName()));
 
 		return false;
@@ -473,7 +473,7 @@ bool Dbmgr::initDB()
 void Dbmgr::finalise()
 {
 	SAFE_RELEASE(pUpdateDBServerLogHandler_);
-	
+
 	SAFE_RELEASE(pGlobalData_);
 	SAFE_RELEASE(pBaseAppData_);
 	SAFE_RELEASE(pCellAppData_);
@@ -504,13 +504,13 @@ void Dbmgr::onReqAllocEntityID(Network::Channel* pChannel, COMPONENT_ORDER compo
 {
 	KBEngine::COMPONENT_TYPE ct = static_cast<KBEngine::COMPONENT_TYPE>(componentType);
 
-	// ªÒ»°“ª∏ˆid∂Œ ≤¢¥´ ‰∏¯IDClient
+	// Ëé∑Âèñ‰∏Ä‰∏™idÊÆµ Âπ∂‰º†ËæìÁªôIDClient
 	std::pair<ENTITY_ID, ENTITY_ID> idRange = idServer_.allocRange();
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 
 	if(ct == BASEAPP_TYPE)
 		(*pBundle).newMessage(BaseappInterface::onReqAllocEntityID);
-	else	
+	else
 		(*pBundle).newMessage(CellappInterface::onReqAllocEntityID);
 
 	(*pBundle) << idRange.first;
@@ -519,7 +519,7 @@ void Dbmgr::onReqAllocEntityID(Network::Channel* pChannel, COMPONENT_ORDER compo
 }
 
 //-------------------------------------------------------------------------------------
-void Dbmgr::onRegisterNewApp(Network::Channel* pChannel, int32 uid, std::string& username, 
+void Dbmgr::onRegisterNewApp(Network::Channel* pChannel, int32 uid, std::string& username,
 						COMPONENT_TYPE componentType, COMPONENT_ID componentID, COMPONENT_ORDER globalorderID, COMPONENT_ORDER grouporderID,
 						uint32 intaddr, uint16 intport, uint32 extaddr, uint16 extport, std::string& extaddrEx)
 {
@@ -530,7 +530,7 @@ void Dbmgr::onRegisterNewApp(Network::Channel* pChannel, int32 uid, std::string&
 						intaddr, intport, extaddr, extport, extaddrEx);
 
 	KBEngine::COMPONENT_TYPE tcomponentType = (KBEngine::COMPONENT_TYPE)componentType;
-	
+
 	COMPONENT_ORDER startGroupOrder = 1;
 	COMPONENT_ORDER startGlobalOrder = Components::getSingleton().getGlobalOrderLog()[getUserUID()];
 
@@ -543,11 +543,11 @@ void Dbmgr::onRegisterNewApp(Network::Channel* pChannel, int32 uid, std::string&
 	if(pSyncAppDatasHandler_ == NULL)
 		pSyncAppDatasHandler_ = new SyncAppDatasHandler(this->networkInterface());
 
-	// œ¬“ª≤Ω:
-	// »Áπ˚ «¡¨Ω”µΩdbmgr‘Ú–Ë“™µ»¥˝Ω” ’app≥ı º–≈œ¢
-	// ¿˝»Á£∫≥ı ºª·∑÷≈‰entityID∂Œ“‘º∞’‚∏ˆapp∆Ù∂ØµƒÀ≥–Ú–≈œ¢£® «∑Òµ⁄“ª∏ˆbaseapp∆Ù∂Ø£©
-	if(tcomponentType == BASEAPP_TYPE || 
-		tcomponentType == CELLAPP_TYPE || 
+	// ‰∏ã‰∏ÄÊ≠•:
+	// Â¶ÇÊûúÊòØËøûÊé•Âà∞dbmgrÂàôÈúÄË¶ÅÁ≠âÂæÖÊé•Êî∂appÂàùÂßã‰ø°ÊÅØ
+	// ‰æãÂ¶ÇÔºöÂàùÂßã‰ºöÂàÜÈÖçentityIDÊÆµ‰ª•ÂèäËøô‰∏™appÂêØÂä®ÁöÑÈ°∫Â∫è‰ø°ÊÅØÔºàÊòØÂê¶Á¨¨‰∏Ä‰∏™baseappÂêØÂä®Ôºâ
+	if(tcomponentType == BASEAPP_TYPE ||
+		tcomponentType == CELLAPP_TYPE ||
 		tcomponentType == LOGINAPP_TYPE)
 	{
 		switch(tcomponentType)
@@ -576,8 +576,8 @@ void Dbmgr::onRegisterNewApp(Network::Channel* pChannel, int32 uid, std::string&
 
 	pSyncAppDatasHandler_->pushApp(componentID, startGroupOrder, startGlobalOrder);
 
-	// »Áπ˚ «baseappªÚ’ﬂcellapp‘ÚΩ´◊‘º∫◊¢≤·µΩÀ˘”–∆‰À˚baseapp∫Õcellapp
-	if(tcomponentType == BASEAPP_TYPE || 
+	// Â¶ÇÊûúÊòØbaseappÊàñËÄÖcellappÂàôÂ∞ÜËá™Â∑±Ê≥®ÂÜåÂà∞ÊâÄÊúâÂÖ∂‰ªñbaseappÂíåcellapp
+	if(tcomponentType == BASEAPP_TYPE ||
 		tcomponentType == CELLAPP_TYPE)
 	{
 		KBEngine::COMPONENT_TYPE broadcastCpTypes[2] = {BASEAPP_TYPE, CELLAPP_TYPE};
@@ -592,20 +592,20 @@ void Dbmgr::onRegisterNewApp(Network::Channel* pChannel, int32 uid, std::string&
 
 				Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 				ENTITTAPP_COMMON_NETWORK_MESSAGE(broadcastCpTypes[idx], (*pBundle), onGetEntityAppFromDbmgr);
-				
+
 				if(tcomponentType == BASEAPP_TYPE)
 				{
-					BaseappInterface::onGetEntityAppFromDbmgrArgs11::staticAddToBundle((*pBundle), 
+					BaseappInterface::onGetEntityAppFromDbmgrArgs11::staticAddToBundle((*pBundle),
 						uid, username, componentType, componentID, startGlobalOrder, startGroupOrder,
 							intaddr, intport, extaddr, extport, g_kbeSrvConfig.getConfig().externalAddress);
 				}
 				else
 				{
-					CellappInterface::onGetEntityAppFromDbmgrArgs11::staticAddToBundle((*pBundle), 
+					CellappInterface::onGetEntityAppFromDbmgrArgs11::staticAddToBundle((*pBundle),
 						uid, username, componentType, componentID, startGlobalOrder, startGroupOrder,
 							intaddr, intport, extaddr, extport, g_kbeSrvConfig.getConfig().externalAddress);
 				}
-				
+
 				KBE_ASSERT((*fiter).pChannel != NULL);
 				(*fiter).pChannel->send(pBundle);
 			}
@@ -640,7 +640,7 @@ void Dbmgr::onBroadcastGlobalDataChanged(Network::Channel* pChannel, KBEngine::M
 	std::string key, value;
 	bool isDelete;
 	COMPONENT_TYPE componentType;
-	
+
 	s >> dataType;
 	s >> isDelete;
 
@@ -705,7 +705,7 @@ void Dbmgr::onCreateAccountCBFromInterfaces(Network::Channel* pChannel, KBEngine
 }
 
 //-------------------------------------------------------------------------------------
-void Dbmgr::onAccountLogin(Network::Channel* pChannel, KBEngine::MemoryStream& s) 
+void Dbmgr::onAccountLogin(Network::Channel* pChannel, KBEngine::MemoryStream& s)
 {
 	std::string loginName, password, datas;
 	s >> loginName >> password;
@@ -721,20 +721,20 @@ void Dbmgr::onAccountLogin(Network::Channel* pChannel, KBEngine::MemoryStream& s
 }
 
 //-------------------------------------------------------------------------------------
-void Dbmgr::onLoginAccountCBBFromInterfaces(Network::Channel* pChannel, KBEngine::MemoryStream& s) 
+void Dbmgr::onLoginAccountCBBFromInterfaces(Network::Channel* pChannel, KBEngine::MemoryStream& s)
 {
 	findBestInterfacesHandler()->onLoginAccountCB(s);
 }
 
 //-------------------------------------------------------------------------------------
-void Dbmgr::queryAccount(Network::Channel* pChannel, 
-						 std::string& accountName, 
+void Dbmgr::queryAccount(Network::Channel* pChannel,
+						 std::string& accountName,
 						 std::string& password,
 						 bool needCheckPassword,
 						 COMPONENT_ID componentID,
 						 ENTITY_ID entityID,
-						 DBID entityDBID, 
-						 uint32 ip, 
+						 DBID entityDBID,
+						 uint32 ip,
 						 uint16 port)
 {
 	if(accountName.size() == 0)
@@ -743,12 +743,12 @@ void Dbmgr::queryAccount(Network::Channel* pChannel,
 		return;
 	}
 
-	Buffered_DBTasks* pBuffered_DBTasks = 
+	Buffered_DBTasks* pBuffered_DBTasks =
 		findBufferedDBTask(Dbmgr::getSingleton().selectAccountDBInterfaceName(accountName));
 
 	if (!pBuffered_DBTasks)
 	{
-		ERROR_MSG(fmt::format("Dbmgr::queryAccount: not found dbInterface({})!\n", 
+		ERROR_MSG(fmt::format("Dbmgr::queryAccount: not found dbInterface({})!\n",
 			Dbmgr::getSingleton().selectAccountDBInterfaceName(accountName)));
 		return;
 	}
@@ -760,12 +760,12 @@ void Dbmgr::queryAccount(Network::Channel* pChannel,
 }
 
 //-------------------------------------------------------------------------------------
-void Dbmgr::onAccountOnline(Network::Channel* pChannel, 
-							std::string& accountName, 
-							COMPONENT_ID componentID, 
+void Dbmgr::onAccountOnline(Network::Channel* pChannel,
+							std::string& accountName,
+							COMPONENT_ID componentID,
 							ENTITY_ID entityID)
 {
-	// bufferedDBTasks_.addTask(new DBTaskAccountOnline(pChannel->addr(), 
+	// bufferedDBTasks_.addTask(new DBTaskAccountOnline(pChannel->addr(),
 	//	accountName, componentID, entityID));
 }
 
@@ -783,7 +783,7 @@ void Dbmgr::onEntityOffline(Network::Channel* pChannel, DBID dbid, ENTITY_SCRIPT
 }
 
 //-------------------------------------------------------------------------------------
-void Dbmgr::executeRawDatabaseCommand(Network::Channel* pChannel, 
+void Dbmgr::executeRawDatabaseCommand(Network::Channel* pChannel,
 									  KBEngine::MemoryStream& s)
 {
 	ENTITY_ID entityID = -1;
@@ -1008,7 +1008,7 @@ void Dbmgr::onExecuteRawDatabaseCommandCB(KBEngine::MemoryStream& s)
 
 	s.done();
 
-	//DEBUG_MSG(fmt::format("Cellapp::onExecuteRawDatabaseCommandCB: nrows={}, nfields={}, err={}.\n", 
+	//DEBUG_MSG(fmt::format("Cellapp::onExecuteRawDatabaseCommandCB: nrows={}, nfields={}, err={}.\n",
 	//	nrows, nfields, err.c_str()));
 
 	if (callbackID > 0)
@@ -1041,7 +1041,7 @@ void Dbmgr::onExecuteRawDatabaseCommandCB(KBEngine::MemoryStream& s)
 }
 
 //-------------------------------------------------------------------------------------
-void Dbmgr::writeEntity(Network::Channel* pChannel, 
+void Dbmgr::writeEntity(Network::Channel* pChannel,
 						KBEngine::MemoryStream& s)
 {
 	ENTITY_ID eid;
@@ -1210,7 +1210,7 @@ void Dbmgr::accountResetPassword(Network::Channel* pChannel, std::string& accoun
 }
 
 //-------------------------------------------------------------------------------------
-void Dbmgr::accountReqBindMail(Network::Channel* pChannel, ENTITY_ID entityID, std::string& accountName, 
+void Dbmgr::accountReqBindMail(Network::Channel* pChannel, ENTITY_ID entityID, std::string& accountName,
 							   std::string& password, std::string& email)
 {
 	INFO_MSG(fmt::format("Dbmgr::accountReqBindMail: accountName={}, email={}.\n", accountName, email));
@@ -1225,7 +1225,7 @@ void Dbmgr::accountBindMail(Network::Channel* pChannel, std::string& username, s
 }
 
 //-------------------------------------------------------------------------------------
-void Dbmgr::accountNewPassword(Network::Channel* pChannel, ENTITY_ID entityID, std::string& accountName, 
+void Dbmgr::accountNewPassword(Network::Channel* pChannel, ENTITY_ID entityID, std::string& accountName,
 							   std::string& password, std::string& newpassword)
 {
 	INFO_MSG(fmt::format("Dbmgr::accountNewPassword: accountName={}.\n", accountName));
@@ -1237,7 +1237,7 @@ std::string Dbmgr::selectAccountDBInterfaceName(const std::string& name)
 {
 	std::string dbInterfaceName = "default";
 
-	// ∞—«Î«ÛΩª”…Ω≈±æ¥¶¿Ì
+	// ÊääËØ∑Ê±Ç‰∫§Áî±ËÑöÊú¨Â§ÑÁêÜ
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
 		const_cast<char*>("onSelectAccountDBInterface"),
@@ -1266,7 +1266,7 @@ std::string Dbmgr::selectAccountDBInterfaceName(const std::string& name)
 //-------------------------------------------------------------------------------------
 void Dbmgr::onChannelDeregister(Network::Channel * pChannel)
 {
-	// »Áπ˚ «appÀ¿Õˆ¡À
+	// Â¶ÇÊûúÊòØappÊ≠ª‰∫°‰∫Ü
 	if (pChannel->isInternal())
 	{
 		Components::ComponentInfos* cinfo = Components::getSingleton().findComponent(pChannel);
@@ -1279,7 +1279,7 @@ void Dbmgr::onChannelDeregister(Network::Channel * pChannel)
 			}
 		}
 	}
-	
+
 	ServerApp::onChannelDeregister(pChannel);
 }
 

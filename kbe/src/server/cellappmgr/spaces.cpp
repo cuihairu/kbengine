@@ -2,9 +2,9 @@
 
 #include "space.h"
 #include "spaces.h"
-#include "helper/profile.h"	
+#include "helper/profile.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------

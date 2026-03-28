@@ -14,7 +14,7 @@ class InitProgressHandler : public Task
 public:
 	InitProgressHandler(Network::NetworkInterface & networkInterface);
 	~InitProgressHandler();
-	
+
 	bool process();
 
 	void start();

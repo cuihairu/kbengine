@@ -26,8 +26,8 @@ public:
 	void unLoadSpaceGeometry();
 	void loadSpaceGeometry(const std::map< int, std::string >& params);
 
-	/** 
-		¸üĞÂspaceÖĞµÄÄÚÈİ 
+	/**
+		æ›´æ–°spaceä¸­çš„å†…å®¹
 	*/
 	bool update();
 
@@ -38,7 +38,7 @@ public:
 	void removeEntity(Entity* pEntity);
 
 	/**
-		Ò»¸öentity½øÈëÁËÓÎÏ·ÊÀ½ç
+		ä¸€ä¸ªentityè¿›å…¥äº†æ¸¸æˆä¸–ç•Œ
 	*/
 	void onEnterWorld(Entity* pEntity);
 	void _onEnterWorld(Entity* pEntity);
@@ -52,18 +52,18 @@ public:
 	Entity* findEntity(ENTITY_ID entityID);
 
 	/**
-		Ïú»Ù
+		é”€æ¯
 	*/
 	bool destroy(ENTITY_ID entityID, bool ignoreGhost = true);
 
 	/**
-		Õâ¸öspaceµÄcell
+		è¿™ä¸ªspaceçš„cell
 	*/
 	Cell * pCell() const	{ return pCell_; }
 	void pCell( Cell * pCell );
 
 	/**
-		Ìí¼ÓspaceµÄ¼¸ºÎÓ³Éä
+		æ·»åŠ spaceçš„å‡ ä½•æ˜ å°„
 	*/
 	static PyObject* __py_AddSpaceGeometryMapping(PyObject* self, PyObject* args);
 	bool addSpaceGeometryMapping(std::string respath, bool shouldLoadOnServer, const std::map< int, std::string >& params);
@@ -72,11 +72,11 @@ public:
 	void setGeometryPath(const std::string& path);
 	void onLoadedSpaceGeometryMapping(NavigationHandlePtr pNavHandle);
 	void onAllSpaceGeometryLoaded();
-	
+
 	NavigationHandlePtr pNavHandle() const{ return pNavHandle_; }
 
 	/**
-		spaceDataÏà¹Ø²Ù×÷½Ó¿Ú
+		spaceDataç›¸å…³æ“ä½œæ¥å£
 	*/
 	void setSpaceData(const std::string& key, const std::string& value);
 	void delSpaceData(const std::string& key);
@@ -96,7 +96,7 @@ protected:
 	void _addSpaceDatasToEntityClient(const Entity* pEntity);
 
 	void _clearGhosts();
-	
+
 	enum STATE
 	{
 		STATE_NORMAL = 0,
@@ -105,32 +105,32 @@ protected:
 	};
 
 protected:
-	// Õâ¸öspaceµÄID
-	SPACE_ID					id_;														
+	// è¿™ä¸ªspaceçš„ID
+	SPACE_ID					id_;
 
-	// ´´½¨Õâ¸öspaceÊ±ÓÃµÄÊµÌå½Å±¾Ä£¿éÃû³Æ
+	// åˆ›å»ºè¿™ä¸ªspaceæ—¶ç”¨çš„å®ä½“è„šæœ¬æ¨¡å—åç§°
 	std::string					scriptModuleName_;
 
-	// Õâ¸öspaceÉÏµÄentity
-	SPACE_ENTITIES				entities_;							
+	// è¿™ä¸ªspaceä¸Šçš„entity
+	SPACE_ENTITIES				entities_;
 
-	// ÊÇ·ñ¼ÓÔØ¹ıµØĞÎÊı¾İ
+	// æ˜¯å¦åŠ è½½è¿‡åœ°å½¢æ•°æ®
 	bool						hasGeometry_;
 
-	// Ã¿¸öspace×î¶àÖ»ÓĞÒ»¸öcell
+	// æ¯ä¸ªspaceæœ€å¤šåªæœ‰ä¸€ä¸ªcell
 	Cell*						pCell_;
 
 	CoordinateSystem			coordinateSystem_;
 
 	NavigationHandlePtr			pNavHandle_;
 
-	// spaceData, Ö»ÄÜ´æ´¢×Ö·û´®×ÊÔ´£¬ ÕâÑùÄÜ±È½ÏºÃµÄ¼æÈİ¿Í»§¶Ë¡£
-	// ¿ª·¢Õß¿ÉÒÔ½«ÆäËûÀàĞÍ×ª»»³É×Ö·û´®½øĞĞ´«Êä
+	// spaceData, åªèƒ½å­˜å‚¨å­—ç¬¦ä¸²èµ„æºï¼Œ è¿™æ ·èƒ½æ¯”è¾ƒå¥½çš„å…¼å®¹å®¢æˆ·ç«¯ã€‚
+	// å¼€å‘è€…å¯ä»¥å°†å…¶ä»–ç±»å‹è½¬æ¢æˆå­—ç¬¦ä¸²è¿›è¡Œä¼ è¾“
 	SPACE_DATA					datas_;
 
 	int8						state_;
-	
-	uint64						destroyTime_;	
+
+	uint64						destroyTime_;
 };
 
 

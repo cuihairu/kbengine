@@ -17,8 +17,8 @@ public:
 	virtual ~EntityCoordinateNode();
 
 	/**
-		(扩展坐标)
-		x && z由不同的应用实现(从不同处获取)
+		(鎵╁睍鍧愭爣)
+		x && z鐢变笉鍚岀殑搴旂敤瀹炵幇(浠庝笉鍚屽鑾峰彇)
 	*/
 	virtual float xx() const;
 	virtual float yy() const;
@@ -31,10 +31,10 @@ public:
 
 	bool addWatcherNode(CoordinateNode* pNode);
 	void onAddWatcherNode(CoordinateNode* pNode);
-	
+
 	bool delWatcherNode(CoordinateNode* pNode);
 
-	static void entitiesInRange(std::vector<Entity*>& foundEntities, CoordinateNode* rootNode, 
+	static void entitiesInRange(std::vector<Entity*>& foundEntities, CoordinateNode* rootNode,
 		const Position3D& orginPos, float radius, int entityUType = -1);
 
 	virtual void onRemove();

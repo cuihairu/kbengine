@@ -85,7 +85,7 @@ public:
 	virtual void handle(Network::Channel* pChannel, MemoryStream& s)
 	{
 		CguiconsoleDlg* dlg = static_cast<CguiconsoleDlg*>(theApp.m_pMainWnd);
-		std::string strarg;	
+		std::string strarg;
 		s.readBlob(strarg);
 		dlg->onExecScriptCommandCB(pChannel, strarg);
 	};
@@ -189,14 +189,14 @@ public:
 			}
 
 			bhandler.newMessage(MachineInterface::onFindInterfaceAddr);
-			MachineInterface::onFindInterfaceAddrArgs7::staticAddToBundle(bhandler, getUserUID(), getUsername(), 
+			MachineInterface::onFindInterfaceAddrArgs7::staticAddToBundle(bhandler, getUserUID(), getUsername(),
 				dlg->componentType(), dlg->componentID(), (COMPONENT_TYPE)findComponentType, dlg->networkInterface().intTcpAddr().ip,
 				bhandler.epListen().addr().port);
 
 			if(!bhandler.broadcast())
 			{
 				ERROR_MSG("CguiconsoleDlg::OnTimer: broadcast error!\n");
-				::AfxMessageBox(L"≥ı ºªØ¥ÌŒÛ£∫≤ªƒ‹∑¢ÀÕ∑˛ŒÒ∆˜ÃΩ≤‚∞¸°£");
+				::AfxMessageBox(L"ÂàùÂßãÂåñÈîôËØØÔºö‰∏çËÉΩÂèëÈÄÅÊúçÂä°Âô®Êé¢ÊµãÂåÖ„ÄÇ");
 				return false;
 			}
 
@@ -236,15 +236,15 @@ RESTART_RECV:
 					INFO_MSG(fmt::format("CguiconsoleDlg::OnTimer: found {}, addr:{}:{}\n",
 						COMPONENT_NAME_EX((COMPONENT_TYPE)args.componentType), inet_ntoa((struct in_addr&)args.intaddr), ntohs(args.intport)));
 
-					Components::getSingleton().addComponent(args.uid, args.username.c_str(), 
+					Components::getSingleton().addComponent(args.uid, args.username.c_str(),
 						(KBEngine::COMPONENT_TYPE)args.componentType, args.componentID, args.globalorderid, args.grouporderid, args.gus,
-						args.intaddr, args.intport, args.extaddr, args.extport, args.extaddrEx, args.pid, args.cpu, args.mem, args.usedmem, 
+						args.intaddr, args.intport, args.extaddr, args.extport, args.extaddrEx, args.pid, args.cpu, args.mem, args.usedmem,
 						args.extradata, args.extradata1, args.extradata2, args.extradata3);
-					
+
 					isContinue = true;
 				}while(bhandler.pCurrPacket()->length() > 0);
 
-				// ∑¿÷πΩ” ’µΩµƒ ˝æ›≤ª «œÎ“™µƒ ˝æ›
+				// Èò≤Ê≠¢Êé•Êî∂Âà∞ÁöÑÊï∞ÊçÆ‰∏çÊòØÊÉ≥Ë¶ÅÁöÑÊï∞ÊçÆ
 				if(findComponentType == args.componentType)
 				{
 					//ifind++;
@@ -273,14 +273,14 @@ RESTART_RECV:
 	}
 
 	virtual thread::TPTask::TPTaskState presentMainThread()
-	{ 
+	{
 		if(!g_isDestroyed)
 		{
 			CguiconsoleDlg* dlg = static_cast<CguiconsoleDlg*>(theApp.m_pMainWnd);
 			dlg->updateTree();
 		}
 
-		return thread::TPTask::TPTASK_STATE_COMPLETED; 
+		return thread::TPTask::TPTASK_STATE_COMPLETED;
 	}
 };
 
@@ -402,7 +402,7 @@ BOOL CguiconsoleDlg::OnInitDialog()
 	//  when the application's main window is not a dialog
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
-	
+
 	if(!m_ToolBar.CreateEx(this, TBSTYLE_FLAT ,  WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS,
     CRect(4,4,0,0))
 		||!m_ToolBar.LoadToolBar(IDR_TOOLBAR1))
@@ -412,7 +412,7 @@ BOOL CguiconsoleDlg::OnInitDialog()
 
 	m_ToolBar.ShowWindow(SW_SHOW);
 	RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0);
-	
+
 	KBEngine::Network::MessageHandlers::pMainMessageHandlers = &KBEngine::ConsoleInterface::messageHandlers;
 
 	// TODO: Add extra initialization here
@@ -423,28 +423,28 @@ BOOL CguiconsoleDlg::OnInitDialog()
 	::SetTimer(m_hWnd, 3, 1000 * 20, NULL);
 
 	m_isInit = true;
-	
-	m_tab.InsertItem(0, _T("Status"), 0); 
+
+	m_tab.InsertItem(0, _T("Status"), 0);
 	m_statusWnd.Create(IDD_STATUS, GetDlgItem(IDC_TAB1));
-	
-	m_tab.InsertItem(1, _T("Debug"), 0); 
+
+	m_tab.InsertItem(1, _T("Debug"), 0);
 	m_debugWnd.Create(IDD_DEBUG, GetDlgItem(IDC_TAB1));
 
-	m_tab.InsertItem(2, _T("Log"), 0); 
+	m_tab.InsertItem(2, _T("Log"), 0);
 	m_logWnd.Create(IDD_LOG, GetDlgItem(IDC_TAB1));
 
-	m_tab.InsertItem(3, _T("Profile"), 0); 
+	m_tab.InsertItem(3, _T("Profile"), 0);
 	m_profileWnd.Create(IDD_PROFILE, GetDlgItem(IDC_TAB1));
 
-	m_tab.InsertItem(4, _T("Watcher"), 0); 
+	m_tab.InsertItem(4, _T("Watcher"), 0);
 	m_watcherWnd.Create(IDD_WATCHER, GetDlgItem(IDC_TAB1));
 
-	m_tab.InsertItem(5, _T("SpaceView"), 0); 
+	m_tab.InsertItem(5, _T("SpaceView"), 0);
 	m_spaceViewWnd.Create(IDD_SPACEVIEW, GetDlgItem(IDC_TAB1));
 
-	m_tab.InsertItem(6, _T("Graphs"), 0); 
+	m_tab.InsertItem(6, _T("Graphs"), 0);
 	m_graphsWindow.Create(IDD_GRAPHS, GetDlgItem(IDC_TAB1));
-	
+
 	DWORD styles = ::GetWindowLong(m_tree.m_hWnd, GWL_STYLE);
 	styles |= TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS;
 	::SetWindowLong(m_tree.m_hWnd, GWL_STYLE, styles);
@@ -453,16 +453,16 @@ BOOL CguiconsoleDlg::OnInitDialog()
 	autoWndSize();
 	updateTree();
 
-	KBEngine::ConsoleInterface::messageHandlers.add("Console::onExecScriptCommandCB", new KBEngine::ConsoleInterface::ConsoleExecCommandCBMessageHandlerArgs1, NETWORK_VARIABLE_MESSAGE, 
+	KBEngine::ConsoleInterface::messageHandlers.add("Console::onExecScriptCommandCB", new KBEngine::ConsoleInterface::ConsoleExecCommandCBMessageHandlerArgs1, NETWORK_VARIABLE_MESSAGE,
 		new ConsoleExecCommandCBMessageHandlerEx);
 
-	KBEngine::ConsoleInterface::messageHandlers.add("Console::onReceiveRemoteLog", new KBEngine::ConsoleInterface::ConsoleLogMessageHandlerArgsStream, NETWORK_VARIABLE_MESSAGE, 
+	KBEngine::ConsoleInterface::messageHandlers.add("Console::onReceiveRemoteLog", new KBEngine::ConsoleInterface::ConsoleLogMessageHandlerArgsStream, NETWORK_VARIABLE_MESSAGE,
 		new ConsoleLogMessageHandlerEx);
 
-	KBEngine::ConsoleInterface::messageHandlers.add("Console::onReceiveWatcherData", new KBEngine::ConsoleInterface::ConsoleWatcherCBHandlerMessageArgsStream, NETWORK_VARIABLE_MESSAGE, 
+	KBEngine::ConsoleInterface::messageHandlers.add("Console::onReceiveWatcherData", new KBEngine::ConsoleInterface::ConsoleWatcherCBHandlerMessageArgsStream, NETWORK_VARIABLE_MESSAGE,
 		new ConsoleWatcherCBMessageHandlerEx);
-	
-	KBEngine::ConsoleInterface::messageHandlers.add("Console::onReceiveProfileData", new KBEngine::ConsoleInterface::ConsoleProfileHandlerArgsStream, NETWORK_VARIABLE_MESSAGE, 
+
+	KBEngine::ConsoleInterface::messageHandlers.add("Console::onReceiveProfileData", new KBEngine::ConsoleInterface::ConsoleProfileHandlerArgsStream, NETWORK_VARIABLE_MESSAGE,
 		new ConsoleProfileHandlerEx);
 
 	KBEngine::Network::Bundle::ObjPool().pMutex(new KBEngine::thread::ThreadMutex());
@@ -487,7 +487,7 @@ void CguiconsoleDlg::historyCommandCheck()
 		m_historyCommandIndex = m_historyCommand.size() - 1;
 
 	if(m_historyCommandIndex > (int)m_historyCommand.size() - 1)
-		m_historyCommandIndex = 0; 
+		m_historyCommandIndex = 0;
 }
 
 CString CguiconsoleDlg::getHistoryCommand(bool isNextCommand)
@@ -513,7 +513,7 @@ HTREEITEM CguiconsoleDlg::hasCheckApp(COMPONENT_TYPE type)
 	HTREEITEM rootitem = m_tree.GetRootItem();
 	if(rootitem == NULL)
 		return NULL;
-	
+
 	rootitem = m_tree.GetChildItem(rootitem);
 	if(rootitem == NULL)
 		return NULL;
@@ -552,14 +552,14 @@ void CguiconsoleDlg::commitPythonCommand(CString strCommand)
 	if(strCommand.GetLength() <= 0)
 		return;
 
-	if(getTreeItemComponent(m_tree.GetSelectedItem()) != CELLAPP_TYPE 
+	if(getTreeItemComponent(m_tree.GetSelectedItem()) != CELLAPP_TYPE
 		&& getTreeItemComponent(m_tree.GetSelectedItem()) != BASEAPP_TYPE
 		&& getTreeItemComponent(m_tree.GetSelectedItem()) != BOTS_TYPE)
 	{
 		::AfxMessageBox(L"Component can not debug!");
 		return;
 	}
-	
+
 	m_isUsingHistroy = false;
 
 	m_historyCommand.push_back(strCommand);
@@ -569,7 +569,7 @@ void CguiconsoleDlg::commitPythonCommand(CString strCommand)
 	CString strCommand1 = strCommand;
 
 	/*
-	// ∂‘∆’Õ®µƒ ‰»Îº”»Îprint »√∑˛ŒÒ∆˜ªÿœ‘–≈œ¢
+	// ÂØπÊôÆÈÄöÁöÑËæìÂÖ•Âä†ÂÖ•print ËÆ©ÊúçÂä°Âô®ÂõûÊòæ‰ø°ÊÅØ
     if((strCommand.Find(L"=")) == -1 &&
 		(strCommand.Find(L"print(")) == -1 &&
 		(strCommand.Find(L"import ")) == -1 &&
@@ -587,7 +587,7 @@ void CguiconsoleDlg::commitPythonCommand(CString strCommand)
 	std::string outcmd;
 	strutil::wchar2utf8(incmd, outcmd);
 
-	
+
 	Network::Channel* pChannel = _networkInterface.findChannel(this->getTreeItemAddr(m_tree.GetSelectedItem()));
 	if(pChannel)
 	{
@@ -619,7 +619,7 @@ void CguiconsoleDlg::commitPythonCommand(CString strCommand)
 
 void CguiconsoleDlg::saveHistory()
 {
-    //¥¥Ω®“ª∏ˆXMLµƒŒƒµµ∂‘œÛ°£
+    //ÂàõÂª∫‰∏Ä‰∏™XMLÁöÑÊñáÊ°£ÂØπË±°„ÄÇ
     TiXmlDocument *pDocument = new TiXmlDocument();
 
 	int i = 0;
@@ -636,7 +636,7 @@ void CguiconsoleDlg::saveHistory()
 
 		std::wstring strCommand = (*iter);
 		std::string str;
-		
+
 		strutil::wchar2utf8(strCommand, str);
 		TiXmlText *content = new TiXmlText(str.data());
 		rootElementChild->LinkEndChild(content);
@@ -673,8 +673,8 @@ void CguiconsoleDlg::loadHistory()
 	TiXmlNode* node = rootElement->FirstChild();
 	if(node)
 	{
-		do																				
-		{	
+		do
+		{
 			if(node->FirstChild() != NULL)
 			{
 				std::string c = node->FirstChild()->Value();
@@ -686,21 +686,21 @@ void CguiconsoleDlg::loadHistory()
 					m_historyCommand.push_back(sstrCommand);
 				}
 			}
-		}while((node = node->NextSibling()));												
+		}while((node = node->NextSibling()));
 	}
 
 	pDocument->Clear();
 	delete pDocument;
-}	
+}
 
 BOOL CguiconsoleDlg::PreTranslateMessage(MSG* pMsg)
 {
-	if (pMsg->message == WM_KEYDOWN)   
+	if (pMsg->message == WM_KEYDOWN)
 	{
-		if(pMsg-> wParam == 0x0d)   
+		if(pMsg-> wParam == 0x0d)
 		{
 			return false;
-		} 
+		}
 	}
 
 	return CDialog::PreTranslateMessage(pMsg);
@@ -769,7 +769,7 @@ void CguiconsoleDlg::autoSelectLogger()
 	HTREEITEM rootitem = m_tree.GetRootItem();
 	if (rootitem == hItem)
 		return;
-	
+
 	CString s = m_tree.GetItemText(hItem);
 	if (s.Find(L"uid[") == -1)
 		hItem = m_tree.GetParentItem(hItem);
@@ -781,7 +781,7 @@ void CguiconsoleDlg::autoSelectLogger()
 		{
 			m_tree.SetCheck(item, TRUE);
 			m_tree.SelectItem(item);
-			
+
 			if (!connectTo())
 				return;
 
@@ -905,7 +905,7 @@ void CguiconsoleDlg::OnTimer(UINT_PTR nIDEvent)
 		break;
 	default:
 		break;
-	};	
+	};
 }
 
 void CguiconsoleDlg::onExecScriptCommandCB(Network::Channel* pChannel, std::string& command)
@@ -945,7 +945,7 @@ void CguiconsoleDlg::onExecScriptCommandCB(Network::Channel* pChannel, std::stri
 
 	str += L"\r\n";
 	lpEdit->SetWindowText(str.GetBuffer(0));
-	int nline = lpEdit->GetLineCount();   
+	int nline = lpEdit->GetLineCount();
 	lpEdit->LineScroll(nline - 1);
 }
 
@@ -1022,7 +1022,7 @@ void CguiconsoleDlg::updateTree()
 	Components::COMPONENTS& cts6 = Components::getSingleton().getComponents(LOGGER_TYPE);
 	Components::COMPONENTS& cts7 = Components::getSingleton().getComponents(BOTS_TYPE);
 	Components::COMPONENTS cts;
-	
+
 	if(cts0.size() > 0)
 		cts.insert(cts.begin(), cts0.begin(), cts0.end());
 	if(cts1.size() > 0)
@@ -1092,12 +1092,12 @@ void CguiconsoleDlg::updateTree()
 			tcitem.item.iSelectedImage = 1;
 			hasUIDItem = m_tree.InsertItem(&tcitem);
 		}
-		
+
 		if(this->hasTreeComponent(cinfos))
 		{
 			continue;
 		}
-		
+
 		char sbuf[1024];
 		kbe_snprintf(sbuf, 1024, "%s[%s]", COMPONENT_NAME_EX(cinfos.componentType), cinfos.pIntAddr->c_str());
 		wchar_t* wbuf = KBEngine::strutil::char2wchar(sbuf);
@@ -1117,7 +1117,7 @@ void CguiconsoleDlg::updateTree()
 	}
 
 	m_tree.Expand(hItemRoot, TVE_EXPAND);
-	
+
 	ListSortData *tmpp = new ListSortData;
 	tmpp->listctrl = &m_statusWnd.m_statusList;
 	tmpp->isub = 0;
@@ -1134,12 +1134,12 @@ void CguiconsoleDlg::autoWndSize()
 	CRect rect1;
 	m_ToolBar.GetClientRect(&rect1);
 	g_diffHeight = rect1.bottom + 8;
-	
+
 	this->GetClientRect(&rect1);
 	rect1.left += int(rect1.right * 0.25);
 	rect1.top += g_diffHeight;
 	m_tab.MoveWindow(rect1);
-	
+
 	CRect rect;
 	m_tab.GetClientRect(&rect);
 
@@ -1186,9 +1186,9 @@ void CguiconsoleDlg::OnNMRClickTree1(NMHDR *pNMHDR, LRESULT *pResult)
 	CMenu menu;
     menu.LoadMenu(IDR_POPMENU);
     CMenu* pPopup = menu.GetSubMenu(0);
-	
+
 	CPoint point;
-	GetCursorPos(&point); // Û±ÍŒª÷√
+	GetCursorPos(&point); //Èº†Ê†á‰ΩçÁΩÆ
     pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
@@ -1386,14 +1386,14 @@ Network::Address CguiconsoleDlg::getTreeItemAddr(HTREEITEM hItem)
 bool CguiconsoleDlg::connectTo()
 {
 	// TODO: Add your command handler code here
-	HTREEITEM hItem = m_tree.GetSelectedItem(); 
+	HTREEITEM hItem = m_tree.GetSelectedItem();
 	KBEngine::Network::Address addr = getTreeItemAddr(hItem);
 	if(addr.ip == 0)
 	{
 		::AfxMessageBox(L"no select!");
 		return false;
 	}
-	
+
 	Network::EndPoint* endpoint = Network::EndPoint::createPoolObject(OBJECTPOOL_POINT);
 	endpoint->socket(SOCK_STREAM);
 	if (!endpoint->good())
@@ -1451,7 +1451,7 @@ bool CguiconsoleDlg::connectTo()
 
 void CguiconsoleDlg::closeCurrTreeSelChannel()
 {
-	HTREEITEM hItem = m_tree.GetSelectedItem(); 
+	HTREEITEM hItem = m_tree.GetSelectedItem();
 	KBEngine::Network::Address addr = getTreeItemAddr(hItem);
 	if(addr.ip == 0)
 	{
@@ -1562,17 +1562,17 @@ void CguiconsoleDlg::OnNMClickTree1(NMHDR *pNMHDR, LRESULT *pResult)
 
 	TVHITTESTINFO hittestInfo;
 
-	GetCursorPos(&hittestInfo.pt);     
+	GetCursorPos(&hittestInfo.pt);
 	m_tree.ScreenToClient(&hittestInfo.pt);
 
-	HTREEITEM hItem = m_tree.HitTest(&hittestInfo);   
-	
+	HTREEITEM hItem = m_tree.HitTest(&hittestInfo);
+
 	if(hItem == NULL || TVHT_NOWHERE & hittestInfo.flags)
 		return;
 
 	bool changeToChecked = false;
 
-	// ∏¥—°øÚ±ª—°÷–æÕ¡¨Ω”∑Ò‘Ú∂œø™¡¨Ω”
+	// Â§çÈÄâÊ°ÜË¢´ÈÄâ‰∏≠Â∞±ËøûÊé•Âê¶ÂàôÊñ≠ÂºÄËøûÊé•
 	if(TVHT_ONITEMSTATEICON & hittestInfo.flags)
 	{
 		m_tree.SelectItem(hItem);
@@ -1599,9 +1599,9 @@ void CguiconsoleDlg::OnNMClickTree1(NMHDR *pNMHDR, LRESULT *pResult)
 	{
 		CString s;
 		m_debugWnd.displaybufferWnd()->GetWindowTextW(s);
-		
+
 		if(s.GetLength() <= 0)
-			s += L">>>«Î‘⁄œ¬√Êµƒ¥∞ø⁄–¥python¥˙¬Î¿¥µ˜ ‘∑˛ŒÒ∂À°£\r\n>>>ctrl+enter ∑¢ÀÕ\r\n>>>°¸°˝ π”√¿˙ ∑√¸¡Ó\r\n\r\n";
+			s += L">>>ËØ∑Âú®‰∏ãÈù¢ÁöÑÁ™óÂè£ÂÜôpython‰ª£Á†ÅÊù•Ë∞ÉËØïÊúçÂä°Á´Ø„ÄÇ\r\n>>>ctrl+enter ÂèëÈÄÅ\r\n>>>‚Üë‚Üì‰ΩøÁî®ÂéÜÂè≤ÂëΩ‰ª§\r\n\r\n";
 		else
 			s += L">>>";
 
@@ -1622,7 +1622,7 @@ void CguiconsoleDlg::OnNMClickTree1(NMHDR *pNMHDR, LRESULT *pResult)
 
 	if(debugComponentType == LOGGER_TYPE && changeToChecked)
 	{
-		HTREEITEM hItem = m_tree.GetSelectedItem(); 
+		HTREEITEM hItem = m_tree.GetSelectedItem();
 		KBEngine::Network::Address addr = getTreeItemAddr(hItem);
 		m_logWnd.onConnectionState(changeToChecked, addr);
 	}
@@ -1652,7 +1652,7 @@ void CguiconsoleDlg::OnToolBar_StartServer()
 {
 	/*
 	COMPONENT_TYPE startComponentTypes[] = {BASEAPP_TYPE, CELLAPP_TYPE, BASEAPPMGR_TYPE, CELLAPPMGR_TYPE, LOGINAPP_TYPE, DBMGR_TYPE, BOTS_TYPE, UNKNOWN_COMPONENT_TYPE};
-	
+
 	int i = 0;
 
 	while(1)
@@ -1688,17 +1688,17 @@ void CguiconsoleDlg::OnToolBar_StartServer()
 		if(!bhandler.broadcast())
 		{
 			ERROR_MSG("CguiconsoleDlg::OnToolBar_StartServer: broadcast error!\n");
-			//::AfxMessageBox(L"≤ªƒ‹∑¢ÀÕ∑˛ŒÒ∆˜∆Ù∂Ø∞¸°£");
+			//::AfxMessageBox(L"‰∏çËÉΩÂèëÈÄÅÊúçÂä°Âô®ÂêØÂä®ÂåÖ„ÄÇ");
 			break;
 		}
 
 		if(!bhandler.receive(NULL, 0, 1000000))
 		{
 			ERROR_MSG("CguiconsoleDlg::OnToolBar_StartServer: recv error!\n");
-			//::AfxMessageBox(L"Ω” ’∑˛ŒÒ∆˜∆Ù∂Ø∞¸¥ÌŒÛ°£");
+			//::AfxMessageBox(L"Êé•Êî∂ÊúçÂä°Âô®ÂêØÂä®ÂåÖÈîôËØØ„ÄÇ");
 			break;
 		}
-		
+
 		bool success;
 		bhandler >> success;
 	}
@@ -1718,7 +1718,7 @@ void CguiconsoleDlg::OnToolBar_StartServer()
 void CguiconsoleDlg::OnToolBar_StopServer()
 {
 	COMPONENT_TYPE startComponentTypes[] = {BASEAPP_TYPE, CELLAPP_TYPE, BASEAPPMGR_TYPE, CELLAPPMGR_TYPE, LOGINAPP_TYPE, DBMGR_TYPE, BOTS_TYPE, UNKNOWN_COMPONENT_TYPE};
-	
+
 	int i = 0;
 
 	while(1)
@@ -1748,7 +1748,7 @@ void CguiconsoleDlg::OnToolBar_StopServer()
 		bhandler << componentType;
 		KBEngine::COMPONENT_ID cid = 0;
 		bhandler << cid;
-		
+
 		uint32 ip = _networkInterface.intTcpAddr().ip;
 		uint16 port = bhandler.epListen().addr().port;
 		bhandler << ip << port;
@@ -1756,17 +1756,17 @@ void CguiconsoleDlg::OnToolBar_StopServer()
 		if(!bhandler.broadcast())
 		{
 			ERROR_MSG("CguiconsoleDlg::OnToolBar_StartServer: broadcast error!\n");
-			//::AfxMessageBox(L"≤ªƒ‹∑¢ÀÕ∑˛ŒÒ∆˜∆Ù∂Ø∞¸°£");
+			//::AfxMessageBox(L"‰∏çËÉΩÂèëÈÄÅÊúçÂä°Âô®ÂêØÂä®ÂåÖ„ÄÇ");
 			break;
 		}
 
 		if(!bhandler.receive(NULL, 0, 3000000))
 		{
 			ERROR_MSG("CguiconsoleDlg::OnToolBar_StartServer: recv error!\n");
-			//::AfxMessageBox(L"Ω” ’∑˛ŒÒ∆˜∆Ù∂Ø∞¸¥ÌŒÛ°£");
+			//::AfxMessageBox(L"Êé•Êî∂ÊúçÂä°Âô®ÂêØÂä®ÂåÖÈîôËØØ„ÄÇ");
 			break;
 		}
-		
+
 		bool success;
 		bhandler >> success;
 	}

@@ -44,18 +44,18 @@ END_MESSAGE_MAP()
 BOOL CStartServerWindow::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	DWORD dwStyle = m_list.GetExtendedStyle();
-	dwStyle |= LVS_EX_FULLROWSELECT;					//Ñ¡ÖĞÄ³ĞĞÊ¹ÕûĞĞ¸ßÁÁ£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
-	dwStyle |= LVS_EX_GRIDLINES;						//Íø¸ñÏß£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
+	dwStyle |= LVS_EX_FULLROWSELECT;					//é€‰ä¸­æŸè¡Œä½¿æ•´è¡Œé«˜äº®ï¼ˆåªé€‚ç”¨ä¸reporté£æ ¼çš„listctrlï¼‰
+	dwStyle |= LVS_EX_GRIDLINES;						//ç½‘æ ¼çº¿ï¼ˆåªé€‚ç”¨ä¸reporté£æ ¼çš„listctrlï¼‰
 	//dwStyle |= LVS_EX_ONECLICKACTIVATE;
-	m_list.SetExtendedStyle(dwStyle);					//ÉèÖÃÀ©Õ¹·ç¸ñ
+	m_list.SetExtendedStyle(dwStyle);					//è®¾ç½®æ‰©å±•é£æ ¼
 
 	dwStyle = m_list1.GetExtendedStyle();
-	dwStyle |= LVS_EX_FULLROWSELECT;					//Ñ¡ÖĞÄ³ĞĞÊ¹ÕûĞĞ¸ßÁÁ£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
-	dwStyle |= LVS_EX_GRIDLINES;						//Íø¸ñÏß£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
+	dwStyle |= LVS_EX_FULLROWSELECT;					//é€‰ä¸­æŸè¡Œä½¿æ•´è¡Œé«˜äº®ï¼ˆåªé€‚ç”¨ä¸reporté£æ ¼çš„listctrlï¼‰
+	dwStyle |= LVS_EX_GRIDLINES;						//ç½‘æ ¼çº¿ï¼ˆåªé€‚ç”¨ä¸reporté£æ ¼çš„listctrlï¼‰
 	//dwStyle |= LVS_EX_ONECLICKACTIVATE;
-	m_list1.SetExtendedStyle(dwStyle);					//ÉèÖÃÀ©Õ¹·ç¸ñ
+	m_list1.SetExtendedStyle(dwStyle);					//è®¾ç½®æ‰©å±•é£æ ¼
 
 	int idx = 0;
 	m_list.InsertColumn(idx++, _T("componentType"),				LVCFMT_CENTER,	150);
@@ -90,7 +90,7 @@ void CStartServerWindow::OnBnClickedButton2()
 	m_layoutlist.GetLBText(m_layoutlist.GetCurSel(), s);
 
 	char* cs = KBEngine::strutil::wchar2char(s.GetBuffer(0));
-	KBEUnordered_map< std::string, std::vector<CStartServerWindow::LAYOUT_ITEM> >::iterator iter = 
+	KBEUnordered_map< std::string, std::vector<CStartServerWindow::LAYOUT_ITEM> >::iterator iter =
 		layouts_.find(cs);
 
 	free(cs);
@@ -116,7 +116,7 @@ void CStartServerWindow::OnBnClickedButton2()
 		}
 
 		KBEngine::Network::EndPoint* endpoint = KBEngine::Network::EndPoint::createPoolObject(OBJECTPOOL_POINT);
-		
+
 		KBEngine::u_int32_t address;
 		KBEngine::Network::Address::string2ip(vec[0].c_str(), address);
 		KBEngine::Network::Address addr(address, htons(atoi(vec[1].c_str())));
@@ -145,7 +145,7 @@ void CStartServerWindow::OnBnClickedButton2()
 			KBEngine::Network::EndPoint::reclaimPoolObject(endpoint);
 			continue;
 		}
-		
+
 		endpoint->setnonblocking(true);
 
 		KBEngine::uint64 cid = KBEngine::genUUID64();
@@ -164,12 +164,12 @@ void CStartServerWindow::OnBnClickedButton2()
 
 		FD_ZERO( &fds );
 		FD_SET((int)(*endpoint), &fds);
-		
+
 		int selgot = select((*endpoint)+1, &fds, NULL, NULL, &tv);
 		if(selgot == 0)
 		{
 			KBEngine::Network::EndPoint::reclaimPoolObject(endpoint);
-			continue;	// ³¬Ê±¿ÉÄÜ¶Ô·½·±Ã¦
+			continue;	// è¶…æ—¶å¯èƒ½å¯¹æ–¹ç¹å¿™
 		}
 		else if(selgot == -1)
 		{
@@ -189,8 +189,8 @@ void CStartServerWindow::OnBnClickedButton2()
 			for(int row = 0; row < m_list.GetItemCount(); row++)
 			{
 				CString name = m_list.GetItemText(row, 0);
-				CString addr = m_list.GetItemText(row, 1); 
-				CString running = m_list.GetItemText(row, 2); 
+				CString addr = m_list.GetItemText(row, 1);
+				CString running = m_list.GetItemText(row, 2);
 
 				char* cs1 = KBEngine::strutil::wchar2char(name.GetBuffer(0));
 				char* cs2 = KBEngine::strutil::wchar2char(addr.GetBuffer(0));
@@ -225,7 +225,7 @@ void CStartServerWindow::OnBnClickedButton3()
 	m_layoutlist.GetLBText(m_layoutlist.GetCurSel(), s);
 
 	char* cs = KBEngine::strutil::wchar2char(s.GetBuffer(0));
-	KBEUnordered_map< std::string, std::vector<CStartServerWindow::LAYOUT_ITEM> >::iterator iter = 
+	KBEUnordered_map< std::string, std::vector<CStartServerWindow::LAYOUT_ITEM> >::iterator iter =
 		layouts_.find(cs);
 
 	free(cs);
@@ -251,7 +251,7 @@ void CStartServerWindow::OnBnClickedButton3()
 		}
 
 		KBEngine::Network::EndPoint* endpoint = KBEngine::Network::EndPoint::createPoolObject(OBJECTPOOL_POINT);
-		
+
 		KBEngine::u_int32_t address;
 		KBEngine::Network::Address::string2ip(vec[0].c_str(), address);
 		KBEngine::Network::Address addr(address, htons(atoi(vec[1].c_str())));
@@ -280,7 +280,7 @@ void CStartServerWindow::OnBnClickedButton3()
 			KBEngine::Network::EndPoint::reclaimPoolObject(endpoint);
 			continue;
 		}
-		
+
 		endpoint->setnonblocking(true);
 
 		KBEngine::Network::Bundle bundle;
@@ -298,12 +298,12 @@ void CStartServerWindow::OnBnClickedButton3()
 
 		FD_ZERO( &fds );
 		FD_SET((int)(*endpoint), &fds);
-		
+
 		int selgot = select((*endpoint)+1, &fds, NULL, NULL, &tv);
 		if(selgot == 0)
 		{
 			KBEngine::Network::EndPoint::reclaimPoolObject(endpoint);
-			continue;	// ³¬Ê±¿ÉÄÜ¶Ô·½·±Ã¦
+			continue;	// è¶…æ—¶å¯èƒ½å¯¹æ–¹ç¹å¿™
 		}
 		else if(selgot == -1)
 		{
@@ -323,8 +323,8 @@ void CStartServerWindow::OnBnClickedButton3()
 			for(int row = 0; row < m_list.GetItemCount(); row++)
 			{
 				CString name = m_list.GetItemText(row, 0);
-				CString addr = m_list.GetItemText(row, 1); 
-				CString running = m_list.GetItemText(row, 2); 
+				CString addr = m_list.GetItemText(row, 1);
+				CString running = m_list.GetItemText(row, 2);
 
 				char* cs1 = KBEngine::strutil::wchar2char(name.GetBuffer(0));
 				char* cs2 = KBEngine::strutil::wchar2char(addr.GetBuffer(0));
@@ -368,10 +368,10 @@ void CStartServerWindow::loadLayouts()
 	TiXmlNode* node = rootElement->FirstChild();
 	if(node)
 	{
-		do																				
+		do
 		{
 			std::vector<LAYOUT_ITEM>& vec = layouts_[node->Value()];
-			
+
 			wchar_t* ws = KBEngine::strutil::char2wchar(node->Value());
 			m_layoutlist.AddString(ws);
 			free(ws);
@@ -385,7 +385,7 @@ void CStartServerWindow::loadLayouts()
 				item.componentName = childnode->Value();
 				item.addr = childnode->FirstChild()->Value();
 				vec.push_back(item);
-			}while((childnode = childnode->NextSibling()));		
+			}while((childnode = childnode->NextSibling()));
 		}while((node = node->NextSibling()));
 	}
 
@@ -395,7 +395,7 @@ void CStartServerWindow::loadLayouts()
 
 void CStartServerWindow::saveLayouts()
 {
-    //´´½¨Ò»¸öXMLµÄÎÄµµ¶ÔÏó¡£
+    //åˆ›å»ºä¸€ä¸ªXMLçš„æ–‡æ¡£å¯¹è±¡ã€‚
     TiXmlDocument *pDocument = new TiXmlDocument();
 
 	int i = 0;
@@ -446,7 +446,7 @@ void CStartServerWindow::OnCbnSelchangeCombo3()
 		return;
 
 	m_layoutlist.GetLBText(m_layoutlist.GetEditSel(), s);
-	
+
 	if(s.GetLength() <= 0 )
 		return;
 

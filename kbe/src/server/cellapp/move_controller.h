@@ -6,7 +6,7 @@
 #include "controller.h"
 #include "updatable.h"
 #include "moveto_point_handler.h"
-#include "pyscript/scriptobject.h"	
+#include "pyscript/scriptobject.h"
 
 namespace KBEngine{
 
@@ -15,7 +15,7 @@ class MoveController : public Controller
 public:
 	MoveController(Entity* pEntity, MoveToPointHandler* pMoveToPointHandler = NULL, uint32 id = 0);
 	virtual ~MoveController();
-	
+
 	void pMoveToPointHandler(MoveToPointHandler* pMoveToPointHandler)
 		{ pMoveToPointHandler_ = pMoveToPointHandler; }
 
@@ -34,7 +34,7 @@ public:
 protected:
 	MoveToPointHandler* pMoveToPointHandler_;
 };
- 
+
 }
 #endif // KBE_MOVETOPOINTCONTROLLERBASE_H
 

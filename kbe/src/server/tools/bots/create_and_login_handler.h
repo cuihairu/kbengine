@@ -8,7 +8,7 @@
 #include "common/timer.h"
 #include "helper/debug_helper.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 
 class CreateAndLoginHandler : public TimerHandler
 {

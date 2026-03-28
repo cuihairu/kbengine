@@ -5,10 +5,10 @@
 #include "proxy_forwarder.h"
 #include "server/serverconfig.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
-ProxyForwarder::ProxyForwarder(Proxy * pProxy) : 
+ProxyForwarder::ProxyForwarder(Proxy * pProxy) :
 pProxy_(pProxy)
 {
 	timerHandle_ = Baseapp::getSingleton().dispatcher().addTimer(1000000 / g_kbeSrvConfig.gameUpdateHertz(), this,

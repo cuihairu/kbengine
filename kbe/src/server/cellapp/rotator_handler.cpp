@@ -5,7 +5,7 @@
 #include "rotator_handler.h"
 #include "turn_controller.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ void RotatorHandler::addToStream(KBEngine::MemoryStream& s)
 void RotatorHandler::createFromStream(KBEngine::MemoryStream& s)
 {
 	s >> destDir_.dir.x >> destDir_.dir.y >> destDir_.dir.z >> velocity_;
-	
+
 	std::string val = "";
 	s.readBlob(val);
 	pyuserarg_ = script::Pickler::unpickle(val);
@@ -67,7 +67,7 @@ bool RotatorHandler::requestTurnOver()
 		if (pController_->pEntity())
 			pController_->pEntity()->onTurn(pController_->id(), pyuserarg_);
 
-		// Èç¹ûÔÚonTurnÖĞµ÷ÓÃcancelController£¨id£©»áµ¼ÖÂControllerÎö¹¹µ¼ÖÂpController_ÎªNULL
+		// å¦‚æœåœ¨onTurnä¸­è°ƒç”¨cancelControllerï¼ˆidï¼‰ä¼šå¯¼è‡´Controllerææ„å¯¼è‡´pController_ä¸ºNULL
 		if (pController_)
 			pController_->destroy();
 	}
@@ -89,18 +89,18 @@ bool RotatorHandler::update()
 		delete this;
 		return false;
 	}
-		
+
 	Entity* pEntity = pController_->pEntity();
 	Py_INCREF(pEntity);
 
 	const Direction3D& dstDir = destDir();
 	Direction3D currDir = pEntity->direction();
 
-	// µÃµ½²îÖµ
+	// å¾—åˆ°å·®å€¼
 	float deltaYaw = dstDir.yaw() - currDir.yaw();
 
 	if (deltaYaw > KBE_PI)
-		deltaYaw = (float)((double)deltaYaw - KBE_2PI/* ÓÉÓÚÎÒÃÇµÄ»¡¶È±íÊ¾·¶Î§ÔÚ-PI ~ PI£¬´Ë´¦·ÀÖ¹Òç³ö */);
+		deltaYaw = (float)((double)deltaYaw - KBE_2PI/* ç”±äºæˆ‘ä»¬çš„å¼§åº¦è¡¨ç¤ºèŒƒå›´åœ¨-PI ~ PIï¼Œæ­¤å¤„é˜²æ­¢æº¢å‡º */);
 	else if (deltaYaw < -KBE_PI)
 		deltaYaw = (float)((double)deltaYaw + KBE_2PI);
 
@@ -120,11 +120,11 @@ bool RotatorHandler::update()
 	else if (currDir.yaw() < -KBE_PI)
 		currDir.yaw((float((double)currDir.yaw() + KBE_2PI)));
 
-	// ÉèÖÃentityµÄĞÂÎ»ÖÃºÍÃæÏò
+	// è®¾ç½®entityçš„æ–°ä½ç½®å’Œé¢å‘
 	if (pController_)
 		pEntity->setPositionAndDirection(pEntity->position(), currDir);
 
-	// Èç¹û´ïµ½Ä¿µÄµØÔò·µ»Øtrue
+	// å¦‚æœè¾¾åˆ°ç›®çš„åœ°åˆ™è¿”å›true
 	if (fabs(deltaYaw) < 0.0001f && requestTurnOver())
 	{
 		Py_DECREF(pEntity);

@@ -15,30 +15,30 @@ class Controllers;
 class MemoryStream;
 
 /*
-	¿ØÖÆÆ÷£¬ ¹ÜÀítrap¡¢VisionµÈ¡£
+	æ§åˆ¶å™¨ï¼Œ ç®¡ç†trapã€Visionç­‰ã€‚
 */
 class Controller
 {
 public:
 	enum ControllerType
 	{
-		CONTROLLER_TYPE_NORMAL = 0,			// ³£¹æÀàĞÍ
-		CONTROLLER_TYPE_PROXIMITY = 1,		// ·¶Î§´¥·¢Æ÷ÀàĞÍ
-		CONTROLLER_TYPE_MOVE = 2,			// ÒÆ¶¯¿ØÖÆÆ÷ÀàĞÍ
-		CONTROLLER_TYPE_ROTATE = 3,			// Ğı×ª¿ØÖÆÆ÷ÀàĞÍ
+		CONTROLLER_TYPE_NORMAL = 0,			// å¸¸è§„ç±»å‹
+		CONTROLLER_TYPE_PROXIMITY = 1,		// èŒƒå›´è§¦å‘å™¨ç±»å‹
+		CONTROLLER_TYPE_MOVE = 2,			// ç§»åŠ¨æ§åˆ¶å™¨ç±»å‹
+		CONTROLLER_TYPE_ROTATE = 3,			// æ—‹è½¬æ§åˆ¶å™¨ç±»å‹
 	};
 
 	Controller(Controller::ControllerType type, Entity* pEntity, int32 userarg, uint32 id = 0);
 	Controller(Entity* pEntity);
 	virtual ~Controller();
-	
+
 	uint32 id() { return id_; }
 	void id(uint32 v) { id_ = v; }
-	
+
 	int32 userarg() const { return userarg_; }
-	
+
 	Entity* pEntity() const { return pEntity_; }
-	
+
 	void pControllers(Controllers* v) { pControllers_ = v; }
 
 	virtual void destroy();
@@ -52,9 +52,9 @@ public:
 protected:
 	uint32 id_;
 	Entity* pEntity_;
-	
+
 	int32 userarg_;
-	
+
 	Controllers* pControllers_;
 
 	ControllerType type_;

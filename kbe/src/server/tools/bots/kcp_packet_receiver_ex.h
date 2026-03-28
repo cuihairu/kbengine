@@ -6,7 +6,7 @@
 
 #include "network/kcp_packet_receiver.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 
 class ClientObject;
 

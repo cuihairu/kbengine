@@ -1,9 +1,9 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
-#include "cell.h"	
-#include "helper/profile.h"	
+#include "cell.h"
+#include "helper/profile.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------

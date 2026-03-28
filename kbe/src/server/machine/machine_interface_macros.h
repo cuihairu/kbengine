@@ -9,18 +9,18 @@
 #ifndef KBE_MACHINE_INTERFACE_MACRO_H
 #define KBE_MACHINE_INTERFACE_MACRO_H
 
-// common include	
+// common include
 #include "network/interface_defs.h"
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine{
 
 /**
-	MachineÏûÏ¢ºê£¬  ²ÎÊıÎªÁ÷£¬ ĞèÒª×Ô¼º½â¿ª
+	Machineæ¶ˆæ¯å®ï¼Œ  å‚æ•°ä¸ºæµï¼Œ éœ€è¦è‡ªå·±è§£å¼€
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_STREAM
@@ -41,7 +41,7 @@ namespace KBEngine{
 													KBEngine::MemoryStream& s)	\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_STREAM(NAME)									\
@@ -61,7 +61,7 @@ namespace KBEngine{
 																				\
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÁã¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰é›¶ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS0
@@ -82,7 +82,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS0(NAME)										\
@@ -103,7 +103,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÒ»¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰ä¸€ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS1
@@ -126,7 +126,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS1(NAME, ARG_TYPE1, ARG_NAME1)				\
@@ -146,7 +146,7 @@ namespace KBEngine{
 																				\
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞ¶ş¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰äºŒä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS2
@@ -174,7 +174,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS2(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -198,7 +198,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÈı¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰ä¸‰ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS3
@@ -231,7 +231,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS3(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -259,7 +259,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞËÄ¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰å››ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS4
@@ -296,7 +296,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS4(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -327,7 +327,7 @@ namespace KBEngine{
 											ARG_TYPE4, ARG_NAME4)				\
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÎå¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰äº”ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS5
@@ -368,7 +368,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS5(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -404,7 +404,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÁù¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰å…­ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS6
@@ -449,7 +449,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS6(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -489,7 +489,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÆß¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰ä¸ƒä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS7
@@ -539,7 +539,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS7(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -584,7 +584,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞ°Ë¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰å…«ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS8
@@ -638,7 +638,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS8(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -686,7 +686,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞ¾Å¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰ä¹ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS9
@@ -744,7 +744,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS9(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -796,7 +796,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÊ®¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰åä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS10
@@ -859,7 +859,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS10(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -915,7 +915,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÊ®Ò»¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰åä¸€ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS11
@@ -982,7 +982,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS11(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -1042,7 +1042,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÊ®Îå¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰åäº”ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS15
@@ -1126,7 +1126,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS15(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -1202,7 +1202,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÊ®Áù¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰åå…­ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS16
@@ -1291,7 +1291,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS16(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -1371,7 +1371,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞÊ®°Ë¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰åå…«ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS18
@@ -1468,7 +1468,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS18(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -1556,7 +1556,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞ¶şÊ®¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰äºŒåä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS20
@@ -1662,7 +1662,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS20(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -1758,7 +1758,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞ¶şÊ®Ò»¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰äºŒåä¸€ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS21
@@ -1868,7 +1868,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS21(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -1969,7 +1969,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞ¶şÊ®¶ş¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰äºŒåäºŒä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS22
@@ -2084,7 +2084,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS22(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -2189,7 +2189,7 @@ namespace KBEngine{
 
 
 /**
-	MachineÏûÏ¢ºê£¬  Ö»ÓĞ¶şÊ®ËÄ¸ö²ÎÊıµÄÏûÏ¢
+	Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰äºŒåå››ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef MACHINE_MESSAGE_HANDLER_ARGS24
@@ -2312,7 +2312,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define MACHINE_MESSAGE_HANDLER_ARGS24(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -2425,7 +2425,7 @@ namespace KBEngine{
 
 
 /**
-MachineÏûÏ¢ºê£¬  Ö»ÓĞ¶şÊ®Îå¸ö²ÎÊıµÄÏûÏ¢
+Machineæ¶ˆæ¯å®ï¼Œ  åªæœ‰äºŒåäº”ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 #undef MACHINE_MESSAGE_HANDLER_ARGS25

@@ -25,19 +25,19 @@ class RestoreEntityHandler : public Task
 public:
 	RestoreEntityHandler(COMPONENT_ID cellappID, Network::NetworkInterface & networkInterface);
 	~RestoreEntityHandler();
-	
+
 	bool process();
-	
+
 	void pushEntity(ENTITY_ID id);
 
-	/** 
-		Ä³¸öbaseappÉÏµÄspace»Ö¸´ÁËcell£¬ ÅĞ¶Ïµ±Ç°baseappÊÇ·ñÓĞÏà¹ØentityĞèÒª»Ö¸´cell
+	/**
+		æŸä¸ªbaseappä¸Šçš„spaceæ¢å¤äº†cellï¼Œ åˆ¤æ–­å½“å‰baseappæ˜¯å¦æœ‰ç›¸å…³entityéœ€è¦æ¢å¤cell
 	*/
-	void onRestoreSpaceCellFromOtherBaseapp(COMPONENT_ID baseappID, COMPONENT_ID cellappID, 
+	void onRestoreSpaceCellFromOtherBaseapp(COMPONENT_ID baseappID, COMPONENT_ID cellappID,
 		SPACE_ID spaceID, ENTITY_ID spaceEntityID, ENTITY_SCRIPT_UID utype, bool destroyed);
 
-	/** 
-		ÊÇ·ñÔÊĞí½øĞĞ»Ö¸´
+	/**
+		æ˜¯å¦å…è®¸è¿›è¡Œæ¢å¤
 	*/
 	bool canRestore() const{ return canRestore_; }
 	void canRestore(bool v){ canRestore_ = v; }
@@ -51,7 +51,7 @@ private:
 	std::vector<RestoreData> restoreSpaces_;
 	std::vector<RestoreData> otherRestoredSpaces_;
 
-	// space´´½¨ºÃcellºó¹ã²¥¸øÆäËûbaseapp
+	// spaceåˆ›å»ºå¥½cellåå¹¿æ’­ç»™å…¶ä»–baseapp
 	bool broadcastOtherBaseapps_;
 
 	uint64 tickReport_;

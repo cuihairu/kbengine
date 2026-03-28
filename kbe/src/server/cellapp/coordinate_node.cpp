@@ -7,7 +7,7 @@
 #include "coordinate_node.inl"
 #endif
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
 CoordinateNode::CoordinateNode(CoordinateSystem* pCoordinateSystem):

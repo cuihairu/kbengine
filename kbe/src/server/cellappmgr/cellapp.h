@@ -9,17 +9,17 @@
 #include "helper/debug_helper.h"
 #include "helper/watcher.h"
 
-namespace KBEngine{ 
+namespace KBEngine{
 
 class Cellapp
 {
 public:
 	Cellapp();
 	virtual ~Cellapp();
-	
+
 	float load() const { return load_; }
 	void load(float v) { load_ = v; }
-	
+
 	void destroy(){ isDestroyed_ = true; }
 	bool isDestroyed() const { return isDestroyed_; }
 
@@ -38,7 +38,7 @@ public:
 
 	void groupOrderID(COMPONENT_ORDER v) { groupOrderID_ = v; }
 	COMPONENT_ORDER groupOrderID() const { return groupOrderID_; }
-	
+
 	ENTITY_ID numSpaces() const { return spaces_.size(); }
 	Spaces& spaces() { return spaces_; }
 
@@ -50,7 +50,7 @@ protected:
 	bool isDestroyed_;
 
 	Watchers watchers_;
-	
+
 	Spaces spaces_;
 
 	float initProgress_;

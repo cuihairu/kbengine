@@ -15,7 +15,7 @@ public:
 	ClientSDKDownloader(Network::NetworkInterface & networkInterface, const Network::Address& addr, size_t clientWindowSize,
 		const std::string& assetsPath, const std::string& binPath, const std::string& options);
 	~ClientSDKDownloader();
-	
+
 	bool process();
 
 private:

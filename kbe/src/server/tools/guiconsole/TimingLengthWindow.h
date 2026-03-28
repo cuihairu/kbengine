@@ -14,7 +14,7 @@ public:
 
 // Dialog Data
 	enum { IDD = IDD_TIMINGLENGTH };
-	
+
 	BOOL OnInitDialog();
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

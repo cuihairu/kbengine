@@ -5,22 +5,22 @@
 
 
 #include "helper/debug_helper.h"
-#include "common/common.h"	
+#include "common/common.h"
 #include "entitydef/remote_entity_method.h"
 
 namespace KBEngine{
 
 class EntityRemoteMethod : public RemoteEntityMethod
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
-	INSTANCE_SCRIPT_HREADER(EntityRemoteMethod, RemoteEntityMethod)	
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
+	INSTANCE_SCRIPT_HREADER(EntityRemoteMethod, RemoteEntityMethod)
 public:
-	EntityRemoteMethod(MethodDescription* methodDescription, 
+	EntityRemoteMethod(MethodDescription* methodDescription,
 						EntityCallAbstract* entityCall);
 
 	~EntityRemoteMethod();
 
-	static PyObject* tp_call(PyObject* self, 
+	static PyObject* tp_call(PyObject* self,
 			PyObject* args, PyObject* kwds);
 
 private:

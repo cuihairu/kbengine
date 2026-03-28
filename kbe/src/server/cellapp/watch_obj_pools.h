@@ -6,7 +6,7 @@
 #include "common/common.h"
 #include "helper/debug_helper.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 
 class WatchObjectPool
 {

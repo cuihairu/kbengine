@@ -9,18 +9,18 @@
 #ifndef KBE_ENTITY_INTERFACE_MACRO_H
 #define KBE_ENTITY_INTERFACE_MACRO_H
 
-// common include	
+// common include
 #include "network/interface_defs.h"
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine{
 
 /**
-	EntityÏûÏ¢ºê£¬  ²ÎÊıÎªÁ÷£¬ ĞèÒª×Ô¼º½â¿ª
+	Entityæ¶ˆæ¯å®ï¼Œ  å‚æ•°ä¸ºæµï¼Œ éœ€è¦è‡ªå·±è§£å¼€
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef ENTITY_MESSAGE_HANDLER_STREAM
@@ -83,7 +83,7 @@ namespace KBEngine{
 																				\
 
 /**
-	EntityÏûÏ¢ºê£¬  Ö»ÓĞÒ»¸ö²ÎÊıµÄÏûÏ¢
+	Entityæ¶ˆæ¯å®ï¼Œ  åªæœ‰ä¸€ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef ENTITY_MESSAGE_HANDLER_ARGS1
@@ -127,7 +127,7 @@ namespace KBEngine{
 	{																			\
 		return Network::NETWORK_MESSAGE_TYPE_ENTITY;							\
 	}																			\
-		
+
 #endif
 #else
 #define ENTITY_MESSAGE_HANDLER_ARGS1(NAME, ARG_TYPE1, ARG_NAME1)				\
@@ -148,7 +148,7 @@ namespace KBEngine{
 																				\
 
 /**
-	EntityÏûÏ¢ºê£¬  Ö»ÓĞ¶ş¸ö²ÎÊıµÄÏûÏ¢
+	Entityæ¶ˆæ¯å®ï¼Œ  åªæœ‰äºŒä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef ENTITY_MESSAGE_HANDLER_ARGS2
@@ -196,7 +196,7 @@ namespace KBEngine{
 	{																			\
 		return Network::NETWORK_MESSAGE_TYPE_ENTITY;							\
 	}																			\
-		
+
 #endif
 #else
 #define ENTITY_MESSAGE_HANDLER_ARGS2(NAME, ARG_TYPE1, ARG_NAME1,				\
@@ -222,7 +222,7 @@ namespace KBEngine{
 
 
 /**
-	EntityÏûÏ¢ºê£¬  Ö»ÓĞÁã¸ö²ÎÊıµÄÏûÏ¢
+	Entityæ¶ˆæ¯å®ï¼Œ  åªæœ‰é›¶ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef ENTITY_MESSAGE_HANDLER_ARGS0
@@ -264,7 +264,7 @@ namespace KBEngine{
 	{																			\
 		return Network::NETWORK_MESSAGE_TYPE_ENTITY;							\
 	}																			\
-		
+
 #endif
 #else
 #define ENTITY_MESSAGE_HANDLER_ARGS0(NAME)										\
@@ -286,7 +286,7 @@ namespace KBEngine{
 
 
 /**
-	EntityÏûÏ¢ºê£¬  Ö»ÓĞÈı¸ö²ÎÊıµÄÏûÏ¢
+	Entityæ¶ˆæ¯å®ï¼Œ  åªæœ‰ä¸‰ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef ENTITY_MESSAGE_HANDLER_ARGS3
@@ -338,7 +338,7 @@ namespace KBEngine{
 	{																			\
 		return Network::NETWORK_MESSAGE_TYPE_ENTITY;							\
 	}																			\
-		
+
 #endif
 #else
 #define ENTITY_MESSAGE_HANDLER_ARGS3(NAME, ARG_TYPE1, ARG_NAME1,				\

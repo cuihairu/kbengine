@@ -13,14 +13,14 @@
 #include "db_interface/db_tasks.h"
 #include "server/server_errors.h"
 
-namespace KBEngine{ 
+namespace KBEngine{
 
 class DBInterface;
 class Buffered_DBTasks;
 struct ACCOUNT_INFOS;
 
 /*
-	Êı¾İ¿âÏß³ÌÈÎÎñ»ù´¡Àà
+	æ•°æ®åº“çº¿ç¨‹ä»»åŠ¡åŸºç¡€ç±»
 */
 
 class DBTask : public DBTaskBase
@@ -41,7 +41,7 @@ public:
 	addr_()
 	{
 	}
-	
+
 	virtual ~DBTask();
 
 	bool send(Network::Bundle* pBundle);
@@ -68,7 +68,7 @@ public:
 	_pBuffered_DBTasks(NULL)
 	{
 	}
-	
+
 	EntityDBTask(const Network::Address& addr, ENTITY_ID entityID, DBID entityDBID):
 	DBTask(addr),
 	_entityID(entityID),
@@ -76,12 +76,12 @@ public:
 	_pBuffered_DBTasks(NULL)
 	{
 	}
-	
+
 	virtual ~EntityDBTask(){}
-	
+
 	ENTITY_ID EntityDBTask_entityID() const { return _entityID; }
 	DBID EntityDBTask_entityDBID() const { return _entityDBID; }
-	
+
 	void pBuffered_DBTasks(Buffered_DBTasks* v){ _pBuffered_DBTasks = v; }
 	virtual thread::TPTask::TPTaskState presentMainThread();
 
@@ -98,7 +98,7 @@ private:
 };
 
 /**
-	Ö´ĞĞÒ»ÌõsqlÓï¾ä
+	æ‰§è¡Œä¸€æ¡sqlè¯­å¥
 */
 class DBTaskExecuteRawDatabaseCommand : public DBTask
 {
@@ -123,7 +123,7 @@ protected:
 
 
 /**
-	Ö´ĞĞÒ»ÌõsqlÓï¾ä
+	æ‰§è¡Œä¸€æ¡sqlè¯­å¥
 */
 class DBTaskExecuteRawDatabaseCommandByEntity : public EntityDBTask
 {
@@ -147,12 +147,12 @@ protected:
 };
 
 /**
-	ÏòÊı¾İ¿âĞ´entity£¬ ±¸·İentityÊ±Ò²ÊÇÕâ¸ö»úÖÆ
+	å‘æ•°æ®åº“å†™entityï¼Œ å¤‡ä»½entityæ—¶ä¹Ÿæ˜¯è¿™ä¸ªæœºåˆ¶
 */
 class DBTaskWriteEntity : public EntityDBTask
 {
 public:
-	DBTaskWriteEntity(const Network::Address& addr, COMPONENT_ID componentID, 
+	DBTaskWriteEntity(const Network::Address& addr, COMPONENT_ID componentID,
 		ENTITY_ID eid, DBID entityDBID, MemoryStream& datas);
 
 	virtual ~DBTaskWriteEntity();
@@ -174,12 +174,12 @@ protected:
 };
 
 /**
-	´ÓÊı¾İ¿âÖĞÉ¾³ıentity
+	ä»æ•°æ®åº“ä¸­åˆ é™¤entity
 */
 class DBTaskRemoveEntity : public EntityDBTask
 {
 public:
-	DBTaskRemoveEntity(const Network::Address& addr, COMPONENT_ID componentID, 
+	DBTaskRemoveEntity(const Network::Address& addr, COMPONENT_ID componentID,
 		ENTITY_ID eid, DBID entityDBID, MemoryStream& datas);
 
 	virtual ~DBTaskRemoveEntity();
@@ -198,12 +198,12 @@ protected:
 };
 
 /**
-	´ÓÊı¾İ¿âÖĞÉ¾³ıentity
+	ä»æ•°æ®åº“ä¸­åˆ é™¤entity
 */
 class DBTaskDeleteEntityByDBID : public DBTask
 {
 public:
-	DBTaskDeleteEntityByDBID(const Network::Address& addr, COMPONENT_ID componentID, 
+	DBTaskDeleteEntityByDBID(const Network::Address& addr, COMPONENT_ID componentID,
 		DBID entityDBID, CALLBACK_ID callbackID, ENTITY_SCRIPT_UID sid);
 
 	virtual ~DBTaskDeleteEntityByDBID();
@@ -225,12 +225,12 @@ protected:
 };
 
 /**
-	´ÓÊı¾İ¿âÖĞ×Ô¶¯¼ÓÔØÊµÌå
+	ä»æ•°æ®åº“ä¸­è‡ªåŠ¨åŠ è½½å®ä½“
 */
 class DBTaskEntityAutoLoad : public DBTask
 {
 public:
-	DBTaskEntityAutoLoad(const Network::Address& addr, COMPONENT_ID componentID, 
+	DBTaskEntityAutoLoad(const Network::Address& addr, COMPONENT_ID componentID,
 		ENTITY_SCRIPT_UID entityType, ENTITY_ID start, ENTITY_ID end);
 
 	virtual ~DBTaskEntityAutoLoad();
@@ -250,12 +250,12 @@ protected:
 };
 
 /**
-	Í¨¹ıdbid²éÑ¯Ò»¸öÊµÌåÊÇ·ñ´ÓÊı¾İ¿â¼ì³ö
+	é€šè¿‡dbidæŸ¥è¯¢ä¸€ä¸ªå®ä½“æ˜¯å¦ä»æ•°æ®åº“æ£€å‡º
 */
 class DBTaskLookUpEntityByDBID : public DBTask
 {
 public:
-	DBTaskLookUpEntityByDBID(const Network::Address& addr, COMPONENT_ID componentID, 
+	DBTaskLookUpEntityByDBID(const Network::Address& addr, COMPONENT_ID componentID,
 		DBID entityDBID, CALLBACK_ID callbackID, ENTITY_SCRIPT_UID sid);
 
 	virtual ~DBTaskLookUpEntityByDBID();
@@ -278,18 +278,18 @@ protected:
 };
 
 /**
-	´´½¨Ò»¸öÕËºÅµ½Êı¾İ¿â
+	åˆ›å»ºä¸€ä¸ªè´¦å·åˆ°æ•°æ®åº“
 */
 class DBTaskCreateAccount : public DBTask
 {
 public:
-	DBTaskCreateAccount(const Network::Address& addr, std::string& registerName, std::string& accountName, 
+	DBTaskCreateAccount(const Network::Address& addr, std::string& registerName, std::string& accountName,
 		std::string& password, std::string& postdatas, std::string& getdatas);
 	virtual ~DBTaskCreateAccount();
 	virtual bool db_thread_process();
 	virtual thread::TPTask::TPTaskState presentMainThread();
 
-	static bool writeAccount(DBInterface* pdbi, const std::string& accountName, 
+	static bool writeAccount(DBInterface* pdbi, const std::string& accountName,
 		const std::string& passwd, const std::string& datas, ACCOUNT_INFOS& info);
 
 	virtual std::string name() const {
@@ -297,21 +297,21 @@ public:
 	}
 
 protected:
-	std::string registerName_; 
+	std::string registerName_;
 	std::string accountName_;
 	std::string password_;
 	std::string postdatas_, getdatas_;
 	bool success_;
-	
+
 };
 
 /**
-	´´½¨Ò»¸öemailÕËºÅ
+	åˆ›å»ºä¸€ä¸ªemailè´¦å·
 */
 class DBTaskCreateMailAccount : public DBTask
 {
 public:
-	DBTaskCreateMailAccount(const Network::Address& addr, std::string& registerName, std::string& accountName, 
+	DBTaskCreateMailAccount(const Network::Address& addr, std::string& registerName, std::string& accountName,
 		std::string& password, std::string& postdatas, std::string& getdatas);
 	virtual ~DBTaskCreateMailAccount();
 	virtual bool db_thread_process();
@@ -322,16 +322,16 @@ public:
 	}
 
 protected:
-	std::string registerName_; 
+	std::string registerName_;
 	std::string accountName_;
 	std::string password_;
 	std::string postdatas_, getdatas_;
 	bool success_;
-	
+
 };
 
 /**
-	´´½¨Ò»¸öemailÕËºÅ
+	åˆ›å»ºä¸€ä¸ªemailè´¦å·
 */
 class DBTaskActivateAccount : public DBTask
 {
@@ -346,13 +346,13 @@ public:
 	}
 
 protected:
-	std::string code_; 
+	std::string code_;
 	bool success_;
-	
+
 };
 
 /**
-	ÇëÇóÖØÖÃÕËºÅ
+	è¯·æ±‚é‡ç½®è´¦å·
 */
 class DBTaskReqAccountResetPassword : public DBTask
 {
@@ -367,20 +367,20 @@ public:
 	}
 
 protected:
-	std::string code_; 
+	std::string code_;
 	std::string email_;
 	std::string accountName_;
 	bool success_;
-	
+
 };
 
 /**
-	Íê³ÉÖØÖÃÕËºÅ
+	å®Œæˆé‡ç½®è´¦å·
 */
 class DBTaskAccountResetPassword : public DBTask
 {
 public:
-	DBTaskAccountResetPassword(const Network::Address& addr, std::string& accountName, 
+	DBTaskAccountResetPassword(const Network::Address& addr, std::string& accountName,
 		std::string& newpassword, std::string& code);
 	virtual ~DBTaskAccountResetPassword();
 	virtual bool db_thread_process();
@@ -391,20 +391,20 @@ public:
 	}
 
 protected:
-	std::string code_; 
+	std::string code_;
 	std::string accountName_;
 	std::string newpassword_;
 	bool success_;
-	
+
 };
 
 /**
-	ÇëÇó°ó¶¨email
+	è¯·æ±‚ç»‘å®šemail
 */
 class DBTaskReqAccountBindEmail : public DBTask
 {
 public:
-	DBTaskReqAccountBindEmail(const Network::Address& addr, ENTITY_ID entityID, std::string& accountName, 
+	DBTaskReqAccountBindEmail(const Network::Address& addr, ENTITY_ID entityID, std::string& accountName,
 		std::string password,std::string& email);
 	virtual ~DBTaskReqAccountBindEmail();
 	virtual bool db_thread_process();
@@ -415,22 +415,22 @@ public:
 	}
 
 protected:
-	std::string code_; 
-	std::string password_; 
+	std::string code_;
+	std::string password_;
 	std::string accountName_;
-	std::string email_; 
+	std::string email_;
 	bool success_;
 	ENTITY_ID entityID_;
-	
+
 };
 
 /**
-	Íê³É°ó¶¨email
+	å®Œæˆç»‘å®šemail
 */
 class DBTaskAccountBindEmail : public DBTask
 {
 public:
-	DBTaskAccountBindEmail(const Network::Address& addr, std::string& accountName, 
+	DBTaskAccountBindEmail(const Network::Address& addr, std::string& accountName,
 		std::string& code);
 	virtual ~DBTaskAccountBindEmail();
 	virtual bool db_thread_process();
@@ -441,18 +441,18 @@ public:
 	}
 
 protected:
-	std::string code_; 
+	std::string code_;
 	std::string accountName_;
 	bool success_;
 };
 
 /**
-	ÉèÖÃĞÂÃÜÂë
+	è®¾ç½®æ–°å¯†ç 
 */
 class DBTaskAccountNewPassword : public DBTask
 {
 public:
-	DBTaskAccountNewPassword(const Network::Address& addr, ENTITY_ID entityID, std::string& accountName, 
+	DBTaskAccountNewPassword(const Network::Address& addr, ENTITY_ID entityID, std::string& accountName,
 		std::string& oldpassword_, std::string& newpassword);
 	virtual ~DBTaskAccountNewPassword();
 	virtual bool db_thread_process();
@@ -470,7 +470,7 @@ protected:
 };
 
 /**
-	baseappÇëÇó²éÑ¯accountĞÅÏ¢
+	baseappè¯·æ±‚æŸ¥è¯¢accountä¿¡æ¯
 */
 class DBTaskQueryAccount : public EntityDBTask
 {
@@ -505,7 +505,7 @@ protected:
 };
 
 /**
-	ÕËºÅÉÏÏß
+	è´¦å·ä¸Šçº¿
 */
 class DBTaskAccountOnline : public EntityDBTask
 {
@@ -527,7 +527,7 @@ protected:
 
 
 /**
-	entityÏÂÏß
+	entityä¸‹çº¿
 */
 class DBTaskEntityOffline : public EntityDBTask
 {
@@ -547,13 +547,13 @@ protected:
 
 
 /**
-	Ò»¸öĞÂÓÃ»§µÇÂ¼£¬ ĞèÒª¼ì²éºÏ·¨ĞÔ
+	ä¸€ä¸ªæ–°ç”¨æˆ·ç™»å½•ï¼Œ éœ€è¦æ£€æŸ¥åˆæ³•æ€§
 */
 class DBTaskAccountLogin : public DBTask
 {
 public:
-	DBTaskAccountLogin(const Network::Address& addr, std::string& loginName, 
-		std::string& accountName, std::string& password, SERVER_ERROR_CODE retcode, std::string& postdatas, 
+	DBTaskAccountLogin(const Network::Address& addr, std::string& loginName,
+		std::string& accountName, std::string& password, SERVER_ERROR_CODE retcode, std::string& postdatas,
 		std::string& getdatas, bool needCheckPassword);
 
 	virtual ~DBTaskAccountLogin();
@@ -580,12 +580,12 @@ protected:
 };
 
 /**
-	baseappÇëÇó²éÑ¯entityĞÅÏ¢
+	baseappè¯·æ±‚æŸ¥è¯¢entityä¿¡æ¯
 */
 class DBTaskQueryEntity : public EntityDBTask
 {
 public:
-	DBTaskQueryEntity(const Network::Address& addr, int8 queryMode, std::string& entityType, DBID dbid, 
+	DBTaskQueryEntity(const Network::Address& addr, int8 queryMode, std::string& entityType, DBID dbid,
 		COMPONENT_ID componentID, CALLBACK_ID callbackID, ENTITY_ID entityID);
 
 	virtual ~DBTaskQueryEntity();
@@ -606,16 +606,16 @@ protected:
 	MemoryStream* s_;
 	ENTITY_ID entityID_;
 
-	// Èç¹ûÊµÌåÒÑ¾­¼¤»î£¬ÔòÕâ¸öÊôĞÔÖ¸ÏòÊµÌåËùÔÚapp
+	// å¦‚æœå®ä½“å·²ç»æ¿€æ´»ï¼Œåˆ™è¿™ä¸ªå±æ€§æŒ‡å‘å®ä½“æ‰€åœ¨app
 	bool wasActive_;
 	COMPONENT_ID wasActiveCID_;
 	ENTITY_ID wasActiveEntityID_;
-	
+
 	COMPONENT_ID serverGroupID_;
 };
 
 /**
-	Ğ´·şÎñÆ÷ÈÕÖ¾
+	å†™æœåŠ¡å™¨æ—¥å¿—
 */
 class DBTaskServerLog : public DBTask
 {
@@ -633,11 +633,11 @@ protected:
 };
 
 /**
-	²Á³ıÄ³¸öbaseapp¼ÇÂ¼µÄentitylog
+	æ“¦é™¤æŸä¸ªbaseappè®°å½•çš„entitylog
 */
 class DBTaskEraseBaseappEntityLog : public DBTask
 {
-public: 
+public:
 	DBTaskEraseBaseappEntityLog(COMPONENT_ID componentID);
 	virtual ~DBTaskEraseBaseappEntityLog();
 	virtual bool db_thread_process();

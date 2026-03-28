@@ -46,7 +46,7 @@ BOOL CGraphsWindow::OnInitDialog()
 
 	SetTimer(1,100,NULL);
 	startPlot();
-	return TRUE; 
+	return TRUE;
 };
 
 void CGraphsWindow::autoWndSize()
@@ -110,5 +110,5 @@ void CGraphsWindow::OnTimer(UINT_PTR nIDEvent)
 
 	m_plot.GetLine(0).AddPoint(x,y0);
 	m_plot.GetLine(1).AddPoint(x,y1);
-		
+
 }

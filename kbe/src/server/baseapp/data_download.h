@@ -16,11 +16,11 @@ class DataDownloads;
 class DataDownload : public thread::TPTask
 {
 public:
-	DataDownload(PyObjectPtr objptr, 
+	DataDownload(PyObjectPtr objptr,
 		const std::string & descr, int16 id);
 
 	virtual ~DataDownload();
-	
+
 	virtual bool checkDescr(){ return true; }
 
 	void pDataDownloads(DataDownloads* pDataDownloads){ pDataDownloads_ = pDataDownloads; }
@@ -51,7 +51,7 @@ protected:
 
 	uint32 totalBytes_;
 
-	// ×Ü¹²·¢ËÍµÄ×Ö½ÚÊı
+	// æ€»å…±å‘é€çš„å­—èŠ‚æ•°
 	uint32 totalSentBytes_;
 	uint32 remainSent_;
 	uint32 currSent_;
@@ -66,7 +66,7 @@ protected:
 class StringDataDownload : public DataDownload
 {
 public:
-	StringDataDownload(PyObjectPtr objptr, 
+	StringDataDownload(PyObjectPtr objptr,
 		const std::string & descr, int16 id);
 
 	virtual ~StringDataDownload();
@@ -81,7 +81,7 @@ public:
 class FileDataDownload : public DataDownload
 {
 public:
-	FileDataDownload(PyObjectPtr objptr, 
+	FileDataDownload(PyObjectPtr objptr,
 		const std::string & descr, int16 id);
 
 	virtual ~FileDataDownload();
@@ -91,7 +91,7 @@ public:
 	virtual int8 type();
 protected:
 	std::string path_;
-	
+
 };
 
 }

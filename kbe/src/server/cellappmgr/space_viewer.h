@@ -10,7 +10,7 @@
 #include "helper/eventhistory_stats.h"
 #include "network/interfaces.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 namespace Network
 {
 class NetworkInterface;
@@ -25,7 +25,7 @@ class SpaceViewer
 public:
 	SpaceViewer();
 	virtual ~SpaceViewer();
-	
+
 	virtual void timeout();
 	virtual void sendStream(MemoryStream* s);
 
@@ -40,7 +40,7 @@ protected:
 
 	Network::Address addr_;
 
-	// 当前所查看的space
+	// 褰撳墠鎵�鏌ョ湅鐨剆pace
 	SPACE_ID spaceID_;
 };
 

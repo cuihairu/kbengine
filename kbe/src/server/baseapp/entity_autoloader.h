@@ -13,14 +13,14 @@ class EntityAutoLoader
 public:
 	EntityAutoLoader(Network::NetworkInterface & networkInterface, InitProgressHandler* pInitProgressHandler);
 	~EntityAutoLoader();
-	
+
 	bool process();
 
 	void pInitProgressHandler(InitProgressHandler* p)
 		{ pInitProgressHandler_ = p; }
 
-	/** ÍøÂç½Ó¿Ú
-		Êı¾İ¿âÖĞ²éÑ¯µÄ×Ô¶¯entity¼ÓÔØĞÅÏ¢·µ»Ø
+	/** ç½‘ç»œæ¥å£
+		æ•°æ®åº“ä¸­æŸ¥è¯¢çš„è‡ªåŠ¨entityåŠ è½½ä¿¡æ¯è¿”å›
 	*/
 	void onEntityAutoLoadCBFromDBMgr(Network::Channel* pChannel, MemoryStream& s);
 
@@ -30,7 +30,7 @@ private:
 
 	std::vector< std::vector<ENTITY_SCRIPT_UID> > entityTypes_;
 
-	// Ã¿´ÎÈ¡²éÑ¯½á¹û¼¯µÄÇø¶Î
+	// æ¯æ¬¡å–æŸ¥è¯¢ç»“æœé›†çš„åŒºæ®µ
 	ENTITY_ID start_;
 	ENTITY_ID end_;
 

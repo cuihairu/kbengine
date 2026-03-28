@@ -15,7 +15,7 @@
 
 namespace KBEngine{
 
-class Baseappmgr :	public ServerApp, 
+class Baseappmgr :	public ServerApp,
 					public Singleton<Baseappmgr>
 {
 public:
@@ -23,23 +23,23 @@ public:
 	{
 		TIMEOUT_GAME_TICK = TIMEOUT_SERVERAPP_MAX + 1
 	};
-	
-	Baseappmgr(Network::EventDispatcher& dispatcher, 
-		Network::NetworkInterface& ninterface, 
+
+	Baseappmgr(Network::EventDispatcher& dispatcher,
+		Network::NetworkInterface& ninterface,
 		COMPONENT_TYPE componentType,
 		COMPONENT_ID componentID);
 
 	~Baseappmgr();
-	
+
 	bool run();
-	
+
 	virtual void onChannelDeregister(Network::Channel * pChannel);
 	virtual void onAddComponent(const Components::ComponentInfos* pInfos);
 
 	void handleTimeout(TimerHandle handle, void * arg);
 	void handleGameTick();
 
-	/* ³õÊ¼»¯Ïà¹Ø½Ó¿Ú */
+	/* åˆå§‹åŒ–ç›¸å…³æ¥å£ */
 	bool initializeBegin();
 	bool inInitialize();
 	bool initializeEnd();
@@ -48,81 +48,81 @@ public:
 	COMPONENT_ID findFreeBaseapp();
 	void updateBestBaseapp();
 
-	/** ÍøÂç½Ó¿Ú
-		baseapp::createEntityAnywhere²éÑ¯µ±Ç°×îºÃµÄ×é¼şID
+	/** ç½‘ç»œæ¥å£
+		baseapp::createEntityAnywhereæŸ¥è¯¢å½“å‰æœ€å¥½çš„ç»„ä»¶ID
 	*/
 	void reqCreateEntityAnywhereFromDBIDQueryBestBaseappID(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		ÊÕµ½baseapp::createEntityAnywhereÇëÇóÔÚÄ³¸ö¿ÕÏĞµÄbaseappÉÏ´´½¨Ò»¸öbaseEntity
-		@param sp: Õâ¸öÊı¾İ°üÖĞ´æ´¢µÄÊÇ entityType	: entityµÄÀà±ğ£¬ entities.xmlÖĞµÄ¶¨ÒåµÄ¡£
-										strInitData	: Õâ¸öentity±»´´½¨ºóÓ¦¸Ã¸øËû³õÊ¼»¯µÄÒ»Ğ©Êı¾İ£¬ 
-													  ĞèÒªÊ¹ÓÃpickle.loads½â°ü.
-										componentID	: ÇëÇó´´½¨entityµÄbaseappµÄ×é¼şID
+	/** ç½‘ç»œæ¥å£
+		æ”¶åˆ°baseapp::createEntityAnywhereè¯·æ±‚åœ¨æŸä¸ªç©ºé—²çš„baseappä¸Šåˆ›å»ºä¸€ä¸ªbaseEntity
+		@param sp: è¿™ä¸ªæ•°æ®åŒ…ä¸­å­˜å‚¨çš„æ˜¯ entityType	: entityçš„ç±»åˆ«ï¼Œ entities.xmlä¸­çš„å®šä¹‰çš„ã€‚
+										strInitData	: è¿™ä¸ªentityè¢«åˆ›å»ºååº”è¯¥ç»™ä»–åˆå§‹åŒ–çš„ä¸€äº›æ•°æ®ï¼Œ
+													  éœ€è¦ä½¿ç”¨pickle.loadsè§£åŒ….
+										componentID	: è¯·æ±‚åˆ›å»ºentityçš„baseappçš„ç»„ä»¶ID
 	*/
 	void reqCreateEntityAnywhere(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-	ÊÕµ½baseapp::createEntityRemotelyÇëÇóÔÚÄ³¸ö¿ÕÏĞµÄbaseappÉÏ´´½¨Ò»¸öbaseEntity
-	@param sp: Õâ¸öÊı¾İ°üÖĞ´æ´¢µÄÊÇ entityType	: entityµÄÀà±ğ£¬ entities.xmlÖĞµÄ¶¨ÒåµÄ¡£
-	strInitData	: Õâ¸öentity±»´´½¨ºóÓ¦¸Ã¸øËû³õÊ¼»¯µÄÒ»Ğ©Êı¾İ£¬
-	ĞèÒªÊ¹ÓÃpickle.loads½â°ü.
-	componentID	: ÇëÇó´´½¨entityµÄbaseappµÄ×é¼şID
+	/** ç½‘ç»œæ¥å£
+	æ”¶åˆ°baseapp::createEntityRemotelyè¯·æ±‚åœ¨æŸä¸ªç©ºé—²çš„baseappä¸Šåˆ›å»ºä¸€ä¸ªbaseEntity
+	@param sp: è¿™ä¸ªæ•°æ®åŒ…ä¸­å­˜å‚¨çš„æ˜¯ entityType	: entityçš„ç±»åˆ«ï¼Œ entities.xmlä¸­çš„å®šä¹‰çš„ã€‚
+	strInitData	: è¿™ä¸ªentityè¢«åˆ›å»ºååº”è¯¥ç»™ä»–åˆå§‹åŒ–çš„ä¸€äº›æ•°æ®ï¼Œ
+	éœ€è¦ä½¿ç”¨pickle.loadsè§£åŒ….
+	componentID	: è¯·æ±‚åˆ›å»ºentityçš„baseappçš„ç»„ä»¶ID
 	*/
 	void reqCreateEntityRemotely(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		ÊÕµ½baseapp::createEntityAnywhereFromDBIDÇëÇóÔÚÄ³¸ö¿ÕÏĞµÄbaseappÉÏ´´½¨Ò»¸öbaseEntity
+	/** ç½‘ç»œæ¥å£
+		æ”¶åˆ°baseapp::createEntityAnywhereFromDBIDè¯·æ±‚åœ¨æŸä¸ªç©ºé—²çš„baseappä¸Šåˆ›å»ºä¸€ä¸ªbaseEntity
 	*/
 	void reqCreateEntityAnywhereFromDBID(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		ÊÕµ½baseapp::createEntityRemotelyFromDBIDÇëÇóÔÚÄ³¸ö¿ÕÏĞµÄbaseappÉÏ´´½¨Ò»¸öbaseEntity
+	/** ç½‘ç»œæ¥å£
+		æ”¶åˆ°baseapp::createEntityRemotelyFromDBIDè¯·æ±‚åœ¨æŸä¸ªç©ºé—²çš„baseappä¸Šåˆ›å»ºä¸€ä¸ªbaseEntity
 	*/
 	void reqCreateEntityRemotelyFromDBID(Network::Channel* pChannel, MemoryStream& s);
-	
-	/** ÍøÂç½Ó¿Ú
-		ÏûÏ¢×ª·¢£¬ ÓÉÄ³¸öappÏëÍ¨¹ı±¾app½«ÏûÏ¢×ª·¢¸øÄ³¸öapp¡£
+
+	/** ç½‘ç»œæ¥å£
+		æ¶ˆæ¯è½¬å‘ï¼Œ ç”±æŸä¸ªappæƒ³é€šè¿‡æœ¬appå°†æ¶ˆæ¯è½¬å‘ç»™æŸä¸ªappã€‚
 	*/
 	void forwardMessage(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		Ò»¸öĞÂµÇÂ¼µÄÕËºÅ»ñµÃºÏ·¨µÇÈëbaseappµÄÈ¨Àû£¬ ÏÖÔÚĞèÒª½«ÕËºÅ×¢²á¸øbaseapp
-		Ê¹ÆäÔÊĞíÔÚ´ËbaseappÉÏµÇÂ¼¡£
+	/** ç½‘ç»œæ¥å£
+		ä¸€ä¸ªæ–°ç™»å½•çš„è´¦å·è·å¾—åˆæ³•ç™»å…¥baseappçš„æƒåˆ©ï¼Œ ç°åœ¨éœ€è¦å°†è´¦å·æ³¨å†Œç»™baseapp
+		ä½¿å…¶å…è®¸åœ¨æ­¤baseappä¸Šç™»å½•ã€‚
 	*/
 	void registerPendingAccountToBaseapp(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		Ò»¸öĞÂµÇÂ¼µÄÕËºÅ»ñµÃºÏ·¨µÇÈëbaseappµÄÈ¨Àû£¬ ÏÖÔÚĞèÒª½«ÕËºÅ×¢²á¸øÖ¸¶¨µÄbaseapp
-		Ê¹ÆäÔÊĞíÔÚ´ËbaseappÉÏµÇÂ¼¡£
+	/** ç½‘ç»œæ¥å£
+		ä¸€ä¸ªæ–°ç™»å½•çš„è´¦å·è·å¾—åˆæ³•ç™»å…¥baseappçš„æƒåˆ©ï¼Œ ç°åœ¨éœ€è¦å°†è´¦å·æ³¨å†Œç»™æŒ‡å®šçš„baseapp
+		ä½¿å…¶å…è®¸åœ¨æ­¤baseappä¸Šç™»å½•ã€‚
 	*/
 	void registerPendingAccountToBaseappAddr(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		baseapp½«×Ô¼ºµÄµØÖ··¢ËÍ¸øloginapp²¢×ª·¢¸ø¿Í»§¶Ë¡£
+	/** ç½‘ç»œæ¥å£
+		baseappå°†è‡ªå·±çš„åœ°å€å‘é€ç»™loginappå¹¶è½¬å‘ç»™å®¢æˆ·ç«¯ã€‚
 	*/
-	void onPendingAccountGetBaseappAddr(Network::Channel* pChannel, 
-								  std::string& loginName, std::string& accountName, 
+	void onPendingAccountGetBaseappAddr(Network::Channel* pChannel,
+								  std::string& loginName, std::string& accountName,
 								  std::string& addr, uint16 tcp_port, uint16 udp_port);
 
-	/** ÍøÂç½Ó¿Ú
-		¸üĞÂbaseappÇé¿ö¡£
+	/** ç½‘ç»œæ¥å£
+		æ›´æ–°baseappæƒ…å†µã€‚
 	*/
 	void updateBaseapp(Network::Channel* pChannel, COMPONENT_ID componentID,
 								ENTITY_ID numEntitys, ENTITY_ID numProxices, float load, uint32 flags);
 
-	/** ÍøÂç½Ó¿Ú
-		baseappÍ¬²½×Ô¼ºµÄ³õÊ¼»¯ĞÅÏ¢
-		startGlobalOrder: È«¾ÖÆô¶¯Ë³Ğò °üÀ¨¸÷ÖÖ²»Í¬×é¼ş
-		startGroupOrder: ×éÄÚÆô¶¯Ë³Ğò£¬ ±ÈÈçÔÚËùÓĞbaseappÖĞµÚ¼¸¸öÆô¶¯¡£
+	/** ç½‘ç»œæ¥å£
+		baseappåŒæ­¥è‡ªå·±çš„åˆå§‹åŒ–ä¿¡æ¯
+		startGlobalOrder: å…¨å±€å¯åŠ¨é¡ºåº åŒ…æ‹¬å„ç§ä¸åŒç»„ä»¶
+		startGroupOrder: ç»„å†…å¯åŠ¨é¡ºåºï¼Œ æ¯”å¦‚åœ¨æ‰€æœ‰baseappä¸­ç¬¬å‡ ä¸ªå¯åŠ¨ã€‚
 	*/
 	void onBaseappInitProgress(Network::Channel* pChannel, COMPONENT_ID cid, float progress);
 
-	/** 
-		½«·ÖÅäµÄbaseappµØÖ··¢ËÍ¸øloginapp²¢×ª·¢¸ø¿Í»§¶Ë¡£
+	/**
+		å°†åˆ†é…çš„baseappåœ°å€å‘é€ç»™loginappå¹¶è½¬å‘ç»™å®¢æˆ·ç«¯ã€‚
 	*/
-	void sendAllocatedBaseappAddr(Network::Channel* pChannel, 
-								  std::string& loginName, std::string& accountName, 
+	void sendAllocatedBaseappAddr(Network::Channel* pChannel,
+								  std::string& loginName, std::string& accountName,
 								  const std::string& addr, uint16 tcp_port, uint16 udp_port);
 
 	bool componentsReady();
@@ -132,19 +132,19 @@ public:
 
 	uint32 numLoadBalancingApp();
 
-	/** ÍøÂç½Ó¿Ú
-		²éÑ¯ËùÓĞÏà¹Ø½ø³Ì¸ºÔØĞÅÏ¢
+	/** ç½‘ç»œæ¥å£
+		æŸ¥è¯¢æ‰€æœ‰ç›¸å…³è¿›ç¨‹è´Ÿè½½ä¿¡æ¯
 	*/
 	void queryAppsLoads(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		baseappÇëÇó°ó¶¨email£¨·µ»ØÊ±ĞèÒªÕÒµ½loginappµÄµØÖ·£©
+	/** ç½‘ç»œæ¥å£
+		baseappè¯·æ±‚ç»‘å®šemailï¼ˆè¿”å›æ—¶éœ€è¦æ‰¾åˆ°loginappçš„åœ°å€ï¼‰
 	*/
 	void reqAccountBindEmailAllocCallbackLoginapp(Network::Channel* pChannel, COMPONENT_ID reqBaseappID, ENTITY_ID entityID, std::string& accountName, std::string& email,
 		SERVER_ERROR_CODE failedcode, std::string& code);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó°ó¶¨email, loginapp·µ»ØĞèÒªÕÒµ½loginappµÄµØÖ·
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚ç»‘å®šemail, loginappè¿”å›éœ€è¦æ‰¾åˆ°loginappçš„åœ°å€
 	*/
 	void onReqAccountBindEmailCBFromLoginapp(Network::Channel* pChannel, COMPONENT_ID reqBaseappID, ENTITY_ID entityID, std::string& accountName, std::string& email,
 		SERVER_ERROR_CODE failedcode, std::string& code, std::string& loginappCBHost, uint16 loginappCBPort);

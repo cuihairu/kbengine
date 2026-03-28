@@ -35,7 +35,7 @@ public:
 
 // Implementation
 public:
-	/** ·şÎñÆ÷Ö´ĞĞÖ¸ÁîÍê±Ï»ØÏÔ */
+	/** æœåŠ¡å™¨æ‰§è¡ŒæŒ‡ä»¤å®Œæ¯•å›æ˜¾ */
 	void onExecScriptCommandCB(Network::Channel* pChannel, std::string& command);
 
 	BOOL PreTranslateMessage(MSG* pMsg);
@@ -52,7 +52,7 @@ public:
 
 	void loadHistory();
 	void saveHistory();
-	
+
 	bool connectTo();
 
 	void autoShowWindow();
@@ -103,7 +103,7 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	CTreeCtrl m_tree;
 	afx_msg void OnNMRClickTree1(NMHDR *pNMHDR, LRESULT *pResult);
-	
+
 	afx_msg void OnMenu_Update();
 
 	afx_msg void OnToolBar_Find();
@@ -134,8 +134,8 @@ private:
 	CToolBar m_ToolBar;
 	CImageList m_ImageList;
 
-	// Ïß³Ì³Ø
-	thread::ThreadPool threadPool_;	
+	// çº¿ç¨‹æ± 
+	thread::ThreadPool threadPool_;
 
 public:
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);

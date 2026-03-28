@@ -40,12 +40,12 @@ void CProfileWindow::DoDataExchange(CDataExchange* pDX)
 BOOL CProfileWindow::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	DWORD dwStyle = m_profileShowList.GetExtendedStyle();
-	dwStyle |= LVS_EX_FULLROWSELECT;					//Ñ¡ÖĞÄ³ĞĞÊ¹ÕûĞĞ¸ßÁÁ£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
-	dwStyle |= LVS_EX_GRIDLINES;						//Íø¸ñÏß£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
+	dwStyle |= LVS_EX_FULLROWSELECT;					//é€‰ä¸­æŸè¡Œä½¿æ•´è¡Œé«˜äº®ï¼ˆåªé€‚ç”¨ä¸reporté£æ ¼çš„listctrlï¼‰
+	dwStyle |= LVS_EX_GRIDLINES;						//ç½‘æ ¼çº¿ï¼ˆåªé€‚ç”¨ä¸reporté£æ ¼çš„listctrlï¼‰
 	//dwStyle |= LVS_EX_ONECLICKACTIVATE;
-	m_profileShowList.SetExtendedStyle(dwStyle);				//ÉèÖÃÀ©Õ¹·ç¸ñ
+	m_profileShowList.SetExtendedStyle(dwStyle);				//è®¾ç½®æ‰©å±•é£æ ¼
 
 	std::stringstream ss;
 	ss << KBEngine::genUUID64();
@@ -236,7 +236,7 @@ void CProfileWindow::onReceiveData(KBEngine::int8 type, KBEngine::MemoryStream& 
 		onReceiveNetworkProfileData(s);
 		break;
 	default:
-		ERROR_MSG(fmt::format("CProfileWindow::onReceiveData: type({}) not support!\n", 
+		ERROR_MSG(fmt::format("CProfileWindow::onReceiveData: type({}) not support!\n",
 			type));
 		break;
 	};
@@ -265,13 +265,13 @@ void CProfileWindow::onReceiveCProfileData(KBEngine::MemoryStream& s)
 
 	if(m_profileShowList.GetHeaderCtrl())
 	{
-		int nColumnCount = m_profileShowList.GetHeaderCtrl()->GetItemCount();       
+		int nColumnCount = m_profileShowList.GetHeaderCtrl()->GetItemCount();
 		for (int i=0;i < nColumnCount;i++)
 		{
 			m_profileShowList.DeleteColumn(0);
 		}
 	}
-	
+
 	int idx = 0;
 	m_profileShowList.InsertColumn(idx++, _T("ncalls "),					LVCFMT_CENTER,	50);
 	m_profileShowList.InsertColumn(idx++, _T("tottime"),					LVCFMT_CENTER,	80);
@@ -335,10 +335,10 @@ void CProfileWindow::onReceiveEventProfileData(KBEngine::MemoryStream& s)
 
 	KBEngine::ArraySize size;
 	s >> size;
-	
+
 	CString outstr;
 	outstr.Format(L"Waiting %.2f secs...\r\n\r\n", (float)timinglen);
-	
+
 	if(size == 0)
 		outstr += L"\r\nresults is empty!";
 
@@ -348,7 +348,7 @@ void CProfileWindow::onReceiveEventProfileData(KBEngine::MemoryStream& s)
 	{
 		std::string type_name;
 		s >> type_name;
-		
+
 		wchar_t* ws = KBEngine::strutil::char2wchar(type_name.c_str());
 
 		str.Format(L"Event Type:%s\r\n\r\n(name|count|size)\r\n---------------------\r\n\r\n", ws);
@@ -365,7 +365,7 @@ void CProfileWindow::onReceiveEventProfileData(KBEngine::MemoryStream& s)
 			std::string name;
 
 			s >> name >> count >> eventSize;
-			
+
 			if(count == 0)
 				continue;
 
@@ -388,13 +388,13 @@ void CProfileWindow::onReceiveNetworkProfileData(KBEngine::MemoryStream& s)
 
 	if(m_profileShowList.GetHeaderCtrl())
 	{
-		int nColumnCount = m_profileShowList.GetHeaderCtrl()->GetItemCount();       
+		int nColumnCount = m_profileShowList.GetHeaderCtrl()->GetItemCount();
 		for (int i=0;i < nColumnCount;i++)
 		{
 			m_profileShowList.DeleteColumn(0);
 		}
 	}
-	
+
 	int idx = 0;
 	m_profileShowList.InsertColumn(idx++, _T("name "),					LVCFMT_CENTER,	230);
 	m_profileShowList.InsertColumn(idx++, _T("sent#"),					LVCFMT_CENTER,	50);
@@ -413,10 +413,10 @@ void CProfileWindow::onReceiveNetworkProfileData(KBEngine::MemoryStream& s)
 
 	KBEngine::ArraySize size;
 	s >> size;
-	
+
 	CString outstr;
 	outstr.Format(L"Waiting %.2f secs...\r\n\r\n", (float)timinglen);
-	
+
 	if(size == 0)
 	{
 		outstr += L"\r\nresults is empty!";
@@ -449,7 +449,7 @@ void CProfileWindow::onReceiveNetworkProfileData(KBEngine::MemoryStream& s)
 		s >> name >> send_count >> send_size >> send_avgsize >> total_send_size >> total_send_count;
 		s  >> recv_count >> recv_size >> recv_avgsize >> total_recv_size >> total_recv_count;
 
-		
+
 		idx = 1;
 		wchar_t* ws = KBEngine::strutil::char2wchar(name.c_str());
 		str = ws;
@@ -485,10 +485,10 @@ void CProfileWindow::onReceiveNetworkProfileData(KBEngine::MemoryStream& s)
 		m_profileShowList.SetItemText(0, idx++, str);
 
 		str.Format(L"%u", total_recv_size);
-		m_profileShowList.SetItemText(0, idx++, str);	
+		m_profileShowList.SetItemText(0, idx++, str);
 	};
 
-	
+
 }
 
 

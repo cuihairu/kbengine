@@ -5,14 +5,14 @@ namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
 INLINE bool Entity::isWitnessed(void) const
-{ 
-	return witnesses_count_ > 0; 
+{
+	return witnesses_count_ > 0;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE bool Entity::hasWitness(void) const
-{ 
-	return pWitness_ != NULL &&  clientEntityCall_ != NULL; 
+{
+	return pWitness_ != NULL &&  clientEntityCall_ != NULL;
 }
 
 //-------------------------------------------------------------------------------------
@@ -29,31 +29,31 @@ INLINE size_t Entity::witnessesSize() const
 
 //-------------------------------------------------------------------------------------
 INLINE void Entity::topSpeedY(float speed)
-{ 
-	topSpeedY_ = speed; 
+{
+	topSpeedY_ = speed;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE float Entity::topSpeedY() const
-{ 
-	return topSpeedY_; 
+{
+	return topSpeedY_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE void Entity::topSpeed(float speed)
-{ 
-	topSpeed_ = speed; 
+{
+	topSpeed_ = speed;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE void Entity::position(const Position3D& pos)
-{ 
+{
 	Vector3 movement = pos - position_;
 
 	if(KBEVec3Length(&movement) < 0.0004f)
 		return;
-		
-	position_ = pos; 
+
+	position_ = pos;
 	onPositionChanged();
 }
 
@@ -63,56 +63,56 @@ INLINE void Entity::direction(const Direction3D& dir)
 	if(almostEqual(direction_.yaw(), dir.yaw()) && almostEqual(direction_.roll(), dir.roll()) && almostEqual(direction_.pitch(), dir.pitch()))
 		return;
 
-	direction_ = dir; 
+	direction_ = dir;
 	onDirectionChanged();
 }
 
 //-------------------------------------------------------------------------------------
 INLINE Direction3D& Entity::direction()
-{ 
-	return direction_; 
+{
+	return direction_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE Position3D& Entity::position()
 {
-	return position_; 
+	return position_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE EntityCall* Entity::baseEntityCall() const
-{ 
-	return baseEntityCall_; 
+{
+	return baseEntityCall_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE void Entity::baseEntityCall(EntityCall* entityCall)
-{ 
-	baseEntityCall_ = entityCall; 
+{
+	baseEntityCall_ = entityCall;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE void Entity::clientEntityCall(EntityCall* entityCall)
 {
-	clientEntityCall_ = entityCall; 
+	clientEntityCall_ = entityCall;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE EntityCall* Entity::clientEntityCall() const
-{ 
-	return clientEntityCall_; 
+{
+	return clientEntityCall_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE AllClients* Entity::allClients() const
-{ 
-	return allClients_; 
+{
+	return allClients_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE AllClients* Entity::otherClients() const
-{ 
-	return otherClients_; 
+{
+	return otherClients_;
 }
 
 //-------------------------------------------------------------------------------------
@@ -129,38 +129,38 @@ INLINE void Entity::otherClients(AllClients* clients)
 
 //-------------------------------------------------------------------------------------
 INLINE bool Entity::isReal(void) const
-{ 
-	return realCell_ == 0; 
+{
+	return realCell_ == 0;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE bool Entity::hasGhost(void) const
-{ 
-	return ghostCell_ > 0; 
+{
+	return ghostCell_ > 0;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE COMPONENT_ID Entity::realCell(void) const
-{ 
-	return realCell_; 
+{
+	return realCell_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE COMPONENT_ID Entity::ghostCell(void) const
-{ 
-	return ghostCell_; 
+{
+	return ghostCell_;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE void Entity::realCell(COMPONENT_ID cellID)
-{ 
-	realCell_ = cellID; 
+{
+	realCell_ = cellID;
 }
 
 //-------------------------------------------------------------------------------------
 INLINE void Entity::ghostCell(COMPONENT_ID cellID)
-{ 
-	ghostCell_ = cellID; 
+{
+	ghostCell_ = cellID;
 }
 
 //-------------------------------------------------------------------------------------
@@ -244,7 +244,7 @@ INLINE bool Entity::isControlledNotSelfClient() const
 //-------------------------------------------------------------------------------------
 INLINE EntityCall* Entity::controlledBy() const
 {
-	return controlledBy_; 
+	return controlledBy_;
 }
 
 //-------------------------------------------------------------------------------------
@@ -279,10 +279,10 @@ INLINE void Entity::setDirty(uint32* digest)
 //-------------------------------------------------------------------------------------
 INLINE bool Entity::isDirty() const
 {
-	return persistentDigest_[0] == 0 && 
-		persistentDigest_[1] == 0 && 
-		persistentDigest_[2] == 0 && 
-		persistentDigest_[3] == 0 && 
+	return persistentDigest_[0] == 0 &&
+		persistentDigest_[1] == 0 &&
+		persistentDigest_[2] == 0 &&
+		persistentDigest_[3] == 0 &&
 		persistentDigest_[4] == 0;
 }
 

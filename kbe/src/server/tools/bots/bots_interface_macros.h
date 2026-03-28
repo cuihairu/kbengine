@@ -9,18 +9,18 @@
 #ifndef KBE_BOTS_INTERFACE_MACRO_H
 #define KBE_BOTS_INTERFACE_MACRO_H
 
-// common include	
+// common include
 #include "network/interface_defs.h"
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine{
 
 /**
-	BotsÏûÏ¢ºê£¬  ²ÎÊıÎªÁ÷£¬ ĞèÒª×Ô¼º½â¿ª
+	Botsæ¶ˆæ¯å®ï¼Œ  å‚æ•°ä¸ºæµï¼Œ éœ€è¦è‡ªå·±è§£å¼€
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef BOTS_MESSAGE_HANDLER_STREAM
@@ -41,7 +41,7 @@ namespace KBEngine{
 													KBEngine::MemoryStream& s)	\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define BOTS_MESSAGE_HANDLER_STREAM(NAME)										\
@@ -61,7 +61,7 @@ namespace KBEngine{
 																				\
 
 /**
-	BotsÏûÏ¢ºê£¬  Ö»ÓĞÁã¸ö²ÎÊıµÄÏûÏ¢
+	Botsæ¶ˆæ¯å®ï¼Œ  åªæœ‰é›¶ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef BOTS_MESSAGE_HANDLER_ARGS0
@@ -82,7 +82,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define BOTS_MESSAGE_HANDLER_ARGS0(NAME)										\
@@ -102,7 +102,7 @@ namespace KBEngine{
 																				\
 
 /**
-	BotsÏûÏ¢ºê£¬  Ö»ÓĞ¶ş¸ö²ÎÊıµÄÏûÏ¢
+	Botsæ¶ˆæ¯å®ï¼Œ  åªæœ‰äºŒä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef BOTS_MESSAGE_HANDLER_ARGS2
@@ -130,7 +130,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define BOTS_MESSAGE_HANDLER_ARGS2(NAME, ARG_TYPE1, ARG_NAME1,					\
@@ -154,7 +154,7 @@ namespace KBEngine{
 
 
 /**
-	BotsÏûÏ¢ºê£¬  Ö»ÓĞÒ»¸ö²ÎÊıµÄÏûÏ¢
+	Botsæ¶ˆæ¯å®ï¼Œ  åªæœ‰ä¸€ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef BOTS_MESSAGE_HANDLER_ARGS1
@@ -177,7 +177,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define BOTS_MESSAGE_HANDLER_ARGS1(NAME, ARG_TYPE1, ARG_NAME1)					\
@@ -195,9 +195,9 @@ namespace KBEngine{
 	NETWORK_MESSAGE_DECLARE_ARGS1(Bots, NAME,									\
 				NAME##BotsMessagehandler1, MSG_LENGTH, ARG_TYPE1, ARG_NAME1)	\
 																				\
-	
+
 /**
-	BotsÏûÏ¢ºê£¬  Ö»ÓĞËÄ¸ö²ÎÊıµÄÏûÏ¢
+	Botsæ¶ˆæ¯å®ï¼Œ  åªæœ‰å››ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef BOTS_MESSAGE_HANDLER_ARGS4
@@ -234,7 +234,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define BOTS_MESSAGE_HANDLER_ARGS4(NAME, ARG_TYPE1, ARG_NAME1,					\
@@ -265,7 +265,7 @@ namespace KBEngine{
 											ARG_TYPE4, ARG_NAME4)				\
 
 /**
-	BotsÏûÏ¢ºê£¬  Ö»ÓĞÎå¸ö²ÎÊıµÄÏûÏ¢
+	Botsæ¶ˆæ¯å®ï¼Œ  åªæœ‰äº”ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef BOTS_MESSAGE_HANDLER_ARGS5
@@ -306,7 +306,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define BOTS_MESSAGE_HANDLER_ARGS5(NAME, ARG_TYPE1, ARG_NAME1,					\
@@ -342,7 +342,7 @@ namespace KBEngine{
 
 
 /**
-	BotsÏûÏ¢ºê£¬  Ö»ÓĞÁù¸ö²ÎÊıµÄÏûÏ¢
+	Botsæ¶ˆæ¯å®ï¼Œ  åªæœ‰å…­ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef BOTS_MESSAGE_HANDLER_ARGS6
@@ -387,7 +387,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define BOTS_MESSAGE_HANDLER_ARGS6(NAME, ARG_TYPE1, ARG_NAME1,					\
@@ -426,7 +426,7 @@ namespace KBEngine{
 											ARG_TYPE6, ARG_NAME6)				\
 
 /**
-	BotsÏûÏ¢ºê£¬  Ö»ÓĞ°Ë¸ö²ÎÊıµÄÏûÏ¢
+	Botsæ¶ˆæ¯å®ï¼Œ  åªæœ‰å…«ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef BOTS_MESSAGE_HANDLER_ARGS8
@@ -480,7 +480,7 @@ namespace KBEngine{
 												KBEngine::MemoryStream& s)		\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define BOTS_MESSAGE_HANDLER_ARGS8(NAME, ARG_TYPE1, ARG_NAME1,					\

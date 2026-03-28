@@ -3,7 +3,7 @@
 
 #ifndef KBE_CELLAPPMGR_H
 #define KBE_CELLAPPMGR_H
-	
+
 #include "cellapp.h"
 #include "space_viewer.h"
 #include "server/kbemain.h"
@@ -17,7 +17,7 @@
 namespace KBEngine{
 
 
-class Cellappmgr :	public ServerApp, 
+class Cellappmgr :	public ServerApp,
 					public Singleton<Cellappmgr>
 {
 public:
@@ -25,57 +25,57 @@ public:
 	{
 		TIMEOUT_GAME_TICK = TIMEOUT_SERVERAPP_MAX + 1
 	};
-	
-	Cellappmgr(Network::EventDispatcher& dispatcher, 
-		Network::NetworkInterface& ninterface, 
+
+	Cellappmgr(Network::EventDispatcher& dispatcher,
+		Network::NetworkInterface& ninterface,
 		COMPONENT_TYPE componentType,
 		COMPONENT_ID componentID);
 
 	~Cellappmgr();
-	
+
 	bool run();
-	
+
 	virtual void onChannelDeregister(Network::Channel * pChannel);
 
 	void handleTimeout(TimerHandle handle, void * arg);
 	void handleGameTick();
 
-	/* ³õÊ¼»¯Ïà¹Ø½Ó¿Ú */
+	/* åˆå§‹åŒ–ç›¸å…³æ¥å£ */
 	bool initializeBegin();
 	bool inInitialize();
 	bool initializeEnd();
 	void finalise();
 
-	/** ÕÒ³öÒ»¸ö×î¿ÕÏĞµÄcellapp */
+	/** æ‰¾å‡ºä¸€ä¸ªæœ€ç©ºé—²çš„cellapp */
 	COMPONENT_ID findFreeCellapp(void);
 	void updateBestCellapp();
 
-	/** ÍøÂç½Ó¿Ú
-		baseEntityÇëÇó´´½¨ÔÚÒ»¸öĞÂµÄspaceÖĞ
+	/** ç½‘ç»œæ¥å£
+		baseEntityè¯·æ±‚åˆ›å»ºåœ¨ä¸€ä¸ªæ–°çš„spaceä¸­
 	*/
 	void reqCreateCellEntityInNewSpace(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		baseEntityÇëÇó´´½¨ÔÚÒ»¸öĞÂµÄspaceÖĞ
+	/** ç½‘ç»œæ¥å£
+		baseEntityè¯·æ±‚åˆ›å»ºåœ¨ä¸€ä¸ªæ–°çš„spaceä¸­
 	*/
 	void reqRestoreSpaceInCell(Network::Channel* pChannel, MemoryStream& s);
-	
-	/** ÍøÂç½Ó¿Ú
-		ÏûÏ¢×ª·¢£¬ ÓÉÄ³¸öappÏëÍ¨¹ı±¾app½«ÏûÏ¢×ª·¢¸øÄ³¸öapp¡£
+
+	/** ç½‘ç»œæ¥å£
+		æ¶ˆæ¯è½¬å‘ï¼Œ ç”±æŸä¸ªappæƒ³é€šè¿‡æœ¬appå°†æ¶ˆæ¯è½¬å‘ç»™æŸä¸ªappã€‚
 	*/
 	void forwardMessage(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		¸üĞÂcellappÇé¿ö¡£
+	/** ç½‘ç»œæ¥å£
+		æ›´æ–°cellappæƒ…å†µã€‚
 	*/
 	void updateCellapp(Network::Channel* pChannel, COMPONENT_ID componentID, ENTITY_ID numEntities, float load, uint32 flags);
 
-	/** ÍøÂç½Ó¿Ú
-		cellappÍ¬²½×Ô¼ºµÄ³õÊ¼»¯ĞÅÏ¢
-		startGlobalOrder: È«¾ÖÆô¶¯Ë³Ğò °üÀ¨¸÷ÖÖ²»Í¬×é¼ş
-		startGroupOrder: ×éÄÚÆô¶¯Ë³Ğò£¬ ±ÈÈçÔÚËùÓĞbaseappÖĞµÚ¼¸¸öÆô¶¯¡£
+	/** ç½‘ç»œæ¥å£
+		cellappåŒæ­¥è‡ªå·±çš„åˆå§‹åŒ–ä¿¡æ¯
+		startGlobalOrder: å…¨å±€å¯åŠ¨é¡ºåº åŒ…æ‹¬å„ç§ä¸åŒç»„ä»¶
+		startGroupOrder: ç»„å†…å¯åŠ¨é¡ºåºï¼Œ æ¯”å¦‚åœ¨æ‰€æœ‰baseappä¸­ç¬¬å‡ ä¸ªå¯åŠ¨ã€‚
 	*/
-	void onCellappInitProgress(Network::Channel* pChannel, COMPONENT_ID cid, float progress, 
+	void onCellappInitProgress(Network::Channel* pChannel, COMPONENT_ID cid, float progress,
 		COMPONENT_ORDER componentGlobalOrder, COMPONENT_ORDER componentGroupOrder);
 
 	bool componentsReady();
@@ -87,30 +87,30 @@ public:
 
 	uint32 numLoadBalancingApp();
 
-	/* ÒÔgroupOrderIDÎªÅÅĞò»ù×¼£¬
-	   ‰ˆ¼ÓÒ»¸öcellapp component idµ½cellapp_cids_ÁĞ±íÖĞ
+	/* ä»¥groupOrderIDä¸ºæ’åºåŸºå‡†ï¼Œ
+	   å¢—åŠ ä¸€ä¸ªcellapp component idåˆ°cellapp_cids_åˆ—è¡¨ä¸­
 	*/
 	void addCellappComponentID(COMPONENT_ID cid);
 
-	/** ÍøÂç½Ó¿Ú
-	²éÑ¯ËùÓĞÏà¹Ø½ø³Ì¸ºÔØĞÅÏ¢
+	/** ç½‘ç»œæ¥å£
+	æŸ¥è¯¢æ‰€æœ‰ç›¸å…³è¿›ç¨‹è´Ÿè½½ä¿¡æ¯
 	*/
 	void queryAppsLoads(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-	²éÑ¯ËùÓĞÏà¹Ø½ø³ÌspaceĞÅÏ¢
+	/** ç½‘ç»œæ¥å£
+	æŸ¥è¯¢æ‰€æœ‰ç›¸å…³è¿›ç¨‹spaceä¿¡æ¯
 	*/
 	void querySpaces(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-	¸üĞÂÏà¹Ø½ø³ÌspaceĞÅÏ¢£¬×¢Òâ£º´ËspaceData²¢·ÇAPIÎÄµµÖĞÃèÊöµÄspaceData
-	ÊÇÖ¸spaceµÄÒ»Ğ©ĞÅÏ¢
+	/** ç½‘ç»œæ¥å£
+	æ›´æ–°ç›¸å…³è¿›ç¨‹spaceä¿¡æ¯ï¼Œæ³¨æ„ï¼šæ­¤spaceDataå¹¶éAPIæ–‡æ¡£ä¸­æè¿°çš„spaceData
+	æ˜¯æŒ‡spaceçš„ä¸€äº›ä¿¡æ¯
 	*/
 	void updateSpaceData(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-	¹¤¾ßÇëÇó¸Ä±äspace²é¿´Æ÷£¨º¬Ìí¼ÓºÍÉ¾³ı¹¦ÄÜ£©
-	Èç¹ûÊÇÇëÇó¸üĞÂ²¢ÇÒ·şÎñÆ÷ÉÏ²»´æÔÚ¸ÃµØÖ·µÄ²é¿´Æ÷Ôò×Ô¶¯´´½¨£¬Èç¹ûÊÇÉ¾³ıÔòÃ÷È·¸ø³öÉ¾³ıÒªÇó
+	/** ç½‘ç»œæ¥å£
+	å·¥å…·è¯·æ±‚æ”¹å˜spaceæŸ¥çœ‹å™¨ï¼ˆå«æ·»åŠ å’Œåˆ é™¤åŠŸèƒ½ï¼‰
+	å¦‚æœæ˜¯è¯·æ±‚æ›´æ–°å¹¶ä¸”æœåŠ¡å™¨ä¸Šä¸å­˜åœ¨è¯¥åœ°å€çš„æŸ¥çœ‹å™¨åˆ™è‡ªåŠ¨åˆ›å»ºï¼Œå¦‚æœæ˜¯åˆ é™¤åˆ™æ˜ç¡®ç»™å‡ºåˆ é™¤è¦æ±‚
 	*/
 	void setSpaceViewer(Network::Channel* pChannel, MemoryStream& s);
 
@@ -124,10 +124,10 @@ protected:
 	std::map< COMPONENT_ID, Cellapp >	cellapps_;
 	std::vector<COMPONENT_ID>			cellapp_cids_;
 
-	// Í¨¹ı¹¤¾ß²é¿´space
+	// é€šè¿‡å·¥å…·æŸ¥çœ‹space
 	SpaceViewers						spaceViewers_;
 };
 
-} 
+}
 
 #endif // KBE_CELLAPPMGR_H

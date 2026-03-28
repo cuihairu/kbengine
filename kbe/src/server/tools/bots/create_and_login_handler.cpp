@@ -10,7 +10,7 @@
 #include "common/memorystream.h"
 #include "server/serverconfig.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 
 uint64 g_accountID = 0;
 
@@ -37,14 +37,14 @@ CreateAndLoginHandler::~CreateAndLoginHandler()
 void CreateAndLoginHandler::handleTimeout(TimerHandle handle, void * arg)
 {
 	KBE_ASSERT(handle == timerHandle_);
-	
+
 	Bots& bots = Bots::getSingleton();
 
 	static float lasttick = bots.reqCreateAndLoginTickTime();
 
 	if(lasttick > 0.f)
 	{
-		// Ã¿¸ötick¼õÈ¥0.1Ãë£¬ Îª0Ôò¿ÉÒÔ´´½¨Ò»´ÎÇÒÖØÖÃ;
+		// æ¯ä¸ªtickå‡åŽ»0.1ç§’ï¼Œ ä¸º0åˆ™å¯ä»¥åˆ›å»ºä¸€æ¬¡ä¸”é‡ç½®;
 		lasttick -= 0.1f;
 		return;
 	}
@@ -53,8 +53,8 @@ void CreateAndLoginHandler::handleTimeout(TimerHandle handle, void * arg)
 
 	while(bots.reqCreateAndLoginTotalCount() - bots.clients().size() > 0 && count-- > 0)
 	{
-		ClientObject* pClient = new ClientObject(g_kbeSrvConfig.getBots().bots_account_name_prefix + 
-			KBEngine::StringConv::val2str(g_componentID) + "_" + KBEngine::StringConv::val2str(g_accountID++), 
+		ClientObject* pClient = new ClientObject(g_kbeSrvConfig.getBots().bots_account_name_prefix +
+			KBEngine::StringConv::val2str(g_componentID) + "_" + KBEngine::StringConv::val2str(g_accountID++),
 			Bots::getSingleton().networkInterface());
 
 		Bots::getSingleton().addClient(pClient);

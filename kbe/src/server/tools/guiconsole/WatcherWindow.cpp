@@ -37,10 +37,10 @@ BOOL CWatcherWindow::OnInitDialog()
 
 	{
 		DWORD dwStyle = m_status.GetExtendedStyle();
-		dwStyle |= LVS_EX_FULLROWSELECT;					//Ñ¡ÖÐÄ³ÐÐÊ¹ÕûÐÐ¸ßÁÁ£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
-		dwStyle |= LVS_EX_GRIDLINES;						//Íø¸ñÏß£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
+		dwStyle |= LVS_EX_FULLROWSELECT;					//é€‰ä¸­æŸè¡Œä½¿æ•´è¡Œé«˜äº®ï¼ˆåªé€‚ç”¨ä¸Žreporté£Žæ ¼çš„listctrlï¼‰
+		dwStyle |= LVS_EX_GRIDLINES;						//ç½‘æ ¼çº¿ï¼ˆåªé€‚ç”¨ä¸Žreporté£Žæ ¼çš„listctrlï¼‰
 		//dwStyle |= LVS_EX_ONECLICKACTIVATE;
-		m_status.SetExtendedStyle(dwStyle);					//ÉèÖÃÀ©Õ¹·ç¸ñ
+		m_status.SetExtendedStyle(dwStyle);					//è®¾ç½®æ‰©å±•é£Žæ ¼
 	}
 
 	DWORD styles = ::GetWindowLong(m_tree.m_hWnd, GWL_STYLE);
@@ -49,12 +49,12 @@ BOOL CWatcherWindow::OnInitDialog()
 
 	{
 		DWORD dwStyle = m_statusShow.GetExtendedStyle();
-		dwStyle |= LVS_EX_FULLROWSELECT;					//Ñ¡ÖÐÄ³ÐÐÊ¹ÕûÐÐ¸ßÁÁ£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
-		dwStyle |= LVS_EX_GRIDLINES;						//Íø¸ñÏß£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
+		dwStyle |= LVS_EX_FULLROWSELECT;					//é€‰ä¸­æŸè¡Œä½¿æ•´è¡Œé«˜äº®ï¼ˆåªé€‚ç”¨ä¸Žreporté£Žæ ¼çš„listctrlï¼‰
+		dwStyle |= LVS_EX_GRIDLINES;						//ç½‘æ ¼çº¿ï¼ˆåªé€‚ç”¨ä¸Žreporté£Žæ ¼çš„listctrlï¼‰
 		//dwStyle |= LVS_EX_ONECLICKACTIVATE;
-		m_statusShow.SetExtendedStyle(dwStyle);				//ÉèÖÃÀ©Õ¹·ç¸ñ
+		m_statusShow.SetExtendedStyle(dwStyle);				//è®¾ç½®æ‰©å±•é£Žæ ¼
 	}
-	
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -88,7 +88,7 @@ void CWatcherWindow::OnTimer(UINT_PTR nIDEvent)
 
 	if(m_status.GetItemCount() == 1)
 	{
-		int nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();   
+		int nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();
 
 		if(m_statusShow.GetItemCount() != nColumnCount)
 		{
@@ -107,7 +107,7 @@ void CWatcherWindow::OnTimer(UINT_PTR nIDEvent)
 				lvcol.cchTextMax = 256;
 				lvcol.cx = i;
 				m_status.GetColumn(i, &lvcol);
-				
+
 				m_statusShow.InsertItem(0, lvcol.pszText);
 			}
 		}
@@ -139,7 +139,7 @@ void CWatcherWindow::OnTimer(UINT_PTR nIDEvent)
 
 		if(m_status.GetHeaderCtrl())
 		{
-			nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();     
+			nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();
 
 			if(m_statusShow.GetHeaderCtrl() == NULL || nColumnCount != m_statusShow.GetHeaderCtrl()->GetItemCount() ||
 				m_status.GetItemCount() != m_statusShow.GetItemCount())
@@ -147,7 +147,7 @@ void CWatcherWindow::OnTimer(UINT_PTR nIDEvent)
 				m_statusShow.DeleteAllItems();
 				if(m_statusShow.GetHeaderCtrl())
 				{
-					int nColumnCount = m_statusShow.GetHeaderCtrl()->GetItemCount();       
+					int nColumnCount = m_statusShow.GetHeaderCtrl()->GetItemCount();
 					for (int i=0;i < nColumnCount;i++)
 					{
 						m_statusShow.DeleteColumn(0);
@@ -191,7 +191,7 @@ void CWatcherWindow::addHeaderShow(CString name)
 
 	if(m_statusShow.GetHeaderCtrl())
 	{
-		nColumnCount = m_statusShow.GetHeaderCtrl()->GetItemCount();       
+		nColumnCount = m_statusShow.GetHeaderCtrl()->GetItemCount();
 		for (int i=0;i < nColumnCount;i++)
 		{
 			LVCOLUMN lvcol;
@@ -220,7 +220,7 @@ void CWatcherWindow::addHeader(std::string name)
 
 	if(m_status.GetHeaderCtrl())
 	{
-		nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();       
+		nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();
 		for (int i=0;i < nColumnCount;i++)
 		{
 			LVCOLUMN lvcol;
@@ -251,7 +251,7 @@ void CWatcherWindow::addItemShow(KBEngine::WatcherObject* wo)
 	CString s1 = ws;
 	free(ws);
 
-	int nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();       
+	int nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();
 	for (int i=0;i < nColumnCount;i++)
 	{
 		LVCOLUMN lvcol;
@@ -287,7 +287,7 @@ void CWatcherWindow::addItem(KBEngine::WatcherObject* wo)
 	CString s1 = ws;
 	free(ws);
 
-	int nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();       
+	int nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();
 	for (int i=0;i < nColumnCount;i++)
 	{
 		LVCOLUMN lvcol;
@@ -320,7 +320,7 @@ void CWatcherWindow::clearAllData(bool clearTree)
 	m_status.DeleteAllItems();
 	if(m_status.GetHeaderCtrl())
 	{
-		int nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();       
+		int nColumnCount = m_status.GetHeaderCtrl()->GetItemCount();
 		for (int i=0;i < nColumnCount;i++)
 		{
 			m_status.DeleteColumn(0);
@@ -330,7 +330,7 @@ void CWatcherWindow::clearAllData(bool clearTree)
 	m_statusShow.DeleteAllItems();
 	if(m_statusShow.GetHeaderCtrl())
 	{
-		int nColumnCount = m_statusShow.GetHeaderCtrl()->GetItemCount();       
+		int nColumnCount = m_statusShow.GetHeaderCtrl()->GetItemCount();
 		for (int i=0;i < nColumnCount;i++)
 		{
 			m_statusShow.DeleteColumn(0);
@@ -356,7 +356,7 @@ void CWatcherWindow::addPath(std::string rootpath, std::string path)
 	hItemRoot = findAndCreatePathItem(rootpath, hItemRoot);
 
 	HTREEITEM item = hItemRoot;
-	
+
 	if(item == NULL)
 	{
 		item = m_tree.GetRootItem();
@@ -399,7 +399,7 @@ HTREEITEM CWatcherWindow::findAndCreatePathItem(std::string path, HTREEITEM root
 
 	std::vector<std::string> vec;
 	KBEngine::strutil::kbe_split(path, '/', vec);
-	
+
 	wchar_t* ws = KBEngine::strutil::char2wchar(vec[0].c_str());
 	CString pathitem = ws;
 	free(ws);
@@ -407,7 +407,7 @@ HTREEITEM CWatcherWindow::findAndCreatePathItem(std::string path, HTREEITEM root
 	if(vec.size() > 1)
 	{
 		path.erase(0, vec[0].size() + 1);
-		
+
 		HTREEITEM item = rootItem, hasItem = NULL;
 		if(item)
 		{

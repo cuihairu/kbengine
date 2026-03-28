@@ -117,7 +117,7 @@ private:
 
 	COLORREF m_clrBkColor; //plot control background color
 	int      m_nRate;      //update interval
-	
+
 };
 
 

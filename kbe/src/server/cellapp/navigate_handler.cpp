@@ -2,15 +2,15 @@
 
 #include "cellapp.h"
 #include "entity.h"
-#include "navigate_handler.h"	
+#include "navigate_handler.h"
 #include "navigation/navigation.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------
-NavigateHandler::NavigateHandler(KBEShared_ptr<Controller>& pController, const Position3D& destPos, 
-											 float velocity, float distance, bool faceMovement, 
+NavigateHandler::NavigateHandler(KBEShared_ptr<Controller>& pController, const Position3D& destPos,
+											 float velocity, float distance, bool faceMovement,
 											 float maxMoveDistance, VECTOR_POS3D_PTR paths_ptr,
 											PyObject* userarg):
 MoveToPointHandler(pController, pController->pEntity()->layer(), pController->pEntity()->position(), velocity, distance, faceMovement, false, userarg),
@@ -19,7 +19,7 @@ paths_(paths_ptr),
 maxMoveDistance_(maxMoveDistance)
 {
 	destPos_ = (*paths_)[destPosIdx_++];
-	
+
 	updatableName = "NavigateHandler";
 }
 

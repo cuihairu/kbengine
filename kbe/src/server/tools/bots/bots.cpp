@@ -31,8 +31,8 @@
 namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
-Bots::Bots(Network::EventDispatcher& dispatcher, 
-			 Network::NetworkInterface& ninterface, 
+Bots::Bots(Network::EventDispatcher& dispatcher,
+			 Network::NetworkInterface& ninterface,
 			 COMPONENT_TYPE componentType,
 			 COMPONENT_ID componentID):
 ClientApp(dispatcher, ninterface, componentType, componentID),
@@ -45,7 +45,7 @@ pCreateAndLoginHandler_(NULL),
 pEventPoller_(Network::EventPoller::create()),
 pTelnetServer_(NULL)
 {
-	// ³õÊ¼»¯EntityDefÄ£¿é»ñÈ¡entityÊµÌåº¯ÊıµØÖ·
+	// åˆå§‹åŒ–EntityDefæ¨¡å—è·å–entityå®ä½“å‡½æ•°åœ°å€
 	EntityDef::setGetEntityFunc(std::bind(&Bots::tryGetEntity, this,
 		std::placeholders::_1, std::placeholders::_2));
 
@@ -63,12 +63,12 @@ Bots::~Bots()
 //-------------------------------------------------------------------------------------
 bool Bots::initialize()
 {
-	// ¹ã²¥×Ô¼ºµÄµØÖ·¸øÍøÉÏÉÏµÄËùÓĞkbemachine
+	// å¹¿æ’­è‡ªå·±çš„åœ°å€ç»™ç½‘ä¸Šä¸Šçš„æ‰€æœ‰kbemachine
 	this->dispatcher().addTask(&Components::getSingleton());
 	return ClientApp::initialize();
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 bool Bots::initializeBegin()
 {
 	Network::g_extReceiveWindowBytesOverflow = 0;
@@ -84,24 +84,24 @@ bool Bots::initializeBegin()
 	return true;
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 bool Bots::initializeEnd()
 {
 	pTelnetServer_ = new TelnetServer(&dispatcher(), &networkInterface());
 	pTelnetServer_->pScript(&getScript());
 
-	if(!pTelnetServer_->start(g_kbeSrvConfig.getBots().telnet_passwd, 
-		g_kbeSrvConfig.getBots().telnet_deflayer, 
+	if(!pTelnetServer_->start(g_kbeSrvConfig.getBots().telnet_passwd,
+		g_kbeSrvConfig.getBots().telnet_deflayer,
 		g_kbeSrvConfig.getBots().telnet_port))
 	{
 		ERROR_MSG("Bots::initialize: initializeEnd error!\n");
 		return false;
 	}
 
-	// ËùÓĞ½Å±¾¶¼¼ÓÔØÍê±Ï
-	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(), 
-										const_cast<char*>("onInit"), 
-										const_cast<char*>("i"), 
+	// æ‰€æœ‰è„šæœ¬éƒ½åŠ è½½å®Œæ¯•
+	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
+										const_cast<char*>("onInit"),
+										const_cast<char*>("i"),
 										0);
 
 	if(pyResult != NULL)
@@ -120,8 +120,8 @@ bool Bots::initializeEnd()
 //-------------------------------------------------------------------------------------
 void Bots::finalise()
 {
-	// ½áÊøÍ¨Öª½Å±¾
-	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(), 
+	// ç»“æŸé€šçŸ¥è„šæœ¬
+	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
 										const_cast<char*>("onFinish"),
 										const_cast<char*>(""));
 
@@ -145,7 +145,7 @@ void Bots::finalise()
 
 	reqCreateAndLoginTotalCount_ = 0;
 	SAFE_RELEASE(pCreateAndLoginHandler_);
-	
+
 	if (pTelnetServer_)
 	{
 		pTelnetServer_->stop();
@@ -178,10 +178,10 @@ bool Bots::installPyModules()
 
 	pPyBots_ = new PyBots();
 	registerPyObjectToScript("bots", pPyBots_);
-	
+
 	APPEND_SCRIPT_MODULE_METHOD(getScript().getModule(), addBots, __py_addBots,	METH_VARARGS, 0);
 
-	// ×¢²áÉèÖÃ½Å±¾Êä³öÀàĞÍ
+	// æ³¨å†Œè®¾ç½®è„šæœ¬è¾“å‡ºç±»å‹
 	APPEND_SCRIPT_MODULE_METHOD(getScript().getModule(),	scriptLogType,	__py_setScriptLogType,	METH_VARARGS,	0)
 	if(PyModule_AddIntConstant(this->getScript().getModule(), "LOG_TYPE_NORMAL", log4cxx::ScriptLevel::SCRIPT_INT))
 	{
@@ -211,7 +211,7 @@ bool Bots::installPyModules()
 	registerScript(client::Entity::getScriptType());
 	registerScript(EntityComponent::getScriptType());
 
-	// °²×°Èë¿ÚÄ£¿é
+	// å®‰è£…å…¥å£æ¨¡å—
 	PyObject *entryScriptFileName = PyUnicode_FromString(g_kbeSrvConfig.getBots().entryScriptFile);
 	if(entryScriptFileName != NULL)
 	{
@@ -334,7 +334,7 @@ void Bots::addBots(Network::Channel * pChannel, MemoryStream& s)
 
 		if(reqCreateAndLoginTickCount > 0)
 			reqCreateAndLoginTickCount_ = reqCreateAndLoginTickCount;
-		
+
 		if(reqCreateAndLoginTickTime > 0)
 			reqCreateAndLoginTickTime_ = reqCreateAndLoginTickTime;
 	}
@@ -361,7 +361,7 @@ PyObject* Bots::__py_addBots(PyObject* self, PyObject* args)
 	}
 	else if(PyTuple_Size(args) == 3)
 	{
-		if(!PyArg_ParseTuple(args, "I|I|f", &reqCreateAndLoginTotalCount, 
+		if(!PyArg_ParseTuple(args, "I|I|f", &reqCreateAndLoginTotalCount,
 			&reqCreateAndLoginTickCount, &reqCreateAndLoginTickTime))
 		{
 			PyErr_Format(PyExc_TypeError, "KBEngine::addBots: args error!");
@@ -374,7 +374,7 @@ PyObject* Bots::__py_addBots(PyObject* self, PyObject* args)
 
 		if(reqCreateAndLoginTickCount > 0)
 			Bots::getSingleton().reqCreateAndLoginTickCount(reqCreateAndLoginTickCount);
-		
+
 		if(reqCreateAndLoginTickTime > 0)
 			Bots::getSingleton().reqCreateAndLoginTickTime(reqCreateAndLoginTickTime);
 	}
@@ -388,7 +388,7 @@ PyObject* Bots::__py_addBots(PyObject* self, PyObject* args)
 	S_Return;
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 PyObject* Bots::__py_setScriptLogType(PyObject* self, PyObject* args)
 {
 	int argCount = (int)PyTuple_Size(args);
@@ -417,7 +417,7 @@ void Bots::lookApp(Network::Channel* pChannel)
 	//DEBUG_MSG(fmt::format("Bots::lookApp: {0}\n", pChannel->c_str()));
 
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
-	
+
 	(*pBundle) << g_componentType;
 	(*pBundle) << componentID_;
 	int8 istate = 0;
@@ -432,7 +432,7 @@ void Bots::reqCloseServer(Network::Channel* pChannel, MemoryStream& s)
 	DEBUG_MSG(fmt::format("Bots::reqCloseServer: {0}\n", pChannel->c_str()));
 
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
-	
+
 	bool success = true;
 	(*pBundle) << success;
 	pChannel->send(pBundle);
@@ -454,7 +454,7 @@ void Bots::reqKillServer(Network::Channel* pChannel, MemoryStream& s)
 	INFO_MSG(fmt::format("Bots::reqKillServer: requester(uid:{}, username:{}, componentType:{}, "
 				"componentID:{}, reason:{}, from {})\n",
 				uid ,
-				username , 
+				username ,
 				COMPONENT_NAME_EX((COMPONENT_TYPE)componentType),
 				componentID,
 				reason,
@@ -484,7 +484,7 @@ void Bots::onExecScriptCommand(Network::Channel* pChannel, KBEngine::MemoryStrea
 
 	if(getScript().run_simpleString(PyBytes_AsString(pycmd1), &retbuf) == 0)
 	{
-		// ½«½á¹û·µ»Ø¸ø¿Í»§¶Ë
+		// å°†ç»“æœè¿”å›ç»™å®¢æˆ·ç«¯
 		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 		ConsoleInterface::ConsoleExecCommandCBMessageHandler msgHandler;
 		(*pBundle).newMessage(msgHandler);
@@ -555,16 +555,16 @@ void Bots::onAppActiveTick(Network::Channel* pChannel, COMPONENT_TYPE componentT
 	if(componentType != CLIENT_TYPE)
 		if(pChannel->isExternal())
 			return;
-	
+
 	Network::Channel* pTargetChannel = NULL;
 	if(componentType != CONSOLE_TYPE && componentType != CLIENT_TYPE)
 	{
-		Components::ComponentInfos* cinfos = 
+		Components::ComponentInfos* cinfos =
 			Components::getSingleton().findComponent(componentType, KBEngine::getUserUID(), componentID);
 
 		if(cinfos == NULL)
 		{
-			ERROR_MSG(fmt::format("Bots::onAppActiveTick[{0:p}]: {1}:{2} not found.\n", 
+			ERROR_MSG(fmt::format("Bots::onAppActiveTick[{0:p}]: {1}:{2} not found.\n",
 				(void*)pChannel, COMPONENT_NAME_EX(componentType), componentID));
 
 			return;
@@ -584,8 +584,8 @@ void Bots::onAppActiveTick(Network::Channel* pChannel, COMPONENT_TYPE componentT
 }
 
 //-------------------------------------------------------------------------------------
-void Bots::onHelloCB_(Network::Channel* pChannel, const std::string& verInfo, 
-		const std::string& scriptVerInfo, const std::string& protocolMD5, const std::string& entityDefMD5, 
+void Bots::onHelloCB_(Network::Channel* pChannel, const std::string& verInfo,
+		const std::string& scriptVerInfo, const std::string& protocolMD5, const std::string& entityDefMD5,
 		COMPONENT_TYPE componentType)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -595,7 +595,7 @@ void Bots::onHelloCB_(Network::Channel* pChannel, const std::string& verInfo,
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onVersionNotMatch(Network::Channel* pChannel, MemoryStream& s)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -605,7 +605,7 @@ void Bots::onVersionNotMatch(Network::Channel* pChannel, MemoryStream& s)
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onScriptVersionNotMatch(Network::Channel* pChannel, MemoryStream& s)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -625,7 +625,7 @@ void Bots::onCreateAccountResult(Network::Channel * pChannel, MemoryStream& s)
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onLoginSuccessfully(Network::Channel * pChannel, MemoryStream& s)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -635,7 +635,7 @@ void Bots::onLoginSuccessfully(Network::Channel * pChannel, MemoryStream& s)
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onLoginFailed(Network::Channel * pChannel, MemoryStream& s)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -645,7 +645,7 @@ void Bots::onLoginFailed(Network::Channel * pChannel, MemoryStream& s)
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onLoginBaseappFailed(Network::Channel * pChannel, SERVER_ERROR_CODE failedcode)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -655,7 +655,7 @@ void Bots::onLoginBaseappFailed(Network::Channel * pChannel, SERVER_ERROR_CODE f
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onReloginBaseappSuccessfully(Network::Channel * pChannel, MemoryStream& s)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -665,8 +665,8 @@ void Bots::onReloginBaseappSuccessfully(Network::Channel * pChannel, MemoryStrea
 	}
 }
 
-//-------------------------------------------------------------------------------------	
-void Bots::onCreatedProxies(Network::Channel * pChannel, 
+//-------------------------------------------------------------------------------------
+void Bots::onCreatedProxies(Network::Channel * pChannel,
 								 uint64 rndUUID, ENTITY_ID eid, std::string& entityType)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -676,7 +676,7 @@ void Bots::onCreatedProxies(Network::Channel * pChannel,
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onEntityEnterWorld(Network::Channel * pChannel, MemoryStream& s)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -686,7 +686,7 @@ void Bots::onEntityEnterWorld(Network::Channel * pChannel, MemoryStream& s)
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onEntityLeaveWorld(Network::Channel * pChannel, ENTITY_ID eid)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -696,7 +696,7 @@ void Bots::onEntityLeaveWorld(Network::Channel * pChannel, ENTITY_ID eid)
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onEntityLeaveWorldOptimized(Network::Channel * pChannel, MemoryStream& s)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -706,7 +706,7 @@ void Bots::onEntityLeaveWorldOptimized(Network::Channel * pChannel, MemoryStream
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onEntityEnterSpace(Network::Channel * pChannel, MemoryStream& s)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -716,7 +716,7 @@ void Bots::onEntityEnterSpace(Network::Channel * pChannel, MemoryStream& s)
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onEntityLeaveSpace(Network::Channel * pChannel, ENTITY_ID eid)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -726,7 +726,7 @@ void Bots::onEntityLeaveSpace(Network::Channel * pChannel, ENTITY_ID eid)
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onEntityDestroyed(Network::Channel * pChannel, ENTITY_ID eid)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -756,7 +756,7 @@ void Bots::onRemoteMethodCallOptimized(Network::Channel* pChannel, KBEngine::Mem
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::onKicked(Network::Channel * pChannel, SERVER_ERROR_CODE failedcode)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -1336,7 +1336,7 @@ void Bots::onStreamDataCompleted(Network::Channel* pChannel, int16 id)
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::initSpaceData(Network::Channel* pChannel, MemoryStream& s)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -1346,7 +1346,7 @@ void Bots::initSpaceData(Network::Channel* pChannel, MemoryStream& s)
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::setSpaceData(Network::Channel* pChannel, SPACE_ID spaceID, const std::string& key, const std::string& value)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -1356,7 +1356,7 @@ void Bots::setSpaceData(Network::Channel* pChannel, SPACE_ID spaceID, const std:
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Bots::delSpaceData(Network::Channel* pChannel, SPACE_ID spaceID, const std::string& key)
 {
 	ClientObject* pClient = findClient(pChannel);
@@ -1366,7 +1366,7 @@ void Bots::delSpaceData(Network::Channel* pChannel, SPACE_ID spaceID, const std:
 	}
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 void Bots::queryWatcher(Network::Channel* pChannel, MemoryStream& s)
 {
 	AUTO_SCOPED_PROFILE("watchers");
@@ -1428,7 +1428,7 @@ void Bots::startProfile_(Network::Channel* pChannel, std::string profileName, in
 		new NetworkProfileHandler(this->networkInterface(), timelen, profileName, pChannel->addr());
 		break;
 	default:
-		ERROR_MSG(fmt::format("Bots::startProfile_: type({}:{}) not support!\n", 
+		ERROR_MSG(fmt::format("Bots::startProfile_: type({}:{}) not support!\n",
 			profileType, profileName));
 
 		break;

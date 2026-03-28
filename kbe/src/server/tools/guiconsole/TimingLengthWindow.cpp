@@ -42,7 +42,7 @@ BOOL CTimingLengthWindow::OnInitDialog()
 	s = ws;
 	free(ws);
 	this->SetDlgItemTextW(IDC_EDIT2, s.GetBuffer(0));
-	
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 

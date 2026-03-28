@@ -3,13 +3,13 @@
 #include "trap_trigger.h"
 #include "entity.h"
 #include "entity_coordinate_node.h"
-#include "proximity_controller.h"	
+#include "proximity_controller.h"
 
 #ifndef CODE_INLINE
 #include "trap_trigger.inl"
 #endif
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------
