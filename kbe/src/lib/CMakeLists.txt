@@ -335,6 +335,24 @@ target_include_directories(kbe_thread_primitives
 
 add_dependencies(kbe-bootstrap kbe_thread_primitives)
 
+add_library(kbe_thread_concurrency STATIC
+  "${KBE_SOURCE_DIR}/lib/thread/concurrency.cpp"
+)
+
+add_library(KBEngine::thread_concurrency ALIAS kbe_thread_concurrency)
+
+target_link_libraries(kbe_thread_concurrency
+  PUBLIC
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_thread_concurrency
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_thread_concurrency)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"

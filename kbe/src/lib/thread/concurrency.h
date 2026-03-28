@@ -6,7 +6,6 @@
 #define KBE_CONCURENCY_H
 
 #include "common/platform.h"
-#include "helper/debug_helper.h"
 namespace KBEngine{
 
 extern void (*pMainThreadIdleStartCallback)();

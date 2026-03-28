@@ -19,6 +19,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_blowfish.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_smartpointer.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_thread_primitives.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_thread_concurrency.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
@@ -41,6 +42,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::common_blowfish
     KBEngine::common_smartpointer
     KBEngine::thread_primitives
+    KBEngine::thread_concurrency
 )
 
 gtest_discover_tests(kbe_smoke_tests)
