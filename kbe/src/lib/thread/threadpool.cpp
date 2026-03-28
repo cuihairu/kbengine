@@ -7,12 +7,16 @@
 #include "threadpool.inl"
 #endif
 
+#ifndef KBE_CMAKE_BOOTSTRAP_THREADPOOL
 #include "helper/watcher.h"
+#endif
 
 namespace KBEngine
 { 
 
+#ifndef KBE_CMAKE_BOOTSTRAP_THREADPOOL
 KBE_SINGLETON_INIT(KBEngine::thread::ThreadPool);
+#endif
 
 namespace thread
 {
@@ -114,6 +118,9 @@ ThreadPool::~ThreadPool()
 //-------------------------------------------------------------------------------------
 bool ThreadPool::initializeWatcher()
 {
+#ifdef KBE_CMAKE_BOOTSTRAP_THREADPOOL
+	return true;
+#else
 	WATCH_OBJECT((fmt::format("{}/maxThreadCount", name())).c_str(), this->maxThreadCount_);
 	WATCH_OBJECT((fmt::format("{}/extraNewAddThreadCount", name())).c_str(), this->extraNewAddThreadCount_);
 	WATCH_OBJECT((fmt::format("{}/currentFreeThreadCount", name())).c_str(), this->currentFreeThreadCount_);
@@ -122,6 +129,7 @@ bool ThreadPool::initializeWatcher()
 	WATCH_OBJECT((fmt::format("{}/finiTaskSize", name()).c_str()), this, &ThreadPool::finiTaskSize);
 	WATCH_OBJECT((fmt::format("{}/busyThreadStates", name())).c_str(), this, &ThreadPool::printThreadWorks);
 	return true;
+#endif
 }
 
 //-------------------------------------------------------------------------------------

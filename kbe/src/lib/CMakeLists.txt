@@ -417,6 +417,32 @@ target_include_directories(kbe_common_endian
 
 add_dependencies(kbe-bootstrap kbe_common_endian)
 
+add_library(kbe_thread_pool STATIC
+  "${KBE_SOURCE_DIR}/lib/thread/threadpool.cpp"
+)
+
+add_library(KBEngine::thread_pool ALIAS kbe_thread_pool)
+
+target_link_libraries(kbe_thread_pool
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_tasks
+    KBEngine::thread_task
+    KBEngine::thread_primitives
+)
+
+target_compile_definitions(kbe_thread_pool
+  PUBLIC
+    KBE_CMAKE_BOOTSTRAP_THREADPOOL
+)
+
+target_include_directories(kbe_thread_pool
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_thread_pool)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"

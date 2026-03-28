@@ -6,7 +6,18 @@
 
 #include "common/common.h"
 #include "common/tasks.h"
+#include <cstdio>
+#ifdef KBE_CMAKE_BOOTSTRAP_THREADPOOL
+#include <cassert>
+#define DEBUG_MSG(m) do { } while (0)
+#define INFO_MSG(m) do { } while (0)
+#define WARNING_MSG(m) do { } while (0)
+#define ERROR_MSG(m) do { } while (0)
+#define CRITICAL_MSG(m) do { } while (0)
+#define KBE_ASSERT(exp) assert((exp))
+#else
 #include "helper/debug_helper.h"
+#endif
 #include "thread/threadtask.h"
 // windows include	
 #if KBE_PLATFORM == PLATFORM_WIN32
@@ -25,7 +36,9 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <fcntl.h>
+#if defined(__linux__)
 #include <sys/epoll.h>
+#endif
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <pthread.h>	
@@ -189,7 +202,7 @@ REATTEMPT:
 	{
 		char buf[128];
 		lock();
-		sprintf(buf, "%p,%u", currTask_, done_tasks_);
+		std::snprintf(buf, sizeof(buf), "%p,%u", currTask_, done_tasks_);
 		unlock();
 		return buf;
 	}

@@ -24,6 +24,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_deadline.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_predicates.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_endian.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_thread_pool.cpp"
 )
 
 set_target_properties(kbe_smoke_tests PROPERTIES
@@ -51,6 +52,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::common_deadline
     KBEngine::common_predicates
     KBEngine::common_endian
+    KBEngine::thread_pool
 )
 
 gtest_discover_tests(kbe_smoke_tests)
