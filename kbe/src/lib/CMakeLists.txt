@@ -496,6 +496,24 @@ target_include_directories(kbe_helper_profile
 
 add_dependencies(kbe-bootstrap kbe_helper_profile)
 
+add_library(kbe_helper_debug_option STATIC
+  "${KBE_SOURCE_DIR}/lib/helper/debug_option.cpp"
+)
+
+add_library(KBEngine::helper_debug_option ALIAS kbe_helper_debug_option)
+
+target_link_libraries(kbe_helper_debug_option
+  PUBLIC
+    KBEngine::build_config
+)
+
+target_include_directories(kbe_helper_debug_option
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_helper_debug_option)
+
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
