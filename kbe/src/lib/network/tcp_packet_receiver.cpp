@@ -14,6 +14,7 @@
 #include "network/network_interface.h"
 #include "network/event_poller.h"
 #include "network/error_reporter.h"
+#include "helper/debug_helper.h"
 #include <openssl/err.h>
 
 namespace KBEngine { 
@@ -42,8 +43,11 @@ void TCPPacketReceiver::reclaimPoolObject(TCPPacketReceiver* obj)
 //-------------------------------------------------------------------------------------
 void TCPPacketReceiver::destroyObjPool()
 {
-	DEBUG_MSG(fmt::format("TCPPacketReceiver::destroyObjPool(): size {}.\n", 
-		_g_objPool.size()));
+	if (DebugHelper::isInit())
+	{
+		DEBUG_MSG(fmt::format("TCPPacketReceiver::destroyObjPool(): size {}.\n",
+			_g_objPool.size()));
+	}
 
 	_g_objPool.destroy();
 }
@@ -95,7 +99,7 @@ bool TCPPacketReceiver::processRecv(bool expectingPacket)
 
 		return rstate == PacketReceiver::RECV_STATE_CONTINUE;
 	}
-	else if(len == 0) // 客户端正常退出
+	else if(len == 0) // 驴脥禄搂露脣脮媒鲁拢脥脣鲁枚
 	{
 		TCPPacket::reclaimPoolObject(pReceiveWindow);
 		onGetError(pChannel, "disconnected");
@@ -122,7 +126,7 @@ void TCPPacketReceiver::onGetError(Channel* pChannel, const std::string& err)
 //-------------------------------------------------------------------------------------
 Reason TCPPacketReceiver::processFilteredPacket(Channel* pChannel, Packet * pPacket)
 {
-	// 如果为None， 则可能是被过滤器过滤掉了(过滤器正在按照自己的规则组包解密)
+	// 脠莽鹿没脦陋None拢卢 脭貌驴脡脛脺脢脟卤禄鹿媒脗脣脝梅鹿媒脗脣碌么脕脣(鹿媒脗脣脝梅脮媒脭脷掳麓脮脮脳脭录潞碌脛鹿忙脭貌脳茅掳眉陆芒脙脺)
 	if(pPacket)
 	{
 		pChannel->addReceiveWindow(pPacket);
@@ -140,9 +144,9 @@ PacketReceiver::RecvState TCPPacketReceiver::checkSocketErrors(int len, bool exp
 
 	if (
 #if KBE_PLATFORM == PLATFORM_WIN32
-		wsaErr == WSAEWOULDBLOCK && !expectingPacket// send出错大概是缓冲区满了, recv出错已经无数据可读了
+		wsaErr == WSAEWOULDBLOCK && !expectingPacket// send鲁枚麓铆麓贸赂脜脢脟禄潞鲁氓脟酶脗煤脕脣, recv鲁枚麓铆脪脩戮颅脦脼脢媒戮脻驴脡露脕脕脣
 #else
-		errno == EAGAIN && !expectingPacket			// recv缓冲区已经无数据可读了
+		errno == EAGAIN && !expectingPacket			// recv禄潞鲁氓脟酶脪脩戮颅脦脼脢媒戮脻驴脡露脕脕脣
 #endif
 		)
 	{
@@ -150,9 +154,9 @@ PacketReceiver::RecvState TCPPacketReceiver::checkSocketErrors(int len, bool exp
 	}
 
 #if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
-	if (errno == EAGAIN ||							// 已经无数据可读了
-		errno == ECONNREFUSED ||					// 连接被服务器拒绝
-		errno == EHOSTUNREACH)						// 目的地址不可到达
+	if (errno == EAGAIN ||							// 脪脩戮颅脦脼脢媒戮脻驴脡露脕脕脣
+		errno == ECONNREFUSED ||					// 脕卢陆脫卤禄路镁脦帽脝梅戮脺戮酶
+		errno == EHOSTUNREACH)						// 脛驴碌脛碌脴脰路虏禄驴脡碌陆麓茂
 	{
 		this->dispatcher().errorReporter().reportException(
 				REASON_NO_SUCH_PORT);
@@ -161,10 +165,10 @@ PacketReceiver::RecvState TCPPacketReceiver::checkSocketErrors(int len, bool exp
 	}
 #else
 	/*
-	存在的连接被远程主机强制关闭。通常原因为：远程主机上对等方应用程序突然停止运行，或远程主机重新启动，
-	或远程主机在远程方套接字上使用了“强制”关闭（参见setsockopt(SO_LINGER)）。
-	另外，在一个或多个操作正在进行时，如果连接因“keep-alive”活动检测到一个失败而中断，也可能导致此错误。
-	此时，正在进行的操作以错误码WSAENETRESET失败返回，后续操作将失败返回错误码WSAECONNRESET
+	麓忙脭脷碌脛脕卢陆脫卤禄脭露鲁脤脰梅禄煤脟驴脰脝鹿脴卤脮隆拢脥篓鲁拢脭颅脪貌脦陋拢潞脭露鲁脤脰梅禄煤脡脧露脭碌脠路陆脫娄脫脙鲁脤脨貌脥禄脠禄脥拢脰鹿脭脣脨脨拢卢禄貌脭露鲁脤脰梅禄煤脰脴脨脗脝么露炉拢卢
+	禄貌脭露鲁脤脰梅禄煤脭脷脭露鲁脤路陆脤脳陆脫脳脰脡脧脢鹿脫脙脕脣隆掳脟驴脰脝隆卤鹿脴卤脮拢篓虏脦录没setsockopt(SO_LINGER)拢漏隆拢
+	脕铆脥芒拢卢脭脷脪禄赂枚禄貌露脿赂枚虏脵脳梅脮媒脭脷陆酶脨脨脢卤拢卢脠莽鹿没脕卢陆脫脪貌隆掳keep-alive隆卤禄卯露炉录矛虏芒碌陆脪禄赂枚脢搂掳脺露酶脰脨露脧拢卢脪虏驴脡脛脺碌录脰脗麓脣麓铆脦贸隆拢
+	麓脣脢卤拢卢脮媒脭脷陆酶脨脨碌脛虏脵脳梅脪脭麓铆脦贸脗毛WSAENETRESET脢搂掳脺路碌禄脴拢卢潞贸脨酶虏脵脳梅陆芦脢搂掳脺路碌禄脴麓铆脦贸脗毛WSAECONNRESET
 	*/
 	switch(wsaErr)
 	{
@@ -220,4 +224,3 @@ PacketReceiver::RecvState TCPPacketReceiver::checkSocketErrors(int len, bool exp
 //-------------------------------------------------------------------------------------
 }
 }
-

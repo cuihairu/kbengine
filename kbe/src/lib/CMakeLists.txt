@@ -578,6 +578,28 @@ target_include_directories(kbe_helper_debug_helper
 
 add_dependencies(kbe-bootstrap kbe_helper_debug_helper)
 
+add_library(kbe_network_http_utility STATIC
+  "${KBE_SOURCE_DIR}/lib/network/http_utility.cpp"
+)
+
+add_library(KBEngine::network_http_utility ALIAS kbe_network_http_utility)
+
+target_link_libraries(kbe_network_http_utility
+  PUBLIC
+    KBEngine::build_config
+  PRIVATE
+    KBEngine::common_memorystream
+    KBEngine::helper_debug_helper
+    CURL::libcurl
+)
+
+target_include_directories(kbe_network_http_utility
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)
+
+add_dependencies(kbe-bootstrap kbe_network_http_utility)
+
 add_library(kbe_network_common STATIC
   "${KBE_SOURCE_DIR}/lib/network/common.cpp"
 )
@@ -589,16 +611,12 @@ target_link_libraries(kbe_network_common
     KBEngine::build_config
   PRIVATE
     KBEngine::common_ssl
+    KBEngine::network_http_utility
     KBEngine::network_address
     KBEngine::network_endpoint
     KBEngine::network_tcp_packet
     KBEngine::network_udp_packet
     KBEngine::helper_debug_option
-)
-
-target_compile_definitions(kbe_network_common
-  PRIVATE
-    KBE_CMAKE_BOOTSTRAP_NETWORK_COMMON
 )
 
 target_include_directories(kbe_network_common
@@ -914,7 +932,6 @@ target_link_libraries(kbe_network_event_dispatcher
     KBEngine::common_tasks
     KBEngine::common_timer
     KBEngine::network_interfaces
-    KBEngine::network_common
     KBEngine::network_event_poller
     KBEngine::network_error_reporter
     KBEngine::helper_profile
@@ -926,6 +943,11 @@ target_include_directories(kbe_network_event_dispatcher
 )
 
 add_dependencies(kbe-bootstrap kbe_network_event_dispatcher)
+
+target_link_libraries(kbe_network_http_utility
+  PRIVATE
+    KBEngine::network_event_dispatcher
+)
 
 add_library(kbe_network_endpoint STATIC
   "${KBE_SOURCE_DIR}/lib/network/endpoint.cpp"

@@ -7,7 +7,6 @@
 #include "common/tasks.h"
 #include "common/timer.h"
 #include "network/interfaces.h"
-#include "network/common.h"
 
 namespace KBEngine { 
 namespace Network

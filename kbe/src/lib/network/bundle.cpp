@@ -6,6 +6,7 @@
 #include "network/network_interface.h"
 #include "network/channel.h"
 #include "helper/profile.h"
+#include "helper/debug_helper.h"
 #include "network/packet_sender.h"
 
 #ifndef CODE_INLINE
@@ -41,8 +42,11 @@ void Bundle::reclaimPoolObject(Bundle* obj)
 //-------------------------------------------------------------------------------------
 void Bundle::destroyObjPool()
 {
-	DEBUG_MSG(fmt::format("Bundle::destroyObjPool(): size {}.\n", 
-		_g_objPool.size()));
+	if (DebugHelper::isInit())
+	{
+		DEBUG_MSG(fmt::format("Bundle::destroyObjPool(): size {}.\n",
+			_g_objPool.size()));
+	}
 
 	_g_objPool.destroy();
 }
@@ -104,8 +108,8 @@ void Bundle::onReclaimObject()
 //-------------------------------------------------------------------------------------
 void Bundle::copy(const Bundle& bundle)
 {
-	// 这些必须在前面设置
-	// 否则中途创建packet可能错误
+	// 脮芒脨漏卤脴脨毛脭脷脟掳脙忙脡猫脰脙
+	// 路帽脭貌脰脨脥戮麓麓陆篓packet驴脡脛脺麓铆脦贸
 	isTCPPacket_ = bundle.isTCPPacket_;
 	pChannel_ = bundle.pChannel_;
 	pCurrMsgHandler_ = bundle.pCurrMsgHandler_;
@@ -137,8 +141,8 @@ void Bundle::copy(const Bundle& bundle)
 //-------------------------------------------------------------------------------------
 void Bundle::_calcPacketMaxSize()
 {
-	// 如果使用了openssl加密通讯则我们保证一个包最大能被Blowfish::BLOCK_SIZE除尽
-	// 这样我们在加密一个满载包时不需要额外填充字节
+	// 脠莽鹿没脢鹿脫脙脕脣openssl录脫脙脺脥篓脩露脭貌脦脪脙脟卤拢脰陇脪禄赂枚掳眉脳卯麓贸脛脺卤禄Blowfish::BLOCK_SIZE鲁媒戮隆
+	// 脮芒脩霉脦脪脙脟脭脷录脫脙脺脪禄赂枚脗煤脭脴掳眉脢卤虏禄脨猫脪陋露卯脥芒脤卯鲁盲脳脰陆脷
 	if(g_channelExternalEncryptType == 1)
 	{
 		packetMaxSize_ = isTCPPacket_ ? (int)(TCPPacket::maxBufferSize() - ENCRYPTTION_WASTAGE_SIZE) :
@@ -183,7 +187,7 @@ int32 Bundle::onPacketAppend(int32 addsize, bool inseparable)
 	if(inseparable)
 		fwpos += addsize;
 
-	// 如果当前包装不下本次append的数据，将其填充到新包中
+	// 脠莽鹿没碌卤脟掳掳眉脳掳虏禄脧脗卤戮麓脦append碌脛脢媒戮脻拢卢陆芦脝盲脤卯鲁盲碌陆脨脗掳眉脰脨
 	if(fwpos >= packetMaxSize_)
 	{
 		packets_.push_back(pCurrPacket_);
@@ -195,7 +199,7 @@ int32 Bundle::onPacketAppend(int32 addsize, bool inseparable)
 	int32 remainsize = packetMaxSize_ - totalsize;
 	int32 taddsize = addsize;
 
-	// 如果当前包剩余空间小于要添加的字节则本次填满此包
+	// 脠莽鹿没碌卤脟掳掳眉脢拢脫脿驴脮录盲脨隆脫脷脪陋脤铆录脫碌脛脳脰陆脷脭貌卤戮麓脦脤卯脗煤麓脣掳眉
 	if(remainsize < addsize)
 		taddsize = remainsize;
 	
@@ -296,7 +300,7 @@ void Bundle::newMessage(const MessageHandler& msgHandler)
 	(*this) << msgHandler.msgID;
 	pCurrPacket_->messageID(msgHandler.msgID);
 
-	// 此处对于非固定长度的消息来说需要先设置它的消息长度位为0， 到最后需要填充长度
+	// 麓脣麓娄露脭脫脷路脟鹿脤露篓鲁陇露脠碌脛脧没脧垄脌麓脣碌脨猫脪陋脧脠脡猫脰脙脣眉碌脛脧没脧垄鲁陇露脠脦禄脦陋0拢卢 碌陆脳卯潞贸脨猫脪陋脤卯鲁盲鲁陇露脠
 	if(msgHandler.msgLen == NETWORK_VARIABLE_MESSAGE)
 	{
 		MessageLength msglen = 0;
@@ -323,7 +327,7 @@ void Bundle::finiMessage(bool isSend)
 		packets_.push_back(pCurrPacket_);
 	}
 
-	// 对消息进行跟踪
+	// 露脭脧没脧垄陆酶脨脨赂煤脳脵
 	if(pCurrMsgHandler_){
 		if(isSend || numMessages_ > 1)
 		{
@@ -332,7 +336,7 @@ void Bundle::finiMessage(bool isSend)
 		}
 	}
 
-	// 此处对于非固定长度的消息来说需要设置它的最终长度信息
+	// 麓脣麓娄露脭脫脷路脟鹿脤露篓鲁陇露脠碌脛脧没脧垄脌麓脣碌脨猫脪陋脡猫脰脙脣眉碌脛脳卯脰脮鲁陇露脠脨脜脧垄
 	if(currMsgID_ > 0 && (currMsgHandlerLength_ < 0))
 	{
 		Packet* pPacket = pCurrPacket_;
@@ -342,15 +346,15 @@ void Bundle::finiMessage(bool isSend)
 		currMsgLength_ -= NETWORK_MESSAGE_ID_SIZE;
 		currMsgLength_ -= NETWORK_MESSAGE_LENGTH_SIZE;
 
-		// 按照设计一个包最大也不可能超过NETWORK_MESSAGE_MAX_SIZE
+		// 掳麓脮脮脡猫录脝脪禄赂枚掳眉脳卯麓贸脪虏虏禄驴脡脛脺鲁卢鹿媒NETWORK_MESSAGE_MAX_SIZE
 		if(g_componentType == BOTS_TYPE || g_componentType == CLIENT_TYPE)
 		{
 			KBE_ASSERT(currMsgLength_ <= NETWORK_MESSAGE_MAX_SIZE);
 		}
 
-		// 如果消息长度大于等于NETWORK_MESSAGE_MAX_SIZE
-		// 使用扩展消息长度机制，向消息长度后面再填充4字节
-		// 用于描述更大的长度
+		// 脠莽鹿没脧没脧垄鲁陇露脠麓贸脫脷碌脠脫脷NETWORK_MESSAGE_MAX_SIZE
+		// 脢鹿脫脙脌漏脮鹿脧没脧垄鲁陇露脠禄煤脰脝拢卢脧貌脧没脧垄鲁陇露脠潞贸脙忙脭脵脤卯鲁盲4脳脰陆脷
+		// 脫脙脫脷脙猫脢枚赂眉麓贸碌脛鲁陇露脠
 		if(currMsgLength_ >= NETWORK_MESSAGE_MAX_SIZE)
 		{
 			MessageLength1 ex_msg_length = currMsgLength_;
@@ -403,7 +407,7 @@ void Bundle::debugCurrentMessages(MessageID currMsgID, const Network::MessageHan
 
 	if (pCurrMsgHandler->msgLen == NETWORK_VARIABLE_MESSAGE)
 	{
-		// 因为Bundle::finiMessage等地方遇到可变参数消息时将长度去掉了消息头部，这里要还原消息就要加回来
+		// 脪貌脦陋Bundle::finiMessage碌脠碌脴路陆脫枚碌陆驴脡卤盲虏脦脢媒脧没脧垄脢卤陆芦鲁陇露脠脠楼碌么脕脣脧没脧垄脥路虏驴拢卢脮芒脌茂脪陋禄鹿脭颅脧没脧垄戮脥脪陋录脫禄脴脌麓
 		currMsgLength += NETWORK_MESSAGE_ID_SIZE;
 		currMsgLength += NETWORK_MESSAGE_LENGTH_SIZE;
 		if (currMsgLength - NETWORK_MESSAGE_ID_SIZE - NETWORK_MESSAGE_LENGTH_SIZE >= NETWORK_MESSAGE_MAX_SIZE)
@@ -421,11 +425,11 @@ void Bundle::debugCurrentMessages(MessageID currMsgID, const Network::MessageHan
 
 	MemoryStream* pMemoryStream = MemoryStream::createPoolObject(OBJECTPOOL_POINT);
 	
-	// 通过消息长度找到消息头，然后将消息内容输出
+	// 脥篓鹿媒脧没脧垄鲁陇露脠脮脪碌陆脧没脧垄脥路拢卢脠禄潞贸陆芦脧没脧垄脛脷脠脻脢盲鲁枚
 	int msglen = currMsgLength;
 	if(pCurrPacket)
 	{
-		// 如果当前消息所有内容都在当前包中，直接输出内容即可
+		// 脠莽鹿没碌卤脟掳脧没脧垄脣霉脫脨脛脷脠脻露录脭脷碌卤脟掳掳眉脰脨拢卢脰卤陆脫脢盲鲁枚脛脷脠脻录麓驴脡
 		msglen -= pCurrPacket->length();
 		if(msglen <= 0)
 		{
@@ -442,11 +446,11 @@ void Bundle::debugCurrentMessages(MessageID currMsgID, const Network::MessageHan
 
 				Network::Packet* pPacket = (*packiter);
 
-				// 当前包可能已经计算过
+				// 碌卤脟掳掳眉驴脡脛脺脪脩戮颅录脝脣茫鹿媒
 				if (pCurrPacket == pPacket)
 					continue;
 
-				// 如果所有内容都在包中
+				// 脠莽鹿没脣霉脫脨脛脷脠脻露录脭脷掳眉脰脨
 				if((int)pPacket->length() >= msglen)
 				{
 					int wpos = pPacket->length() - msglen;
@@ -456,15 +460,15 @@ void Bundle::debugCurrentMessages(MessageID currMsgID, const Network::MessageHan
 					{
 						Network::Packet* pPacket1 = packets[i];
 						
-						// 这个包已经在上面处理过了
+						// 脮芒赂枚掳眉脪脩戮颅脭脷脡脧脙忙麓娄脌铆鹿媒脕脣
 						if (pPacket1 == pPacket || pCurrPacket == pPacket1)
 							continue;
 						
-						// 期间的包内容全部加入
+						// 脝脷录盲碌脛掳眉脛脷脠脻脠芦虏驴录脫脠毛
 						pMemoryStream->append(pPacket1->data() + pPacket1->rpos(), pPacket1->length());
 					}
 					
-					// 把当前的包内容全部加进去
+					// 掳脩碌卤脟掳碌脛掳眉脛脷脠脻脠芦虏驴录脫陆酶脠楼
 					pMemoryStream->append(pCurrPacket->data() + pCurrPacket->rpos(), pCurrPacket->length());
 					break;
 				}
@@ -476,7 +480,7 @@ void Bundle::debugCurrentMessages(MessageID currMsgID, const Network::MessageHan
 		}
 	}
 	
-	// 一些sendto操作的包导致, 这类包也不需要追踪
+	// 脪禄脨漏sendto虏脵脳梅碌脛掳眉碌录脰脗, 脮芒脌脿掳眉脪虏虏禄脨猫脪陋脳路脳脵
 	if(pMemoryStream->length() < NETWORK_MESSAGE_ID_SIZE)
 	{
 		MemoryStream::reclaimPoolObject(pMemoryStream);

@@ -42,6 +42,12 @@ if(TARGET ZLIB::ZLIB)
   message(STATUS "Using system zlib target: ZLIB::ZLIB")
 endif()
 
+find_package(CURL REQUIRED)
+
+if(TARGET CURL::libcurl)
+  message(STATUS "Using system CURL target: CURL::libcurl")
+endif()
+
 if(KBE_USE_OPENSSL)
   find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
 

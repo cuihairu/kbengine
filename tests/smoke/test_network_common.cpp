@@ -39,6 +39,12 @@ TEST(NetworkCommonBootstrapTest, CloseChannelInactivityDetectionMacroUpdatesTime
   KBEngine::Network::g_channelExternalTimeout = 60.f;
 }
 
+TEST(NetworkCommonBootstrapTest, InitializeAndFinalizeSucceedWithoutBootstrapPath)
+{
+  ASSERT_TRUE(KBEngine::Network::initialize());
+  KBEngine::Network::finalise();
+}
+
 #if KBE_PLATFORM != PLATFORM_WIN32
 TEST(NetworkCommonBootstrapTest, PollDetectsReadableFileDescriptor)
 {

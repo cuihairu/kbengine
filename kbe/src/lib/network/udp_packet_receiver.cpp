@@ -14,6 +14,7 @@
 #include "network/network_interface.h"
 #include "network/event_poller.h"
 #include "network/error_reporter.h"
+#include "helper/debug_helper.h"
 
 namespace KBEngine { 
 namespace Network
@@ -41,8 +42,11 @@ void UDPPacketReceiver::reclaimPoolObject(UDPPacketReceiver* obj)
 //-------------------------------------------------------------------------------------
 void UDPPacketReceiver::destroyObjPool()
 {
-	DEBUG_MSG(fmt::format("UDPPacketReceiver::destroyObjPool(): size {}.\n", 
-		_g_objPool.size()));
+	if (DebugHelper::isInit())
+	{
+		DEBUG_MSG(fmt::format("UDPPacketReceiver::destroyObjPool(): size {}.\n",
+			_g_objPool.size()));
+	}
 
 	_g_objPool.destroy();
 }
@@ -146,7 +150,7 @@ bool UDPPacketReceiver::processRecv(UDPPacket* pReceiveWindow)
 //-------------------------------------------------------------------------------------
 Reason UDPPacketReceiver::processFilteredPacket(Channel* pChannel, Packet * pPacket)
 {
-	// Èç¹ûÎªNone£¬ Ôò¿ÉÄÜÊÇ±»¹ýÂËÆ÷¹ýÂËµôÁË(¹ýÂËÆ÷ÕýÔÚ°´ÕÕ×Ô¼ºµÄ¹æÔò×é°ü½âÃÜ)
+	// ÃˆÃ§Â¹Ã»ÃŽÂªNoneÂ£Â¬ Ã”Ã²Â¿Ã‰Ã„ÃœÃŠÃ‡Â±Â»Â¹Ã½Ã‚Ã‹Ã†Ã·Â¹Ã½Ã‚Ã‹ÂµÃ´ÃÃ‹(Â¹Ã½Ã‚Ã‹Ã†Ã·Ã•Ã½Ã”ÃšÂ°Â´Ã•Ã•Ã—Ã”Â¼ÂºÂµÃ„Â¹Ã¦Ã”Ã²Ã—Ã©Â°Ã¼Â½Ã¢ÃƒÃœ)
 	if(pPacket)
 	{
 		pChannel->addReceiveWindow(pPacket);
@@ -200,7 +204,7 @@ PacketReceiver::RecvState UDPPacketReceiver::checkSocketErrors(int len, bool exp
 			// exceptions is built into BaseApp::onClientNoSuchPort().
 			if (errno == ECONNREFUSED)
 			{
-				// Î´ÊµÏÖ
+				// ÃŽÂ´ÃŠÂµÃÃ–
 			}
 
 			this->dispatcher().errorReporter().reportException(

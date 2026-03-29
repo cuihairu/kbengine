@@ -6,7 +6,6 @@
 #include "helper/debug_helper.h"
 #include "common/memorystream.h"
 #include "network/event_dispatcher.h"
-#include "network/network_interface.h"
 
 namespace KBEngine 
 {
@@ -14,6 +13,8 @@ namespace Network
 {
 namespace Http
 { 
+
+#define KBE_HTTP_UTILITY_ERROR_MSG(m) do { if (KBEngine::DebugHelper::isInit()) { ERROR_MSG(m); } } while (0)
 
 static bool _g_init = false;
 static Requests* g_pRequests = NULL;
@@ -28,7 +29,7 @@ bool initialize()
 		CURLcode curlCode = curl_global_init(CURL_GLOBAL_ALL);
 		if (CURLE_OK != curlCode)
 		{
-			ERROR_MSG(fmt::format("Http::initialize: "
+			KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::initialize: "
 				"curl_global_init error! curlCode={}\n", static_cast<int>(curlCode)));
 
 			return false;
@@ -115,7 +116,7 @@ Request::Status Request::setCAInfo(const std::string& cainfo)
 	CURLcode curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_CAINFO, cainfo.c_str());
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setCAInfo: error! curlCode={}\n", static_cast<int>(curlCode)));
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setCAInfo: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -128,7 +129,7 @@ Request::Status Request::setSSLCert(const std::string& sslCert)
 	CURLcode curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_SSLCERT, sslCert.c_str());
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setSSLCert: error! curlCode={}\n", static_cast<int>(curlCode)));
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setSSLCert: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -141,7 +142,7 @@ Request::Status Request::setSSLKey(const std::string& sslKey)
 	CURLcode curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_SSLKEY, sslKey.c_str());
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setSSLKey: error! curlCode={}\n", static_cast<int>(curlCode)));
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setSSLKey: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -154,7 +155,7 @@ Request::Status Request::setSSLKeyPassword(const std::string& sslKeyPwd)
 	CURLcode curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_KEYPASSWD, sslKeyPwd.c_str());
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setSSLKeyPassword: error! curlCode={}\n", static_cast<int>(curlCode)));
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setSSLKeyPassword: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -169,7 +170,7 @@ Request::Status Request::setSSLVerifyPeer(long v)
 
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setSSLVerifyPeer: error! curlCode={}\n", static_cast<int>(curlCode)));
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setSSLVerifyPeer: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -184,7 +185,7 @@ Request::Status Request::setSSLVerifyHost(long v)
 
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setSSLVerifyHost: error! curlCode={}\n", static_cast<int>(curlCode)));
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setSSLVerifyHost: error! curlCode={}\n", static_cast<int>(curlCode)));
 		return INVALID_OPT;
 	}
 
@@ -205,7 +206,7 @@ Request::Status Request::setURL(const std::string& url)
 	curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_URL, url.c_str());
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setURL: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setURL: "
 			"curl_easy_setopt(CURLOPT_URL) error! curlCode={}, url={}\n", static_cast<int>(curlCode), url));
 
 		return INVALID_OPT;
@@ -229,7 +230,7 @@ Request::Status Request::setFollowURL(int maxRedirs)
 		curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_MAXREDIRS, maxRedirs);
 		if (CURLE_OK != curlCode)
 		{
-			ERROR_MSG(fmt::format("Http::Request::setFollowURL: "
+			KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setFollowURL: "
 				"curl_easy_setopt(CURLOPT_MAXREDIRS) error! curlCode={}, maxRedirs={}\n", static_cast<int>(curlCode), maxRedirs));
 
 			return INVALID_OPT;
@@ -240,7 +241,7 @@ Request::Status Request::setFollowURL(int maxRedirs)
 
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setFollowURL: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setFollowURL: "
 			"curl_easy_setopt(CURLOPT_FOLLOWLOCATION) error! curlCode={}, maxRedirs={}\n", static_cast<int>(curlCode), maxRedirs));
 
 		return INVALID_OPT;
@@ -255,7 +256,7 @@ Request::Status Request::setPostData(const void* data, unsigned int size)
 {
 	if (!data)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setPostData: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setPostData: "
 				"data is NULL! size={}\n", size));
 
 		return INVALID_OPT;
@@ -266,7 +267,7 @@ Request::Status Request::setPostData(const void* data, unsigned int size)
 	curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_POST, 1);
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setPostData: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setPostData: "
 			"curl_easy_setopt(CURLOPT_POST) error! curlCode={}, size={}\n", static_cast<int>(curlCode), size));
 
 		return INVALID_OPT;
@@ -288,7 +289,7 @@ Request::Status Request::setPostData(const void* data, unsigned int size)
 
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setPostData: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setPostData: "
 			"curl_easy_setopt(CURLOPT_POSTFIELDS) error! curlCode={}, size={}\n", static_cast<int>(curlCode), size));
 
 		return INVALID_OPT;
@@ -297,7 +298,7 @@ Request::Status Request::setPostData(const void* data, unsigned int size)
 	curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_POSTFIELDSIZE, size);
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setPostData: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setPostData: "
 			"curl_easy_setopt(CURLOPT_POSTFIELDSIZE) error! curlCode={}, size={}\n", static_cast<int>(curlCode), size));
 
 		return INVALID_OPT;
@@ -316,7 +317,7 @@ Request::Status Request::setHeader(const std::string& header)
 
 	if (!headers_)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setHeaders: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setHeaders: "
 			"curl_slist_append error!, header={}\n", header));
 
 		return INVALID_OPT;
@@ -326,7 +327,7 @@ Request::Status Request::setHeader(const std::string& header)
 
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setHeader: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setHeader: "
 			"curl_easy_setopt(CURLOPT_HTTPHEADER) error! curlCode={}, header={}\n", static_cast<int>(curlCode), header));
 
 		return INVALID_OPT;
@@ -340,7 +341,7 @@ Request::Status Request::setHeader(const std::vector<std::string>& headers)
 {
 	if (headers.size() == 0)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setHeaders: headers size is 0!\n"));
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setHeaders: headers size is 0!\n"));
 		return INVALID_OPT;
 	}
 
@@ -356,7 +357,7 @@ Request::Status Request::setHeader(const std::vector<std::string>& headers)
 
 		if (!headers_)
 		{
-			ERROR_MSG(fmt::format("Http::Request::setHeaders: "
+			KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setHeaders: "
 				"curl_slist_append error! curlCode={}, header={}\n", static_cast<int>(curlCode), (*iter)));
 
 			return INVALID_OPT;
@@ -367,7 +368,7 @@ Request::Status Request::setHeader(const std::vector<std::string>& headers)
 
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setHeaders: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setHeaders: "
 			"curl_easy_setopt(CURLOPT_HTTPHEADER) error! curlCode={}\n", static_cast<int>(curlCode)));
 
 		return INVALID_OPT;
@@ -381,7 +382,7 @@ Request::Status Request::setHeader(const std::map<std::string, std::string>& hea
 {
 	if (headers.size() == 0)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setHeaders: headers size is 0!\n"));
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setHeaders: headers size is 0!\n"));
 		return INVALID_OPT;
 	}
 
@@ -401,7 +402,7 @@ Request::Status Request::setHeader(const std::map<std::string, std::string>& hea
 
 		if (!headers_)
 		{
-			ERROR_MSG(fmt::format("Http::Request::setHeaders: "
+			KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setHeaders: "
 				"curl_slist_append error! curlCode={}, header={}\n", static_cast<int>(curlCode), header));
 
 			return INVALID_OPT;
@@ -412,7 +413,7 @@ Request::Status Request::setHeader(const std::map<std::string, std::string>& hea
 
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setHeaders: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setHeaders: "
 			"curl_easy_setopt(CURLOPT_HTTPHEADER) error! curlCode={}\n", static_cast<int>(curlCode)));
 
 		return INVALID_OPT;
@@ -427,7 +428,7 @@ Request::Status Request::setTimeout(uint32 secs)
 	CURLcode curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_TIMEOUT, secs);
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setTimeout: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setTimeout: "
 			"curl_easy_setopt(CURLOPT_TIMEOUT) error! curlCode={}, secs={}\n", static_cast<int>(curlCode), secs));
 
 		return INVALID_OPT;
@@ -442,7 +443,7 @@ Request::Status Request::setProxy(const std::string& proxyIP, long proxyPort)
 	CURLcode curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_PROXYPORT, proxyPort);
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setProxy: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setProxy: "
 			"curl_easy_setopt(CURLOPT_PROXYPORT) error! curlCode={}\n", static_cast<int>(curlCode)));
 
 		return INVALID_OPT;
@@ -451,7 +452,7 @@ Request::Status Request::setProxy(const std::string& proxyIP, long proxyPort)
 	curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_PROXY, proxyIP.c_str());
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::setProxy: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::setProxy: "
 			"curl_easy_setopt(CURLOPT_PROXYPORT) error! curlCode={}\n", static_cast<int>(curlCode)));
 
 		return INVALID_OPT;
@@ -524,7 +525,7 @@ bool Request::updateHttpCode()
 	CURLcode curlCode = curl_easy_getinfo((CURL*)pContext_, CURLINFO_RESPONSE_CODE, &httpCode_);
 	if (CURLE_OK != curlCode)
 	{
-		ERROR_MSG(fmt::format("Http::Request::perform: "
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::perform: "
 			"curl_easy_getinfo(CURLINFO_RESPONSE_CODE) error! curlCode={}\n", static_cast<int>(curlCode)));
 
 		return false;
@@ -541,7 +542,7 @@ void Request::callCallback(bool success)
 
 	if (strlen(getError()) > 0)
 	{
-		ERROR_MSG(fmt::format("Http::Request::perform: {}\n", getError()));
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("Http::Request::perform: {}\n", getError()));
 		success = false;
 	}
 
@@ -567,12 +568,12 @@ static void mcode_or_die(const char *where, CURLMcode code)
 			__case(CURLM_LAST); break;
 		default: s = "CURLM_unknown"; break;
 			__case(CURLM_BAD_SOCKET);
-			ERROR_MSG(fmt::format("curl-multi: {} returns {}.\n", where, s));
+			KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("curl-multi: {} returns {}.\n", where, s));
 			/* ignore this error */
 			return;
 		}
 
-		ERROR_MSG(fmt::format("curl-multi: {} returns {}!\n", where, s));
+		KBE_HTTP_UTILITY_ERROR_MSG(fmt::format("curl-multi: {} returns {}!\n", where, s));
 	}
 }
 
@@ -685,7 +686,8 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act, Requests *g)
 	else if (f->action != act)
 		f->action = CURL_POLL_INOUT;
 
-	EventDispatcher& dispatcher = DebugHelper::getSingleton().pNetworkInterface()->dispatcher();
+	KBE_ASSERT(DebugHelper::getSingleton().pDispatcher() != NULL);
+	EventDispatcher& dispatcher = (*DebugHelper::getSingleton().pDispatcher());
 
 	if (act == CURL_POLL_IN) 
 	{
@@ -719,7 +721,8 @@ static void remsock(SockInfo *f, Requests *g)
 { 
 	if (f) 
 	{
-		EventDispatcher& dispatcher = DebugHelper::getSingleton().pNetworkInterface()->dispatcher();
+		KBE_ASSERT(DebugHelper::getSingleton().pDispatcher() != NULL);
+		EventDispatcher& dispatcher = (*DebugHelper::getSingleton().pDispatcher());
 
 		if (f->action == CURL_POLL_IN)
 		{
@@ -780,7 +783,8 @@ static int multi_timer_cb(CURLM* multi, long timeout_ms, Requests *g)
 	* the timer to the new value
 	*/
 
-	EventDispatcher &dispatcher = DebugHelper::getSingleton().pNetworkInterface()->dispatcher();
+	KBE_ASSERT(DebugHelper::getSingleton().pDispatcher() != NULL);
+	EventDispatcher &dispatcher = (*DebugHelper::getSingleton().pDispatcher());
 	
 	g->timerHandle.cancel();
 
