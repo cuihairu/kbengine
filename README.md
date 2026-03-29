@@ -75,6 +75,7 @@ KBEngine
 	The CMake build now supports vcpkg manifest mode.
 	When configured with the vcpkg toolchain, KBEngine will prefer vcpkg-provided fmt, zlib, OpenSSL and GTest.
 	If vcpkg is not active, the current vendored/fallback path remains available.
+	The manifest is pinned with a vcpkg builtin baseline for reproducible dependency resolution.
 
 	Example:
 		export VCPKG_ROOT=/path/to/vcpkg
@@ -99,4 +100,3 @@ KBEngine
 
 	(经常被问到承载上限，KBEngine底层架构被设计为多进程分布式动态负载均衡方案，
 	理论上只需要不断扩展硬件就能够不断增加承载上限，单台机器的承载上限取决于游戏逻辑本身的复杂度。)
-
