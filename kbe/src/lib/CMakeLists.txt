@@ -774,11 +774,6 @@ target_link_libraries(kbe_network_error_reporter
     KBEngine::network_event_dispatcher
 )
 
-target_compile_definitions(kbe_network_error_reporter
-  PRIVATE
-    KBE_CMAKE_BOOTSTRAP_ERROR_REPORTER
-)
-
 target_include_directories(kbe_network_error_reporter
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
@@ -1672,11 +1667,6 @@ target_link_libraries(kbe_helper_sys_info
   PUBLIC
     KBEngine::build_config
     KBEngine::helper_debug_helper
-)
-
-target_compile_definitions(kbe_helper_sys_info
-  PRIVATE
-    KBE_CMAKE_BOOTSTRAP_SYS_INFO
 )
 
 target_include_directories(kbe_helper_sys_info

@@ -7,10 +7,8 @@
 #endif
 
 #include "network/address.h"
-#ifndef KBE_CMAKE_BOOTSTRAP_ERROR_REPORTER
 #include "network/event_dispatcher.h"
 #include "network/endpoint.h"
-#endif
 
 namespace KBEngine { 
 namespace Network
@@ -260,12 +258,8 @@ void ErrorReporter::reportPendingExceptions(bool reportBelowThreshold)
 //-------------------------------------------------------------------------------------
 void ErrorReporter::handleTimeout(TimerHandle handle, void * arg)
 {
-#ifndef KBE_CMAKE_BOOTSTRAP_ERROR_REPORTER
 	KBE_ASSERT(handle == reportLimitTimerHandle_);
-#else
-	(void)handle;
 	(void)arg;
-#endif
 	this->reportPendingExceptions();
 }
 
