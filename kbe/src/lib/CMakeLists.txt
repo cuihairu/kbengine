@@ -203,12 +203,8 @@ target_link_libraries(kbe_common_rsa
   PUBLIC
     KBEngine::build_config
     KBEngine::common_strutil
+    KBEngine::helper_debug_helper
     OpenSSL::Crypto
-)
-
-target_compile_definitions(kbe_common_rsa
-  PRIVATE
-    KBE_CMAKE_BOOTSTRAP_RSA
 )
 
 target_include_directories(kbe_common_rsa
@@ -228,11 +224,6 @@ target_link_libraries(kbe_common_kbekey
   PUBLIC
     KBEngine::build_config
     KBEngine::common_rsa
-)
-
-target_compile_definitions(kbe_common_kbekey
-  PRIVATE
-    KBE_CMAKE_BOOTSTRAP_KBEKEY
 )
 
 target_include_directories(kbe_common_kbekey
@@ -287,13 +278,13 @@ add_library(KBEngine::common_blowfish ALIAS kbe_common_blowfish)
 target_link_libraries(kbe_common_blowfish
   PUBLIC
     KBEngine::build_config
+    KBEngine::helper_debug_helper
     OpenSSL::Crypto
 )
 
 target_compile_definitions(kbe_common_blowfish
   PRIVATE
     OPENSSL_SUPPRESS_DEPRECATED
-    KBE_CMAKE_BOOTSTRAP_BLOWFISH
 )
 
 target_include_directories(kbe_common_blowfish

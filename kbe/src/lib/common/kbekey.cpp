@@ -2,12 +2,7 @@
 
 #include "kbekey.h"
 #include "common.h"
-#ifdef KBE_CMAKE_BOOTSTRAP_KBEKEY
-#include <cassert>
-#define KBE_ASSERT(exp) assert((exp))
-#else
 #include "helper/debug_helper.h"
-#endif
 
 
 namespace KBEngine

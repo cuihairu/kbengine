@@ -3,14 +3,7 @@
 #include "rsa.h"
 #include "common.h"
 #include "strutil.h"
-#ifdef KBE_CMAKE_BOOTSTRAP_RSA
-#include <cassert>
-#define KBE_ASSERT(exp) assert((exp))
-#define ERROR_MSG(msg) do { (void)(msg); } while (0)
-#define INFO_MSG(msg) do { (void)(msg); } while (0)
-#else
 #include "helper/debug_helper.h"
-#endif
 
 #include <iostream>
 #include <fstream>
@@ -21,6 +14,25 @@
 
 namespace KBEngine
 {
+
+namespace
+{
+void log_rsa_error(const std::string& message)
+{
+	if(DebugHelper::isInit())
+	{
+		ERROR_MSG(message);
+	}
+}
+
+void log_rsa_info(const std::string& message)
+{
+	if(DebugHelper::isInit())
+	{
+		INFO_MSG(message);
+	}
+}
+}
 
 //-------------------------------------------------------------------------------------
 KBE_RSA::KBE_RSA(const std::string& pubkeyname, const std::string& prikeyname):
@@ -77,7 +89,7 @@ bool KBE_RSA::loadPublic(const std::string& keyname)
 		{
 			char err[1024];
 			char* errret = ERR_error_string(ERR_get_error(), err);
-			ERROR_MSG(fmt::format("KBE_RSA::loadPublic: PEM_read_RSAPublicKey error({} : {})\n",
+			log_rsa_error(fmt::format("KBE_RSA::loadPublic: PEM_read_RSAPublicKey error({} : {})\n",
 				errret, err));
 
 			fclose(fp);
@@ -107,7 +119,7 @@ bool KBE_RSA::loadPrivate(const std::string& keyname)
 		{
 			char err[1024];
 			char* errret = ERR_error_string(ERR_get_error(), err);
-			ERROR_MSG(fmt::format("KBE_RSA::loadPrivate: PEM_read_RSAPrivateKey error({} : {})\n",
+			log_rsa_error(fmt::format("KBE_RSA::loadPrivate: PEM_read_RSAPrivateKey error({} : {})\n",
 				errret, err));
 
 			fclose(fp);
@@ -156,7 +168,7 @@ bool KBE_RSA::generateKey(const std::string& pubkeyname,
 	{
 		char err[1024];
 		char* errret = ERR_error_string(ERR_get_error(), err);
-		ERROR_MSG(fmt::format("KBE_RSA::generateKey: RSA_generate_key error({} : {})\n",
+		log_rsa_error(fmt::format("KBE_RSA::generateKey: RSA_generate_key error({} : {})\n",
 			errret, err));
 
 		return false;
@@ -164,7 +176,7 @@ bool KBE_RSA::generateKey(const std::string& pubkeyname,
 
 	if (!RSA_check_key(rsa)) 
 	{
-		ERROR_MSG("KBE_RSA::generateKey: invalid RSA Key.\n");
+		log_rsa_error("KBE_RSA::generateKey: invalid RSA Key.\n");
 		RSA_free(rsa);
 		return false;
 	}
@@ -179,7 +191,7 @@ bool KBE_RSA::generateKey(const std::string& pubkeyname,
 	{
 		char err[1024];
 		char* errret = ERR_error_string(ERR_get_error(), err);
-		ERROR_MSG(fmt::format("KBE_RSA::generateKey: PEM_write_RSAPrivateKey error({} : {})\n",
+		log_rsa_error(fmt::format("KBE_RSA::generateKey: PEM_write_RSAPrivateKey error({} : {})\n",
 			errret, err));
 
 		fclose(fp);
@@ -198,7 +210,7 @@ bool KBE_RSA::generateKey(const std::string& pubkeyname,
 	{
 		char err[1024];
 		char* errret = ERR_error_string(ERR_get_error(), err);
-		ERROR_MSG(fmt::format("KBE_RSA::generateKey: PEM_write_RSAPublicKey error({} : {})\n",
+		log_rsa_error(fmt::format("KBE_RSA::generateKey: PEM_write_RSAPublicKey error({} : {})\n",
 			errret, err));
 
 		fclose(fp);
@@ -206,7 +218,7 @@ bool KBE_RSA::generateKey(const std::string& pubkeyname,
 		return false;
 	}
 
-	INFO_MSG(fmt::format("KBE_RSA::generateKey: RSA key generated. keysize({}) bits.\n", keySize));
+	log_rsa_info(fmt::format("KBE_RSA::generateKey: RSA key generated. keysize({}) bits.\n", keySize));
 
 	RSA_free(rsa);
 	fclose(fp);
@@ -241,7 +253,7 @@ int KBE_RSA::encrypt(const std::string& instr, std::string& outCertifdata)
 	{
 		char err[1024];
 		char* errret = ERR_error_string(ERR_get_error(), err);
-		ERROR_MSG(fmt::format("KBE_RSA::encrypt: RSA_public_encrypt error({} : {})\n",
+		log_rsa_error(fmt::format("KBE_RSA::encrypt: RSA_public_encrypt error({} : {})\n",
 			errret, err));
 
 		free(certifdata);
@@ -265,7 +277,7 @@ void KBE_RSA::hexCertifData(const std::string& inCertifdata)
 	
 	s += "\n";
 
-	INFO_MSG(s.c_str());
+	log_rsa_info(s.c_str());
 }
 
 //-------------------------------------------------------------------------------------
@@ -283,7 +295,7 @@ int KBE_RSA::decrypt(const std::string& inCertifdata, std::string& outstr)
 	{
 		char err[1024];
 		char* errret = ERR_error_string(ERR_get_error(), err);
-		ERROR_MSG(fmt::format("KBE_RSA::decrypt: RSA_private_decrypt error({} : {})\n",
+		log_rsa_error(fmt::format("KBE_RSA::decrypt: RSA_private_decrypt error({} : {})\n",
 			errret, err));
 
 		free(keydata);

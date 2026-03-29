@@ -2,12 +2,37 @@
 
 #include "common/common.h"
 #include "blowfish.h"
-#ifndef KBE_CMAKE_BOOTSTRAP_BLOWFISH
 #include "helper/debug_helper.h"
-#endif
 #include "openssl/rand.h"
 
 namespace KBEngine { 
+
+namespace
+{
+void log_blowfish_debug(const std::string& message)
+{
+	if(DebugHelper::isInit())
+	{
+		DEBUG_MSG(message);
+	}
+}
+
+void log_blowfish_error(const std::string& message)
+{
+	if(DebugHelper::isInit())
+	{
+		ERROR_MSG(message);
+	}
+}
+
+void log_blowfish_critical(const std::string& message)
+{
+	if(DebugHelper::isInit())
+	{
+		CRITICAL_MSG(message);
+	}
+}
+}
 
 //-------------------------------------------------------------------------------------
 KBEBlowfish::KBEBlowfish(const Key & key):
@@ -35,10 +60,8 @@ KBEBlowfish::KBEBlowfish(int keySize):
 
 	if (this->init())
 	{
-#ifndef KBE_CMAKE_BOOTSTRAP_BLOWFISH
-		DEBUG_MSG(fmt::format("KBEBlowfish::KBEBlowfish(): Using Blowfish key: {}\n", 
+		log_blowfish_debug(fmt::format("KBEBlowfish::KBEBlowfish(): Using Blowfish key: {}\n", 
 			this->strBlowFishKey()));
-#endif
 	}
 }
 
@@ -61,11 +84,9 @@ bool KBEBlowfish::init()
 	}
 	else
 	{
-#ifndef KBE_CMAKE_BOOTSTRAP_BLOWFISH
-		ERROR_MSG(fmt::format("KBEBlowfish::init: "
+		log_blowfish_error(fmt::format("KBEBlowfish::init: "
 			"invalid length {}\n",
 			keySize_));
-#endif
 
 		isGood_ = false;
 	}
@@ -95,11 +116,9 @@ int KBEBlowfish::encrypt( const unsigned char * src, unsigned char * dest,
 	// BLOCK_SIZEµÄÕûÊý±¶
 	if(length % BLOCK_SIZE != 0)
 	{
-#ifndef KBE_CMAKE_BOOTSTRAP_BLOWFISH
-		CRITICAL_MSG(fmt::format("Blowfish::encrypt: "
+		log_blowfish_critical(fmt::format("Blowfish::encrypt: "
 			"Input length ({}) is not a multiple of block size ({})\n",
 			length, (int)(BLOCK_SIZE)));
-#endif
 		return -1;
 	}
 
@@ -128,11 +147,9 @@ int KBEBlowfish::decrypt( const unsigned char * src, unsigned char * dest,
 {
 	if (length % BLOCK_SIZE != 0)
 	{
-#ifndef KBE_CMAKE_BOOTSTRAP_BLOWFISH
-		ERROR_MSG(fmt::format("Blowfish::decrypt: "
+		log_blowfish_error(fmt::format("Blowfish::decrypt: "
 			"Input stream size ({}) is not a multiple of the block size ({})\n",
 			length, (int)(BLOCK_SIZE)));
-#endif
 
 		return -1;
 	}
