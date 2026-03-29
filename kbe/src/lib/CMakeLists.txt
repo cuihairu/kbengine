@@ -160,11 +160,6 @@ target_link_libraries(kbe_common_memorystream
     fmt::fmt
 )
 
-target_compile_definitions(kbe_common_memorystream
-  PUBLIC
-    KBE_CMAKE_BOOTSTRAP_MEMORYSTREAM
-)
-
 target_include_directories(kbe_common_memorystream
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
@@ -439,11 +434,6 @@ target_link_libraries(kbe_thread_pool
     KBEngine::thread_primitives
 )
 
-target_compile_definitions(kbe_thread_pool
-  PUBLIC
-    KBE_CMAKE_BOOTSTRAP_THREADPOOL
-)
-
 target_include_directories(kbe_thread_pool
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
@@ -463,11 +453,6 @@ target_link_libraries(kbe_helper_watcher
     KBEngine::common_strutil
     KBEngine::common_memorystream
     KBEngine::common_smartpointer
-)
-
-target_compile_definitions(kbe_helper_watcher
-  PUBLIC
-    KBE_CMAKE_BOOTSTRAP_WATCHER
 )
 
 target_include_directories(kbe_helper_watcher
@@ -490,11 +475,6 @@ target_link_libraries(kbe_helper_profile
     KBEngine::common_timer
     KBEngine::common_timestamp
     KBEngine::helper_watcher
-)
-
-target_compile_definitions(kbe_helper_profile
-  PUBLIC
-    KBE_CMAKE_BOOTSTRAP_PROFILE
 )
 
 target_include_directories(kbe_helper_profile
@@ -531,11 +511,6 @@ add_library(KBEngine::helper_event_stats ALIAS kbe_helper_event_stats)
 target_link_libraries(kbe_helper_event_stats
   PUBLIC
     KBEngine::build_config
-)
-
-target_compile_definitions(kbe_helper_event_stats
-  PUBLIC
-    KBE_CMAKE_BOOTSTRAP_EVENT_STATS
 )
 
 target_include_directories(kbe_helper_event_stats

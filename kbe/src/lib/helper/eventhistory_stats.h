@@ -7,8 +7,10 @@
 
 namespace KBEngine { 
 
+class EventHistoryStats;
+
 /*
-	¼ÇÂ¼event_historyÁ÷Á¿
+	Â¼Ã‡Ã‚Â¼event_historyÃÃ·ÃÂ¿
 */
 class EventHistoryStats
 {
@@ -43,6 +45,10 @@ private:
 
 	std::string name_;
 };
+
+using EventHistoryStatsTrigger = void (*)(const EventHistoryStats&, const EventHistoryStats::Stats&, uint32);
+
+void setEventHistoryStatsTrigger(EventHistoryStatsTrigger trigger);
 
 }
 

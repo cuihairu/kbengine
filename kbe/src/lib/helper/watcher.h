@@ -3,29 +3,7 @@
 #define KBE_HELPER_WATCHER_H
 
 #include "common/common.h"
-#ifdef KBE_CMAKE_BOOTSTRAP_WATCHER
-#include <cassert>
-#ifndef DEBUG_MSG
-#define DEBUG_MSG(m) do { } while (0)
-#endif
-#ifndef INFO_MSG
-#define INFO_MSG(m) do { } while (0)
-#endif
-#ifndef WARNING_MSG
-#define WARNING_MSG(m) do { } while (0)
-#endif
-#ifndef ERROR_MSG
-#define ERROR_MSG(m) do { } while (0)
-#endif
-#ifndef CRITICAL_MSG
-#define CRITICAL_MSG(m) do { } while (0)
-#endif
-#ifndef KBE_ASSERT
-#define KBE_ASSERT(exp) assert((exp))
-#endif
-#else
 #include "helper/debug_helper.h"
-#endif
 #include "common/smartpointer.h"
 #include "common/singleton.h"
 #include "common/memorystream.h"
@@ -58,7 +36,7 @@ typedef uint8 WATCHER_VALUE_TYPE;
 class Watchers;
 
 /*
-	watcher基础对象
+	watcher禄霉麓隆露脭脧贸
 */
 class WatcherObject
 {
@@ -246,7 +224,7 @@ inline void WatcherObject::updateStream<const char*>(MemoryStream* s)
 
 
 /*
-	watcher: 直接监视一个值
+	watcher: 脰卤陆脫录脿脢脫脪禄赂枚脰碌
 */
 template <class T>
 class WatcherValue : public WatcherObject
@@ -279,7 +257,7 @@ protected:
 };
 
 /*
-	watcher: 监视一个方法返回的值
+	watcher: 录脿脢脫脪禄赂枚路陆路篓路碌禄脴碌脛脰碌
 */
 template <class RETURN_TYPE>
 class WatcherFunction : public WatcherObject
@@ -313,7 +291,7 @@ protected:
 };
 
 /*
-	watcher: 监视一个成员函数返回的值
+	watcher: 录脿脢脫脪禄赂枚鲁脡脭卤潞炉脢媒路碌禄脴碌脛脰碌
 */
 template <class RETURN_TYPE, class OBJ_TYPE>
 class WatcherMethod : public WatcherObject
@@ -383,7 +361,7 @@ protected:
 };
 
 /*
-	watcher管理器
+	watcher鹿脺脌铆脝梅
 */
 class Watchers
 {
@@ -454,7 +432,7 @@ protected:
 };
 
 /**
-	用于监视一个值
+	脫脙脫脷录脿脢脫脪禄赂枚脰碌
 	int32 a = 1;
 	addWatcher("a", a);
 
@@ -472,7 +450,7 @@ inline WatcherObject* addWatcher(std::string path, const TYPE& type)
 };
 
 /**
-	用于监视一个函数的返回值
+	脫脙脫脷录脿脢脫脪禄赂枚潞炉脢媒碌脛路碌禄脴脰碌
 
 	int32 func(){}
 
@@ -488,7 +466,7 @@ inline WatcherObject* addWatcher(std::string path, RETURN_TYPE (*func)())
 };
 
 /**
-	用于监视一个成员函数的返回值
+	脫脙脫脷录脿脢脫脪禄赂枚鲁脡脭卤潞炉脢媒碌脛路碌禄脴脰碌
 
 	int32 AAA::func(){}
 	AAA a;

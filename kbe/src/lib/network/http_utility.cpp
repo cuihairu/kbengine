@@ -196,7 +196,7 @@ Request::Status Request::setURL(const std::string& url)
 {
 	CURLcode curlCode = CURLE_OK;
 
-	if (!setVerifySSL_/* 如果没设置过，自动设置一个默认值 */ && url.substr(0, 6) == "https:")
+	if (!setVerifySSL_/* 脠莽鹿没脙禄脡猫脰脙鹿媒拢卢脳脭露炉脡猫脰脙脪禄赂枚脛卢脠脧脰碌 */ && url.substr(0, 6) == "https:")
 	{
 		curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_SSL_VERIFYPEER, 0L);
 		curlCode = curl_easy_setopt((CURL*)pContext_, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -849,7 +849,7 @@ Request::Status Requests::perform(const std::string& url, const Request::Callbac
 		r->setHeader(headers);
 
 	Request::Status status = perform(r);
-	// 由curl的回调中销毁
+	// 脫脡curl碌脛禄脴碌梅脰脨脧煤禄脵
 	// delete r;
 	return status;
 }
@@ -867,7 +867,7 @@ Request::Status Requests::perform(const std::string& url, const Request::Callbac
 		r->setHeader(headers);
 
 	Request::Status status = perform(r);
-	// 由curl的回调中销毁
+	// 脫脡curl碌脛禄脴碌梅脰脨脧煤禄脵
 	// delete r;
 	return status;
 }

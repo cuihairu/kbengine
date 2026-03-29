@@ -5,19 +5,11 @@
 
 #include "common/common.h"
 #include "common/objectpool.h"
-#if defined(KBE_CMAKE_BOOTSTRAP_MEMORYSTREAM)
-#include <cstdio>
-inline void kbe_memorystream_bootstrap_log(const std::string& msg) { std::fprintf(stderr, "%s", msg.c_str()); }
-inline void kbe_memorystream_bootstrap_log(const char* msg) { std::fprintf(stderr, "%s", msg); }
-#define KBE_MEMORYSTREAM_ERROR(msg) kbe_memorystream_bootstrap_log(msg)
-#define KBE_MEMORYSTREAM_DEBUG(msg) kbe_memorystream_bootstrap_log(msg)
-#define KBE_MEMORYSTREAM_ASSERT(expr) assert((expr))
-#else
 #include "helper/debug_helper.h"
-#define KBE_MEMORYSTREAM_ERROR(msg) ERROR_MSG(msg)
-#define KBE_MEMORYSTREAM_DEBUG(msg) DEBUG_MSG(msg)
+
+#define KBE_MEMORYSTREAM_ERROR(msg) do { if (KBEngine::DebugHelper::isInit()) { ERROR_MSG(msg); } } while (0)
+#define KBE_MEMORYSTREAM_DEBUG(msg) do { if (KBEngine::DebugHelper::isInit()) { DEBUG_MSG(msg); } } while (0)
 #define KBE_MEMORYSTREAM_ASSERT(expr) KBE_ASSERT(expr)
-#endif
 #include "common/memorystream_converter.h"
 	
 namespace KBEngine{
@@ -76,11 +68,11 @@ private:
 };
 
 /*
-	将常用数据类型二进制序列化与反序列化
-	注意：端与端之间传输可能涉及大小端问题，可以通过如下进行转换进行转换:
-	具体看 MemoryStreamConverter.h
+	陆芦鲁拢脫脙脢媒戮脻脌脿脨脥露镁陆酶脰脝脨貌脕脨禄炉脫毛路麓脨貌脕脨禄炉
+	脳垄脪芒拢潞露脣脫毛露脣脰庐录盲麓芦脢盲驴脡脛脺脡忙录掳麓贸脨隆露脣脦脢脤芒拢卢驴脡脪脭脥篓鹿媒脠莽脧脗陆酶脨脨脳陋禄禄陆酶脨脨脳陋禄禄:
+	戮脽脤氓驴麓 MemoryStreamConverter.h
 
-	使用方法:
+	脢鹿脫脙路陆路篓:
 			MemoryStream stream; 
 			stream << (int64)100000000;
 			stream << (uint8)1;
@@ -94,7 +86,7 @@ private:
 			stream >> n;
 			stream >> n1;
 			stream >> a;
-			printf("还原: %lld, %d, %d, %s", x, n, n1, a.c_str());
+			printf("禄鹿脭颅: %lld, %d, %d, %s", x, n, n1, a.c_str());
 */
 class MemoryStream : public PoolObject
 {
@@ -483,14 +475,14 @@ public:
 		(*this) >> tv;
 		data |= tv;
 
-		// 复制指数和尾数
+		// 赂麓脰脝脰赂脢媒潞脥脦虏脢媒
 		xPackData.uv |= (data & 0x7ff000) << 3;
 		zPackData.uv |= (data & 0x0007ff) << 15;
 
 		xPackData.fv -= 2.0f;
 		zPackData.fv -= 2.0f;
 
-		// 设置标记位
+		// 脡猫脰脙卤锚录脟脦禄
 		xPackData.uv |= (data & 0x800000) << 8;
 		zPackData.uv |= (data & 0x000800) << 20;
 	}
@@ -511,19 +503,19 @@ public:
     uint8 *data() { return &data_[0]; }
 	const uint8 *data() const { return &data_[0]; }
 	
-	// vector的大小
+	// vector碌脛麓贸脨隆
     virtual size_t size() const { return data_.size(); }
 
-	// vector是否为空
+	// vector脢脟路帽脦陋驴脮
     virtual bool empty() const { return data_.empty(); }
 
-	// 读索引到与写索引之间的长度
+	// 露脕脣梅脪媒碌陆脫毛脨麓脣梅脪媒脰庐录盲碌脛鲁陇露脠
 	virtual size_t length() const { return rpos() >= wpos() ? 0 : wpos() - rpos(); }
 
-	// 剩余可填充的大小
+	// 脢拢脫脿驴脡脤卯鲁盲碌脛麓贸脨隆
 	virtual size_t space() const { return wpos() >= size() ? 0 : size() - wpos(); }
 
-	// 将读索引强制设置到写索引，表示操作结束
+	// 陆芦露脕脣梅脪媒脟驴脰脝脡猫脰脙碌陆脨麓脣梅脪媒拢卢卤铆脢戮虏脵脳梅陆谩脢酶
 	void done(){ read_skip(length()); }
 
     void resize(size_t newsize)
@@ -644,8 +636,8 @@ public:
 		y -= minf / 2.f;
 		z -= minf;
 
-		// 最大值不要超过-256~256
-		// y 不要超过-128~128
+		// 脳卯麓贸脰碌虏禄脪陋鲁卢鹿媒-256~256
+		// y 虏禄脪陋鲁卢鹿媒-128~128
         uint32 packed = 0;
         packed |= ((int)(x / 0.25f) & 0x7FF);
         packed |= ((int)(z / 0.25f) & 0x7FF) << 11;
@@ -661,11 +653,11 @@ public:
 		PackFloatXType zPackData; 
 		zPackData.fv = z;
 		
-		// 0-7位存放尾数, 8-10位存放指数, 11位存放标志
-		// 由于使用了24位来存储2个float， 并且要求能够达到-512~512之间的数
-		// 8位尾数只能放最大值256, 指数只有3位(决定浮点数最大值为2^(2^3)=256) 
-		// 我们舍去第一位使范围达到(-512~-2), (2~512)之间
-		// 因此这里我们保证最小数为-2.f或者2.f
+		// 0-7脦禄麓忙路脜脦虏脢媒, 8-10脦禄麓忙路脜脰赂脢媒, 11脦禄麓忙路脜卤锚脰戮
+		// 脫脡脫脷脢鹿脫脙脕脣24脦禄脌麓麓忙麓垄2赂枚float拢卢 虏垄脟脪脪陋脟贸脛脺鹿禄麓茂碌陆-512~512脰庐录盲碌脛脢媒
+		// 8脦禄脦虏脢媒脰禄脛脺路脜脳卯麓贸脰碌256, 脰赂脢媒脰禄脫脨3脦禄(戮枚露篓赂隆碌茫脢媒脳卯麓贸脰碌脦陋2^(2^3)=256) 
+		// 脦脪脙脟脡谩脠楼碌脷脪禄脦禄脢鹿路露脦搂麓茂碌陆(-512~-2), (2~512)脰庐录盲
+		// 脪貌麓脣脮芒脌茂脦脪脙脟卤拢脰陇脳卯脨隆脢媒脦陋-2.f禄貌脮脽2.f
 		xPackData.fv += xPackData.iv < 0 ? -2.f : 2.f;
 		zPackData.fv += zPackData.iv < 0 ? -2.f : 2.f;
 
@@ -676,26 +668,26 @@ public:
 		const uint32 xCeilingValues[] = { 0, 0x7ff000 };
 		const uint32 zCeilingValues[] = { 0, 0x0007ff };
 
-		// 这里如果这个浮点数溢出了则设置浮点数为最大数
-		// 这里检查了指数高4位和标记位， 如果高四位不为0则肯定溢出， 如果低4位和8位尾数不为0则溢出
+		// 脮芒脌茂脠莽鹿没脮芒赂枚赂隆碌茫脢媒脪莽鲁枚脕脣脭貌脡猫脰脙赂隆碌茫脢媒脦陋脳卯麓贸脢媒
+		// 脮芒脌茂录矛虏茅脕脣脰赂脢媒赂脽4脦禄潞脥卤锚录脟脦禄拢卢 脠莽鹿没赂脽脣脛脦禄虏禄脦陋0脭貌驴脧露篓脪莽鲁枚拢卢 脠莽鹿没碌脥4脦禄潞脥8脦禄脦虏脢媒虏禄脦陋0脭貌脪莽鲁枚
 		// 0x7c000000 = 1111100000000000000000000000000
 		// 0x40000000 = 1000000000000000000000000000000
 		// 0x3ffc000  = 0000011111111111100000000000000
 		data |= xCeilingValues[((xPackData.uv & 0x7c000000) != 0x40000000) || ((xPackData.uv & 0x3ffc000) == 0x3ffc000)];
 		data |= zCeilingValues[((zPackData.uv & 0x7c000000) != 0x40000000) || ((zPackData.uv & 0x3ffc000) == 0x3ffc000)];
 		
-		// 复制8位尾数和3位指数， 如果浮点数剩余尾数最高位是1则+1四舍五入, 并且存放到data中
+		// 赂麓脰脝8脦禄脦虏脢媒潞脥3脦禄脰赂脢媒拢卢 脠莽鹿没赂隆碌茫脢媒脢拢脫脿脦虏脢媒脳卯赂脽脦禄脢脟1脭貌+1脣脛脡谩脦氓脠毛, 虏垄脟脪麓忙路脜碌陆data脰脨
 		// 0x7ff000 = 11111111111000000000000
 		// 0x0007ff = 00000000000011111111111
 		// 0x4000	= 00000000100000000000000
 		data |= ((xPackData.uv >>  3) & 0x7ff000) + ((xPackData.uv & 0x4000) >> 2);
 		data |= ((zPackData.uv >> 15) & 0x0007ff) + ((zPackData.uv & 0x4000) >> 14);
 		
-		// 确保值在范围内
+		// 脠路卤拢脰碌脭脷路露脦搂脛脷
 		// 0x7ff7ff = 11111111111011111111111
 		data &= 0x7ff7ff;
 
-		// 复制标记位
+		// 赂麓脰脝卤锚录脟脦禄
 		// 0x800000 = 100000000000000000000000
 		// 0x000800 = 000000000000100000000000
 		data |=  (xPackData.uv >>  8) & 0x800000;
@@ -736,7 +728,7 @@ public:
         memcpy(&data_[pos], src, cnt);
     }
 
-	/** 输出流数据 */
+	/** 脢盲鲁枚脕梅脢媒戮脻 */
     void print_storage() const
     {
 		char buf[1024];
@@ -758,7 +750,7 @@ public:
 		rpos_ = trpos;
     }
 
-	/** 输出流数据字符串 */
+	/** 脢盲鲁枚脕梅脢媒戮脻脳脰路没麓庐 */
     void textlike() const
     {
 		char buf[1024];
@@ -953,7 +945,7 @@ inline void MemoryStream::read_skip<std::string>()
     read_skip<char*>();
 }
 
-// 从对象池中创建与回收 
+// 麓脫露脭脧贸鲁脴脰脨麓麓陆篓脫毛禄脴脢脮 
 #define NEW_MEMORY_STREAM() MemoryStream::createPoolObject(OBJECTPOOL_POINT)
 #define DELETE_MEMORY_STREAM(obj) { MemoryStream::reclaimPoolObject(obj); obj = NULL; }
 

@@ -7,18 +7,14 @@
 #include "common/common.h"
 #include "common/tasks.h"
 #include <cstdio>
-#ifdef KBE_CMAKE_BOOTSTRAP_THREADPOOL
-#include <cassert>
-#define DEBUG_MSG(m) do { } while (0)
-#define INFO_MSG(m) do { } while (0)
-#define WARNING_MSG(m) do { } while (0)
-#define ERROR_MSG(m) do { } while (0)
-#define CRITICAL_MSG(m) do { } while (0)
-#define KBE_ASSERT(exp) assert((exp))
-#else
 #include "helper/debug_helper.h"
-#endif
 #include "thread/threadtask.h"
+
+#define KBE_THREADPOOL_DEBUG_MSG(m) do { if (KBEngine::DebugHelper::isInit()) { DEBUG_MSG(m); } } while (0)
+#define KBE_THREADPOOL_INFO_MSG(m) do { if (KBEngine::DebugHelper::isInit()) { INFO_MSG(m); } } while (0)
+#define KBE_THREADPOOL_WARNING_MSG(m) do { if (KBEngine::DebugHelper::isInit()) { WARNING_MSG(m); } } while (0)
+#define KBE_THREADPOOL_ERROR_MSG(m) do { if (KBEngine::DebugHelper::isInit()) { ERROR_MSG(m); } } while (0)
+#define KBE_THREADPOOL_CRITICAL_MSG(m) do { if (KBEngine::DebugHelper::isInit()) { CRITICAL_MSG(m); } } while (0)
 // windows include	
 #if KBE_PLATFORM == PLATFORM_WIN32
 #include <windows.h>          // for HANDLE
@@ -46,11 +42,11 @@
 	
 namespace KBEngine{ namespace thread{
 
-// 线程池活动线程大于这个数目则处于繁忙状态
+// 脧脽鲁脤鲁脴禄卯露炉脧脽鲁脤麓贸脫脷脮芒赂枚脢媒脛驴脭貌麓娄脫脷路卤脙娄脳麓脤卢
 #define THREAD_BUSY_SIZE 32
 
 /*
-	线程池的线程基类
+	脧脽鲁脤鲁脴碌脛脧脽鲁脤禄霉脌脿
 */
 class ThreadPool;
 class TPThread
@@ -58,7 +54,7 @@ class TPThread
 public:
 	friend class ThreadPool;
 
-	// 线程状态 -1还未启动, 0睡眠， 1繁忙中
+	// 脧脽鲁脤脳麓脤卢 -1禄鹿脦麓脝么露炉, 0脣炉脙脽拢卢 1路卤脙娄脰脨
 	enum THREAD_STATE
 	{
 		THREAD_STATE_STOP = -1,
@@ -84,7 +80,7 @@ public:
 		deleteCond();
 		deleteMutex();
 
-		DEBUG_MSG(fmt::format("TPThread::~TPThread(): {}\n", (void*)this));
+		KBE_THREADPOOL_DEBUG_MSG(fmt::format("TPThread::~TPThread(): {}\n", (void*)this));
 	}
 	
 	virtual void onStart(){}
@@ -99,7 +95,7 @@ public:
 	INLINE void id(THREAD_ID tidp);
 	
 	/**
-		创建一个线程， 并将自己与该线程绑定
+		麓麓陆篓脪禄赂枚脧脽鲁脤拢卢 虏垄陆芦脳脭录潞脫毛赂脙脧脽鲁脤掳贸露篓
 	*/
 	THREAD_ID createThread(void);
 	
@@ -136,7 +132,7 @@ public:
 	virtual TPTask* tryGetTask(void);
 	
 	/**
-		发送条件信号
+		路垄脣脥脤玫录镁脨脜潞脜
 	*/
 	int sendCondSignal(void)
 	{
@@ -160,26 +156,26 @@ REATTEMPT:
 	}
 	
 	/**
-		线程通知 等待条件信号
+		脧脽鲁脤脥篓脰陋 碌脠麓媒脤玫录镁脨脜潞脜
 	*/
 	bool onWaitCondSignal(void);
 	
 	bool join(void);
 
 	/**
-		获取本线程要处理的任务
+		禄帽脠隆卤戮脧脽鲁脤脪陋麓娄脌铆碌脛脠脦脦帽
 	*/
 	INLINE TPTask* task(void) const;
 
 	/**
-		设置本线程要处理的任务
+		脡猫脰脙卤戮脧脽鲁脤脪陋麓娄脌铆碌脛脠脦脦帽
 	*/
 	INLINE void task(TPTask* tpt);
 
 	INLINE int state(void) const;
 	
 	/**
-		本线程要处理的任务已经处理完毕 我们决定删除这个废弃的任务
+		卤戮脧脽鲁脤脪陋麓娄脌铆碌脛脠脦脦帽脪脩戮颅麓娄脌铆脥锚卤脧 脦脪脙脟戮枚露篓脡戮鲁媒脮芒赂枚路脧脝煤碌脛脠脦脦帽
 	*/
 	void onTaskCompleted(void);
 
@@ -190,13 +186,13 @@ REATTEMPT:
 #endif
 
 	/**
-		设置本线程要处理的任务
+		脡猫脰脙卤戮脧脽鲁脤脪陋麓娄脌铆碌脛脠脦脦帽
 	*/
 	INLINE ThreadPool* threadPool();
 
 	/**
-		输出线程工作状态
-		主要提供给watcher使用
+		脢盲鲁枚脧脽鲁脤鹿陇脳梅脳麓脤卢
+		脰梅脪陋脤谩鹿漏赂酶watcher脢鹿脫脙
 	*/
 	virtual std::string printWorkState()
 	{
@@ -208,20 +204,20 @@ REATTEMPT:
 	}
 
 	/**
-		线程启动一次在未改变到闲置状态下连续执行的任务计数
+		脧脽鲁脤脝么露炉脪禄麓脦脭脷脦麓赂脛卤盲碌陆脧脨脰脙脳麓脤卢脧脗脕卢脨酶脰麓脨脨碌脛脠脦脦帽录脝脢媒
 	*/
 	void reset_done_tasks(){ done_tasks_ = 0; }
 	void inc_done_tasks(){ ++done_tasks_; }
 
 protected:
-	THREAD_SINGNAL cond_;			// 线程信号量
-	THREAD_MUTEX mutex_;			// 线程互诉体
-	int threadWaitSecond_;			// 线程空闲状态超过这个秒数则线程退出, 小于0为永久线程(秒单位)
-	TPTask * currTask_;				// 该线程的当前执行的任务
-	THREAD_ID tidp_;				// 本线程的ID
-	ThreadPool* threadPool_;		// 线程池指针
-	THREAD_STATE state_;			// 线程状态: -1还未启动, 0睡眠, 1繁忙中
-	uint32 done_tasks_;				// 线程启动一次在未改变到闲置状态下连续执行的任务计数
+	THREAD_SINGNAL cond_;			// 脧脽鲁脤脨脜潞脜脕驴
+	THREAD_MUTEX mutex_;			// 脧脽鲁脤禄楼脣脽脤氓
+	int threadWaitSecond_;			// 脧脽鲁脤驴脮脧脨脳麓脤卢鲁卢鹿媒脮芒赂枚脙毛脢媒脭貌脧脽鲁脤脥脣鲁枚, 脨隆脫脷0脦陋脫脌戮脙脧脽鲁脤(脙毛碌楼脦禄)
+	TPTask * currTask_;				// 赂脙脧脽鲁脤碌脛碌卤脟掳脰麓脨脨碌脛脠脦脦帽
+	THREAD_ID tidp_;				// 卤戮脧脽鲁脤碌脛ID
+	ThreadPool* threadPool_;		// 脧脽鲁脤鲁脴脰赂脮毛
+	THREAD_STATE state_;			// 脧脽鲁脤脳麓脤卢: -1禄鹿脦麓脝么露炉, 0脣炉脙脽, 1路卤脙娄脰脨
+	uint32 done_tasks_;				// 脧脽鲁脤脝么露炉脪禄麓脦脭脷脦麓赂脛卤盲碌陆脧脨脰脙脳麓脤卢脧脗脕卢脨酶脰麓脨脨碌脛脠脦脦帽录脝脢媒
 };
 
 
@@ -239,31 +235,31 @@ public:
 	bool hasThread(TPThread* pTPThread);
 
 	/**
-		获取当前线程池所有线程状态(提供给watch用)
+		禄帽脠隆碌卤脟掳脧脽鲁脤鲁脴脣霉脫脨脧脽鲁脤脳麓脤卢(脤谩鹿漏赂酶watch脫脙)
 	*/
 	std::string printThreadWorks();
 
 	/**
-		获取当前线程总数
+		禄帽脠隆碌卤脟掳脧脽鲁脤脳脺脢媒
 	*/	
 	INLINE uint32 currentThreadCount(void) const;
 	
 	/**
-		获取当前空闲线程总数
+		禄帽脠隆碌卤脟掳驴脮脧脨脧脽鲁脤脳脺脢媒
 	*/		
 	INLINE uint32 currentFreeThreadCount(void) const;
 	
 	/**
-		创建线程池
-		@param inewThreadCount			: 当系统繁忙时线程池会新增加这么多线程（临时）
-		@param inormalMaxThreadCount	: 线程池会一直保持这么多个数的线程
-		@param imaxThreadCount			: 线程池最多只能有这么多个线程
+		麓麓陆篓脧脽鲁脤鲁脴
+		@param inewThreadCount			: 碌卤脧碌脥鲁路卤脙娄脢卤脧脽鲁脤鲁脴禄谩脨脗脭枚录脫脮芒脙麓露脿脧脽鲁脤拢篓脕脵脢卤拢漏
+		@param inormalMaxThreadCount	: 脧脽鲁脤鲁脴禄谩脪禄脰卤卤拢鲁脰脮芒脙麓露脿赂枚脢媒碌脛脧脽鲁脤
+		@param imaxThreadCount			: 脧脽鲁脤鲁脴脳卯露脿脰禄脛脺脫脨脮芒脙麓露脿赂枚脧脽鲁脤
 	*/
 	bool createThreadPool(uint32 inewThreadCount, 
 			uint32 inormalMaxThreadCount, uint32 imaxThreadCount);
 	
 	/**
-		向线程池添加一个任务
+		脧貌脧脽鲁脤鲁脴脤铆录脫脪禄赂枚脠脦脦帽
 	*/		
 	bool addTask(TPTask* tptask);
 	bool _addTask(TPTask* tptask);
@@ -271,49 +267,49 @@ public:
 	INLINE bool pushTask(TPTask* tptask){ return addTask(tptask); }
 
 	/**
-		线程数量是否到达最大个数
+		脧脽鲁脤脢媒脕驴脢脟路帽碌陆麓茂脳卯麓贸赂枚脢媒
 	*/
 	INLINE bool isThreadCountMax(void) const;
 	
 	/**
-		线程池是否处于繁忙状态
-		未处理任务是否非常多   说明线程很繁忙
+		脧脽鲁脤鲁脴脢脟路帽麓娄脫脷路卤脙娄脳麓脤卢
+		脦麓麓娄脌铆脠脦脦帽脢脟路帽路脟鲁拢露脿   脣碌脙梅脧脽鲁脤潞脺路卤脙娄
 	*/
 	INLINE bool isBusy(void) const;
 	
 	/** 
-		线程池是否已经被初始化 
+		脧脽鲁脤鲁脴脢脟路帽脪脩戮颅卤禄鲁玫脢录禄炉 
 	*/
 	INLINE bool isInitialize(void) const;
 
 	/**
-		返回是否已经销毁
+		路碌禄脴脢脟路帽脪脩戮颅脧煤禄脵
 	*/
 	INLINE bool isDestroyed() const;
 
 	/**
-		返回是否已经销毁
+		路碌禄脴脢脟路帽脪脩戮颅脧煤禄脵
 	*/
 	INLINE void destroy();
 
 	/** 
-		获得缓存的任务数量
+		禄帽碌脙禄潞麓忙碌脛脠脦脦帽脢媒脕驴
 	*/
 	INLINE uint32 bufferTaskSize() const;
 
 	/** 
-		获得缓存的任务
+		禄帽碌脙禄潞麓忙碌脛脠脦脦帽
 	*/
 	INLINE std::queue<thread::TPTask*>& bufferedTaskList();
 
 	/** 
-		操作缓存的任务锁
+		虏脵脳梅禄潞麓忙碌脛脠脦脦帽脣酶
 	*/
 	INLINE void lockBufferedTaskList();
 	INLINE void unlockBufferedTaskList();
 
 	/** 
-		获得已经完成的任务数量
+		禄帽碌脙脪脩戮颅脥锚鲁脡碌脛脠脦脦帽脢媒脕驴
 	*/
 	INLINE uint32 finiTaskSize() const;
 
@@ -323,63 +319,63 @@ public:
 	static int timeout;
 
 	/**
-		创建一个线程池线程
+		麓麓陆篓脪禄赂枚脧脽鲁脤鲁脴脧脽鲁脤
 	*/
 	virtual TPThread* createThread(int threadWaitSecond = ThreadPool::timeout, bool threadStartsImmediately = true);
 
 	/**
-		将某个任务保存到未处理列表
+		陆芦脛鲁赂枚脠脦脦帽卤拢麓忙碌陆脦麓麓娄脌铆脕脨卤铆
 	*/
 	void bufferTask(TPTask* tptask);
 
 	/**
-		从未处理列表取出一个任务 并从列表中删除
+		麓脫脦麓麓娄脌铆脕脨卤铆脠隆鲁枚脪禄赂枚脠脦脦帽 虏垄麓脫脕脨卤铆脰脨脡戮鲁媒
 	*/
 	TPTask* popbufferTask(void);
 
 	/**
-		移动一个线程到空闲列表
+		脪脝露炉脪禄赂枚脧脽鲁脤碌陆驴脮脧脨脕脨卤铆
 	*/
 	bool addFreeThread(TPThread* tptd);
 	
 	/**
-		移动一个线程到繁忙列表
+		脪脝露炉脪禄赂枚脧脽鲁脤碌陆路卤脙娄脕脨卤铆
 	*/	
 	bool addBusyThread(TPThread* tptd);
 	
 	/**
-		添加一个已经完成的任务到列表
+		脤铆录脫脪禄赂枚脪脩戮颅脥锚鲁脡碌脛脠脦脦帽碌陆脕脨卤铆
 	*/	
 	void addFiniTask(TPTask* tptask);
 	
 	/**
-		删除一个挂起(超时)线程
+		脡戮鲁媒脪禄赂枚鹿脪脝冒(鲁卢脢卤)脧脽鲁脤
 	*/	
 	bool removeHangThread(TPThread* tptd);
 
 	bool initializeWatcher();
 
 protected:
-	bool isInitialize_;												// 线程池是否被初始化过
+	bool isInitialize_;												// 脧脽鲁脤鲁脴脢脟路帽卤禄鲁玫脢录禄炉鹿媒
 	
-	std::queue<TPTask*> bufferedTaskList_;							// 系统处于繁忙时还未处理的任务列表
-	std::list<TPTask*> finiTaskList_;								// 已经完成的任务列表
+	std::queue<TPTask*> bufferedTaskList_;							// 脧碌脥鲁麓娄脫脷路卤脙娄脢卤禄鹿脦麓麓娄脌铆碌脛脠脦脦帽脕脨卤铆
+	std::list<TPTask*> finiTaskList_;								// 脪脩戮颅脥锚鲁脡碌脛脠脦脦帽脕脨卤铆
 	size_t finiTaskList_count_;
 
-	THREAD_MUTEX bufferedTaskList_mutex_;							// 处理bufferTaskList互斥锁
-	THREAD_MUTEX threadStateList_mutex_;							// 处理bufferTaskList and freeThreadList_互斥锁
-	THREAD_MUTEX finiTaskList_mutex_;								// 处理finiTaskList互斥锁
+	THREAD_MUTEX bufferedTaskList_mutex_;							// 麓娄脌铆bufferTaskList禄楼鲁芒脣酶
+	THREAD_MUTEX threadStateList_mutex_;							// 麓娄脌铆bufferTaskList and freeThreadList_禄楼鲁芒脣酶
+	THREAD_MUTEX finiTaskList_mutex_;								// 麓娄脌铆finiTaskList禄楼鲁芒脣酶
 	
-	std::list<TPThread*> busyThreadList_;							// 繁忙的线程列表
-	std::list<TPThread*> freeThreadList_;							// 闲置的线程列表
-	std::list<TPThread*> allThreadList_;							// 所有的线程列表
+	std::list<TPThread*> busyThreadList_;							// 路卤脙娄碌脛脧脽鲁脤脕脨卤铆
+	std::list<TPThread*> freeThreadList_;							// 脧脨脰脙碌脛脧脽鲁脤脕脨卤铆
+	std::list<TPThread*> allThreadList_;							// 脣霉脫脨碌脛脧脽鲁脤脕脨卤铆
 
-	uint32 maxThreadCount_;											// 最大线程总数
-	uint32 extraNewAddThreadCount_;									// 如果normalThreadCount_不足够使用则会新创建这么多线程
-	uint32 currentThreadCount_;										// 当前线程数
-	uint32 currentFreeThreadCount_;									// 当前闲置的线程数
-	uint32 normalThreadCount_;										// 标准状态下的线程总数 即：默认情况下一启动服务器就开启这么多线程
-																	// 如果线程不足够，则会新创建一些线程， 最大能够到maxThreadNum.
+	uint32 maxThreadCount_;											// 脳卯麓贸脧脽鲁脤脳脺脢媒
+	uint32 extraNewAddThreadCount_;									// 脠莽鹿没normalThreadCount_虏禄脳茫鹿禄脢鹿脫脙脭貌禄谩脨脗麓麓陆篓脮芒脙麓露脿脧脽鲁脤
+	uint32 currentThreadCount_;										// 碌卤脟掳脧脽鲁脤脢媒
+	uint32 currentFreeThreadCount_;									// 碌卤脟掳脧脨脰脙碌脛脧脽鲁脤脢媒
+	uint32 normalThreadCount_;										// 卤锚脳录脳麓脤卢脧脗碌脛脧脽鲁脤脳脺脢媒 录麓拢潞脛卢脠脧脟茅驴枚脧脗脪禄脝么露炉路镁脦帽脝梅戮脥驴陋脝么脮芒脙麓露脿脧脽鲁脤
+																	// 脠莽鹿没脧脽鲁脤虏禄脳茫鹿禄拢卢脭貌禄谩脨脗麓麓陆篓脪禄脨漏脧脽鲁脤拢卢 脳卯麓贸脛脺鹿禄碌陆maxThreadNum.
 
 	bool isDestroyed_;
 };
