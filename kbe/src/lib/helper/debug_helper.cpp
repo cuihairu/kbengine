@@ -2,261 +2,6 @@
 
 #include "debug_helper.h"
 
-#ifdef KBE_CMAKE_BOOTSTRAP_DEBUG_HELPER
-
-#include "common/memorystream.h"
-
-namespace KBEngine {
-
-template<>
-DebugHelper* Singleton<DebugHelper>::singleton_ = nullptr;
-
-DebugHelper::DebugHelper() :
-_logfile(nullptr),
-_currFile(),
-_currFuncName(),
-_currLine(0),
-loggerAddr_(),
-logMutex(),
-bufferedLogPackets_(),
-hasBufferedLogPackets_(0),
-pNetworkInterface_(nullptr),
-pDispatcher_(nullptr),
-scriptMsgType_(0),
-noSyncLog_(false),
-canLogFile_(true),
-loseLoggerTime_(0),
-#if KBE_PLATFORM == PLATFORM_WIN32
-mainThreadID_(GetCurrentThreadId()),
-#else
-mainThreadID_(pthread_self()),
-#endif
-memoryStreamPool_("DebugHelperMemoryStream"),
-childThreadBufferedLogPackets_()
-{
-}
-
-DebugHelper::~DebugHelper()
-{
-}
-
-void DebugHelper::initialize(COMPONENT_TYPE)
-{
-	if (!getSingletonPtr())
-	{
-		new DebugHelper();
-	}
-}
-
-void DebugHelper::finalise(bool destroy)
-{
-	if (!getSingletonPtr())
-	{
-		return;
-	}
-
-	getSingleton().clearBufferedLog(destroy);
-
-	if (destroy)
-	{
-		delete getSingletonPtr();
-		singleton_ = nullptr;
-	}
-}
-
-std::string DebugHelper::getLogName()
-{
-	return "";
-}
-
-void DebugHelper::lockthread()
-{
-	logMutex.lockMutex();
-}
-
-void DebugHelper::unlockthread()
-{
-	logMutex.unlockMutex();
-}
-
-void DebugHelper::pNetworkInterface(Network::NetworkInterface* ni)
-{
-	pNetworkInterface_ = ni;
-}
-
-void DebugHelper::pDispatcher(Network::EventDispatcher* dispatcher)
-{
-	pDispatcher_ = dispatcher;
-}
-
-Network::Channel* DebugHelper::pLoggerChannel()
-{
-	return nullptr;
-}
-
-namespace {
-void write_debug_line(FILE* stream, const std::string& s)
-{
-	if (!s.empty())
-	{
-		std::fwrite(s.data(), 1, s.size(), stream);
-	}
-}
-}
-
-void DebugHelper::print_msg(const std::string& s)
-{
-	write_debug_line(stdout, s);
-}
-
-void DebugHelper::debug_msg(const std::string& s)
-{
-	write_debug_line(stdout, s);
-}
-
-void DebugHelper::error_msg(const std::string& s)
-{
-	write_debug_line(stderr, s);
-}
-
-void DebugHelper::info_msg(const std::string& s)
-{
-	write_debug_line(stdout, s);
-}
-
-void DebugHelper::warning_msg(const std::string& s)
-{
-	write_debug_line(stderr, s);
-}
-
-void DebugHelper::critical_msg(const std::string& s)
-{
-	write_debug_line(stderr, s);
-}
-
-void DebugHelper::script_info_msg(const std::string& s)
-{
-	write_debug_line(stdout, s);
-}
-
-void DebugHelper::script_error_msg(const std::string& s)
-{
-	write_debug_line(stderr, s);
-}
-
-void DebugHelper::backtrace_msg()
-{
-}
-
-void DebugHelper::onMessage(uint32, const char*, uint32)
-{
-}
-
-void DebugHelper::registerLogger(Network::MessageID, Network::Address*)
-{
-}
-
-void DebugHelper::unregisterLogger(Network::MessageID, Network::Address*)
-{
-}
-
-void DebugHelper::onNoLogger()
-{
-}
-
-void DebugHelper::changeLogger(const std::string&)
-{
-}
-
-void DebugHelper::closeLogger()
-{
-}
-
-void DebugHelper::clearBufferedLog(bool)
-{
-	while (!bufferedLogPackets_.empty())
-	{
-		bufferedLogPackets_.pop();
-	}
-
-	while (!childThreadBufferedLogPackets_.empty())
-	{
-		MemoryStream* pMemoryStream = childThreadBufferedLogPackets_.front();
-		childThreadBufferedLogPackets_.pop();
-		delete pMemoryStream;
-	}
-
-	hasBufferedLogPackets_ = 0;
-	noSyncLog_ = true;
-	canLogFile_ = true;
-}
-
-void DebugHelper::set_errorcolor()
-{
-}
-
-void DebugHelper::set_normalcolor()
-{
-}
-
-void DebugHelper::set_warningcolor()
-{
-}
-
-void DebugHelper::setScriptMsgType(int msgtype)
-{
-	scriptMsgType_ = msgtype;
-}
-
-void DebugHelper::resetScriptMsgType()
-{
-	scriptMsgType_ = 0;
-}
-
-void DebugHelper::shouldWriteToSyslog(bool)
-{
-}
-
-void DebugHelper::sync()
-{
-}
-
-void DebugHelper::printBufferedLogs()
-{
-}
-
-bool DebugHelper::canLog(int)
-{
-	return true;
-}
-
-int KBELOG_TYPE_MAPPING(int type)
-{
-	return type;
-}
-
-void vutf8printf(FILE *out, const char *str, va_list* ap)
-{
-	vfprintf(out, str, *ap);
-}
-
-void utf8printf(FILE *out, const char *str, ...)
-{
-	va_list ap;
-	va_start(ap, str);
-	vutf8printf(out, str, &ap);
-	va_end(ap);
-}
-
-void myassert(const char* exp, const char * func, const char * file, unsigned int line)
-{
-	fprintf(stderr, "ASSERT: %s in %s at %s:%u\n", exp, func, file, line);
-}
-
-} // namespace KBEngine
-
-#else
-
 #include "profile.h"
 #include "common/common.h"
 #include "common/timer.h"
@@ -297,7 +42,6 @@ namespace KBEngine{
 	
 KBE_SINGLETON_INIT(DebugHelper);
 
-DebugHelper dbghelper;
 ProfileVal g_syncLogProfile("syncLog");
 
 #ifndef NO_USE_LOG4CXX
@@ -383,11 +127,21 @@ bool g_shouldWriteToSyslog = false;
 #ifdef KBE_USE_ASSERTS
 void myassert(const char * exp, const char * func, const char * file, unsigned int line)
 {
-	DebugHelper::getSingleton().backtrace_msg();
+	if(DebugHelper::getSingletonPtr())
+	{
+		DebugHelper::getSingleton().backtrace_msg();
+	}
 	std::string s = (fmt::format("assertion failed: {}, file {}, line {}, at: {}\n", exp, file, line, func));
 	printf("%s%02d: %s", COMPONENT_NAME_EX_2(g_componentType), g_componentGroupOrder, (std::string("[ASSERT]: ") + s).c_str());
 
-	dbghelper.print_msg(s);
+	if(DebugHelper::getSingletonPtr())
+	{
+		DebugHelper::getSingleton().print_msg(s);
+	}
+	else
+	{
+		fprintf(stderr, "%s", s.c_str());
+	}
     abort();
 }
 #endif
@@ -496,7 +250,11 @@ bufferedLogPackets_(),
 hasBufferedLogPackets_(0),
 pNetworkInterface_(NULL),
 pDispatcher_(NULL),
+#ifdef NO_USE_LOG4CXX
+scriptMsgType_(KBELOG_SCRIPT_INFO),
+#else
 scriptMsgType_(log4cxx::ScriptLevel::SCRIPT_INT),
+#endif
 noSyncLog_(false),
 canLogFile_(true),
 loseLoggerTime_(timestamp()),
@@ -515,7 +273,14 @@ memoryStreamPool_("DebugHelperMemoryStream")
 //-------------------------------------------------------------------------------------
 DebugHelper::~DebugHelper()
 {
-	finalise(true);
+	clearBufferedLog(true);
+
+	if(g_pDebugHelperSyncHandler)
+	{
+		g_pDebugHelperSyncHandler->cancel();
+		delete g_pDebugHelperSyncHandler;
+		g_pDebugHelperSyncHandler = NULL;
+	}
 }	
 
 //-------------------------------------------------------------------------------------
@@ -622,6 +387,11 @@ void DebugHelper::unlockthread()
 //-------------------------------------------------------------------------------------
 void DebugHelper::initialize(COMPONENT_TYPE componentType)
 {
+	if(!getSingletonPtr())
+	{
+		new DebugHelper();
+	}
+
 #ifndef NO_USE_LOG4CXX
 	
 	char helpConfig[MAX_PATH];
@@ -671,6 +441,11 @@ void DebugHelper::initialize(COMPONENT_TYPE componentType)
 //-------------------------------------------------------------------------------------
 void DebugHelper::finalise(bool destroy)
 {
+	if(!getSingletonPtr())
+	{
+		return;
+	}
+
 	if(!destroy)
 	{
 		while(DebugHelper::getSingleton().hasBufferedLogPackets() > 0)
@@ -692,12 +467,13 @@ void DebugHelper::finalise(bool destroy)
 		sleep(1000);
 	}
 
-	DebugHelper::getSingleton().clearBufferedLog(true);
+	DebugHelper* instance = getSingletonPtr();
+	instance->clearBufferedLog(true);
 
-	// SAFE_RELEASE(g_pDebugHelperSyncHandler);
-
-#ifndef NO_USE_LOG4CXX
-#endif
+	if(destroy)
+	{
+		delete instance;
+	}
 }
 
 //-------------------------------------------------------------------------------------
@@ -744,7 +520,10 @@ void DebugHelper::clearBufferedLog(bool destroy)
 	canLogFile_ = true;
 
 	if(!destroy)
-		g_pDebugHelperSyncHandler->cancel();
+	{
+		if(g_pDebugHelperSyncHandler)
+			g_pDebugHelperSyncHandler->cancel();
+	}
 }
 
 //-------------------------------------------------------------------------------------
@@ -834,8 +613,10 @@ void DebugHelper::sync()
 	static bool alertmsg = false;
 	if(!alertmsg)
 	{
+#ifndef NO_USE_LOG4CXX
 		KBE_LOG4CXX_WARN(g_logger, fmt::format("Forwarding logs to logger[{}]...\n", 
 			pLoggerChannel->c_str()));
+#endif
 
 		alertmsg = true;
 	}
@@ -873,7 +654,8 @@ void DebugHelper::sync()
 void DebugHelper::pDispatcher(Network::EventDispatcher* dispatcher)
 { 
 	pDispatcher_ = dispatcher; 
-	g_pDebugHelperSyncHandler->startActiveTick();
+	if(g_pDebugHelperSyncHandler)
+		g_pDebugHelperSyncHandler->startActiveTick();
 }
 
 //-------------------------------------------------------------------------------------
@@ -888,7 +670,7 @@ void DebugHelper::onMessage(uint32 logType, const char * str, uint32 length)
 	if (!canLog(logType))
 		return;
 
-#if !defined( _WIN32 )
+#if KBE_PLATFORM == PLATFORM_UNIX
 	if (g_shouldWriteToSyslog)
 	{
 		int lid = LOG_INFO;
@@ -914,11 +696,16 @@ void DebugHelper::onMessage(uint32 logType, const char * str, uint32 length)
 	}
 
 	bool isMainThread = (mainThreadID_ == pthread_self());
-#else
+#elif defined(_WIN32)
 	bool isMainThread = (mainThreadID_ == GetCurrentThreadId());
+#else
+	bool isMainThread = true;
 #endif
 
 	if(length <= 0 || noSyncLog_)
+		return;
+
+	if(pNetworkInterface_ == NULL || pDispatcher_ == NULL)
 		return;
 
 	if(g_componentType == MACHINE_TYPE || 
@@ -1218,7 +1005,7 @@ void DebugHelper::info_msg(const std::string& s)
 int KBELOG_TYPE_MAPPING(int type)
 {
 #ifdef NO_USE_LOG4CXX
-	return KBELOG_SCRIPT_INFO;
+	return type;
 #else
 	switch(type)
 	{
@@ -1252,7 +1039,7 @@ void DebugHelper::script_info_msg(const std::string& s)
 	onMessage(KBELOG_TYPE_MAPPING(scriptMsgType_), s.c_str(), (uint32)s.size());
 
 	// Èç¹ûÊÇÓÃ»§ÊÖ¶¯ÉèÖÃµÄÒ²Êä³öÎª´íÎóÐÅÏ¢
-	if(log4cxx::ScriptLevel::SCRIPT_ERR == scriptMsgType_)
+	if(KBELOG_TYPE_MAPPING(scriptMsgType_) == KBELOG_SCRIPT_ERROR)
 	{
 		set_errorcolor();
 		printf("%s%02d: [S_ERROR]: %s", COMPONENT_NAME_EX_2(g_componentType), g_componentGroupOrder, s.c_str());
@@ -1265,7 +1052,11 @@ void DebugHelper::script_error_msg(const std::string& s)
 {
 	KBEngine::thread::ThreadGuard tg(&this->logMutex); 
 
+#ifdef NO_USE_LOG4CXX
+	setScriptMsgType(KBELOG_SCRIPT_ERROR);
+#else
 	setScriptMsgType(log4cxx::ScriptLevel::SCRIPT_ERR);
+#endif
 
 #ifdef NO_USE_LOG4CXX
 #else
@@ -1289,7 +1080,11 @@ void DebugHelper::setScriptMsgType(int msgtype)
 //-------------------------------------------------------------------------------------
 void DebugHelper::resetScriptMsgType()
 {
+#ifdef NO_USE_LOG4CXX
+	setScriptMsgType(KBELOG_SCRIPT_INFO);
+#else
 	setScriptMsgType(log4cxx::ScriptLevel::SCRIPT_INFO);
+#endif
 }
 
 //-------------------------------------------------------------------------------------
@@ -1458,7 +1253,5 @@ void DebugHelper::closeLogger()
 
 
 }
-
-#endif
 
 

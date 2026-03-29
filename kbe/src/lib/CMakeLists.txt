@@ -596,11 +596,6 @@ target_link_libraries(kbe_helper_debug_helper
     KBEngine::common_memorystream
 )
 
-target_compile_definitions(kbe_helper_debug_helper
-  PRIVATE
-    KBE_CMAKE_BOOTSTRAP_DEBUG_HELPER
-)
-
 target_include_directories(kbe_helper_debug_helper
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
