@@ -26,8 +26,8 @@ public:
 
 	enum NAV_OBJECT_STATE
 	{
-		NAV_OBJECT_STATE_MOVING = 1,	// “∆∂Ø÷–
-		NAV_OBJECT_STATE_MOVEOVER = 2,	// “∆∂Ø“—æ≠Ω· ¯¡À
+		NAV_OBJECT_STATE_MOVING = 1,	// ÁßªÂä®‰∏≠
+		NAV_OBJECT_STATE_MOVEOVER = 2,	// ÁßªÂä®Â∑≤ÁªèÁªìÊùü‰∫Ü
 	};
 
 	NavigationHandle():

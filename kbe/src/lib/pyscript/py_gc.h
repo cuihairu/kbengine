@@ -18,48 +18,48 @@ public:
 	static uint32 DEBUG_LEAK;
 	
 	/** 
-		初始化pickler 
+		鍒濆鍖杙ickler 
 	*/
 	static bool initialize(void);
 	static void finalise(void);
 	
 	/** 
-		强制回收垃圾
+		寮哄埗鍥炴敹鍨冨溇
 	*/
 	static void collect(int8 generations = -1);
 
 	/** 
-		设置调试标志
+		璁剧疆璋冭瘯鏍囧織
 	*/
 	static void set_debug(uint32 flags);
 	
 	/**
-		增加计数
+		澧炲姞璁℃暟
 	*/
 	static void incTracing(std::string name);
 
 	/**
-		减少计数
+		鍑忓皯璁℃暟
 	*/
 	static void decTracing(std::string name);
 
 	/**
-		debug追踪kbe封装的py对象计数
+		debug杩借釜kbe灏佽鐨刾y瀵硅薄璁℃暟
 	*/
 	static void debugTracing(bool shuttingdown = true);
 
 	/**
-		脚本调用
+		鑴氭湰璋冪敤
 	*/
 	static PyObject* __py_debugTracing(PyObject* self, PyObject* args);
 
 private:
-	static PyObject* collectMethod_;							// cPicket.dumps方法指针
-	static PyObject* set_debugMethod_;							// cPicket.loads方法指针
+	static PyObject* collectMethod_;							// cPicket.dumps鏂规硶鎸囬拡
+	static PyObject* set_debugMethod_;							// cPicket.loads鏂规硶鎸囬拡
 
-	static bool	isInit;											// 是否已经被初始化
+	static bool	isInit;											// 鏄惁宸茬粡琚垵濮嬪寲
 
-	static KBEUnordered_map<std::string, int> tracingCountMap_;	// 追踪特定的对象计数器
+	static KBEUnordered_map<std::string, int> tracingCountMap_;	// 杩借釜鐗瑰畾鐨勫璞¤鏁板櫒
 } ;
 
 }

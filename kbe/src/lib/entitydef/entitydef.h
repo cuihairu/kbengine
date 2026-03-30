@@ -38,7 +38,7 @@ public:
 	~EntityDef();
 
 	/**
-		³õÊ¼»¯
+		åˆå§‹åŒ–
 	*/
 	static bool initialize(std::vector<PyTypeObject*>& scriptBaseTypes,
 		COMPONENT_TYPE loadComponentType);
@@ -48,19 +48,19 @@ public:
 	static void reload(bool fullReload);
 
 	/**
-		Í¨¹ıentityµÄID³¢ÊÔÑ°ÕÒËüµÄÊµÀı
+		é€šè¿‡entityçš„IDå°è¯•å¯»æ‰¾å®ƒçš„å®ä¾‹
 	*/
 	static PyObject* tryGetEntity(COMPONENT_ID componentID, ENTITY_ID entityID);
 
 	/**
-		ÉèÖÃentityCallµÄ__getEntityFuncº¯ÊıµØÖ·
+		è®¾ç½®entityCallçš„__getEntityFuncå‡½æ•°åœ°å€
 	*/
 	static void setGetEntityFunc(GetEntityFunc func) {
 		__getEntityFunc = func;
 	};
 
 	/**
-		¼ÓÔØÏà¹ØÃèÊö
+		åŠ è½½ç›¸å…³æè¿°
 	*/
 	static bool loadAllEntityScriptModules(std::string entitiesPath,
 		std::vector<PyTypeObject*>& scriptBaseTypes);
@@ -148,28 +148,28 @@ public:
 	static PyObject* loadScriptModule(std::string moduleName);
 
 	/**
-		ÊÇ·ñ¼ÓÔØÕâ¸ö½Å±¾Ä£¿é
+		æ˜¯å¦åŠ è½½è¿™ä¸ªè„šæœ¬æ¨¡å—
 	*/
 	static bool isLoadScriptModule(ScriptDefModule* pScriptModule);
 
 	/**
-		¸ù¾İµ±Ç°×é¼şÀà±ğÉèÖÃÊÇ·ñÓĞcell »òÕßbase
+		æ ¹æ®å½“å‰ç»„ä»¶ç±»åˆ«è®¾ç½®æ˜¯å¦æœ‰cell æˆ–è€…base
 	*/
 	static void setScriptModuleHasComponentEntity(ScriptDefModule* pScriptModule, bool has);
 
 	/**
-		¼ì²é½Å±¾Ä£¿éÖĞ±»¶¨ÒåµÄ·½·¨ÊÇ·ñ´æÔÚ
+		æ£€æŸ¥è„šæœ¬æ¨¡å—ä¸­è¢«å®šä¹‰çš„æ–¹æ³•æ˜¯å¦å­˜åœ¨
 	*/
 	static bool checkDefMethod(ScriptDefModule* pScriptModule, PyObject* moduleObj,
 		const std::string& moduleName);
 
 	/**
-		¼ì²é½Å±¾Ä£¿éÖĞ±»¶¨ÒåµÄÊôĞÔÊÇ·ñºÏ·¨
+		æ£€æŸ¥è„šæœ¬æ¨¡å—ä¸­è¢«å®šä¹‰çš„å±æ€§æ˜¯å¦åˆæ³•
 	*/
 	static bool validDefPropertyName(const std::string& name);
 
 	/**
-		Í¨¹ı±ê¼ÇÀ´Ñ°ÕÒµ½¶ÔÓ¦µÄ½Å±¾Ä£¿é¶ÔÏó
+		é€šè¿‡æ ‡è®°æ¥å¯»æ‰¾åˆ°å¯¹åº”çš„è„šæœ¬æ¨¡å—å¯¹è±¡
 	*/
 	static ScriptDefModule* findScriptModule(ENTITY_SCRIPT_UID utype, bool notFoundOutErr = true);
 	static ScriptDefModule* findScriptModule(const char* scriptName, bool notFoundOutErr = true);
@@ -237,18 +237,18 @@ public:
 	static std::vector<PyTypeObject*> getScriptBaseTypes() { return __scriptBaseTypes;  }
 
 	/**
-		ÊÇ·ñÊÇ¼Ì³ĞÒıÇæµ×²ãÔÊĞíµÄ»ù´¡ÀàµÄÅÉÉúÀà
+		æ˜¯å¦æ˜¯ç»§æ‰¿å¼•æ“åº•å±‚å…è®¸çš„åŸºç¡€ç±»çš„æ´¾ç”Ÿç±»
 	*/
 	static std::string isSubClass(PyObject* pyClass);
 
 private:
-	static SCRIPT_MODULES __scriptModules;										// ËùÓĞµÄÀ©Õ¹½Å±¾Ä£¿é¶¼´æ´¢ÔÚÕâÀï
-	static SCRIPT_MODULES __oldScriptModules;									// reloadÊ±¾ÉµÄÄ£¿é»á·Åµ½ÕâÀïÓÃÓÚÅĞ¶Ï
+	static SCRIPT_MODULES __scriptModules;										// æ‰€æœ‰çš„æ‰©å±•è„šæœ¬æ¨¡å—éƒ½å­˜å‚¨åœ¨è¿™é‡Œ
+	static SCRIPT_MODULES __oldScriptModules;									// reloadæ—¶æ—§çš„æ¨¡å—ä¼šæ”¾åˆ°è¿™é‡Œç”¨äºåˆ¤æ–­
 
-	static SCRIPT_MODULE_UID_MAP __scriptTypeMappingUType;						// ½Å±¾Àà±ğÓ³Éäutype
-	static SCRIPT_MODULE_UID_MAP __oldScriptTypeMappingUType;					// reloadÊ±¾ÉµÄ½Å±¾Àà±ğÓ³Éäutype
+	static SCRIPT_MODULE_UID_MAP __scriptTypeMappingUType;						// è„šæœ¬ç±»åˆ«æ˜ å°„utype
+	static SCRIPT_MODULE_UID_MAP __oldScriptTypeMappingUType;					// reloadæ—¶æ—§çš„è„šæœ¬ç±»åˆ«æ˜ å°„utype
 
-	static COMPONENT_TYPE __loadComponentType;									// ËùĞè¹ØÏµµÄ×é¼şÀà±ğµÄÏà¹ØÊı¾İ
+	static COMPONENT_TYPE __loadComponentType;									// æ‰€éœ€å…³ç³»çš„ç»„ä»¶ç±»åˆ«çš„ç›¸å…³æ•°æ®
 	static std::vector<PyTypeObject*> __scriptBaseTypes;
 	static std::string __entitiesPath;
 
@@ -256,12 +256,12 @@ private:
 
 	static bool _isInit;
 
-	static bool __entityAliasID;												// ÓÅ»¯EntityID£¬view·¶Î§ÄÚĞ¡ÓÚ255¸öEntityID, ´«Êäµ½clientÊ±Ê¹ÓÃ1×Ö½ÚÎ±ID
-	static bool __entitydefAliasID;												// ÓÅ»¯entityÊôĞÔºÍ·½·¨¹ã²¥Ê±Õ¼ÓÃµÄ´ø¿í£¬entity¿Í»§¶ËÊôĞÔ»òÕß¿Í»§¶Ë²»³¬¹ı255¸öÊ±£¬ ·½·¨uidºÍÊôĞÔuid´«Êäµ½clientÊ±Ê¹ÓÃ1×Ö½Ú±ğÃûID
+	static bool __entityAliasID;												// ä¼˜åŒ–EntityIDï¼ŒviewèŒƒå›´å†…å°äº255ä¸ªEntityID, ä¼ è¾“åˆ°clientæ—¶ä½¿ç”¨1å­—èŠ‚ä¼ªID
+	static bool __entitydefAliasID;												// ä¼˜åŒ–entityå±æ€§å’Œæ–¹æ³•å¹¿æ’­æ—¶å ç”¨çš„å¸¦å®½ï¼Œentityå®¢æˆ·ç«¯å±æ€§æˆ–è€…å®¢æˆ·ç«¯ä¸è¶…è¿‡255ä¸ªæ—¶ï¼Œ æ–¹æ³•uidå’Œå±æ€§uidä¼ è¾“åˆ°clientæ—¶ä½¿ç”¨1å­—èŠ‚åˆ«åID
 
-	static GetEntityFunc __getEntityFunc;										// »ñµÃÒ»¸öentityµÄÊµÌåµÄº¯ÊıµØÖ·
+	static GetEntityFunc __getEntityFunc;										// è·å¾—ä¸€ä¸ªentityçš„å®ä½“çš„å‡½æ•°åœ°å€
 
-	// ÉèÖÃµ±Ç°²Ù×÷µÄÒ»Ğ©ÉÏÏÂÎÄ
+	// è®¾ç½®å½“å‰æ“ä½œçš„ä¸€äº›ä¸Šä¸‹æ–‡
 	static Context __context;
 };
 

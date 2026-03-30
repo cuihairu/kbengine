@@ -1,21 +1,21 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
 /*
-	�̻߳����壺
-	�÷�:
+	线程互诉体：
+	用法:
 		ThreadMutex tm;
 		tm.lockMutex();
-		....��ȫ����
+		....安全代码
 		tm.unlockMutex();
 		
-		��������ThreadGuard��ʹ��
-		��һ�����ж��廥�����Ա
+		最好是配合ThreadGuard来使用
+		在一个类中定义互诉体成员
 		ThreadMutex tm;
-		����Ҫ�����ĵط�:
+		在需要保护的地方:
 		void XXCLASS::func(void)
 		{
 			ThreadGuard tg(this->tm);
-			����Ĵ��붼�ǰ�ȫ��
+			下面的代码都是安全的
 			...
 		}
 */
@@ -57,8 +57,8 @@ public:
 
 	ThreadMutex(const ThreadMutex& v)
 	{
-		// ���ﲻ������������mutex_�����Ƿǳ�Σ�յ�
-		// ����ɶ��THREAD_MUTEX_DELETE
+		// 这里不允许拷贝构造mutex_，这是非常危险的
+		// 会造成多次THREAD_MUTEX_DELETE
 		THREAD_MUTEX_INIT(mutex_);
 	}
 

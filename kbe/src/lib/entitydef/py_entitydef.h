@@ -68,7 +68,7 @@ public:
 	bool exposed;
 	bool hasClient;
 
-	// -1£ºÎ´ÉèÖÃ£¬ 0£ºfalse£¬ 1£ºtrue
+	// -1ï¼šæœªè®¾ç½®ï¼Œ 0ï¼šfalseï¼Œ 1ï¼štrue
 	int persistent;
 
 	int databaseLength;
@@ -86,7 +86,7 @@ public:
 
 	PyObjectPtr pyObjectPtr;
 	std::string pyObjectSourceFile;
-	// ½Å±¾×îºóÉèÖÃÔÚÄÄ¸ö×é¼ş½ø³ÌÖĞ£¬Èç¹ûµ±Ç°×é¼ş½ø³Ì²»µÈÓÚ¸Ã½ø³ÌÄÇÃ´±íÊ¾µ±Ç°½ø³ÌÉÏÃ»ÓĞ½Å±¾
+	// è„šæœ¬æœ€åè®¾ç½®åœ¨å“ªä¸ªç»„ä»¶è¿›ç¨‹ä¸­ï¼Œå¦‚æœå½“å‰ç»„ä»¶è¿›ç¨‹ä¸ç­‰äºè¯¥è¿›ç¨‹é‚£ä¹ˆè¡¨ç¤ºå½“å‰è¿›ç¨‹ä¸Šæ²¡æœ‰è„šæœ¬
 	COMPONENT_TYPE pyObjectSourceFileComponentType;
 
 	std::vector< std::string > baseClasses;
@@ -109,7 +109,7 @@ public:
 	static DEF_CONTEXT_MAP allScriptDefContextLineMaps;
 };
 
-/** °²×°entitydefÄ£¿é */
+/** å®‰è£…entitydefæ¨¡å— */
 bool installModule(const char* moduleName);
 bool uninstallModule();
 

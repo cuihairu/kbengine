@@ -10,7 +10,7 @@ namespace KBEngine{ namespace script{
 
 class Map : public ScriptObject
 {		
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
 	INSTANCE_SCRIPT_HREADER(Map, ScriptObject)
 
 public:	
@@ -21,7 +21,7 @@ public:
 	virtual ~Map();
 
 	/** 
-		±©Â¶Ò»Ğ©×Öµä·½·¨¸øpython 
+		æš´éœ²ä¸€äº›å­—å…¸æ–¹æ³•ç»™python 
 	*/
 	static PyObject* __py_has_key(PyObject* self, PyObject* args);
 	static PyObject* __py_keys(PyObject* self, PyObject* args);
@@ -33,7 +33,7 @@ public:
 	static int seq_contains(PyObject* self, PyObject* value);
 
 	/** 
-		map²Ù×÷º¯ÊıÏà¹Ø 
+		mapæ“ä½œå‡½æ•°ç›¸å…³ 
 	*/
 	static PyObject* mp_subscript(PyObject* self, PyObject* key);
 
@@ -46,18 +46,18 @@ public:
 	static PyObject* mp_iternextkey(PyObject* iter);
 
 	/** 
-		»ñÈ¡×Öµä¶ÔÏó 
+		è·å–å­—å…¸å¯¹è±¡ 
 	*/
 	INLINE PyObject* getDictObject(void) const;
 	
 	/** 
-		Êı¾İ¸Ä±äÍ¨Öª 
+		æ•°æ®æ”¹å˜é€šçŸ¥ 
 	*/
 	virtual void onDataChanged(PyObject* key, PyObject* value, 
 		bool isDelete = false);
 
 protected:
-	// ×ÖµäÊı¾İ£¬ ËùÓĞµÄÊı¾İ¶¼ÍùÕâÀïÃæĞ´
+	// å­—å…¸æ•°æ®ï¼Œ æ‰€æœ‰çš„æ•°æ®éƒ½å¾€è¿™é‡Œé¢å†™
 	PyObject* pyDict_;
 } ;
 

@@ -12,7 +12,7 @@ namespace KBEngine{ namespace script{
 class Script;
 
 /*
-	使watcher能够监视到py脚本中的数据
+	浣縲atcher鑳藉鐩戣鍒皃y鑴氭湰涓殑鏁版嵁
 */
 template <class T>
 class PyWatcherObject : public WatcherObject

@@ -11,34 +11,34 @@ namespace KBEngine {
 namespace mysql {
 
 /**
-	¶ÁÐ´É¾²Ù×÷Ê±»áÓÃµ½£¬°üº¬È¡µ½»ò´ýÐ´ÈëµÄ¸÷ÖÖÐÅÏ¢¡£
+	è¯»å†™åˆ æ“ä½œæ—¶ä¼šç”¨åˆ°ï¼ŒåŒ…å«å–åˆ°æˆ–å¾…å†™å…¥çš„å„ç§ä¿¡æ¯ã€‚
 
-	dbid£ºÈç¹ûÊÇÖ÷±í¾ÍÊÇÊµÌåµÄdbid£¬×Ó±í¾ÍÊÇµ±Ç°²éÑ¯µÄdbid
+	dbidï¼šå¦‚æžœæ˜¯ä¸»è¡¨å°±æ˜¯å®žä½“çš„dbidï¼Œå­è¡¨å°±æ˜¯å½“å‰æŸ¥è¯¢çš„dbid
 
-	dbids£ºÖ÷±íÉÏdbidsÖÐÖ»ÓÐÒ»¸ödbid£¬¾ÍÊÇÊµÌåµÄid£¬Èç¹ûÊµÌåÊý¾Ý´æÔÚÊý×éÀàÔò»áÓÐ×Ó±í³öÏÖ£¬µ±Õâ¸öÊý¾Ý½á¹¹ÃèÊöµÄÊÇÒ»¸ö×Ó±íµÄÊ±ºò
-		dbidsÊÇÕâ¸öÊý×éµÄ×Ó±íË÷Òý, Ã¿¸ödbid¶¼±íÊ¾Õâ¸ö×Ó±íÉÏ¶ÔÓ¦µÄÖµ²¢ÇÒ°´ÕÕÅÅÁÐË³ÐòÍ¬Ê±Ò²±íÊ¾ÔÚÊý×éÖÐ¶ÔÓ¦Î»ÖÃµÄÖµ¡£
+	dbidsï¼šä¸»è¡¨ä¸Šdbidsä¸­åªæœ‰ä¸€ä¸ªdbidï¼Œå°±æ˜¯å®žä½“çš„idï¼Œå¦‚æžœå®žä½“æ•°æ®å­˜åœ¨æ•°ç»„ç±»åˆ™ä¼šæœ‰å­è¡¨å‡ºçŽ°ï¼Œå½“è¿™ä¸ªæ•°æ®ç»“æž„æè¿°çš„æ˜¯ä¸€ä¸ªå­è¡¨çš„æ—¶å€™
+		dbidsæ˜¯è¿™ä¸ªæ•°ç»„çš„å­è¡¨ç´¢å¼•, æ¯ä¸ªdbidéƒ½è¡¨ç¤ºè¿™ä¸ªå­è¡¨ä¸Šå¯¹åº”çš„å€¼å¹¶ä¸”æŒ‰ç…§æŽ’åˆ—é¡ºåºåŒæ—¶ä¹Ÿè¡¨ç¤ºåœ¨æ•°ç»„ä¸­å¯¹åº”ä½ç½®çš„å€¼ã€‚
 		dbids = {
-			123 : [xxx, xxx, ...], // 123Îª¸¸±íÉÏµÄÄ³¸ödbid£¬Êý×éÎªÔÚ×Ó±íÉÏÓë¸¸±íÏà¹ØÁªµÄµÄdbids¡£
+			123 : [xxx, xxx, ...], // 123ä¸ºçˆ¶è¡¨ä¸Šçš„æŸä¸ªdbidï¼Œæ•°ç»„ä¸ºåœ¨å­è¡¨ä¸Šä¸Žçˆ¶è¡¨ç›¸å…³è”çš„çš„dbidsã€‚
 			...
 		}
 
-	items£ºÖÐÓÐÕâ¸ö±íµÄ×Ö¶ÎÐÅÏ¢£¬Èç¹ûÊÇÐ´¿âÔò×Ö¶ÎÖÐÒ²ÓÐ¶ÔÓ¦µÄÒªÐ´Öµ¡£
+	itemsï¼šä¸­æœ‰è¿™ä¸ªè¡¨çš„å­—æ®µä¿¡æ¯ï¼Œå¦‚æžœæ˜¯å†™åº“åˆ™å­—æ®µä¸­ä¹Ÿæœ‰å¯¹åº”çš„è¦å†™å€¼ã€‚
 
-	optable£º×Ó±í½á¹¹
+	optableï¼šå­è¡¨ç»“æž„
 
-	results£º¶Á²Ù×÷Ê±²éÑ¯µ½µÄÊý¾Ý, Êý¾ÝµÄÅÅÁÐ¶ÔÓ¦itemsÖÐµÄstrkeyµÄÊýÁ¿³ËÒÔdbidsµÄÊýÁ¿¡£
-	readresultIdx£ºÒòÎªresultsÖÐµÄÊýÁ¿ÊÇdbids * items£¬ËùÒÔµ±ÔÚÄ³Ð©µÝ¹é¶ÁµÄÊ±ºòÌî³äÊý¾Ý»á¸ù¾ÝÕâ¸öreadresultIdx¼ÆËãÌî³äµÄÎ»ÖÃ¡£
+	resultsï¼šè¯»æ“ä½œæ—¶æŸ¥è¯¢åˆ°çš„æ•°æ®, æ•°æ®çš„æŽ’åˆ—å¯¹åº”itemsä¸­çš„strkeyçš„æ•°é‡ä¹˜ä»¥dbidsçš„æ•°é‡ã€‚
+	readresultIdxï¼šå› ä¸ºresultsä¸­çš„æ•°é‡æ˜¯dbids * itemsï¼Œæ‰€ä»¥å½“åœ¨æŸäº›é€’å½’è¯»çš„æ—¶å€™å¡«å……æ•°æ®ä¼šæ ¹æ®è¿™ä¸ªreadresultIdxè®¡ç®—å¡«å……çš„ä½ç½®ã€‚
 
-	parentTableDBID£º¸¸±íµÄdbid
-	parentTableName£º¸¸±íµÄÃû³Æ
+	parentTableDBIDï¼šçˆ¶è¡¨çš„dbid
+	parentTableNameï¼šçˆ¶è¡¨çš„åç§°
 
-	tableName£ºµ±Ç°±íµÄÃû³Æ
+	tableNameï¼šå½“å‰è¡¨çš„åç§°
  */
 class DBContext
 {
 public:
 	/**
-		´æ´¢ËùÓÐÒª²Ù×÷µÄ±íitem½á¹¹
+		å­˜å‚¨æ‰€æœ‰è¦æ“ä½œçš„è¡¨itemç»“æž„
 	*/
 	struct DB_ITEM_DATA
 	{

@@ -13,7 +13,7 @@ namespace KBEngine{
 class VolatileInfo : public script::ScriptObject
 {
 	/**
-	×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà
+	å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±»
 	*/
 	INSTANCE_SCRIPT_HREADER(VolatileInfo, ScriptObject)
 

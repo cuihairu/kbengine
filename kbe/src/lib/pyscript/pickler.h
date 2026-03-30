@@ -12,24 +12,24 @@ class Pickler
 {						
 public:	
 	/** 
-		´úÀí cPicket.dumps 
+		ä»£ç† cPicket.dumps 
 	*/
 	static std::string pickle(PyObject* pyobj);
 	static std::string pickle(PyObject* pyobj, int8 protocol);
 
 	/** 
-		´úÀí cPicket.loads 
+		ä»£ç† cPicket.loads 
 	*/
 	static PyObject* unpickle(const std::string& str);
 
 	/** 
-		³õÊ¼»¯pickler 
+		åˆå§‹åŒ–pickler 
 	*/
 	static bool initialize(void);
 	static void finalise(void);
 	
 	/** 
-		»ñÈ¡unpickleº¯Êı±íÄ£¿é¶ÔÏó 
+		è·å–unpickleå‡½æ•°è¡¨æ¨¡å—å¯¹è±¡ 
 	*/
 	static PyObject* getUnpickleFuncTableModule(void){ return pyPickleFuncTableModule_; }
 	static PyObject* getUnpickleFunc(const char* funcName);
@@ -37,12 +37,12 @@ public:
 	static void registerUnpickleFunc(PyObject* pyFunc, const char* funcName);
 
 private:
-	static PyObject* picklerMethod_;						// cPicket.dumps·½·¨Ö¸Õë
-	static PyObject* unPicklerMethod_;						// cPicket.loads·½·¨Ö¸Õë
+	static PyObject* picklerMethod_;						// cPicket.dumpsæ–¹æ³•æŒ‡é’ˆ
+	static PyObject* unPicklerMethod_;						// cPicket.loadsæ–¹æ³•æŒ‡é’ˆ
 
-	static PyObject* pyPickleFuncTableModule_;				// unpickleº¯Êı±íÄ£¿é¶ÔÏó ËùÓĞ×Ô¶¨ÒåÀàµÄunpickleº¯Êı¶¼ĞèÒªÔÚ´Ë×¢²á
+	static PyObject* pyPickleFuncTableModule_;				// unpickleå‡½æ•°è¡¨æ¨¡å—å¯¹è±¡ æ‰€æœ‰è‡ªå®šä¹‰ç±»çš„unpickleå‡½æ•°éƒ½éœ€è¦åœ¨æ­¤æ³¨å†Œ
 
-	static bool	isInit;										// ÊÇ·ñÒÑ¾­±»³õÊ¼»¯
+	static bool	isInit;										// æ˜¯å¦å·²ç»è¢«åˆå§‹åŒ–
 } ;
 
 }

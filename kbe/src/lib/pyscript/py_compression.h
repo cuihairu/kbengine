@@ -14,12 +14,12 @@ public:
 	static bool zipCompressDirectory(const std::string& sourceDir, const std::string& outfile);
 	static bool tarCompressDirectory(const std::string& sourceDir, const std::string& outfile);
 
-	/** ³õÊ¼»¯ */
+	/** åˆå§‹åŒ– */
 	static bool initialize(void);
 	static void finalise(void);
 
 private:
-	static bool	isInit;										// ÊÇ·ñÒÑ¾­±»³õÊ¼»¯
+	static bool	isInit;										// æ˜¯å¦å·²ç»è¢«åˆå§‹åŒ–
 } ;
 
 }

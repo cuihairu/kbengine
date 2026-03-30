@@ -17,7 +17,7 @@ template<typename T>
 class Entities : public script::ScriptObject
 {
 	/** 
-		×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà 
+		å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» 
 	*/
 	INSTANCE_SCRIPT_HREADER(Entities, ScriptObject)	
 public:
@@ -41,7 +41,7 @@ public:
 	}
 
 	/** 
-		±©Â¶Ò»Ğ©×Öµä·½·¨¸øpython 
+		æš´éœ²ä¸€äº›å­—å…¸æ–¹æ³•ç»™python 
 	*/
 	DECLARE_PY_MOTHOD_ARG1(pyHas_key, ENTITY_ID);
 	DECLARE_PY_MOTHOD_ARG0(pyKeys);
@@ -52,7 +52,7 @@ public:
 		PyObject * args, PyObject* kwds);
 
 	/** 
-		map²Ù×÷º¯ÊıÏà¹Ø 
+		mapæ“ä½œå‡½æ•°ç›¸å…³ 
 	*/
 	static PyObject* mp_subscript(PyObject * self, PyObject * key);
 
@@ -78,13 +78,13 @@ public:
 private:
 	ENTITYS_MAP _entities;
 
-	// ÒÑ¾­µ÷ÓÃ¹ıdestroyµ«Î´Îö¹¹µÄentity¶¼½«´æ´¢ÔÚÕâÀï£¬ ³¤Ê±¼äÎ´±»Îö¹¹ËµÃ÷
-	// ½Å±¾²ãÓĞ¿ÉÄÜ´æÔÚÑ­»·ÒıÓÃµÄÎÊÌâÔì³ÉÄÚ´æĞ¹Â¶¡£
+	// å·²ç»è°ƒç”¨è¿‡destroyä½†æœªææ„çš„entityéƒ½å°†å­˜å‚¨åœ¨è¿™é‡Œï¼Œ é•¿æ—¶é—´æœªè¢«ææ„è¯´æ˜
+	// è„šæœ¬å±‚æœ‰å¯èƒ½å­˜åœ¨å¾ªç¯å¼•ç”¨çš„é—®é¢˜é€ æˆå†…å­˜æ³„éœ²ã€‚
 	EntityGarbages<T>* _pGarbages;
 };
 
 /** 
-	Python Entities²Ù×÷ËùĞèÒªµÄ·½·¨±í 
+	Python Entitiesæ“ä½œæ‰€éœ€è¦çš„æ–¹æ³•è¡¨ 
 */
 template<typename T>
 PyMappingMethods Entities<T>::mappingMethods =
@@ -94,7 +94,7 @@ PyMappingMethods Entities<T>::mappingMethods =
 	NULL											// mp_ass_subscript
 };
 
-// ²Î¿¼ objects/dictobject.c
+// å‚è€ƒ objects/dictobject.c
 // Hack to implement "key in dict"
 template<typename T>
 PySequenceMethods Entities<T>::mappingSequenceMethods = 
@@ -309,7 +309,7 @@ void Entities<T>::clear(bool callScript, std::vector<ENTITY_ID> excludes)
 		_entities.erase(iter++);
 	}
 	
-	// ÓÉÓÚ´æÔÚexcludes²»ÄÜÇå¿Õ
+	// ç”±äºå­˜åœ¨excludesä¸èƒ½æ¸…ç©º
 	// _entities.clear();
 }
 

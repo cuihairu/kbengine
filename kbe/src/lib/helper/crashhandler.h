@@ -21,13 +21,13 @@
 #endif
 	
 namespace KBEngine{ namespace exception {
-/** °²×° */
+/** å®‰è£… */
 void installCrashHandler(int svnVer, const char* dumpType);
 
-/** ´´½¨dumpÎÄ¼şº¯Êı */
+/** åˆ›å»ºdumpæ–‡ä»¶å‡½æ•° */
 void createMiniDump(EXCEPTION_POINTERS* pep ); 
 
-/**  ×Ô¶¨ÒåµÄ minidump callback */
+/**  è‡ªå®šä¹‰çš„ minidump callback */
 BOOL CALLBACK dumpCallback(
 	PVOID                            pParam, 
 	const PMINIDUMP_CALLBACK_INPUT   pInput, 
@@ -35,11 +35,11 @@ BOOL CALLBACK dumpCallback(
 ); 
 
 #ifndef _DEBUG
-	/** ÔÚÒª½Ø»ñcrashµÄ´úÂë×î¿ªÊ¼µÄµØ·½Ğ´ÉÏÕâ¸öºê */
+	/** åœ¨è¦æˆªè·crashçš„ä»£ç æœ€å¼€å§‹çš„åœ°æ–¹å†™ä¸Šè¿™ä¸ªå® */
 	#define THREAD_TRY_EXECUTION int exceptionCode = 0;																												\
 								__try{
 		
-	/** ÔÚÒª½Ø»ñcrashµÄ´úÂë×îÄ©Î²µÄµØ·½Ğ´ÉÏÕâ¸öºê */
+	/** åœ¨è¦æˆªè·crashçš„ä»£ç æœ€æœ«å°¾çš„åœ°æ–¹å†™ä¸Šè¿™ä¸ªå® */
 	#define THREAD_HANDLE_CRASH  }__except(exceptionCode = GetExceptionCode(), KBEngine::exception::createMiniDump(GetExceptionInformation()),						\
 															EXCEPTION_EXECUTE_HANDLER) {																			\
 									printf("%x\n", exceptionCode);																									\

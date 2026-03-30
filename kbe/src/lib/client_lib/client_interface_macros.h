@@ -17,7 +17,7 @@ namespace KBEngine{
 #define CLIENTAPP ClientApp
 
 /**
-	ClientÏûÏ¢ºê£¬  ²ÎÊıÎªÁ÷£¬ ĞèÒª×Ô¼º½â¿ª
+	Clientæ¶ˆæ¯å®ï¼Œ  å‚æ•°ä¸ºæµï¼Œ éœ€è¦è‡ªå·±è§£å¼€
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef CLIENT_MESSAGE_HANDLER_STREAM
@@ -58,7 +58,7 @@ namespace KBEngine{
 																				\
 
 /**
-	ClientÏûÏ¢ºê£¬  Ö»ÓĞÁã¸ö²ÎÊıµÄÏûÏ¢
+	Clientæ¶ˆæ¯å®ï¼Œ  åªæœ‰é›¶ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef CLIENT_MESSAGE_HANDLER_ARGS0
@@ -100,7 +100,7 @@ namespace KBEngine{
 
 
 /**
-	ClientÏûÏ¢ºê£¬  Ö»ÓĞÒ»¸ö²ÎÊıµÄÏûÏ¢
+	Clientæ¶ˆæ¯å®ï¼Œ  åªæœ‰ä¸€ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef CLIENT_MESSAGE_HANDLER_ARGS1
@@ -144,7 +144,7 @@ namespace KBEngine{
 	
 
 /**
-	ClientÏûÏ¢ºê£¬  Ö»ÓĞ¶ş¸ö²ÎÊıµÄÏûÏ¢
+	Clientæ¶ˆæ¯å®ï¼Œ  åªæœ‰äºŒä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef CLIENT_MESSAGE_HANDLER_ARGS2
@@ -197,7 +197,7 @@ namespace KBEngine{
 
 
 /**
-	ClientÏûÏ¢ºê£¬  Ö»ÓĞÈı¸ö²ÎÊıµÄÏûÏ¢
+	Clientæ¶ˆæ¯å®ï¼Œ  åªæœ‰ä¸‰ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef CLIENT_MESSAGE_HANDLER_ARGS3
@@ -259,7 +259,7 @@ namespace KBEngine{
 
 
 /**
-	ClientÏûÏ¢ºê£¬  Ö»ÓĞËÄ¸ö²ÎÊıµÄÏûÏ¢
+	Clientæ¶ˆæ¯å®ï¼Œ  åªæœ‰å››ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef CLIENT_MESSAGE_HANDLER_ARGS4
@@ -327,7 +327,7 @@ namespace KBEngine{
 											ARG_TYPE4, ARG_NAME4)				\
 
 /**
-	ClientÏûÏ¢ºê£¬  Ö»ÓĞÎå¸ö²ÎÊıµÄÏûÏ¢
+	Clientæ¶ˆæ¯å®ï¼Œ  åªæœ‰äº”ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef CLIENT_MESSAGE_HANDLER_ARGS5
@@ -404,7 +404,7 @@ namespace KBEngine{
 
 
 /**
-	ClientÏûÏ¢ºê£¬  Ö»ÓĞÁù¸ö²ÎÊıµÄÏûÏ¢
+	Clientæ¶ˆæ¯å®ï¼Œ  åªæœ‰å…­ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef CLIENT_MESSAGE_HANDLER_ARGS6
@@ -488,7 +488,7 @@ namespace KBEngine{
 											ARG_TYPE6, ARG_NAME6)				\
 
 /**
-	ClientÏûÏ¢ºê£¬  Ö»ÓĞ°Ë¸ö²ÎÊıµÄÏûÏ¢
+	Clientæ¶ˆæ¯å®ï¼Œ  åªæœ‰å…«ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef CLIENT_MESSAGE_HANDLER_ARGS8

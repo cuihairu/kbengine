@@ -14,7 +14,7 @@ namespace KBEngine{
 
 class EntityCall : public EntityCallAbstract
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
 	INSTANCE_SCRIPT_HREADER(EntityCall, EntityCallAbstract)
 public:
 	EntityCall(ScriptDefModule* pScriptModule, const Network::Address* pAddr, COMPONENT_ID componentID, 
@@ -23,12 +23,12 @@ public:
 	~EntityCall();
 	
 	/** 
-		½Å±¾ÇëÇó»ñÈ¡ÊôĞÔ»òÕß·½·¨ 
+		è„šæœ¬è¯·æ±‚è·å–å±æ€§æˆ–è€…æ–¹æ³• 
 	*/
 	PyObject* onScriptGetAttribute(PyObject* attr);						
 			
 	/** 
-		»ñµÃ¶ÔÏóµÄÃèÊö 
+		è·å¾—å¯¹è±¡çš„æè¿° 
 	*/
 	PyObject* tp_repr();
 	PyObject* tp_str();
@@ -36,12 +36,12 @@ public:
 	void c_str(char* s, size_t size);
 
 	/** 
-		unpickle·½·¨ 
+		unpickleæ–¹æ³• 
 	*/
 	static PyObject* __unpickle__(PyObject* self, PyObject* args);
 
 	/** 
-		½Å±¾±»°²×°Ê±±»µ÷ÓÃ 
+		è„šæœ¬è¢«å®‰è£…æ—¶è¢«è°ƒç”¨ 
 	*/
 	static void onInstallScript(PyObject* mod);
 
@@ -64,7 +64,7 @@ public:
 protected:
 	std::string								scriptModuleName_;
 
-	// ¸ÃentityËùÊ¹ÓÃµÄ½Å±¾Ä£¿é¶ÔÏó
+	// è¯¥entityæ‰€ä½¿ç”¨çš„è„šæœ¬æ¨¡å—å¯¹è±¡
 	ScriptDefModule*						pScriptModule_;	
 
 	void _setATIdx(ENTITYCALLS::size_type idx) {

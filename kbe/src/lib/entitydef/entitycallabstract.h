@@ -27,7 +27,7 @@ class Bundle;
 
 class EntityCallAbstract : public script::ScriptObject
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
 	INSTANCE_SCRIPT_HREADER(EntityCallAbstract, ScriptObject)
 public:
 	EntityCallAbstract(PyTypeObject* scriptType, 
@@ -49,14 +49,14 @@ public:
 	};
 
 	/**
-		ÉèÖÃentityCallµÄ__findChannelFuncº¯ÊıµØÖ·
+		è®¾ç½®entityCallçš„__findChannelFuncå‡½æ•°åœ°å€
 	*/
 	static void setFindChannelFunc(FindChannelFunc func) {
 		__findChannelFunc = func;
 	};
 
 	/**
-		ÉèÖÃentityCallµÄ__hookCallFuncº¯ÊıµØÖ·
+		è®¾ç½®entityCallçš„__hookCallFuncå‡½æ•°åœ°å€
 	*/
 	static void setEntityCallCallHookFunc(EntityCallCallHookFunc* pFunc) {
 		__hookCallFuncPtr = pFunc;
@@ -72,7 +72,7 @@ public:
 	}
 
 	/** 
-		»ñÈ¡entityID 
+		è·å–entityID 
 	*/
 	INLINE ENTITY_ID id() const;
 
@@ -81,27 +81,27 @@ public:
 	DECLARE_PY_GET_MOTHOD(pyGetID);
 
 	/** 
-		»ñµÃ×é¼şID 
+		è·å¾—ç»„ä»¶ID 
 	*/
 	INLINE COMPONENT_ID componentID(void) const;
 
 	/** 
-		ÉèÖÃ×é¼şµÄID 
+		è®¾ç½®ç»„ä»¶çš„ID 
 	*/
 	INLINE void componentID(COMPONENT_ID cid);
 
 	/** 
-		»ñµÃutype 
+		è·å¾—utype 
 	*/
 	INLINE ENTITY_SCRIPT_UID utype(void) const;
 
 	/** 
-		»ñµÃtype 
+		è·å¾—type 
 	*/
 	INLINE ENTITYCALL_TYPE type(void) const;
 
 	/** 
-		Ö§³Öpickler ·½·¨ 
+		æ”¯æŒpickler æ–¹æ³• 
 	*/
 	static PyObject* __py_reduce_ex__(PyObject* self, PyObject* protocol);
 	
@@ -126,11 +126,11 @@ public:
 	ScriptDefModule* pScriptDefModule();
 
 protected:
-	COMPONENT_ID							componentID_;			// Ô¶¶Ë»úÆ÷×é¼şµÄID
-	Network::Address						addr_;					// ÆµµÀµØÖ·
-	ENTITYCALL_TYPE							type_;					// ¸ÃentityCallµÄÀàĞÍ
+	COMPONENT_ID							componentID_;			// è¿œç«¯æœºå™¨ç»„ä»¶çš„ID
+	Network::Address						addr_;					// é¢‘é“åœ°å€
+	ENTITYCALL_TYPE							type_;					// è¯¥entityCallçš„ç±»å‹
 	ENTITY_ID								id_;					// entityID
-	ENTITY_SCRIPT_UID						utype_;					// entityµÄutype°´ÕÕentities.xmlÖĞµÄ¶¨ÒåË³Ğò
+	ENTITY_SCRIPT_UID						utype_;					// entityçš„utypeæŒ‰ç…§entities.xmlä¸­çš„å®šä¹‰é¡ºåº
 
 	static EntityCallCallHookFunc*			__hookCallFuncPtr;
 	static FindChannelFunc					__findChannelFunc;

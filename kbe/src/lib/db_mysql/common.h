@@ -10,7 +10,7 @@
 
 namespace KBEngine{ 
 
-// 记录KBE所设置过的所有mysql标记，提供sync_item_to_db时检查设置项
+// 璁板綍KBE鎵�璁剧疆杩囩殑鎵�鏈塵ysql鏍囪锛屾彁渚泂ync_item_to_db鏃舵鏌ヨ缃」
 extern uint32 ALL_MYSQL_SET_FLAGS;
 
 }

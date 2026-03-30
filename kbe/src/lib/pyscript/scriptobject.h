@@ -13,7 +13,7 @@
 
 namespace KBEngine{ namespace script{
 
-// pythonµÄÄ¬ÈÏ¿Õ·µ»ØÖµ
+// pythonçš„é»˜è®¤ç©ºè¿”å›å€¼
 #define S_Return { Py_INCREF(Py_None); return Py_None; }			
 #define S_RETURN S_Return	
 #define PY_RETURN S_Return	
@@ -28,14 +28,14 @@ namespace KBEngine{ namespace script{
 		Py_DECREF(pyObj);																	\
 	}																						\
 
-// pythonµÄ¶ÔÏóÊÍ·Å
+// pythonçš„å¯¹è±¡é‡Šæ”¾
 #define S_RELEASE(pyObj)																	\
 	if(pyObj){																				\
 		Py_DECREF(pyObj);																	\
 		pyObj = NULL;																		\
 	}																						\
 
-/// Êä³öµ±Ç°½Å±¾²úÉúµÄ´íÎóĞÅÏ¢	
+/// è¾“å‡ºå½“å‰è„šæœ¬äº§ç”Ÿçš„é”™è¯¯ä¿¡æ¯	
 #define SCRIPT_ERROR_CHECK()																\
 {																							\
  	if (PyErr_Occurred())																	\
@@ -44,20 +44,20 @@ namespace KBEngine{ namespace script{
 	}																						\
 }
 
-// ½Å±¾¶ÔÏóÍ· £¨Í¨³£ÊÇpythonÄ¬ÈÏ·ÖÅä¶ÔÏó·½Ê½²úÉúµÄ¶ÔÏó £©
+// è„šæœ¬å¯¹è±¡å¤´ ï¼ˆé€šå¸¸æ˜¯pythoné»˜è®¤åˆ†é…å¯¹è±¡æ–¹å¼äº§ç”Ÿçš„å¯¹è±¡ ï¼‰
 #define SCRIPT_OBJECT_HREADER(CLASS, SUPERCLASS)											\
 	SCRIPT_HREADER_BASE(CLASS, SUPERCLASS);													\
-	/** python´´½¨µÄ¶ÔÏóÔò¶ÔÏó´ÓpythonÖĞÊÍ·Å
+	/** pythonåˆ›å»ºçš„å¯¹è±¡åˆ™å¯¹è±¡ä»pythonä¸­é‡Šæ”¾
 	*/																						\
 	static void _tp_dealloc(PyObject* self)													\
 	{																						\
 		CLASS::_scriptType.tp_free(self);													\
 	}																						\
 
-// »ù´¡½Å±¾¶ÔÏóÍ· £¨Õâ¸öÄ£¿éÍ¨³£ÊÇÌá¹©¸øpython½Å±¾ÖĞ½øĞĞ¼Ì³ĞµÄÒ»¸ö»ù´¡Àà £©
+// åŸºç¡€è„šæœ¬å¯¹è±¡å¤´ ï¼ˆè¿™ä¸ªæ¨¡å—é€šå¸¸æ˜¯æä¾›ç»™pythonè„šæœ¬ä¸­è¿›è¡Œç»§æ‰¿çš„ä¸€ä¸ªåŸºç¡€ç±» ï¼‰
 #define BASE_SCRIPT_HREADER(CLASS, SUPERCLASS)												\
 	SCRIPT_HREADER_BASE(CLASS, SUPERCLASS);													\
-	/** python´´½¨µÄ¶ÔÏóÔò¶ÔÏó´ÓpythonÖĞÊÍ·Å
+	/** pythonåˆ›å»ºçš„å¯¹è±¡åˆ™å¯¹è±¡ä»pythonä¸­é‡Šæ”¾
 	*/																						\
 	static void _tp_dealloc(PyObject* self)													\
 	{																						\
@@ -65,10 +65,10 @@ namespace KBEngine{ namespace script{
 		CLASS::_scriptType.tp_free(self);													\
 	}																						\
 
-// ÊµÀı½Å±¾¶ÔÏóÍ· £¨Õâ¸ö½Å±¾¶ÔÏóÊÇÓÉc++ÖĞ½øĞĞnew²úÉúµÄ £©
+// å®ä¾‹è„šæœ¬å¯¹è±¡å¤´ ï¼ˆè¿™ä¸ªè„šæœ¬å¯¹è±¡æ˜¯ç”±c++ä¸­è¿›è¡Œnewäº§ç”Ÿçš„ ï¼‰
 #define INSTANCE_SCRIPT_HREADER(CLASS, SUPERCLASS)											\
 	SCRIPT_HREADER_BASE(CLASS, SUPERCLASS);													\
-	/** c++new´´½¨µÄ¶ÔÏóÔò½øĞĞdelete²Ù×÷
+	/** c++newåˆ›å»ºçš„å¯¹è±¡åˆ™è¿›è¡Œdeleteæ“ä½œ
 	*/																						\
 	static void _tp_dealloc(PyObject* self)													\
 	{																						\
@@ -77,7 +77,7 @@ namespace KBEngine{ namespace script{
 
 																							
 #define SCRIPT_HREADER_BASE(CLASS, SUPERCLASS)												\
-	/* µ±Ç°½Å±¾Ä£¿éµÄÀà±ğ */																	\
+	/* å½“å‰è„šæœ¬æ¨¡å—çš„ç±»åˆ« */																	\
 	static PyTypeObject _scriptType;														\
 	typedef CLASS ThisClass;																\
 																							\
@@ -91,21 +91,21 @@ namespace KBEngine{ namespace script{
 		return static_cast<CLASS*>(self)->tp_str();											\
 	}																						\
 																							\
-	/** ½Å±¾Ä£¿é¶ÔÏó´ÓpythonÖĞ´´½¨
+	/** è„šæœ¬æ¨¡å—å¯¹è±¡ä»pythonä¸­åˆ›å»º
 	*/																						\
 	static PyObject* _tp_new(PyTypeObject* type, PyObject* args, PyObject* kwds)			\
 	{																						\
 		return CLASS::tp_new(type, args, kwds);												\
 	}																						\
 																							\
-	/** python ÇëÇó»ñÈ¡±¾Ä£¿éµÄÊôĞÔ»òÕß·½·¨
+	/** python è¯·æ±‚è·å–æœ¬æ¨¡å—çš„å±æ€§æˆ–è€…æ–¹æ³•
 	*/																						\
 	static PyObject* _tp_getattro(PyObject* self, PyObject* name)							\
 	{																						\
 		return static_cast<CLASS*>(self)->onScriptGetAttribute(name);						\
 	}																						\
 																							\
-	/** python ÇëÇóÉèÖÃ±¾Ä£¿éµÄÊôĞÔ»òÕß·½·¨
+	/** python è¯·æ±‚è®¾ç½®æœ¬æ¨¡å—çš„å±æ€§æˆ–è€…æ–¹æ³•
 	*/																						\
 	static int _tp_setattro(PyObject* self, PyObject* name, PyObject* value)				\
 	{																						\
@@ -114,7 +114,7 @@ namespace KBEngine{ namespace script{
 				static_cast<CLASS*>(self)->onScriptDelAttribute(name);						\
 	}																						\
 																							\
-	/** python ÇëÇó³õÊ¼»¯±¾Ä£¿é¶ÔÏó
+	/** python è¯·æ±‚åˆå§‹åŒ–æœ¬æ¨¡å—å¯¹è±¡
 	*/																						\
 	static int _tp_init(PyObject* self, PyObject *args, PyObject* kwds)						\
 	{																						\
@@ -122,18 +122,18 @@ namespace KBEngine{ namespace script{
 	}																						\
 																							\
 public:																						\
-	/* ×îÖÕ½«Òª±»°²×°µ½½Å±¾Ä£¿éÖĞµÄ·½·¨ºÍ³ÉÔ±´æ·ÅÁĞ±í*/											\
+	/* æœ€ç»ˆå°†è¦è¢«å®‰è£…åˆ°è„šæœ¬æ¨¡å—ä¸­çš„æ–¹æ³•å’Œæˆå‘˜å­˜æ”¾åˆ—è¡¨*/											\
 	static PyMethodDef* _##CLASS##_lpScriptmethods;											\
 	static PyMemberDef* _##CLASS##_lpScriptmembers;											\
 	static PyGetSetDef* _##CLASS##_lpgetseters;												\
-	/* ±¾Ä£¿éËùÒª±©Â©¸ø½Å±¾µÄ·½·¨ºÍ³ÉÔ±£¬ ×îÖÕ»á±»µ¼Èëµ½ÉÏÃæµÄ2¸öÖ¸ÕëÁĞ±íÖĞ */					\
+	/* æœ¬æ¨¡å—æ‰€è¦æš´æ¼ç»™è„šæœ¬çš„æ–¹æ³•å’Œæˆå‘˜ï¼Œ æœ€ç»ˆä¼šè¢«å¯¼å…¥åˆ°ä¸Šé¢çš„2ä¸ªæŒ‡é’ˆåˆ—è¡¨ä¸­ */					\
 	static PyMethodDef _##CLASS##_scriptMethods[];											\
 	static PyMemberDef _##CLASS##_scriptMembers[];											\
 	static PyGetSetDef _##CLASS##_scriptGetSeters[];										\
 																							\
 	static bool _##CLASS##_py_installed;													\
 																							\
-	/** getsetµÄÖ»¶ÁÊôĞÔ
+	/** getsetçš„åªè¯»å±æ€§
 	*/																						\
 	static int __py_readonly_descr(PyObject* self, PyObject* value, void* closure)			\
 	{																						\
@@ -144,7 +144,7 @@ public:																						\
 		return 0;																			\
 	}																						\
 																							\
-	/** getsetµÄÖ»Ğ´ÊôĞÔ
+	/** getsetçš„åªå†™å±æ€§
 	*/																						\
 	static int __py_writeonly_descr(PyObject* self, PyObject* value, void* closure)			\
 	{																						\
@@ -155,7 +155,7 @@ public:																						\
 		return 0;																			\
 	}																						\
 																							\
-	/** Õâ¸ö½Ó¿Ú¿ÉÒÔ»ñµÃµ±Ç°Ä£¿éµÄ½Å±¾Àà±ğ 
+	/** è¿™ä¸ªæ¥å£å¯ä»¥è·å¾—å½“å‰æ¨¡å—çš„è„šæœ¬ç±»åˆ« 
 	*/																						\
 	static PyTypeObject* getScriptType(void)												\
 	{																						\
@@ -175,7 +175,7 @@ public:																						\
 		return 0;																			\
 	}																						\
 																							\
-	/** ¼ÆËãËùÓĞ¼Ì³ĞÄ£¿éµÄ±©Â¶·½·¨¸öÊı 
+	/** è®¡ç®—æ‰€æœ‰ç»§æ‰¿æ¨¡å—çš„æš´éœ²æ–¹æ³•ä¸ªæ•° 
 	*/																						\
 	static int calcTotalMethodCount(void)													\
 	{																						\
@@ -193,7 +193,7 @@ public:																						\
 		return SUPERCLASS::calcTotalMethodCount() + nlen;									\
 	}																						\
 																							\
-	/** ¼ÆËãËùÓĞ¼Ì³ĞÄ£¿éµÄ±©Â¶³ÉÔ±¸öÊı 
+	/** è®¡ç®—æ‰€æœ‰ç»§æ‰¿æ¨¡å—çš„æš´éœ²æˆå‘˜ä¸ªæ•° 
 	*/																						\
 	static int calcTotalMemberCount(void)													\
 	{																						\
@@ -211,7 +211,7 @@ public:																						\
 		return SUPERCLASS::calcTotalMemberCount() + nlen;									\
 	}																						\
 																							\
-	/** ¼ÆËãËùÓĞ¼Ì³ĞÄ£¿éµÄ±©Â¶getset¸öÊı 
+	/** è®¡ç®—æ‰€æœ‰ç»§æ‰¿æ¨¡å—çš„æš´éœ²getsetä¸ªæ•° 
 	*/																						\
 	static int calcTotalGetSetCount(void)													\
 	{																						\
@@ -229,7 +229,7 @@ public:																						\
 		return SUPERCLASS::calcTotalGetSetCount() + nlen;									\
 	}																						\
 																							\
-	/** ½«ËùÓĞ¸¸ÀàÒÔ¼°µ±Ç°Ä£¿éµÄ±©Â¶³ÉÔ±ºÍ·½·¨°²×°µ½×îÖÕÒªµ¼Èë½Å±¾µÄÁĞ±íÖĞ 
+	/** å°†æ‰€æœ‰çˆ¶ç±»ä»¥åŠå½“å‰æ¨¡å—çš„æš´éœ²æˆå‘˜å’Œæ–¹æ³•å®‰è£…åˆ°æœ€ç»ˆè¦å¯¼å…¥è„šæœ¬çš„åˆ—è¡¨ä¸­ 
 	*/																						\
 	static void setupScriptMethodAndAttribute(PyMethodDef* lppmf, PyMemberDef* lppmd,		\
 	PyGetSetDef* lppgs)																		\
@@ -275,8 +275,8 @@ public:																						\
 		SUPERCLASS::setupScriptMethodAndAttribute(lppmf, lppmd, lppgs);						\
 	}																						\
 																							\
-	/** ×¢²á½Å±¾Ä£¿é
-		@param mod: ËùÒªµ¼ÈëµÄÖ÷Ä£¿é
+	/** æ³¨å†Œè„šæœ¬æ¨¡å—
+		@param mod: æ‰€è¦å¯¼å…¥çš„ä¸»æ¨¡å—
 	*/																						\
 	static void registerScript(PyObject* mod, const char* name = #CLASS)					\
 	{																						\
@@ -315,8 +315,8 @@ public:																						\
 		_##CLASS##_py_installed = true;														\
 	}																						\
 																							\
-	/** °²×°µ±Ç°½Å±¾Ä£¿é 
-		@param mod: ËùÒªµ¼ÈëµÄÖ÷Ä£¿é
+	/** å®‰è£…å½“å‰è„šæœ¬æ¨¡å— 
+		@param mod: æ‰€è¦å¯¼å…¥çš„ä¸»æ¨¡å—
 	*/																						\
 	static void installScript(PyObject* mod, const char* name = #CLASS)						\
 	{																						\
@@ -326,7 +326,7 @@ public:																						\
 		ScriptObject::scriptObjectTypes[name] = &_scriptType;								\
 	}																						\
 																							\
-	/** ×¢Ïú½Å±¾Ä£¿é
+	/** æ³¨é”€è„šæœ¬æ¨¡å—
 	*/																						\
 	static void unregisterScript(void)														\
 	{																						\
@@ -338,7 +338,7 @@ public:																						\
 			Py_DECREF(&_scriptType);														\
 	}																						\
 																							\
-	/** Ğ¶ÔØµ±Ç°½Å±¾Ä£¿é 
+	/** å¸è½½å½“å‰è„šæœ¬æ¨¡å— 
 	*/																						\
 	static void uninstallScript(void)														\
 	{																						\
@@ -349,7 +349,7 @@ public:																						\
 
 
 
-/** Õâ¸öºêÕıÊ½µÄ³õÊ¼»¯Ò»¸ö½Å±¾Ä£¿é£¬ ½«Ò»Ğ©±ØÒªµÄĞÅÏ¢Ìî³äµ½pythonµÄtype¶ÔÏóÖĞ
+/** è¿™ä¸ªå®æ­£å¼çš„åˆå§‹åŒ–ä¸€ä¸ªè„šæœ¬æ¨¡å—ï¼Œ å°†ä¸€äº›å¿…è¦çš„ä¿¡æ¯å¡«å……åˆ°pythonçš„typeå¯¹è±¡ä¸­
 */
 #define SCRIPT_INIT(CLASS, CALL, SEQ, MAP, ITER, ITERNEXT)									\
 		TEMPLATE_SCRIPT_INIT(;,CLASS, CLASS, CALL, SEQ, MAP, ITER, ITERNEXT)				\
@@ -405,7 +405,7 @@ public:																						\
 		PyObject_GC_Del,										/* tp_free            */	\
 	};																						\
 
-// BASE_SCRIPT_HREADER»ù´¡Àà½Å±¾³õÊ¼»¯, ¸ÃÀàÓÉ½Å±¾¼Ì³Ğ
+// BASE_SCRIPT_HREADERåŸºç¡€ç±»è„šæœ¬åˆå§‹åŒ–, è¯¥ç±»ç”±è„šæœ¬ç»§æ‰¿
 #define BASE_SCRIPT_INIT(CLASS, CALL, SEQ, MAP, ITER, ITERNEXT)								\
 	PyMethodDef* CLASS::_##CLASS##_lpScriptmethods = NULL;									\
 	PyMemberDef* CLASS::_##CLASS##_lpScriptmembers = NULL;									\
@@ -465,20 +465,20 @@ public:																						\
 class ScriptObject: public PyObject
 {
 	/** 
-		×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà 
+		å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» 
 	*/
 	SCRIPT_OBJECT_HREADER(ScriptObject, ScriptObject)							
 public:	
 	ScriptObject(PyTypeObject* pyType, bool isInitialised = false);
 	~ScriptObject();
 
-	// ËùÓĞµÄkbe½Å±¾Àà±ğ
+	// æ‰€æœ‰çš„kbeè„šæœ¬ç±»åˆ«
 	typedef KBEUnordered_map<std::string, PyTypeObject*> SCRIPTOBJECT_TYPES;
 	static SCRIPTOBJECT_TYPES scriptObjectTypes;
 	static PyTypeObject* getScriptObjectType(const std::string& name);
 
 	/** 
-		½Å±¾¶ÔÏóÒıÓÃ¼ÆÊı 
+		è„šæœ¬å¯¹è±¡å¼•ç”¨è®¡æ•° 
 	*/
 	void incRef() const				{ Py_INCREF((PyObject*)this); }
 	void decRef() const				{ Py_DECREF((PyObject*)this); }
@@ -486,7 +486,7 @@ public:
 	int refCount() const			{ return int(((PyObject*)this)->ob_refcnt); }
 	
 	/** 
-		»ñµÃ¶ÔÏóµÄÃèÊö 
+		è·å¾—å¯¹è±¡çš„æè¿° 
 	*/
 	PyObject* tp_repr();
 	PyObject* tp_str();
@@ -496,44 +496,44 @@ public:
 	DECLARE_PY_GET_MOTHOD(py__name__);
 
 	/** 
-		½Å±¾ÇëÇó´´½¨Ò»¸ö¸Ã¶ÔÏó 
+		è„šæœ¬è¯·æ±‚åˆ›å»ºä¸€ä¸ªè¯¥å¯¹è±¡ 
 	*/
 	static PyObject* tp_new(PyTypeObject* type, PyObject* args, 
 		PyObject* kwds);
 
 	/** 
-		½Å±¾ÇëÇó»ñÈ¡ÊôĞÔ»òÕß·½·¨ 
+		è„šæœ¬è¯·æ±‚è·å–å±æ€§æˆ–è€…æ–¹æ³• 
 	*/
 	PyObject* onScriptGetAttribute(PyObject* attr);						
 
 	/** 
-		½Å±¾ÇëÇóÉèÖÃÊôĞÔ»òÕß·½·¨ 
+		è„šæœ¬è¯·æ±‚è®¾ç½®å±æ€§æˆ–è€…æ–¹æ³• 
 	*/
 	int onScriptSetAttribute(PyObject* attr, PyObject* value);			
 
 	/** 
-		½Å±¾ÇëÇóÉ¾³ıÒ»¸öÊôĞÔ 
+		è„šæœ¬è¯·æ±‚åˆ é™¤ä¸€ä¸ªå±æ€§ 
 	*/
 	int onScriptDelAttribute(PyObject* attr);
 
 	/** 
-		½Å±¾ÇëÇó³õÊ¼»¯ 
+		è„šæœ¬è¯·æ±‚åˆå§‹åŒ– 
 	*/
 	int onScriptInit(PyObject* self, PyObject *args, 
 		PyObject* kwds);
 
 	/** 
-		»ñÈ¡¶ÔÏóÀà±ğÃû³Æ
+		è·å–å¯¹è±¡ç±»åˆ«åç§°
 	*/
 	const char* scriptName() const { return ob_type->tp_name; }
 
 	/** 
-		½Å±¾±»°²×°Ê±±»µ÷ÓÃ 
+		è„šæœ¬è¢«å®‰è£…æ—¶è¢«è°ƒç”¨ 
 	*/
 	static void onInstallScript(PyObject* mod) {}
 
 	/** 
-		½Å±¾±»Ğ¶ÔØÊ±±»µ÷ÓÃ 
+		è„šæœ¬è¢«å¸è½½æ—¶è¢«è°ƒç”¨ 
 	*/
 	static void onUninstallScript() {}
 } ;
