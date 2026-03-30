@@ -7,7 +7,7 @@
 #include "common/objectpool.h"
 #include "network/common.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 namespace Network
 {
 class Address  : public PoolObject
@@ -68,9 +68,9 @@ inline Address::Address(uint32 ipArg, uint16 portArg) :
 	ip(ipArg),
 	port(portArg)
 {
-} 
+}
 
-// ±È½Ï²Ù×÷·ûÖØÔØ
+// æ¯”è¾ƒæ“ä½œç¬¦é‡è½½
 inline bool operator==(const Address & a, const Address & b)
 {
 	return (a.ip == b.ip) && (a.port == b.port);

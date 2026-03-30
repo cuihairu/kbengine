@@ -8,7 +8,7 @@ namespace KBEVersion
 std::string g_versionString;
 
 /**
-	½Å±¾²ã°æ±¾
+	è„šæœ¬å±‚ç‰ˆæœ¬
 */
 std::string g_scriptVersion = "0.0.0";
 
@@ -36,6 +36,6 @@ const std::string & scriptVersionString()
 
 
 }
-} 
+}
 
 

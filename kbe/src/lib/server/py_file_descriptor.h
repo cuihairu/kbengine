@@ -15,9 +15,9 @@ class PyFileDescriptor : public Network::InputNotificationHandler, public Networ
 public:
 	PyFileDescriptor(int fd, PyObject* pyCallback, bool write);
 	virtual ~PyFileDescriptor();
-	
-	/** 
-		½Å±¾ÇëÇó(×¢²á/×¢Ïú)ÎÄ¼şÃèÊö·û(¶ÁºÍĞ´)
+
+	/**
+		è„šæœ¬è¯·æ±‚(æ³¨å†Œ/æ³¨é”€)æ–‡ä»¶æè¿°ç¬¦(è¯»å’Œå†™)
 	*/
 	static PyObject* __py_registerReadFileDescriptor(PyObject* self, PyObject* args);
 	static PyObject* __py_registerWriteFileDescriptor(PyObject* self, PyObject* args);

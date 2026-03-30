@@ -8,35 +8,35 @@
 #include "server/server_errors.h"
 
 
-namespace KBEngine { 
+namespace KBEngine {
 
-// ÏûÏ¢×ª·¢µ½Ä³¸ö×é¼ş
+// æ¶ˆæ¯è½¬å‘åˆ°æŸä¸ªç»„ä»¶
 #define NETWORK_MESSAGE_FORWARD(SEND_INTERFACE, SENDBUNDLE, FORWARDBUNDLE, MYCOMPONENT_ID, FORWARD_COMPONENT_ID)						\
 	SENDBUNDLE.newMessage(SEND_INTERFACE::forwardMessage);																				\
 	SENDBUNDLE << MYCOMPONENT_ID << FORWARD_COMPONENT_ID;																				\
 	FORWARDBUNDLE.finiMessage(true);																									\
 	SENDBUNDLE.append(FORWARDBUNDLE);																									\
 
-// cellapp×ª·¢ÏûÏ¢¸ø¿Í»§¶Ë
+// cellappè½¬å‘æ¶ˆæ¯ç»™å®¢æˆ·ç«¯
 #define NETWORK_ENTITY_MESSAGE_FORWARD_CLIENT(ENTITYID, SENDBUNDLE, FORWARDBUNDLE)														\
 	SENDBUNDLE.newMessage(BaseappInterface::forwardMessageToClientFromCellapp);															\
 	SENDBUNDLE << ENTITYID;																												\
 	FORWARDBUNDLE.finiMessage(true);																									\
 	SENDBUNDLE.append(FORWARDBUNDLE);																									\
 
-// cellapp×ª·¢ÏûÏ¢¸øcellapp
+// cellappè½¬å‘æ¶ˆæ¯ç»™cellapp
 #define NETWORK_ENTITY_MESSAGE_FORWARD_CELLAPP(ENTITYID, SENDBUNDLE, FORWARDBUNDLE)														\
 	SENDBUNDLE.newMessage(BaseappInterface::forwardMessageToCellappFromCellapp);														\
 	SENDBUNDLE << ENTITYID;																												\
 	FORWARDBUNDLE.finiMessage(true);																									\
-	SENDBUNDLE.append(FORWARDBUNDLE);	
+	SENDBUNDLE.append(FORWARDBUNDLE);
 
-// cellapp×ª·¢ÏûÏ¢¸ø¿Í»§¶Ë¿ªÊ¼
+// cellappè½¬å‘æ¶ˆæ¯ç»™å®¢æˆ·ç«¯å¼€å§‹
 #define NETWORK_ENTITY_MESSAGE_FORWARD_CLIENT_BEGIN(ENTITYID, SENDBUNDLE)																\
 	SENDBUNDLE.newMessage(BaseappInterface::forwardMessageToClientFromCellapp);															\
 	SENDBUNDLE << ENTITYID;																												\
 
-// cellapp×ª·¢ÏûÏ¢¸ø¿Í»§¶ËÏûÏ¢°ü×·¼ÓÏûÏ¢
+// cellappè½¬å‘æ¶ˆæ¯ç»™å®¢æˆ·ç«¯æ¶ˆæ¯åŒ…è¿½åŠ æ¶ˆæ¯
 #define NETWORK_ENTITY_MESSAGE_FORWARD_CLIENT_APPEND(SENDBUNDLE, FORWARDBUNDLE)															\
 	FORWARDBUNDLE.finiMessage(true);																									\
 	SENDBUNDLE.append(FORWARDBUNDLE);																									\
@@ -81,7 +81,7 @@ namespace KBEngine {
 }																																		\
 
 
-// cellapp×ª·¢ÏûÏ¢¸ø¿Í»§¶ËÏûÏ¢°ü×·¼ÓÏûÏ¢(Ö±½ÓÔÚSENDBUNDLE×·¼Ó)
+// cellappè½¬å‘æ¶ˆæ¯ç»™å®¢æˆ·ç«¯æ¶ˆæ¯åŒ…è¿½åŠ æ¶ˆæ¯(ç›´æ¥åœ¨SENDBUNDLEè¿½åŠ )
 #define ENTITY_MESSAGE_FORWARD_CLIENT_BEGIN(SENDBUNDLE, MESSAGEHANDLE, ACTIONNAME)														\
 	(*SENDBUNDLE) << MESSAGEHANDLE.msgID;																								\
 	size_t currMsgLengthPos_##ACTIONNAME = 0;																							\
@@ -103,7 +103,7 @@ namespace KBEngine {
 	size_t messageLength_last_##ACTIONNAME = SENDBUNDLE->currMsgLength();																\
 
 
-// ¹«¹²ÏûÏ¢
+// å…¬å…±æ¶ˆæ¯
 #define COMMON_NETWORK_MESSAGE(COMPONENTTYPE, BUNDLE, MESSAGENAME)											\
 		switch(COMPONENTTYPE)																				\
 		{																									\
@@ -176,13 +176,13 @@ namespace KBEngine {
 		};																									\
 
 /**
-½«Ãë×ª»»Îªtick
-@lowerBound: ×îÉÙ²»µÍÓÚNtick
+å°†ç§’è½¬æ¢ä¸ºtick
+@lowerBound: æœ€å°‘ä¸ä½äºNtick
 */
 int32 secondsToTicks(float seconds, int lowerBound);
 
 /**
-	½«ÃëÎªµ¥Î»µÄÊ±¼ä×ª»»ÎªÃ¿ÃëËùºÄµÄstamps
+	å°†ç§’ä¸ºå•ä½çš„æ—¶é—´è½¬æ¢ä¸ºæ¯ç§’æ‰€è€—çš„stamps
 */
 inline uint64 secondsToStamps(float seconds)
 {
@@ -192,22 +192,22 @@ inline uint64 secondsToStamps(float seconds)
 void autoFixUserDigestUID();
 
 /*
- ÕËºÅºÍÃÜÂë×î´ó³¤¶È
+ è´¦å·å’Œå¯†ç æœ€å¤§é•¿åº¦
 */
 #define ACCOUNT_NAME_MAX_LENGTH						128
 #define ACCOUNT_PASSWD_MAX_LENGTH					255
 
-// µÇÂ¼×¢²áÊ±¸½´øµÄĞÅÏ¢×î´ó³¤¶È
+// ç™»å½•æ³¨å†Œæ—¶é™„å¸¦çš„ä¿¡æ¯æœ€å¤§é•¿åº¦
 #define ACCOUNT_DATA_MAX_LENGTH						1024
 
-// ±»ÓÃÀ´ÃèÊöÈÎºÎÖ»×öÒ»´Îºó×Ô¶¯ÉèÖÃÎª²»×öµÄÑ¡Ïî
+// è¢«ç”¨æ¥æè¿°ä»»ä½•åªåšä¸€æ¬¡åè‡ªåŠ¨è®¾ç½®ä¸ºä¸åšçš„é€‰é¡¹
 #define KBE_NEXT_ONLY								2
 
-/** c/c++Êı¾İÀà±ğ×ª»»³ÉKBEDataTypeID */
+/** c/c++æ•°æ®ç±»åˆ«è½¬æ¢æˆKBEDataTypeID */
 #define KBE_DATATYPE2ID_MAX							21
 uint16 datatype2id(std::string datatype);
 
-/** c/c++Êı¾İÀà±ğ×ª»»³ÉÔ­ÉúÀà±ğUINT16 ... */
+/** c/c++æ•°æ®ç±»åˆ«è½¬æ¢æˆåŸç”Ÿç±»åˆ«UINT16 ... */
 std::string datatype2nativetype(std::string datatype);
 std::string datatype2nativetype(uint16 datatype);
 

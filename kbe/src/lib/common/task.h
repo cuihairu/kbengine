@@ -9,7 +9,7 @@ namespace KBEngine
 {
 
 /**
- *	³éÏóÒ»¸öÈÎÎñ
+ *	æŠ½è±¡ä¸€ä¸ªä»»åŠ¡
  */
 class Task
 {

@@ -26,7 +26,7 @@
 #pragma warning (disable : 4996)
 #endif
 
-	
+
 namespace KBEngine{
 
 class PythonApp : public ServerApp
@@ -36,17 +36,17 @@ public:
 	{
 		TIMEOUT_GAME_TICK = TIMEOUT_SERVERAPP_MAX + 1,
 
-		// Õâ¸ö±ØĞë·ÅÔÚ×îºóÃæ£¬±íÊ¾µ±Ç°×î´óµÄÃ¶¾ÙÖµÊÇ¶àÉÙ
+		// è¿™ä¸ªå¿…é¡»æ”¾åœ¨æœ€åé¢ï¼Œè¡¨ç¤ºå½“å‰æœ€å¤§çš„æšä¸¾å€¼æ˜¯å¤šå°‘
 		TIMEOUT_PYTHONAPP_MAX = TIMEOUT_GAME_TICK
 	};
 
 	PythonApp(Network::EventDispatcher& dispatcher,
-		Network::NetworkInterface& ninterface, 
+		Network::NetworkInterface& ninterface,
 		COMPONENT_TYPE componentType,
 		COMPONENT_ID componentID);
 
 	~PythonApp();
-	
+
 	KBEngine::script::Script& getScript(){ return script_; }
 	PyObjectPtr getEntryScript(){ return entryScript_; }
 
@@ -67,58 +67,58 @@ public:
 
 	virtual void handleTimeout(TimerHandle, void * arg);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇóÖ´ĞĞÒ»¶ÎpythonÖ¸Áî
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚æ‰§è¡Œä¸€æ®µpythonæŒ‡ä»¤
 	*/
 	void onExecScriptCommand(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** 
-		consoleÇëÇó¿ªÊ¼profile
+	/**
+		consoleè¯·æ±‚å¼€å§‹profile
 	*/
 	virtual void startProfile_(Network::Channel* pChannel, std::string profileName, int8 profileType, uint32 timelen);
 
 	/**
-		»ñÈ¡apps·¢²¼×´Ì¬, ¿ÉÔÚ½Å±¾ÖĞ»ñÈ¡¸ÃÖµ
+		è·å–appså‘å¸ƒçŠ¶æ€, å¯åœ¨è„šæœ¬ä¸­è·å–è¯¥å€¼
 	*/
 	static PyObject* __py_getAppPublish(PyObject* self, PyObject* args);
 
 	/**
-		ÉèÖÃ½Å±¾Êä³öÀàĞÍÇ°×º
+		è®¾ç½®è„šæœ¬è¾“å‡ºç±»å‹å‰ç¼€
 	*/
 	static PyObject* __py_setScriptLogType(PyObject* self, PyObject* args);
 
 	/**
-		ÖØĞÂµ¼ÈëËùÓĞµÄ½Å±¾
+		é‡æ–°å¯¼å…¥æ‰€æœ‰çš„è„šæœ¬
 	*/
 	virtual void reloadScript(bool fullReload);
 	virtual void onReloadScript(bool fullReload);
 
 	/**
-		Í¨¹ıÏà¶ÔÂ·¾¶»ñÈ¡×ÊÔ´µÄÈ«Â·¾¶
+		é€šè¿‡ç›¸å¯¹è·¯å¾„è·å–èµ„æºçš„å…¨è·¯å¾„
 	*/
 	static PyObject* __py_getResFullPath(PyObject* self, PyObject* args);
 
 	/**
-		Í¨¹ıÏà¶ÔÂ·¾¶ÅĞ¶Ï×ÊÔ´ÊÇ·ñ´æÔÚ
+		é€šè¿‡ç›¸å¯¹è·¯å¾„åˆ¤æ–­èµ„æºæ˜¯å¦å­˜åœ¨
 	*/
 	static PyObject* __py_hasRes(PyObject* self, PyObject* args);
 
 	/**
-		openÎÄ¼ş
+		openæ–‡ä»¶
 	*/
 	static PyObject* __py_kbeOpen(PyObject* self, PyObject* args);
 
 	/**
-		ÁĞ³öÄ¿Â¼ÏÂËùÓĞÎÄ¼ş
+		åˆ—å‡ºç›®å½•ä¸‹æ‰€æœ‰æ–‡ä»¶
 	*/
 	static PyObject* __py_listPathRes(PyObject* self, PyObject* args);
 
 	/**
-		Æ¥ÅäÏà¶ÔÂ·¾¶»ñµÃÈ«Â·¾¶ 
+		åŒ¹é…ç›¸å¯¹è·¯å¾„è·å¾—å…¨è·¯å¾„
 	*/
 	static PyObject* __py_matchPath(PyObject* self, PyObject* args);
 
-	/** Timer²Ù×÷
+	/** Timeræ“ä½œ
 	*/
 	static PyObject* __py_addTimer(PyObject* self, PyObject* args);
 	static PyObject* __py_delTimer(PyObject* self, PyObject* args);

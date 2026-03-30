@@ -11,38 +11,38 @@
 #include "network/bundle.h"
 #include "network/endpoint.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 namespace Network
 {
 class NetworkInterface;
 
 /*
-	¿ÉÒÔ·½±ãµÄ´¦ÀíÈç:Ïò¾ÖÓòÍøÄÚ¹ã²¥Ä³Ğ©ĞÅÏ¢£¬ ²¢´¦ÀíÊÕ¼¯Ïà¹ØĞÅÏ¢¡£
+	å¯ä»¥æ–¹ä¾¿çš„å¤„ç†å¦‚:å‘å±€åŸŸç½‘å†…å¹¿æ’­æŸäº›ä¿¡æ¯ï¼Œ å¹¶å¤„ç†æ”¶é›†ç›¸å…³ä¿¡æ¯ã€‚
 */
 class BundleBroadcast : public Bundle
 {
 public:
-	BundleBroadcast(NetworkInterface & networkInterface, uint16 bindPort = KBE_PORT_BROADCAST_DISCOVERY, 
+	BundleBroadcast(NetworkInterface & networkInterface, uint16 bindPort = KBE_PORT_BROADCAST_DISCOVERY,
 		uint32 recvWindowSize = PACKET_MAX_SIZE_UDP);
 	virtual ~BundleBroadcast();
 
 	EventDispatcher& dispatcher();
-	
+
 	bool broadcast(uint16 port = 0);
 	bool receive(MessageArgs* recvArgs, sockaddr_in* psin = NULL, int32 timeout = 100000, bool showerr = true);
 
-	Network::EndPoint& epListen() { 
-		return epListen_; 
+	Network::EndPoint& epListen() {
+		return epListen_;
 	}
 
 	void close();
 
-	bool good() const { 
-		return epListen_.good() && good_; 
+	bool good() const {
+		return epListen_.good() && good_;
 	}
 
-	void itry(int8 i){ 
-		itry_ = i; 
+	void itry(int8 i){
+		itry_ = i;
 	}
 
 	void addBroadCastAddress(std::string addr);

@@ -14,7 +14,7 @@ namespace KBEngine
 {
 
 /**
- *	openssl md5�ķ�װ
+ *	openssl md5的封装
  */
 class KBE_MD5
 {
@@ -28,7 +28,7 @@ public:
 	std::string getDigestStr();
 
 	void clear();
-	
+
 	void final();
 
 	bool operator==( const KBE_MD5 & other ) const;

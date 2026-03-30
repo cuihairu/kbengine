@@ -1,7 +1,7 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
 
-namespace KBEngine { 
+namespace KBEngine {
 namespace Network
 {
 
@@ -231,8 +231,8 @@ INLINE int EndPoint::close()
 	if (socket_ == invalidSocket)
 		return 0;
 
-	// UDPÄ£Ê½ÏÂ£¬ socketÊÇ·þÎñÆ÷listenµÄfd
-	// socketÎªÒýÓÃÄ£Ê½
+	// UDPæ¨¡å¼ä¸‹ï¼Œ socketæ˜¯æœåŠ¡å™¨listençš„fd
+	// socketä¸ºå¼•ç”¨æ¨¡å¼
 	if (isRefSocket_)
 	{
 		this->setFileDescriptor(invalidSocket);
@@ -311,7 +311,7 @@ INLINE int EndPoint::getremotehostname(std::string * host) const
 {
 	sockaddr_in sin;
 	socklen_t sinLen = sizeof(sin);
-	
+
 	int ret = ::getpeername(socket_, (struct sockaddr*)&sin, &sinLen);
 	if (ret == 0)
 	{
@@ -408,7 +408,7 @@ INLINE int EndPoint::connect(u_int16_t networkPort, u_int32_t networkAddr, bool 
 		setnonblocking(true);
 		setnodelay(true);
 	}
-	
+
 	return ret;
 }
 
@@ -428,13 +428,13 @@ INLINE EndPoint * EndPoint::accept(u_int16_t * networkPort, u_int32_t * networkA
 
 	pNew->setFileDescriptor(ret);
 	pNew->addr(sin.sin_port, sin.sin_addr.s_addr);
-	
+
 	if(autosetflags)
 	{
 		pNew->setnonblocking(true);
 		pNew->setnodelay(true);
 	}
-	
+
 	if (networkPort != NULL) *networkPort = sin.sin_port;
 	if (networkAddr != NULL) *networkAddr = sin.sin_addr.s_addr;
 

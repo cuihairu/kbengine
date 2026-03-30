@@ -8,7 +8,7 @@
 #include "helper/debug_helper.h"
 #include "network/address.h"
 
-namespace KBEngine{ 
+namespace KBEngine{
 
 class SendEMailTask : public thread::TPTask
 {
@@ -34,7 +34,7 @@ protected:
 };
 
 /*
-	ÕËºÅ¼¤»îÓÊ¼ş·¢ËÍÏß³ÌÈÎÎñ
+	è´¦å·æ¿€æ´»é‚®ä»¶å‘é€çº¿ç¨‹ä»»åŠ¡
 */
 
 class SendActivateEMailTask : public SendEMailTask
@@ -56,7 +56,7 @@ protected:
 };
 
 /*
-	Íü¼ÇÃÜÂëÓÊ¼ş·¢ËÍÏß³ÌÈÎÎñ
+	å¿˜è®°å¯†ç é‚®ä»¶å‘é€çº¿ç¨‹ä»»åŠ¡
 */
 
 class SendResetPasswordEMailTask : public SendEMailTask
@@ -78,7 +78,7 @@ protected:
 };
 
 /*
-	ÕËºÅ°ó¶¨ÓÊÏäÓÊ¼ş·¢ËÍÏß³ÌÈÎÎñ
+	è´¦å·ç»‘å®šé‚®ç®±é‚®ä»¶å‘é€çº¿ç¨‹ä»»åŠ¡
 */
 
 class SendBindEMailTask : public SendEMailTask

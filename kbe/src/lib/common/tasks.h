@@ -10,7 +10,7 @@ namespace KBEngine
 {
 
 /**
- *	ÈÎÎñÈİÆ÷
+ *	ä»»åŠ¡å®¹å™¨
  */
 class Tasks
 {
@@ -22,7 +22,7 @@ public:
 	bool cancel(Task * pTask);
 	void process();
 private:
-	
+
 	typedef std::vector<KBEngine::Task *> Container;
 	Container container_;
 };

@@ -10,7 +10,7 @@
 #include "helper/debug_helper.h"
 #include "network/endpoint.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 namespace Network
 {
 class Address;
@@ -28,10 +28,10 @@ class NetworkInterface : public TimerHandler
 {
 public:
 	typedef std::map<Address, Channel *>	ChannelMap;
-	
+
 	NetworkInterface(EventDispatcher * pDispatcher,
 		int32 extlisteningTcpPort_min = -1, int32 extlisteningTcpPort_max = -1, int32 extlisteningUdpPort_min = -1, int32 extlisteningUdpPort_max = -1, const char * extlisteningInterface = "",
-		uint32 extrbuffer = 0, uint32 extwbuffer = 0, 
+		uint32 extrbuffer = 0, uint32 extwbuffer = 0,
 		int32 intlisteningPort_min = 0, int32 intlisteningPort_max = 0, const char * intlisteningInterface = "",
 		uint32 intrbuffer = 0, uint32 intwbuffer = 0);
 
@@ -54,7 +54,7 @@ public:
 		{ return pChannelTimeOutHandler_; }
 	void pChannelTimeOutHandler(ChannelTimeOutHandler * pHandler)
 		{ pChannelTimeOutHandler_ = pHandler; }
-		
+
 	ChannelDeregisterHandler * pChannelDeregisterHandler() const
 		{ return pChannelDeregisterHandler_; }
 	void pChannelDeregisterHandler(ChannelDeregisterHandler * pHandler)
@@ -62,24 +62,24 @@ public:
 
 	EventDispatcher & dispatcher()		{ return *pDispatcher_; }
 
-	/* Íâ²¿ÍøµãºÍÄÚ²¿Íøµã */
+	/* å¤–éƒ¨ç½‘ç‚¹å’Œå†…éƒ¨ç½‘ç‚¹ */
 	EndPoint & extEndpoint()				{ return extTcpEndpoint_; }
 	EndPoint & intEndpoint()				{ return intTcpEndpoint_; }
 
 	const char * c_str() const { return extTcpEndpoint_.c_str(); }
-	
+
 	const ChannelMap& channels(void) { return channelMap_; }
-		
-	/** ·¢ËÍÏà¹Ø */
+
+	/** å‘é€ç›¸å…³ */
 	void sendIfDelayed(Channel & channel);
 	void delayedSend(Channel & channel);
-	
+
 	bool good() const{ return (!pExtListenerReceiver_ || extTcpEndpoint_.good()) && (intTcpEndpoint_.good()); }
 
 	void onChannelTimeOut(Channel * pChannel);
-	
-	/* 
-		´¦ÀíËùÓĞchannels  
+
+	/*
+		å¤„ç†æ‰€æœ‰channels
 	*/
 	void processChannels(KBEngine::Network::MessageHandlers* pMsgHandlers);
 
@@ -96,14 +96,14 @@ private:
 	ChannelMap								channelMap_;
 
 	EventDispatcher *						pDispatcher_;
-	
+
 	ListenerReceiver *						pExtListenerReceiver_;
 	ListenerReceiver *						pExtUdpListenerReceiver_;
 	ListenerReceiver *						pIntListenerReceiver_;
-	
+
 	DelayedChannels * 						pDelayedChannels_;
-	
-	ChannelTimeOutHandler *					pChannelTimeOutHandler_;	// ³¬Ê±µÄÍ¨µÀ¿É±»Õâ¸ö¾ä±ú²¶×½£¬ ÀıÈç¸æÖªÉÏ²ãclient¶Ï¿ª
+
+	ChannelTimeOutHandler *					pChannelTimeOutHandler_;	// è¶…æ—¶çš„é€šé“å¯è¢«è¿™ä¸ªå¥æŸ„æ•æ‰ï¼Œ ä¾‹å¦‚å‘ŠçŸ¥ä¸Šå±‚clientæ–­å¼€
 	ChannelDeregisterHandler *				pChannelDeregisterHandler_;
 
 	int32									numExtChannels_;
