@@ -133,7 +133,7 @@ void TelnetServer::closeHandler(int fd, TelnetHandler* pTelnetHandler)
 	pDispatcher_->deregisterReadFileDescriptor(fd);
 	handlers_.erase(iter);
 
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 	::close(fd);
 #else
 	::closesocket(fd);
@@ -199,4 +199,3 @@ int	TelnetServer::handleInputNotification(int fd)
 
 //-------------------------------------------------------------------------------------
 }
-

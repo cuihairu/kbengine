@@ -4,16 +4,12 @@ add_library(kbe_build_config INTERFACE)
 add_library(KBEngine::build_config ALIAS kbe_build_config)
 
 target_compile_features(kbe_build_config INTERFACE cxx_std_17)
+target_link_libraries(kbe_build_config INTERFACE fmt::fmt)
 target_compile_definitions(kbe_build_config INTERFACE ${KBE_COMMON_DEFINITIONS})
 target_include_directories(kbe_build_config INTERFACE
   "${KBE_SOURCE_DIR}"
   "${KBE_SOURCE_DIR}/lib"
-  "${KBE_SOURCE_DIR}/server"
   "${KBE_SOURCE_DIR}/lib/dependencies"
-  "${KBE_SOURCE_DIR}/lib/dependencies/fmt/include"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml"
-  "${KBE_SOURCE_DIR}/lib/dependencies/zlib"
-  "${KBE_SOURCE_DIR}/lib/dependencies/curl/include"
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -27,10 +23,6 @@ if(KBE_USE_LOG4CXX)
     "${KBE_SOURCE_DIR}/lib/dependencies/log4cxx/src/main/include"
   )
 endif()
-
-add_custom_target(kbe-bootstrap
-  COMMENT "Initial KBEngine CMake bootstrap target"
-)
 
 add_library(kbe_common_core STATIC
   "${KBE_SOURCE_DIR}/lib/common/base64.cpp"
@@ -49,8 +41,6 @@ target_include_directories(kbe_common_core
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_core)
-
 add_library(kbe_common_strutil STATIC
   "${KBE_SOURCE_DIR}/lib/common/strutil_core.cpp"
 )
@@ -66,8 +56,6 @@ target_include_directories(kbe_common_strutil
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_common_strutil)
 
 add_library(kbe_common_timestamp STATIC
   "${KBE_SOURCE_DIR}/lib/common/timestamp.cpp"
@@ -85,8 +73,6 @@ target_include_directories(kbe_common_timestamp
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_timestamp)
-
 add_library(kbe_common_timer STATIC
   "${KBE_SOURCE_DIR}/lib/common/timer.cpp"
 )
@@ -102,8 +88,6 @@ target_include_directories(kbe_common_timer
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_common_timer)
 
 add_library(kbe_common_md5 STATIC
   "${KBE_SOURCE_DIR}/lib/common/md5.cpp"
@@ -127,8 +111,6 @@ target_include_directories(kbe_common_md5
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_md5)
-
 add_library(kbe_common_objectpool INTERFACE)
 
 add_library(KBEngine::common_objectpool ALIAS kbe_common_objectpool)
@@ -144,8 +126,6 @@ target_include_directories(kbe_common_objectpool
   INTERFACE
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_common_objectpool)
 
 add_library(kbe_common_memorystream STATIC
   "${KBE_SOURCE_DIR}/lib/common/memorystream.cpp"
@@ -164,8 +144,6 @@ target_include_directories(kbe_common_memorystream
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_common_memorystream)
 
 add_library(kbe_common_ssl STATIC
   "${KBE_SOURCE_DIR}/lib/common/ssl.cpp"
@@ -186,8 +164,6 @@ target_include_directories(kbe_common_ssl
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_ssl)
-
 add_library(kbe_common_rsa STATIC
   "${KBE_SOURCE_DIR}/lib/common/rsa.cpp"
 )
@@ -207,8 +183,6 @@ target_include_directories(kbe_common_rsa
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_rsa)
-
 add_library(kbe_common_kbekey STATIC
   "${KBE_SOURCE_DIR}/lib/common/kbekey.cpp"
 )
@@ -226,8 +200,6 @@ target_include_directories(kbe_common_kbekey
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_kbekey)
-
 add_library(kbe_common_tasks STATIC
   "${KBE_SOURCE_DIR}/lib/common/tasks.cpp"
 )
@@ -244,8 +216,6 @@ target_include_directories(kbe_common_tasks
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_tasks)
-
 add_library(kbe_common_version STATIC
   "${KBE_SOURCE_DIR}/lib/common/kbeversion.cpp"
 )
@@ -261,8 +231,6 @@ target_include_directories(kbe_common_version
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_common_version)
 
 add_library(kbe_common_blowfish STATIC
   "${KBE_SOURCE_DIR}/lib/common/blowfish.cpp"
@@ -287,8 +255,6 @@ target_include_directories(kbe_common_blowfish
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_blowfish)
-
 add_library(kbe_common_refcountable INTERFACE)
 
 add_library(KBEngine::common_refcountable ALIAS kbe_common_refcountable)
@@ -302,8 +268,6 @@ target_include_directories(kbe_common_refcountable
   INTERFACE
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_common_refcountable)
 
 add_library(kbe_common_smartpointer INTERFACE)
 
@@ -320,8 +284,6 @@ target_include_directories(kbe_common_smartpointer
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_smartpointer)
-
 add_library(kbe_thread_primitives INTERFACE)
 
 add_library(KBEngine::thread_primitives ALIAS kbe_thread_primitives)
@@ -335,8 +297,6 @@ target_include_directories(kbe_thread_primitives
   INTERFACE
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_thread_primitives)
 
 add_library(kbe_thread_concurrency STATIC
   "${KBE_SOURCE_DIR}/lib/thread/concurrency.cpp"
@@ -354,8 +314,6 @@ target_include_directories(kbe_thread_concurrency
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_thread_concurrency)
-
 add_library(kbe_thread_task INTERFACE)
 
 add_library(KBEngine::thread_task ALIAS kbe_thread_task)
@@ -369,8 +327,6 @@ target_include_directories(kbe_thread_task
   INTERFACE
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_thread_task)
 
 add_library(kbe_common_deadline INTERFACE)
 
@@ -386,8 +342,6 @@ target_include_directories(kbe_common_deadline
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_deadline)
-
 add_library(kbe_common_predicates INTERFACE)
 
 add_library(KBEngine::common_predicates ALIAS kbe_common_predicates)
@@ -402,8 +356,6 @@ target_include_directories(kbe_common_predicates
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_common_predicates)
-
 add_library(kbe_common_endian INTERFACE)
 
 add_library(KBEngine::common_endian ALIAS kbe_common_endian)
@@ -417,8 +369,6 @@ target_include_directories(kbe_common_endian
   INTERFACE
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_common_endian)
 
 add_library(kbe_thread_pool STATIC
   "${KBE_SOURCE_DIR}/lib/thread/threadpool.cpp"
@@ -439,8 +389,6 @@ target_include_directories(kbe_thread_pool
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_thread_pool)
-
 add_library(kbe_helper_watcher STATIC
   "${KBE_SOURCE_DIR}/lib/helper/watcher.cpp"
 )
@@ -459,8 +407,6 @@ target_include_directories(kbe_helper_watcher
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_helper_watcher)
 
 add_library(kbe_helper_profile STATIC
   "${KBE_SOURCE_DIR}/lib/helper/profile.cpp"
@@ -482,8 +428,6 @@ target_include_directories(kbe_helper_profile
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_helper_profile)
-
 add_library(kbe_helper_debug_option STATIC
   "${KBE_SOURCE_DIR}/lib/helper/debug_option.cpp"
 )
@@ -499,8 +443,6 @@ target_include_directories(kbe_helper_debug_option
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_helper_debug_option)
 
 add_library(kbe_helper_event_stats STATIC
   "${KBE_SOURCE_DIR}/lib/helper/eventhistory_stats.cpp"
@@ -518,8 +460,6 @@ target_include_directories(kbe_helper_event_stats
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_helper_event_stats)
-
 add_library(kbe_helper_memory INTERFACE)
 
 add_library(KBEngine::helper_memory ALIAS kbe_helper_memory)
@@ -533,8 +473,6 @@ target_include_directories(kbe_helper_memory
   INTERFACE
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_helper_memory)
 
 add_library(kbe_helper_profiler STATIC
   "${KBE_SOURCE_DIR}/lib/helper/profiler.cpp"
@@ -551,8 +489,6 @@ target_include_directories(kbe_helper_profiler
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_helper_profiler)
 
 add_library(kbe_helper_debug_helper STATIC
   "${KBE_SOURCE_DIR}/lib/helper/debug_helper.cpp"
@@ -574,9 +510,9 @@ target_link_libraries(kbe_helper_debug_helper
 target_include_directories(kbe_helper_debug_helper
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+  PRIVATE
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_helper_debug_helper)
 
 add_library(kbe_network_http_utility STATIC
   "${KBE_SOURCE_DIR}/lib/network/http_utility.cpp"
@@ -597,8 +533,6 @@ target_include_directories(kbe_network_http_utility
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_http_utility)
 
 add_library(kbe_network_common STATIC
   "${KBE_SOURCE_DIR}/lib/network/common.cpp"
@@ -624,8 +558,6 @@ target_include_directories(kbe_network_common
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_common)
-
 add_library(kbe_network_address STATIC
   "${KBE_SOURCE_DIR}/lib/network/address.cpp"
 )
@@ -646,8 +578,6 @@ target_include_directories(kbe_network_address
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_address)
-
 add_library(kbe_network_exception INTERFACE)
 
 add_library(KBEngine::network_exception ALIAS kbe_network_exception)
@@ -665,8 +595,6 @@ target_include_directories(kbe_network_exception
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_exception)
-
 add_library(kbe_network_interfaces INTERFACE)
 
 add_library(KBEngine::network_interfaces ALIAS kbe_network_interfaces)
@@ -680,8 +608,6 @@ target_include_directories(kbe_network_interfaces
   INTERFACE
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_interfaces)
 
 add_library(kbe_network_packet INTERFACE)
 
@@ -699,8 +625,6 @@ target_include_directories(kbe_network_packet
   INTERFACE
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_packet)
 
 add_library(kbe_network_message_handler STATIC
   "${KBE_SOURCE_DIR}/lib/network/message_handler.cpp"
@@ -728,8 +652,6 @@ target_include_directories(kbe_network_message_handler
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_message_handler)
-
 add_library(kbe_network_stats STATIC
   "${KBE_SOURCE_DIR}/lib/network/network_stats.cpp"
 )
@@ -748,8 +670,6 @@ target_include_directories(kbe_network_stats
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_stats)
 
 add_library(kbe_network_error_reporter STATIC
   "${KBE_SOURCE_DIR}/lib/network/error_reporter.cpp"
@@ -772,8 +692,6 @@ target_include_directories(kbe_network_error_reporter
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_error_reporter)
-
 add_library(kbe_network_packet_filter STATIC
   "${KBE_SOURCE_DIR}/lib/network/packet_filter.cpp"
 )
@@ -795,8 +713,6 @@ target_include_directories(kbe_network_packet_filter
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_packet_filter)
 
 set(KBE_EVENT_POLLER_SOURCES
   "${KBE_SOURCE_DIR}/lib/network/event_poller.cpp"
@@ -828,9 +744,17 @@ target_include_directories(kbe_network_event_poller
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_event_poller)
-
 add_library(kbe_math STATIC
+  "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite/AABox.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite/Box.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite/Crypto.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite/format.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite/Matrix3.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite/Plane.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite/System.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite/Triangle.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite/Vector3.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite/Vector4.cpp"
   "${KBE_SOURCE_DIR}/lib/math/math.cpp"
 )
 
@@ -846,8 +770,6 @@ target_include_directories(kbe_math
     "${KBE_SOURCE_DIR}/lib"
     "${KBE_SOURCE_DIR}/lib/dependencies/g3dlite"
 )
-
-add_dependencies(kbe-bootstrap kbe_math)
 
 add_library(kbe_resmgr STATIC
   "${KBE_SOURCE_DIR}/lib/resmgr/resmgr.cpp"
@@ -873,8 +795,6 @@ target_include_directories(kbe_resmgr
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_resmgr)
-
 add_library(kbe_network_tcp_packet STATIC
   "${KBE_SOURCE_DIR}/lib/network/tcp_packet.cpp"
 )
@@ -895,8 +815,6 @@ target_include_directories(kbe_network_tcp_packet
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_tcp_packet)
-
 add_library(kbe_network_udp_packet STATIC
   "${KBE_SOURCE_DIR}/lib/network/udp_packet.cpp"
 )
@@ -916,8 +834,6 @@ target_include_directories(kbe_network_udp_packet
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_udp_packet)
 
 add_library(kbe_network_event_dispatcher STATIC
   "${KBE_SOURCE_DIR}/lib/network/event_dispatcher.cpp"
@@ -941,8 +857,6 @@ target_include_directories(kbe_network_event_dispatcher
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_event_dispatcher)
 
 target_link_libraries(kbe_network_http_utility
   PRIVATE
@@ -969,8 +883,6 @@ target_include_directories(kbe_network_endpoint
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_endpoint)
-
 if(KBE_BUILD_LEGACY_XML_TARGET)
   add_library(kbe_xml STATIC
     "${KBE_SOURCE_DIR}/lib/xml/xml.cpp"
@@ -990,7 +902,6 @@ if(KBE_BUILD_LEGACY_XML_TARGET)
       "${KBE_SOURCE_DIR}/lib"
   )
 
-  add_dependencies(kbe-bootstrap kbe_xml)
 endif()
 
 # ---------------------------------------------------------------------------
@@ -1016,8 +927,6 @@ target_include_directories(kbe_network_fixed_messages
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_fixed_messages)
-
 # ---------------------------------------------------------------------------
 # Server: machine_infos
 # ---------------------------------------------------------------------------
@@ -1041,9 +950,8 @@ target_link_libraries(kbe_server_machine_infos
 target_include_directories(kbe_server_machine_infos
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_machine_infos)
 
 # ---------------------------------------------------------------------------
 # Server: serverconfig
@@ -1072,9 +980,8 @@ target_link_libraries(kbe_server_serverconfig
 target_include_directories(kbe_server_serverconfig
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_serverconfig)
 
 # ---------------------------------------------------------------------------
 # Server: shutdowner
@@ -1097,9 +1004,8 @@ target_link_libraries(kbe_server_shutdowner
 target_include_directories(kbe_server_shutdowner
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_shutdowner)
 
 # ---------------------------------------------------------------------------
 # Server: signal_handler (stub)
@@ -1121,9 +1027,8 @@ target_link_libraries(kbe_server_signal_handler
 target_include_directories(kbe_server_signal_handler
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_signal_handler)
 
 # ---------------------------------------------------------------------------
 # Server: common
@@ -1146,9 +1051,8 @@ target_link_libraries(kbe_server_common
 target_include_directories(kbe_server_common
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_common)
 
 # ===========================================================================
 # Network: ikcp (self-contained C protocol implementation)
@@ -1168,8 +1072,6 @@ target_include_directories(kbe_network_ikcp
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_ikcp)
 
 # ---------------------------------------------------------------------------
 # Network: packet_reader
@@ -1192,8 +1094,6 @@ target_include_directories(kbe_network_packet_reader
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_packet_reader)
 
 # ---------------------------------------------------------------------------
 # Network: packet_sender
@@ -1220,8 +1120,6 @@ target_include_directories(kbe_network_packet_sender
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_packet_sender)
-
 # ---------------------------------------------------------------------------
 # Network: encryption_filter
 # ---------------------------------------------------------------------------
@@ -1245,8 +1143,6 @@ target_include_directories(kbe_network_encryption_filter
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_encryption_filter)
-
 # ---------------------------------------------------------------------------
 # Network: websocket_protocol
 # ---------------------------------------------------------------------------
@@ -1267,8 +1163,6 @@ target_include_directories(kbe_network_websocket_protocol
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_websocket_protocol)
 
 # ---------------------------------------------------------------------------
 # Network: delayed_channels
@@ -1291,8 +1185,6 @@ target_include_directories(kbe_network_delayed_channels
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_delayed_channels)
 
 # ---------------------------------------------------------------------------
 # Network: packet_receiver (base class for tcp/udp receivers)
@@ -1317,8 +1209,6 @@ target_include_directories(kbe_network_packet_receiver
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_packet_receiver)
-
 # ---------------------------------------------------------------------------
 # Network: tcp_packet_receiver
 # ---------------------------------------------------------------------------
@@ -1341,8 +1231,6 @@ target_include_directories(kbe_network_tcp_packet_receiver
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_tcp_packet_receiver)
 
 # ---------------------------------------------------------------------------
 # Network: tcp_packet_sender
@@ -1368,8 +1256,6 @@ target_include_directories(kbe_network_tcp_packet_sender
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_tcp_packet_sender)
-
 # ---------------------------------------------------------------------------
 # Network: udp_packet_receiver
 # ---------------------------------------------------------------------------
@@ -1392,8 +1278,6 @@ target_include_directories(kbe_network_udp_packet_receiver
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_udp_packet_receiver)
 
 # ---------------------------------------------------------------------------
 # Network: udp_packet_sender
@@ -1420,8 +1304,6 @@ target_include_directories(kbe_network_udp_packet_sender
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_udp_packet_sender)
-
 # ---------------------------------------------------------------------------
 # Network: kcp_packet_reader / kcp_packet_receiver / kcp_packet_sender
 # ---------------------------------------------------------------------------
@@ -1435,7 +1317,6 @@ target_link_libraries(kbe_network_kcp_packet_reader
 target_include_directories(kbe_network_kcp_packet_reader
   PUBLIC "${KBE_SOURCE_DIR}/lib"
 )
-add_dependencies(kbe-bootstrap kbe_network_kcp_packet_reader)
 
 add_library(kbe_network_kcp_packet_receiver STATIC
   "${KBE_SOURCE_DIR}/lib/network/kcp_packet_receiver.cpp"
@@ -1448,7 +1329,6 @@ target_link_libraries(kbe_network_kcp_packet_receiver
 target_include_directories(kbe_network_kcp_packet_receiver
   PUBLIC "${KBE_SOURCE_DIR}/lib"
 )
-add_dependencies(kbe-bootstrap kbe_network_kcp_packet_receiver)
 
 add_library(kbe_network_kcp_packet_sender STATIC
   "${KBE_SOURCE_DIR}/lib/network/kcp_packet_sender.cpp"
@@ -1461,7 +1341,6 @@ target_link_libraries(kbe_network_kcp_packet_sender
 target_include_directories(kbe_network_kcp_packet_sender
   PUBLIC "${KBE_SOURCE_DIR}/lib"
 )
-add_dependencies(kbe-bootstrap kbe_network_kcp_packet_sender)
 
 # ---------------------------------------------------------------------------
 # Network: websocket_packet_reader / websocket_packet_filter
@@ -1477,7 +1356,6 @@ target_link_libraries(kbe_network_websocket_packet_reader
 target_include_directories(kbe_network_websocket_packet_reader
   PUBLIC "${KBE_SOURCE_DIR}/lib"
 )
-add_dependencies(kbe-bootstrap kbe_network_websocket_packet_reader)
 
 add_library(kbe_network_websocket_packet_filter STATIC
   "${KBE_SOURCE_DIR}/lib/network/websocket_packet_filter.cpp"
@@ -1490,7 +1368,6 @@ target_link_libraries(kbe_network_websocket_packet_filter
 target_include_directories(kbe_network_websocket_packet_filter
   PUBLIC "${KBE_SOURCE_DIR}/lib"
 )
-add_dependencies(kbe-bootstrap kbe_network_websocket_packet_filter)
 
 # ---------------------------------------------------------------------------
 # Network: bundle (key milestone: part of circular dependency chain)
@@ -1521,8 +1398,6 @@ target_include_directories(kbe_network_bundle
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_bundle)
 
 # ---------------------------------------------------------------------------
 # Network: channel (key milestone: part of circular dependency chain)
@@ -1560,8 +1435,6 @@ target_include_directories(kbe_network_channel
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_channel)
-
 # ---------------------------------------------------------------------------
 # Network: network_interface (THE key milestone: unlocks server layer)
 # ---------------------------------------------------------------------------
@@ -1593,8 +1466,6 @@ target_include_directories(kbe_network_interface
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_network_interface)
-
 # ---------------------------------------------------------------------------
 # Network: bundle_broadcast
 # ---------------------------------------------------------------------------
@@ -1618,8 +1489,6 @@ target_include_directories(kbe_network_bundle_broadcast
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_network_bundle_broadcast)
 
 # ---------------------------------------------------------------------------
 # Helper: profile_handler
@@ -1649,8 +1518,6 @@ target_include_directories(kbe_helper_profile_handler
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_helper_profile_handler)
-
 # ---------------------------------------------------------------------------
 # Helper: sys_info
 # ---------------------------------------------------------------------------
@@ -1670,8 +1537,6 @@ target_include_directories(kbe_helper_sys_info
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
 )
-
-add_dependencies(kbe-bootstrap kbe_helper_sys_info)
 
 # ---------------------------------------------------------------------------
 # Helper: watch_pools
@@ -1701,8 +1566,6 @@ target_include_directories(kbe_helper_watch_pools
     "${KBE_SOURCE_DIR}/lib"
 )
 
-add_dependencies(kbe-bootstrap kbe_helper_watch_pools)
-
 # ---------------------------------------------------------------------------
 # Server: components bootstrap support
 # ---------------------------------------------------------------------------
@@ -1721,8 +1584,6 @@ target_include_directories(kbe_server_components_bootstrap_support
     "${KBE_SOURCE_DIR}/lib"
     "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_components_bootstrap_support)
 
 # ---------------------------------------------------------------------------
 # Server: components
@@ -1757,9 +1618,8 @@ target_link_libraries(kbe_server_components
 target_include_directories(kbe_server_components
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_components)
 
 # ---------------------------------------------------------------------------
 # Server: component_active_report_handler
@@ -1783,9 +1643,8 @@ target_link_libraries(kbe_server_component_active_report_handler
 target_include_directories(kbe_server_component_active_report_handler
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_component_active_report_handler)
 
 # ---------------------------------------------------------------------------
 # Server: script_timers
@@ -1806,9 +1665,8 @@ target_link_libraries(kbe_server_script_timers
 target_include_directories(kbe_server_script_timers
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_script_timers)
 
 # ---------------------------------------------------------------------------
 # Server: globaldata_server
@@ -1830,30 +1688,34 @@ target_link_libraries(kbe_server_globaldata_server
 target_include_directories(kbe_server_globaldata_server
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
 
-add_dependencies(kbe-bootstrap kbe_server_globaldata_server)
-
 # ---------------------------------------------------------------------------
-# Server: sendmail_threadtasks (header-only, all methods inline)
+# Server: sendmail_threadtasks
 # ---------------------------------------------------------------------------
-add_library(kbe_server_sendmail INTERFACE)
+add_library(kbe_server_sendmail STATIC
+  "${KBE_SOURCE_DIR}/lib/server/sendmail_threadtasks.cpp"
+)
 
 add_library(KBEngine::server_sendmail ALIAS kbe_server_sendmail)
 
 target_link_libraries(kbe_server_sendmail
-  INTERFACE
+  PUBLIC
     KBEngine::build_config
     KBEngine::thread_task
     KBEngine::network_address
+    KBEngine::server_serverconfig
+    KBEngine::helper_debug_helper
+    KBEngine::common_deadline
+    KBEngine::dependency_jwsmtp
 )
 
 target_include_directories(kbe_server_sendmail
-  INTERFACE
+  PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_sendmail)
 
 # ---------------------------------------------------------------------------
 # Server: pendingLoginmgr
@@ -1878,9 +1740,8 @@ target_link_libraries(kbe_server_pending_loginmgr
 target_include_directories(kbe_server_pending_loginmgr
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
-
-add_dependencies(kbe-bootstrap kbe_server_pending_loginmgr)
 
 # ---------------------------------------------------------------------------
 # Server: forward_messagebuffer
@@ -1904,6 +1765,373 @@ target_link_libraries(kbe_server_forward_messagebuffer
 target_include_directories(kbe_server_forward_messagebuffer
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
 )
 
-add_dependencies(kbe-bootstrap kbe_server_forward_messagebuffer)
+# ---------------------------------------------------------------------------
+# Script: pyscript
+# ---------------------------------------------------------------------------
+add_library(kbe_pyscript STATIC
+  "${KBE_SOURCE_DIR}/lib/pyscript/copy.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/map.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/math.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/pickler.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/py_compression.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/py_gc.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/pyurl.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/py_platform.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/pystruct.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/pyprofile.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/pyprofile_handler.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/py_memorystream.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/pywatcher.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/script.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/scriptobject.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/scriptstdout.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/scriptstderr.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/scriptstdouterr.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/scriptstdouterrhook.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/sequence.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/vector2.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/vector3.cpp"
+  "${KBE_SOURCE_DIR}/lib/pyscript/vector4.cpp"
+)
+
+add_library(KBEngine::pyscript ALIAS kbe_pyscript)
+
+target_link_libraries(kbe_pyscript
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_memorystream
+    KBEngine::helper_debug_helper
+    KBEngine::helper_profile
+    KBEngine::helper_watcher
+    KBEngine::math
+    KBEngine::network_address
+    KBEngine::network_common
+    KBEngine::resmgr
+    KBEngine::thread_concurrency
+    KBEngine::tinyxml
+    Python3::Python
+)
+
+target_include_directories(kbe_pyscript
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
+)
+
+# ---------------------------------------------------------------------------
+# Entity: entitydef
+# ---------------------------------------------------------------------------
+add_library(kbe_entitydef STATIC
+  "${KBE_SOURCE_DIR}/lib/entitydef/fixedarray.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/common.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/datatype.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/datatypes.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/detaillevel.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/entity_component.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/entity_component_call.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/entity_call.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/entitydef.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/py_entitydef.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/entitycallabstract.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/fixeddict.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/method.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/property.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/remote_entity_method.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/scriptdef_module.cpp"
+  "${KBE_SOURCE_DIR}/lib/entitydef/volatileinfo.cpp"
+)
+
+add_library(KBEngine::entitydef ALIAS kbe_entitydef)
+
+target_link_libraries(kbe_entitydef
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::math
+    KBEngine::network_bundle
+    KBEngine::network_channel
+    KBEngine::network_message_handler
+    KBEngine::pyscript
+)
+
+target_include_directories(kbe_entitydef
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
+)
+
+# ---------------------------------------------------------------------------
+# Server: runtime
+# ---------------------------------------------------------------------------
+add_library(kbe_server_runtime STATIC
+  "${KBE_SOURCE_DIR}/lib/server/entity_app.cpp"
+  "${KBE_SOURCE_DIR}/lib/server/globaldata_client.cpp"
+  "${KBE_SOURCE_DIR}/lib/server/idallocate.cpp"
+  "${KBE_SOURCE_DIR}/lib/server/id_component_querier.cpp"
+  "${KBE_SOURCE_DIR}/lib/server/py_file_descriptor.cpp"
+  "${KBE_SOURCE_DIR}/lib/server/python_app.cpp"
+  "${KBE_SOURCE_DIR}/lib/server/serverapp.cpp"
+  "${KBE_SOURCE_DIR}/lib/server/telnet_handler.cpp"
+  "${KBE_SOURCE_DIR}/lib/server/telnet_server.cpp"
+)
+
+add_library(KBEngine::server_runtime ALIAS kbe_server_runtime)
+
+target_link_libraries(kbe_server_runtime
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::common_core
+    KBEngine::common_kbekey
+    KBEngine::common_memorystream
+    KBEngine::entitydef
+    KBEngine::helper_debug_helper
+    KBEngine::helper_event_stats
+    KBEngine::helper_profile_handler
+    KBEngine::helper_sys_info
+    KBEngine::helper_watch_pools
+    KBEngine::math
+    KBEngine::network_bundle_broadcast
+    KBEngine::network_http_utility
+    KBEngine::network_interface
+    KBEngine::network_udp_packet_sender
+    KBEngine::pyscript
+    KBEngine::resmgr
+    KBEngine::server_sendmail
+    KBEngine::thread_pool
+  PRIVATE
+    KBEngine::server_component_active_report_handler
+    KBEngine::server_common
+    KBEngine::server_components
+    KBEngine::server_forward_messagebuffer
+    KBEngine::server_globaldata_server
+    KBEngine::server_machine_infos
+    KBEngine::server_pending_loginmgr
+    KBEngine::server_script_timers
+    KBEngine::server_serverconfig
+    KBEngine::server_shutdowner
+    KBEngine::server_signal_handler
+)
+
+target_include_directories(kbe_server_runtime
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
+)
+
+# ---------------------------------------------------------------------------
+# Client: client_lib
+# ---------------------------------------------------------------------------
+add_library(kbe_client_lib STATIC
+  "${KBE_SOURCE_DIR}/lib/client_lib/client_interface.cpp"
+  "${KBE_SOURCE_DIR}/lib/client_lib/clientapp.cpp"
+  "${KBE_SOURCE_DIR}/lib/client_lib/clientobjectbase.cpp"
+  "${KBE_SOURCE_DIR}/lib/client_lib/config.cpp"
+  "${KBE_SOURCE_DIR}/lib/client_lib/script_callbacks.cpp"
+  "${KBE_SOURCE_DIR}/lib/client_lib/entity.cpp"
+  "${KBE_SOURCE_DIR}/lib/client_lib/entity_aspect.cpp"
+  "${KBE_SOURCE_DIR}/lib/client_lib/entity_component.cpp"
+  "${KBE_SOURCE_DIR}/lib/client_lib/event.cpp"
+  "${KBE_SOURCE_DIR}/lib/client_lib/moveto_point_handler.cpp"
+  "${KBE_SOURCE_DIR}/lib/client_lib/profile.cpp"
+)
+
+add_library(KBEngine::client_lib ALIAS kbe_client_lib)
+
+target_link_libraries(kbe_client_lib
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::entitydef
+    KBEngine::helper_debug_helper
+    KBEngine::math
+    KBEngine::network_encryption_filter
+    KBEngine::network_interface
+    KBEngine::pyscript
+    KBEngine::thread_pool
+    KBEngine::tinyxml
+)
+
+target_compile_definitions(kbe_client_lib
+  PUBLIC
+    KBE_CLIENT
+)
+
+target_include_directories(kbe_client_lib
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
+)
+
+# ---------------------------------------------------------------------------
+# Navigation
+# ---------------------------------------------------------------------------
+add_library(kbe_navigation STATIC
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourAlloc.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourAssert.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourCommon.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourCrowd.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourLocalBoundary.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourNavMesh.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourNavMeshBuilder.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourNavMeshQuery.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourNode.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourObstacleAvoidance.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourPathCorridor.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourPathQueue.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourProximityGrid.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourTileCache.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/DetourTileCacheBuilder.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/navigation.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/navigation_handle.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/navigation_mesh_handle.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/navigation_tile_handle.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/Recast.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/RecastAlloc.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/RecastArea.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/RecastAssert.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/RecastContour.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/RecastFilter.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/RecastLayers.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/RecastMesh.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/RecastMeshDetail.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/RecastRasterization.cpp"
+  "${KBE_SOURCE_DIR}/lib/navigation/RecastRegion.cpp"
+)
+
+add_library(KBEngine::navigation ALIAS kbe_navigation)
+
+target_link_libraries(kbe_navigation
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::dependency_tmxparser
+    KBEngine::math
+    KBEngine::resmgr
+    KBEngine::thread_pool
+)
+
+target_include_directories(kbe_navigation
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser"
+)
+
+# ---------------------------------------------------------------------------
+# Database: interface core
+# ---------------------------------------------------------------------------
+add_library(kbe_db_interface STATIC
+  "${KBE_SOURCE_DIR}/lib/db_interface/db_tasks.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_interface/db_threadpool.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_interface/entity_table.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_interface/kbe_tables.cpp"
+)
+
+add_library(KBEngine::db_interface ALIAS kbe_db_interface)
+
+target_link_libraries(kbe_db_interface
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::entitydef
+    KBEngine::server_runtime
+    KBEngine::thread_pool
+)
+
+target_include_directories(kbe_db_interface
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
+)
+
+# ---------------------------------------------------------------------------
+# Database: mysql backend
+# ---------------------------------------------------------------------------
+add_library(kbe_db_mysql STATIC
+  "${KBE_SOURCE_DIR}/lib/db_mysql/common.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_mysql/db_exception.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_mysql/db_interface_mysql.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_mysql/db_transaction.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_mysql/entity_sqlstatement_mapping.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_mysql/entity_table_mysql.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_mysql/kbe_table_mysql.cpp"
+)
+
+add_library(KBEngine::db_mysql ALIAS kbe_db_mysql)
+
+target_link_libraries(kbe_db_mysql
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::db_interface
+    KBEngine::network_fixed_messages
+)
+
+if(TARGET kbe_dependency_mysqlclient)
+  target_link_libraries(kbe_db_mysql PUBLIC KBEngine::dependency_mysqlclient)
+endif()
+
+target_compile_definitions(kbe_db_mysql
+  PUBLIC
+    KBE_USE_MYSQL
+)
+
+target_include_directories(kbe_db_mysql
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/server"
+)
+
+# ---------------------------------------------------------------------------
+# Database: redis backend
+# ---------------------------------------------------------------------------
+add_library(kbe_db_redis STATIC
+  "${KBE_SOURCE_DIR}/lib/db_redis/common.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_redis/db_exception.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_redis/db_interface_redis.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_redis/db_transaction.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_redis/entity_table_redis.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_redis/kbe_table_redis.cpp"
+  "${KBE_SOURCE_DIR}/lib/db_redis/redis_watcher.cpp"
+)
+
+add_library(KBEngine::db_redis ALIAS kbe_db_redis)
+
+target_link_libraries(kbe_db_redis
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::db_interface
+    KBEngine::dependency_hiredis
+    KBEngine::network_fixed_messages
+)
+
+target_compile_definitions(kbe_db_redis
+  PUBLIC
+    KBE_USE_REDIS
+)
+
+target_include_directories(kbe_db_redis
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/lib/dependencies/hiredis"
+    "${KBE_SOURCE_DIR}/server"
+)
+
+# ---------------------------------------------------------------------------
+# Database: runtime bridge/factory
+# ---------------------------------------------------------------------------
+add_library(kbe_db_runtime STATIC
+  "${KBE_SOURCE_DIR}/lib/db_interface/db_interface.cpp"
+)
+
+add_library(KBEngine::db_runtime ALIAS kbe_db_runtime)
+
+target_link_libraries(kbe_db_runtime
+  PUBLIC
+    KBEngine::build_config
+    KBEngine::db_interface
+    KBEngine::db_mysql
+    KBEngine::db_redis
+)
+
+target_include_directories(kbe_db_runtime
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+)

@@ -1,5 +1,8 @@
 if(KBE_USING_VCPKG)
   find_package(fmt CONFIG QUIET)
+  find_package(hiredis CONFIG QUIET)
+  find_package(unofficial-libmysql CONFIG QUIET)
+  find_package(unofficial-libmariadb CONFIG QUIET)
 endif()
 
 if(TARGET fmt::fmt)
@@ -36,6 +39,111 @@ target_include_directories(tinyxml
     "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml"
 )
 
+add_library(kbe_dependency_tmxparser STATIC
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/base64.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxImage.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxImageLayer.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxLayer.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxEllipse.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxMap.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxObject.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxObjectGroup.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxPolygon.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxPolyline.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxPropertySet.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxTile.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxTileset.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxUtil.cpp"
+)
+
+add_library(KBEngine::dependency_tmxparser ALIAS kbe_dependency_tmxparser)
+
+target_compile_features(kbe_dependency_tmxparser PUBLIC cxx_std_17)
+target_include_directories(kbe_dependency_tmxparser
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser"
+    "${KBE_SOURCE_DIR}/lib/dependencies"
+)
+target_link_libraries(kbe_dependency_tmxparser
+  PUBLIC
+    KBEngine::tinyxml
+    ZLIB::ZLIB
+)
+
+if(TARGET hiredis::hiredis)
+  add_library(kbe_dependency_hiredis INTERFACE)
+  target_link_libraries(kbe_dependency_hiredis INTERFACE hiredis::hiredis)
+  message(STATUS "KBEngine: using package-provided hiredis target")
+elseif(TARGET hiredis::hiredis_static)
+  add_library(kbe_dependency_hiredis INTERFACE)
+  target_link_libraries(kbe_dependency_hiredis INTERFACE hiredis::hiredis_static)
+  message(STATUS "KBEngine: using package-provided hiredis::hiredis_static target")
+else()
+  add_library(kbe_dependency_hiredis STATIC
+    "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/hiredis.c"
+    "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/net.c"
+    "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/read.c"
+    "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/sds.c"
+  )
+
+  target_include_directories(kbe_dependency_hiredis
+    PUBLIC
+      "${KBE_SOURCE_DIR}/lib/dependencies/hiredis"
+  )
+
+  message(STATUS "KBEngine: using vendored hiredis sources")
+endif()
+
+add_library(KBEngine::dependency_hiredis ALIAS kbe_dependency_hiredis)
+
+set(KBE_MYSQLCLIENT_IMPORTED_TARGET "")
+foreach(candidate
+    unofficial::libmysql::libmysql
+    unofficial::libmariadb
+    unofficial::libmariadb::libmariadb
+)
+  if(TARGET ${candidate})
+    set(KBE_MYSQLCLIENT_IMPORTED_TARGET ${candidate})
+    break()
+  endif()
+endforeach()
+
+if(KBE_MYSQLCLIENT_IMPORTED_TARGET)
+  add_library(kbe_dependency_mysqlclient INTERFACE)
+  target_link_libraries(kbe_dependency_mysqlclient INTERFACE ${KBE_MYSQLCLIENT_IMPORTED_TARGET})
+  message(STATUS "KBEngine: using package-provided MySQL client target: ${KBE_MYSQLCLIENT_IMPORTED_TARGET}")
+else()
+  find_path(KBE_MYSQL_INCLUDE_DIR
+    NAMES mysql/mysql.h mysql.h
+    PATHS
+      "${KBE_SOURCE_DIR}/lib/dependencies/mysql"
+      /opt/homebrew/include
+      /usr/local/include
+    PATH_SUFFIXES ""
+  )
+
+  find_library(KBE_MYSQL_LIBRARY
+    NAMES mariadb mysqlclient libmysql libmariadb
+    PATHS
+      /opt/homebrew/lib
+      /usr/local/lib
+  )
+
+  if(KBE_MYSQL_INCLUDE_DIR AND KBE_MYSQL_LIBRARY)
+    add_library(kbe_dependency_mysqlclient INTERFACE)
+    target_include_directories(kbe_dependency_mysqlclient INTERFACE "${KBE_MYSQL_INCLUDE_DIR}")
+    target_link_libraries(kbe_dependency_mysqlclient INTERFACE "${KBE_MYSQL_LIBRARY}")
+    message(STATUS "KBEngine: using discovered MySQL client library: ${KBE_MYSQL_LIBRARY}")
+  else()
+    message(WARNING "KBEngine: MySQL client library was not found; dbmgr will not build until libmariadb/libmysql is available.")
+  endif()
+endif()
+
+if(TARGET kbe_dependency_mysqlclient)
+  add_library(KBEngine::dependency_mysqlclient ALIAS kbe_dependency_mysqlclient)
+endif()
+
 find_package(ZLIB REQUIRED)
 
 if(TARGET ZLIB::ZLIB)
@@ -54,6 +162,30 @@ if(KBE_USE_OPENSSL)
   if(TARGET OpenSSL::Crypto)
     message(STATUS "Using system OpenSSL targets: OpenSSL::Crypto/OpenSSL::SSL")
   endif()
+endif()
+
+find_package(Python3 REQUIRED COMPONENTS Development)
+
+if(TARGET Python3::Python)
+  message(STATUS "Using system Python target: Python3::Python")
+endif()
+
+add_library(kbe_dependency_jwsmtp STATIC
+  "${KBE_SOURCE_DIR}/lib/dependencies/jwsmtp/jwsmtp/jwsmtp/base64.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/jwsmtp/jwsmtp/jwsmtp/compat.cpp"
+  "${KBE_SOURCE_DIR}/lib/dependencies/jwsmtp/jwsmtp/jwsmtp/mailer.cpp"
+)
+
+add_library(KBEngine::dependency_jwsmtp ALIAS kbe_dependency_jwsmtp)
+
+target_compile_features(kbe_dependency_jwsmtp PUBLIC cxx_std_17)
+target_include_directories(kbe_dependency_jwsmtp
+  PUBLIC
+    "${KBE_SOURCE_DIR}/lib/dependencies/jwsmtp/jwsmtp/jwsmtp"
+)
+
+if(WIN32)
+  target_link_libraries(kbe_dependency_jwsmtp PUBLIC ws2_32)
 endif()
 
 if(BUILD_TESTING AND KBE_ENABLE_TESTING)

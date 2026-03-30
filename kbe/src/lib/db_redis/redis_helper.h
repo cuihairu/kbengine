@@ -27,6 +27,8 @@ public:
 	{
 		if (!pdbi->query(printlog, "EXPIRE %s %d", key.c_str(), secs))
 			return false;
+
+		return true;
 	}
 	
 	static bool check_array_results(redisReply* pRedisReply)
@@ -81,7 +83,7 @@ public:
 				{
 					KBE_ASSERT(pRedisReply->element[0]->type == REDIS_REPLY_STRING);
 					
-					// 下一次由这个index开始
+					// 脧脗脪禄麓脦脫脡脮芒赂枚index驴陋脢录
 					StringConv::str2value(index, pRedisReply->element[0]->str);
 					
 					redisReply* r0 = pRedisReply->element[1];
@@ -127,7 +129,7 @@ public:
 				{
 					KBE_ASSERT(pRedisReply->element[0]->type == REDIS_REPLY_STRING);
 					
-					// 下一次由这个index开始
+					// 脧脗脪禄麓脦脫脡脮芒赂枚index驴陋脢录
 					StringConv::str2value(index, pRedisReply->element[0]->str);
 					
 					redisReply* r0 = pRedisReply->element[1];

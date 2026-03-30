@@ -277,9 +277,9 @@ int NavTileHandle::findRandomPointAroundCircle(int layer, const Position3D& cent
 	for (uint32 i = 0; i < max_points; i++)
 	{
 		float rnd = frand();
-		float a = maxRadius * rnd;						// 半径在maxRadius米内
-		float b = 360.0f * rnd;							// 随机一个角度
-		currpos.x = centerPos.x + (a * cos(b)); 		// 半径 * 正余玄
+		float a = maxRadius * rnd;						// 掳毛戮露脭脷maxRadius脙脳脛脷
+		float b = 360.0f * rnd;							// 脣忙禄煤脪禄赂枚陆脟露脠
+		currpos.x = centerPos.x + (a * cos(b)); 		// 掳毛戮露 * 脮媒脫脿脨镁
 		currpos.z = centerPos.z + (a * sin(b));
 		points.push_back(currpos);
 	}
@@ -430,7 +430,7 @@ bool NavTileHandle::MapSearchNode::IsSameState(MapSearchNode &rhs)
 void NavTileHandle::MapSearchNode::PrintNodeInfo()
 {
 	char str[100];
-	sprintf( str, "NavTileHandle::MapSearchNode::printNodeInfo(): Node position : (%d,%d)\n", 
+	kbe_snprintf(str, sizeof(str), "NavTileHandle::MapSearchNode::printNodeInfo(): Node position : (%d,%d)\n",
 		x, y);
 	
 	DEBUG_MSG(str);
@@ -513,7 +513,7 @@ bool NavTileHandle::MapSearchNode::GetSuccessors(AStarSearch<MapSearchNode> *ast
 		astarsearch->AddSuccessor( NewNode );
 	}	
 
-	// 如果是8方向移动
+	// 脠莽鹿没脢脟8路陆脧貌脪脝露炉
 	if(NavTileHandle::pCurrNavTileHandle->direction8())
 	{
 		if( (NavTileHandle::pCurrNavTileHandle->getMap( x + 1, y + 1 ) < TILE_STATE_CLOSED) 
@@ -559,20 +559,20 @@ bool NavTileHandle::MapSearchNode::GetSuccessors(AStarSearch<MapSearchNode> *ast
 float NavTileHandle::MapSearchNode::GetCost( MapSearchNode &successor )
 {
 	/*
-		一个tile寻路的性价比
-		每个tile都可以定义从0~5的性价比值， 值越大性价比越低
-		比如： 前方虽然能够通过但是前方是泥巴路， 行走起来非常费力， 
-		或者是前方为高速公路， 行走非常快。
+		脪禄赂枚tile脩掳脗路碌脛脨脭录脹卤脠
+		脙驴赂枚tile露录驴脡脪脭露篓脪氓麓脫0~5碌脛脨脭录脹卤脠脰碌拢卢 脰碌脭陆麓贸脨脭录脹卤脠脭陆碌脥
+		卤脠脠莽拢潞 脟掳路陆脣盲脠禄脛脺鹿禄脥篓鹿媒碌芦脢脟脟掳路陆脢脟脛脿掳脥脗路拢卢 脨脨脳脽脝冒脌麓路脟鲁拢路脩脕娄拢卢 
+		禄貌脮脽脢脟脟掳路陆脦陋赂脽脣脵鹿芦脗路拢卢 脨脨脳脽路脟鲁拢驴矛隆拢
 	*/
 	
 	/*
-		计算代价：
-		通常用公式表示为：f = g + h.
-		g就是从起点到当前点的代价.
-		h是当前点到终点的估计代价，是通过估价函数计算出来的.
+		录脝脣茫麓煤录脹拢潞
+		脥篓鲁拢脫脙鹿芦脢陆卤铆脢戮脦陋拢潞f = g + h.
+		g戮脥脢脟麓脫脝冒碌茫碌陆碌卤脟掳碌茫碌脛麓煤录脹.
+		h脢脟碌卤脟掳碌茫碌陆脰脮碌茫碌脛鹿脌录脝麓煤录脹拢卢脢脟脥篓鹿媒鹿脌录脹潞炉脢媒录脝脣茫鲁枚脌麓碌脛.
 
-		对于一个不再边上的节点，他周围会有8个节点，可以看成他到周围8个点的代价都是1。
-		精确点，到上下左右4个点的代价是1，到左上左下右上右下的1.414就是“根号2”，这个值就是前面说的g.
+		露脭脫脷脪禄赂枚虏禄脭脵卤脽脡脧碌脛陆脷碌茫拢卢脣没脰脺脦搂禄谩脫脨8赂枚陆脷碌茫拢卢驴脡脪脭驴麓鲁脡脣没碌陆脰脺脦搂8赂枚碌茫碌脛麓煤录脹露录脢脟1隆拢
+		戮芦脠路碌茫拢卢碌陆脡脧脧脗脳贸脫脪4赂枚碌茫碌脛麓煤录脹脢脟1拢卢碌陆脳贸脡脧脳贸脧脗脫脪脡脧脫脪脧脗碌脛1.414戮脥脢脟隆掳赂霉潞脜2隆卤拢卢脮芒赂枚脰碌戮脥脢脟脟掳脙忙脣碌碌脛g.
 		2.8  2.4  2  2.4  2.8
 		2.4  1.4  1  1.4  2.4
 		2    1    0    1    2
@@ -582,7 +582,7 @@ float NavTileHandle::MapSearchNode::GetCost( MapSearchNode &successor )
 	if(NavTileHandle::pCurrNavTileHandle->direction8())
 	{
 		if (x != successor.x && y != successor.y) {
-			return (float) (NavTileHandle::pCurrNavTileHandle->getMap( x, y ) + 0.41421356/* 本身有至少1的值 */); //sqrt(2)
+			return (float) (NavTileHandle::pCurrNavTileHandle->getMap( x, y ) + 0.41421356/* 卤戮脡铆脫脨脰脕脡脵1碌脛脰碌 */); //sqrt(2)
 		}
 	}
 
@@ -592,4 +592,3 @@ float NavTileHandle::MapSearchNode::GetCost( MapSearchNode &successor )
 
 //-------------------------------------------------------------------------------------
 }
-

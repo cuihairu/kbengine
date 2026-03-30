@@ -171,7 +171,7 @@ void SpaceViewer::updateClient()
 
 			Cells& cells = space.cells();
 			std::map<CELL_ID, Cell>& allCells = cells.cells();
-			s << allCells.size();
+			s << static_cast<uint32>(allCells.size());
 
 			std::map<CELL_ID, Cell>::iterator iter3 = allCells.begin();
 			for (; iter3 != allCells.end(); ++iter3)

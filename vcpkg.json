@@ -6,7 +6,9 @@
     "curl",
     "fmt",
     "gtest",
+    "libmariadb",
     "openssl",
+    "hiredis",
     "zlib"
   ]
 }
