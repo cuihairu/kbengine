@@ -1,16 +1,26 @@
-shallow_clone: true
+version: "{build}"
+image: Visual Studio 2022
 
 branches:
   only:
     - master
     - 1.x
+    - chore/cmake-bootstrap
 
-os:
-  - Visual Studio 2019
+clone_depth: 1
 
 environment:
-  matrix:
-  - TOOLSET: vs2019
+  VCPKG_ROOT: $(APPVEYOR_BUILD_FOLDER)\vcpkg
 
-build:
-  project: kbe/src/kbengine.sln
+install:
+  - set PATH=C:\Python312-x64;%PATH%
+  - git clone https://github.com/microsoft/vcpkg.git "%VCPKG_ROOT%"
+  - call "%VCPKG_ROOT%\bootstrap-vcpkg.bat" -disableMetrics
+
+build_script:
+  - call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - cmake --preset vcpkg
+  - cmake --build --preset vcpkg --parallel --target kbe_machine kbe_baseappmgr kbe_baseapp kbe_cellappmgr kbe_cellapp kbe_dbmgr kbe_interfaces kbe_logger kbe_kbcmd kbe_loginapp kbe_bots
+
+test_script:
+  - ctest --preset vcpkg --output-on-failure

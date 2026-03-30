@@ -1,20 +1,20 @@
 language: cpp
-sudo: required
-compiler:
-   - gcc
+dist: focal
+
 branches:
   only:
-  - master
-  - 1.x
-#  - stable
+    - master
+    - 1.x
+    - chore/cmake-bootstrap
+
 before_install:
-   - sudo apt-get update
-   - sudo apt-get install libssl-dev
-   - sudo apt-get install libmysqlclient-dev
-notifications:
-  recipients:
-    - kbesrv@gmail.com
-  email:
-    on_success: change
-    on_failure: always
-script: cd kbe/src && make
+  - sudo apt-get update
+  - sudo apt-get install -y build-essential cmake ninja-build pkg-config zip unzip tar curl python3
+  - git clone https://github.com/microsoft/vcpkg.git "$TRAVIS_BUILD_DIR/vcpkg"
+  - "$TRAVIS_BUILD_DIR/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+
+script:
+  - export VCPKG_ROOT="$TRAVIS_BUILD_DIR/vcpkg"
+  - cmake --preset vcpkg
+  - cmake --build --preset vcpkg --parallel --target kbe_machine kbe_baseappmgr kbe_baseapp kbe_cellappmgr kbe_cellapp kbe_dbmgr kbe_interfaces kbe_logger kbe_kbcmd kbe_loginapp kbe_bots
+  - ctest --preset vcpkg --output-on-failure
