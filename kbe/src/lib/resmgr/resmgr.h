@@ -1,7 +1,7 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
 /*
-	×ÊÔ´¹ÜÀíÆ÷¡£
+	èµ„æºç®¡ç†å™¨ã€‚
 */
 #ifndef KBE_RESMGR_H
 #define KBE_RESMGR_H
@@ -24,7 +24,7 @@ namespace KBEngine{
 class Resmgr : public Singleton<Resmgr>, public TimerHandler
 {
 public:
-	// ÒıÇæ»·¾³±äÁ¿
+	// å¼•æ“ç¯å¢ƒå˜é‡
 	struct KBEEnv
 	{
 		std::string root_path;
@@ -48,7 +48,7 @@ public:
 	const Resmgr::KBEEnv& getEnv() { return kb_env_; }
 
 	/*
-		´Ó×ÊÔ´Â·¾¶ÖĞ(»·¾³±äÁ¿ÖĞÖ¸¶¨µÄ)Æ¥Åäµ½ÍêÕûµÄ×ÊÔ´µØÖ·
+		ä»èµ„æºè·¯å¾„ä¸­(ç¯å¢ƒå˜é‡ä¸­æŒ‡å®šçš„)åŒ¹é…åˆ°å®Œæ•´çš„èµ„æºåœ°å€
 	*/
 	std::string matchRes(const std::string& res);
 	std::string matchRes(const char* res);
@@ -58,12 +58,12 @@ public:
 	FILE* openRes(std::string res, const char* mode = "r");
 
 	/*
-		ÁĞ³öÄ¿Â¼ÏÂËùÓĞµÄ×ÊÔ´ÎÄ¼ş
+		åˆ—å‡ºç›®å½•ä¸‹æ‰€æœ‰çš„èµ„æºæ–‡ä»¶
 	*/
 	bool listPathRes(std::wstring path, const std::wstring& extendName, std::vector<std::wstring>& results);
 
 	/*
-		´Ó×ÊÔ´Â·¾¶ÖĞ(»·¾³±äÁ¿ÖĞÖ¸¶¨µÄ)Æ¥Åäµ½Ä¿Â¼
+		ä»èµ„æºè·¯å¾„ä¸­(ç¯å¢ƒå˜é‡ä¸­æŒ‡å®šçš„)åŒ¹é…åˆ°ç›®å½•
 	*/
 	std::string matchPath(const std::string& path);
 	std::string matchPath(const char* path);
@@ -79,31 +79,31 @@ public:
 	}
 
 	/**
-		»ñµÃÒıÇæÏµÍ³¼¶×ÊÔ´Ä¿Â¼
+		è·å¾—å¼•æ“ç³»ç»Ÿçº§èµ„æºç›®å½•
 		kbe\\res\\*
 	*/
 	std::string getPySysResPath();
 
 	/**
-		»ñµÃÓÃ»§¼¶×ÊÔ´Ä¿Â¼
+		è·å¾—ç”¨æˆ·çº§èµ„æºç›®å½•
 		assets\\res\\*
 	*/
 	std::string getPyUserResPath();
 
 	/**
-		»ñµÃÓÃ»§¼¶½Å±¾Ä¿Â¼
+		è·å¾—ç”¨æˆ·çº§è„šæœ¬ç›®å½•
 		assets\\scripts\\*
 	*/
 	std::string getPyUserScriptsPath();
 
 	/**
-		»ñµÃÓÃ»§¼¶½ø³Ì½Å±¾Ä¿Â¼
-		assets\\scripts\\cell¡¢base¡¢client
+		è·å¾—ç”¨æˆ·çº§è¿›ç¨‹è„šæœ¬ç›®å½•
+		assets\\scripts\\cellã€baseã€client
 	*/
 	std::string getPyUserComponentScriptsPath(COMPONENT_TYPE componentType = UNKNOWN_COMPONENT_TYPE);
 
 	/**
-		»ñµÃÓÃ»§¼¶¿âÄ¿Â¼
+		è·å¾—ç”¨æˆ·çº§åº“ç›®å½•
 		assets\\*
 	*/
 	std::string getPyUserAssetsPath();
