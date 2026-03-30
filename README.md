@@ -70,18 +70,28 @@ KBEngine
 		server_assets
 
 
-## CMake and vcpkg
+	## CMake and vcpkg
 
-	The CMake build now supports vcpkg manifest mode.
-	When configured with the vcpkg toolchain, KBEngine will prefer vcpkg-provided fmt, zlib, OpenSSL and GTest.
-	If vcpkg is not active, the current vendored/fallback path remains available.
-	The manifest is pinned with a vcpkg builtin baseline for reproducible dependency resolution.
-
-	Example:
-		export VCPKG_ROOT=/path/to/vcpkg
-		cmake --preset vcpkg
-		cmake --build --preset vcpkg
-		ctest --preset vcpkg
+		The CMake build now supports vcpkg manifest mode.
+		When configured with the vcpkg toolchain, KBEngine will prefer vcpkg-provided fmt, zlib, OpenSSL, libmariadb, hiredis and GTest.
+		If vcpkg is not active, the current vendored/fallback path remains available.
+		The manifest is pinned with a vcpkg builtin baseline for reproducible dependency resolution.
+		The current manifest resolves to:
+			fmt 12.1.0
+			OpenSSL 3.6.1
+			curl 8.18.0
+			zlib 1.3.1
+			GTest 1.17.0
+			hiredis 1.3.0
+			libmariadb 3.4.7
+		libmariadb 3.4.7 is the MariaDB Connector/C client library used by KBEngine.
+		It is suitable for MariaDB and MySQL deployments, including MySQL 8 authentication flows introduced after older 3.0.x connector releases.
+	
+		Example:
+			export VCPKG_ROOT=/path/to/vcpkg
+			cmake --preset vcpkg
+			cmake --build --preset vcpkg
+			ctest --preset vcpkg
 
 
 ## 中文
