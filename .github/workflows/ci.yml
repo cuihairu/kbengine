@@ -125,3 +125,56 @@ jobs:
         env:
           VCPKG_ROOT: ${{ github.workspace }}\vcpkg
         run: ctest --preset vcpkg --output-on-failure
+
+  macos:
+    name: macOS CMake
+    runs-on: macos-14
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify toolchain
+        run: |
+          cmake --version
+          ninja --version
+          clang++ --version
+
+      - name: Bootstrap vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
+          "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+
+      - name: Configure
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: cmake --preset vcpkg
+
+      - name: Build
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: >
+          cmake --build --preset vcpkg --parallel
+          --target
+          kbe_machine
+          kbe_baseappmgr
+          kbe_baseapp
+          kbe_cellappmgr
+          kbe_cellapp
+          kbe_dbmgr
+          kbe_interfaces
+          kbe_logger
+          kbe_kbcmd
+          kbe_loginapp
+          kbe_bots
+
+      - name: Test
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: ctest --preset vcpkg --output-on-failure

@@ -5,10 +5,6 @@
 #include "poller_select.h"
 #include "helper/profile.h"
 
-namespace KBEngine { 
-namespace Network
-{
-	
 #if KBE_PLATFORM == PLATFORM_UNIX
 #define HAS_EPOLL
 #endif
@@ -16,6 +12,10 @@ namespace Network
 #ifdef HAS_EPOLL
 #include "poller_epoll.h"
 #endif
+
+namespace KBEngine { 
+namespace Network
+{
 
 //-------------------------------------------------------------------------------------
 EventPoller::EventPoller() : 
