@@ -2,14 +2,14 @@
 
 
 /*
-	ÒıÓÃ¼ÆÊıÊµÏÖÀà
+	å¼•ç”¨è®¡æ•°å®ç°ç±»
 
-	Ê¹ÓÃ·½·¨:
+	ä½¿ç”¨æ–¹æ³•:
 		class AA:public RefCountable
 		{
 		public:
 			AA(){}
-			~AA(){ printf("Îö¹¹"); }
+			~AA(){ printf("ææ„"); }
 		};
 		
 		--------------------------------------------
@@ -22,8 +22,8 @@
 		delete s;
 		delete s1;
 		
-		Ö´ĞĞ½á¹û:
-			Îö¹¹
+		æ‰§è¡Œç»“æœ:
+			ææ„
 */
 #ifndef KBE_REFCOUNTABLE_H
 #define KBE_REFCOUNTABLE_H
@@ -46,7 +46,7 @@ public:
 		int currRef = --refCount_;
 		assert(currRef >= 0 && "RefCountable:currRef maybe a error!");
 		if (0 >= currRef)
-			onRefOver();											// ÒıÓÃ½áÊøÁË
+			onRefOver();											// å¼•ç”¨ç»“æŸäº†
 	}
 
 	virtual void onRefOver(void) const
@@ -93,7 +93,7 @@ public:
 		long currRef =::InterlockedDecrement(&refCount_);
 		assert(currRef >= 0 && "RefCountable:currRef maybe a error!");
 		if (0 >= currRef)
-			onRefOver();											// ÒıÓÃ½áÊøÁË
+			onRefOver();											// å¼•ç”¨ç»“æŸäº†
 	}
 
 	virtual void onRefOver(void) const
@@ -130,12 +130,7 @@ class SafeRefCountable
 public:
 	inline void incRef(void) const
 	{
-		__asm__ volatile (
-			"lock addl $1, %0"
-			:						// no output
-			: "m"	(this->refCount_) 	// input: this->count_
-			: "memory" 				// clobbers memory
-		);
+		__sync_add_and_fetch(&refCount_, 1);
 	}
 
 	inline void decRef(void) const
@@ -144,7 +139,7 @@ public:
 		long currRef = intDecRef();
 		assert(currRef >= 0 && "RefCountable:currRef maybe a error!");
 		if (0 >= currRef)
-			onRefOver();											// ÒıÓÃ½áÊøÁË
+			onRefOver();											// å¼•ç”¨ç»“æŸäº†
 	}
 
 	virtual void onRefOver(void) const
@@ -154,13 +149,12 @@ public:
 
 	void setRefCount(long n)
 	{
-		//InterlockedExchange((long *)&refCount_, n);
+		__sync_lock_test_and_set(&refCount_, n);
 	}
 
 	int getRefCount(void) const 
 	{ 
-		//return InterlockedExchange((long *)&refCount_, refCount_);
-		return refCount_;
+		return static_cast<int>(__sync_add_and_fetch(&refCount_, 0));
 	}
 
 protected:
@@ -181,15 +175,7 @@ private:
 	 */
 	inline int intDecRef() const
 	{
-		int ret;
-		__asm__ volatile (
-			"mov $-1, %0  \n\t"
-			"lock xadd %0, %1"
-			: "=&a"	(ret)				// output only and early clobber
-			: "m"	(this->refCount_)		// input (memory)
-			: "memory"
-		);
-		return ret;
+		return static_cast<int>(__sync_sub_and_fetch(&refCount_, 1));
 	}
 };
 #endif
