@@ -1156,6 +1156,7 @@ target_link_libraries(kbe_network_websocket_protocol
   PUBLIC
     KBEngine::build_config
   PRIVATE
+    KBEngine::common_core
     KBEngine::helper_debug_helper
 )
 
@@ -1246,6 +1247,7 @@ target_link_libraries(kbe_network_tcp_packet_sender
     KBEngine::build_config
   PRIVATE
     KBEngine::network_common
+    KBEngine::network_packet_sender
     KBEngine::network_tcp_packet
     KBEngine::network_endpoint
     KBEngine::helper_debug_helper
@@ -1293,6 +1295,7 @@ target_link_libraries(kbe_network_udp_packet_sender
     KBEngine::build_config
   PRIVATE
     KBEngine::network_common
+    KBEngine::network_packet_sender
     KBEngine::network_udp_packet
     KBEngine::network_endpoint
     KBEngine::network_ikcp
@@ -1336,7 +1339,10 @@ add_library(kbe_network_kcp_packet_sender STATIC
 add_library(KBEngine::network_kcp_packet_sender ALIAS kbe_network_kcp_packet_sender)
 target_link_libraries(kbe_network_kcp_packet_sender
   PUBLIC KBEngine::build_config
-  PRIVATE KBEngine::network_ikcp KBEngine::helper_debug_helper
+  PRIVATE
+    KBEngine::network_ikcp
+    KBEngine::network_udp_packet_sender
+    KBEngine::helper_debug_helper
 )
 target_include_directories(kbe_network_kcp_packet_sender
   PUBLIC "${KBE_SOURCE_DIR}/lib"
@@ -1506,6 +1512,7 @@ target_link_libraries(kbe_helper_profile_handler
     KBEngine::common_timer
     KBEngine::common_tasks
     KBEngine::helper_debug_helper
+    KBEngine::helper_event_stats
     KBEngine::helper_profile
     KBEngine::network_interface
     KBEngine::network_address

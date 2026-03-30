@@ -63,6 +63,7 @@ jobs:
           kbe_kbcmd
           kbe_loginapp
           kbe_bots
+          kbe_smoke_tests
 
       - name: Test
         env:
@@ -119,6 +120,7 @@ jobs:
           kbe_kbcmd
           kbe_loginapp
           kbe_bots
+          kbe_smoke_tests
 
       - name: Test
         shell: pwsh
@@ -173,6 +175,7 @@ jobs:
           kbe_kbcmd
           kbe_loginapp
           kbe_bots
+          kbe_smoke_tests
 
       - name: Test
         env:

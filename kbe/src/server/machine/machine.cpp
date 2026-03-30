@@ -1533,7 +1533,7 @@ uint16 Machine::startLinuxProcess(int32 uid, COMPONENT_TYPE componentType, uint6
 DWORD Machine::startWindowsProcess(int32 uid, COMPONENT_TYPE componentType, uint64 cid, uint16 gus,
 	std::string& KBE_ROOT, std::string& KBE_RES_PATH, std::string& KBE_BIN_PATH)
 {
-	STARTUPINFO si;
+	STARTUPINFOW si;
 	PROCESS_INFORMATION pi;
 
 	std::string str = Resmgr::getSingleton().getEnv().bin_path;
@@ -1552,13 +1552,13 @@ DWORD Machine::startWindowsProcess(int32 uid, COMPONENT_TYPE componentType, uint
 	// 使用machine当前的工作目录作为新进程的工作目录，
 	// 为一些与相对目录的文件操作操作一致的工作目录（如日志）
 	wchar_t currdir[1024];
-	GetCurrentDirectory(sizeof(currdir), currdir);
+	GetCurrentDirectoryW(static_cast<DWORD>(sizeof(currdir) / sizeof(currdir[0])), currdir);
 
 	ZeroMemory( &si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory( &pi, sizeof(pi));
 
-	if(!CreateProcess( NULL,   // No module name (use command line)
+	if(!CreateProcessW( NULL,   // No module name (use command line)
 		szCmdline,      // Command line
 		NULL,           // Process handle not inheritable
 		NULL,           // Thread handle not inheritable
