@@ -4,7 +4,7 @@
 #define KBE_SCRIPTOBJECT_H
 
 #include <vector>	
-#include "Python.h"     
+#include "pyscript/python_wrapper.h"
 #include "py_macros.h" 
 #include "helper/debug_helper.h"
 #include "common/common.h"

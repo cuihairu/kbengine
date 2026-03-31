@@ -16,7 +16,7 @@
 #ifndef KBE_CALLBACKMGR_H
 #define KBE_CALLBACKMGR_H
 
-#include "Python.h"
+#include "pyscript/python_wrapper.h"
 #include "idallocate.h"
 #include "serverconfig.h"
 #include "helper/debug_helper.h"
