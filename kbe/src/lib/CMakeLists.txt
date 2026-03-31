@@ -2124,7 +2124,6 @@ target_compile_definitions(kbe_db_redis
 target_include_directories(kbe_db_redis
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
-    "${KBE_SOURCE_DIR}/lib/dependencies/hiredis"
     "${KBE_SOURCE_DIR}/server"
 )
 

@@ -10,14 +10,7 @@
 #include "helper/debug_helper.h"
 #include "db_interface/db_interface.h"
 
-#include "hiredis.h"
-#if KBE_PLATFORM == PLATFORM_WIN32
-#ifdef _DEBUG
-#pragma comment (lib, "hiredis_d.lib")
-#else
-#pragma comment (lib, "hiredis.lib")
-#endif
-#endif
+#include <hiredis/hiredis.h>
 
 namespace KBEngine { 
 
