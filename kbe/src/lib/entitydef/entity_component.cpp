@@ -24,7 +24,7 @@ namespace KBEngine{
 SCRIPT_MEMBER_DECLARE_BEGIN(EntityComponent)
 SCRIPT_MEMBER_DECLARE_END()
 
-/* ÓÉ²»Í¬µÄappÊµÏÖ
+/* ç”±ä¸åŒçš„appå®ç°
 SCRIPT_GETSET_DECLARE_BEGIN(EntityComponent)
 BASE_SCRIPT_INIT(EntityComponent, 0, 0, 0, 0, 0)
 */
@@ -88,7 +88,7 @@ EntityComponent::~EntityComponent()
 	KBE_ASSERT(atIdx_ < EntityComponent::entity_components.size());
 	KBE_ASSERT(EntityComponent::entity_components[atIdx_] == this);
 
-	// Èç¹ûÓĞ2¸ö»òÒÔÉÏµÄEntityCallÔò½«×îºóÒ»¸öEntityCallÒÆÖÁÉ¾³ıµÄÕâ¸öEntityCallËùÔÚÎ»ÖÃ
+	// å¦‚æœæœ‰2ä¸ªæˆ–ä»¥ä¸Šçš„EntityCallåˆ™å°†æœ€åä¸€ä¸ªEntityCallç§»è‡³åˆ é™¤çš„è¿™ä¸ªEntityCallæ‰€åœ¨ä½ç½®
 	EntityComponent* pBack = EntityComponent::entity_components.back();
 	pBack->_setATIdx(atIdx_);
 	EntityComponent::entity_components[atIdx_] = pBack;
@@ -97,7 +97,7 @@ EntityComponent::~EntityComponent()
 
 	script::PyGC::decTracing("EntityComponent");
 
-	// ×é¼şÒÔ¼°±»Ïú»ÙµÄÇé¿ö²»ÄÜÔÙ¼õÒıÓÃ£¬²é¿´onOwnerDestroyEndÖĞÃèÊö
+	// ç»„ä»¶ä»¥åŠè¢«é”€æ¯çš„æƒ…å†µä¸èƒ½å†å‡å¼•ç”¨ï¼ŒæŸ¥çœ‹onOwnerDestroyEndä¸­æè¿°
 	if(!isDestroyed() && owner_)
 		Py_DECREF(owner_);
 
@@ -198,10 +198,10 @@ PyObject* EntityComponent::pyIsDestroyed()
 //-------------------------------------------------------------------------------------
 void EntityComponent::initializeScript()
 {
-	// Èç¹û¸ÃÊôĞÔÔÚcreateFromPersistentStreamÊ±´´½¨ÁË__cellData__£¬ ÄÇÃ´´ËÊ±Ó¦¸Ã½«ÆäÉèÖÃµ½ownerµÄ__cellData__ÖĞ¡£
-	// EntityµÄÊôĞÔ»áÔÚ´´½¨ÊµÌåÊ±ÓÉÓÚcreateNamespaceÉèÖÃ½øcellData£¬×é¼şµÄÊı¾İ»áÓÉÓÚ½á¹¹ÎÊÌâÔÚ´´½¨ÊµÌåÊ±µ÷ÓÃµ½
-	// EntityComponent::createFromPersistentStream(Õâ¸ö½Ó¿Ú´ËÊ±Ö»ÊÇ·µ»ØÁËbase²¿·ÖµÄÊôĞÔÊı¾İ£¬cell²¿·Ö»º´æÔÚÕâÀï)£¬
-	// »ñµÃÁË__cellData__ÊôĞÔ²¢ÑÓÊ±µ½initializeScriptÔÙ¸üĞÂ½øÈ¥¡£
+	// å¦‚æœè¯¥å±æ€§åœ¨createFromPersistentStreamæ—¶åˆ›å»ºäº†__cellData__ï¼Œ é‚£ä¹ˆæ­¤æ—¶åº”è¯¥å°†å…¶è®¾ç½®åˆ°ownerçš„__cellData__ä¸­ã€‚
+	// Entityçš„å±æ€§ä¼šåœ¨åˆ›å»ºå®ä½“æ—¶ç”±äºcreateNamespaceè®¾ç½®è¿›cellDataï¼Œç»„ä»¶çš„æ•°æ®ä¼šç”±äºç»“æ„é—®é¢˜åœ¨åˆ›å»ºå®ä½“æ—¶è°ƒç”¨åˆ°
+	// EntityComponent::createFromPersistentStream(è¿™ä¸ªæ¥å£æ­¤æ—¶åªæ˜¯è¿”å›äº†baseéƒ¨åˆ†çš„å±æ€§æ•°æ®ï¼Œcelléƒ¨åˆ†ç¼“å­˜åœ¨è¿™é‡Œ)ï¼Œ
+	// è·å¾—äº†__cellData__å±æ€§å¹¶å»¶æ—¶åˆ°initializeScriptå†æ›´æ–°è¿›å»ã€‚
 	PyObject* pyCellData = PyObject_GetAttrString(this, const_cast<char*>("__cellData__"));
 	if (pyCellData)
 	{
@@ -387,7 +387,7 @@ PyObject* EntityComponent::__unpickle__(PyObject* self, PyObject* args)
 
 	PyObject* pyobj = sm->createObject();
 
-	// Ö´ĞĞEntityµÄ¹¹Ôìº¯Êı
+	// æ‰§è¡ŒEntityçš„æ„é€ å‡½æ•°
 	return new(pyobj) EntityComponent(ownerID, sm, (COMPONENT_TYPE)ctype);
 }
 
@@ -441,10 +441,10 @@ int EntityComponent::onScriptSetAttribute(PyObject* attr, PyObject* value)
 				Py_ssize_t ob_refcnt = value->ob_refcnt;
 				PyObject* pySetObj = propertyDescription->onSetValue(this, value);
 
-				/* Èç¹ûdefÊôĞÔÊı¾İÓĞ¸Ä±ä£¬ÄÇÃ´¿ÉÄÜĞèÒª¹ã²¥ */
+				/* å¦‚æœdefå±æ€§æ•°æ®æœ‰æ”¹å˜ï¼Œé‚£ä¹ˆå¯èƒ½éœ€è¦å¹¿æ’­ */
 				if (pySetObj != NULL)
 				{
-					// ¼ÙÈçµ±Ç°×é¼ş¶ÔÏó²¢²»ÊôÓÚµ±Ç°½ø³ÌÊµÌåµÄÊôĞÔ£¬ÄÇÃ´¸ÃÊôĞÔÎŞĞè¹ã²¥
+					// å‡å¦‚å½“å‰ç»„ä»¶å¯¹è±¡å¹¶ä¸å±äºå½“å‰è¿›ç¨‹å®ä½“çš„å±æ€§ï¼Œé‚£ä¹ˆè¯¥å±æ€§æ— éœ€å¹¿æ’­
 					if (g_componentType == componentType_)
 					{
 						if (onDataChangedEvent_)
@@ -575,7 +575,7 @@ void EntityComponent::onEntityDestroy(PyObject* pEntity, ScriptDefModule* pEntit
 		}
 	}
 
-	// µÈËùÓĞ×é¼ş¶¼destroyÍê±ÏÖ®ºóÔÙÇåÀí×é¼şowner£¬ÒòÎª´ËºóÔÚÈÎºÎµØ·½ÒıÓÃÁË×é¼ş·ÃÎÊ×é¼şµÄowner½«²»¿ÉÓÃ
+	// ç­‰æ‰€æœ‰ç»„ä»¶éƒ½destroyå®Œæ¯•ä¹‹åå†æ¸…ç†ç»„ä»¶ownerï¼Œå› ä¸ºæ­¤ååœ¨ä»»ä½•åœ°æ–¹å¼•ç”¨äº†ç»„ä»¶è®¿é—®ç»„ä»¶çš„ownerå°†ä¸å¯ç”¨
 	if (!beforeDestroy)
 	{
 		ScriptDefModule::COMPONENTDESCRIPTION_MAP::iterator comps_iter = componentDescrs.begin();
@@ -631,9 +631,9 @@ void EntityComponent::onOwnerDestroyEnd(PyObject* pEntity, ScriptDefModule* pEnt
 	if (owner_)
 		Py_DECREF(owner_);
 
-	// ´Ë´¦¼õÒıÓÃÊÇÎªÁË½â³ı×é¼şºÍÊµÌåÖ®¼äµÄÑ­»·ÒıÓÃµ¼ÖÂÎŞ·¨ÊÍ·ÅÎÊÌâ
-	// µ«ÊÇ´Ë´¦²»ÉèÖÃÎªNULL£¬ ÓÉÓÚÔÚ¶à¸ö×é¼şµÄÇé¿öÊ±ÈçÔÚÄ³¸ö×é¼ş½Å±¾µÄonClientDeathÖĞµ÷ÓÃowner.destroy()
-	// ÆäËû½Å±¾ÖĞÒ²ĞèÒªÄÜ¹»·ÃÎÊµ½owner£¬Ö»²»¹ıownerµÄisDestroyedÎªTrue
+	// æ­¤å¤„å‡å¼•ç”¨æ˜¯ä¸ºäº†è§£é™¤ç»„ä»¶å’Œå®ä½“ä¹‹é—´çš„å¾ªç¯å¼•ç”¨å¯¼è‡´æ— æ³•é‡Šæ”¾é—®é¢˜
+	// ä½†æ˜¯æ­¤å¤„ä¸è®¾ç½®ä¸ºNULLï¼Œ ç”±äºåœ¨å¤šä¸ªç»„ä»¶çš„æƒ…å†µæ—¶å¦‚åœ¨æŸä¸ªç»„ä»¶è„šæœ¬çš„onClientDeathä¸­è°ƒç”¨owner.destroy()
+	// å…¶ä»–è„šæœ¬ä¸­ä¹Ÿéœ€è¦èƒ½å¤Ÿè®¿é—®åˆ°ownerï¼Œåªä¸è¿‡ownerçš„isDestroyedä¸ºTrue
 	//owner_ = NULL;
 }
 
@@ -678,7 +678,7 @@ const ScriptDefModule::PROPERTYDESCRIPTION_MAP* EntityComponent::pChildPropertyD
 
 	if (componentType_ == BASEAPP_TYPE)
 	{
-		// µ±addClientDataToStreamÊ±»áÉèÖÃEntityDef::currComponentType() == CLIENT_TYPE
+		// å½“addClientDataToStreamæ—¶ä¼šè®¾ç½®EntityDef::currComponentType() == CLIENT_TYPE
 		if (EntityDef::context().currComponentType == CLIENT_TYPE)
 			pPropertyDescrs = &pComponentDescrs_->getClientPropertyDescriptions();
 		else
@@ -736,8 +736,8 @@ bool EntityComponent::isSameType(PyObject* pyValue)
 //-------------------------------------------------------------------------------------
 bool EntityComponent::isSamePersistentType(PyObject* pyValue)
 {
-	// ÓÉÓÚ¸ÃÁ÷³Ì¿ÉÄÜÊÇ´ÓcelldataÖĞ»ñÈ¡µ½¸Ã×é¼ş£¬ ÎÒÃÇÔÚ´ò°ücellÊôĞÔµÄÍ¬Ê±»¹ĞèÒª´ò°übase²¿·ÖµÄÊôĞÔ
-	// Òò´Ë´Ë´¦ĞèÒªÕÒµ½ËùÓĞÕßÖ®ºó³¢ÊÔÕÒµ½base²¿·ÖµÄ¸Ã×é¼ş
+	// ç”±äºè¯¥æµç¨‹å¯èƒ½æ˜¯ä»celldataä¸­è·å–åˆ°è¯¥ç»„ä»¶ï¼Œ æˆ‘ä»¬åœ¨æ‰“åŒ…cellå±æ€§çš„åŒæ—¶è¿˜éœ€è¦æ‰“åŒ…baseéƒ¨åˆ†çš„å±æ€§
+	// å› æ­¤æ­¤å¤„éœ€è¦æ‰¾åˆ°æ‰€æœ‰è€…ä¹‹åå°è¯•æ‰¾åˆ°baseéƒ¨åˆ†çš„è¯¥ç»„ä»¶
 	PyObject* pEntity = owner();
 
 	PyObject* baseComponentPart = NULL;
@@ -762,7 +762,7 @@ bool EntityComponent::isSamePersistentType(PyObject* pyValue)
 					cellComponentPart = PyDict_GetItemString(cellDataDict, pPropertyDescription_->getName());
 					Py_DECREF(cellDataDict);
 
-					// ×é¼şÃ»ÓĞcellÊôĞÔÊ±²»»áÔÚcell´´½¨Õâ¸ö×é¼ş
+					// ç»„ä»¶æ²¡æœ‰cellå±æ€§æ—¶ä¸ä¼šåœ¨cellåˆ›å»ºè¿™ä¸ªç»„ä»¶
 					if (cellComponentPart)
 					{
 						Py_INCREF(cellComponentPart);
@@ -796,7 +796,7 @@ bool EntityComponent::isSamePersistentType(PyObject* pyValue)
 		PyObject* pyVal = NULL;
 		if (propertyDescription->hasCell())
 		{
-			// Ò»Ğ©ÊµÌåÃ»ÓĞcell²¿·Ö£¬ Òò´ËcellÊôĞÔºöÂÔ
+			// ä¸€äº›å®ä½“æ²¡æœ‰celléƒ¨åˆ†ï¼Œ å› æ­¤cellå±æ€§å¿½ç•¥
 			if (!cellComponentPart)
 				continue;
 
@@ -850,7 +850,7 @@ PyObject* EntityComponent::createFromPersistentStream(ScriptDefModule* pScriptMo
 {
 	KBE_ASSERT(g_componentType == BASEAPP_TYPE);
 
-	// ÉèÖÃÎª-1£¬ ±ÜÃâonScriptSetAttributeÖĞ³¢ÊÔ¹ã²¥ÊôĞÔ
+	// è®¾ç½®ä¸º-1ï¼Œ é¿å…onScriptSetAttributeä¸­å°è¯•å¹¿æ’­å±æ€§
 	ENTITY_ID oid = ownerID_;
 	ownerID_ = -1;
 
@@ -913,8 +913,8 @@ PyObject* EntityComponent::createFromPersistentStream(ScriptDefModule* pScriptMo
 //-------------------------------------------------------------------------------------
 void EntityComponent::addPersistentToStream(MemoryStream* mstream, PyObject* pyValue)
 {
-	// ÓÉÓÚ¸ÃÁ÷³Ì¿ÉÄÜÊÇ´ÓcelldataÖĞ»ñÈ¡µ½¸Ã×é¼ş£¬ ÎÒÃÇÔÚ´ò°ücellÊôĞÔµÄÍ¬Ê±»¹ĞèÒª´ò°übase²¿·ÖµÄÊôĞÔ
-	// Òò´Ë´Ë´¦ĞèÒªÕÒµ½ËùÓĞÕßÖ®ºó³¢ÊÔÕÒµ½base²¿·ÖµÄ¸Ã×é¼ş
+	// ç”±äºè¯¥æµç¨‹å¯èƒ½æ˜¯ä»celldataä¸­è·å–åˆ°è¯¥ç»„ä»¶ï¼Œ æˆ‘ä»¬åœ¨æ‰“åŒ…cellå±æ€§çš„åŒæ—¶è¿˜éœ€è¦æ‰“åŒ…baseéƒ¨åˆ†çš„å±æ€§
+	// å› æ­¤æ­¤å¤„éœ€è¦æ‰¾åˆ°æ‰€æœ‰è€…ä¹‹åå°è¯•æ‰¾åˆ°baseéƒ¨åˆ†çš„è¯¥ç»„ä»¶
 	PyObject* pEntity = owner();
 
 	PyObject* baseComponentPart = NULL;
@@ -939,7 +939,7 @@ void EntityComponent::addPersistentToStream(MemoryStream* mstream, PyObject* pyV
 					cellComponentPart = PyDict_GetItemString(cellDataDict, pPropertyDescription_->getName());
 					Py_DECREF(cellDataDict);
 
-					// ×é¼şÃ»ÓĞcellÊôĞÔÊ±²»»áÔÚcell´´½¨Õâ¸ö×é¼ş
+					// ç»„ä»¶æ²¡æœ‰cellå±æ€§æ—¶ä¸ä¼šåœ¨cellåˆ›å»ºè¿™ä¸ªç»„ä»¶
 					if (cellComponentPart)
 					{
 						Py_INCREF(cellComponentPart);
@@ -973,7 +973,7 @@ void EntityComponent::addPersistentToStream(MemoryStream* mstream, PyObject* pyV
 		PyObject* pyVal = NULL;
 		if (propertyDescription->hasCell())
 		{
-			// Ò»Ğ©ÊµÌåÃ»ÓĞcell²¿·Ö£¬ Òò´ËcellÊôĞÔºöÂÔ
+			// ä¸€äº›å®ä½“æ²¡æœ‰celléƒ¨åˆ†ï¼Œ å› æ­¤cellå±æ€§å¿½ç•¥
 			if (!cellComponentPart)
 				continue;
 
@@ -1012,8 +1012,8 @@ void EntityComponent::addPersistentToStream(MemoryStream* mstream, PyObject* pyV
 //-------------------------------------------------------------------------------------
 void EntityComponent::addToStream(MemoryStream* mstream, PyObject* pyValue)
 {
-	// µ±addClientDataToStreamÊ±»áÉèÖÃEntityDef::currComponentType() == CLIENT_TYPE
-	// ´ËÊ±ĞèÒªÅĞ¶ÏÕâ¸ö×é¼şÔÚµ±Ç°½ø³ÌÉÏÊÇ·ñ´æÔÚÕâÑùÒ»¸ö°üº¬¿Í»§¶Ë²¿·ÖµÄÊôĞÔ,Èç¹ûÃ»ÓĞÔòÌø¹ı
+	// å½“addClientDataToStreamæ—¶ä¼šè®¾ç½®EntityDef::currComponentType() == CLIENT_TYPE
+	// æ­¤æ—¶éœ€è¦åˆ¤æ–­è¿™ä¸ªç»„ä»¶åœ¨å½“å‰è¿›ç¨‹ä¸Šæ˜¯å¦å­˜åœ¨è¿™æ ·ä¸€ä¸ªåŒ…å«å®¢æˆ·ç«¯éƒ¨åˆ†çš„å±æ€§,å¦‚æœæ²¡æœ‰åˆ™è·³è¿‡
 	if (EntityDef::context().currComponentType == CLIENT_TYPE)
 		addToClientStream(mstream, pyValue);
 	else
@@ -1209,12 +1209,12 @@ PyObject* EntityComponent::createFromStream(MemoryStream* mstream)
 
 	if (isClientApp)
 	{
-		// Èç¹ûÊÇ¸Ã½ø³ÌÊµÌåµÄ×é¼ş£¬´Ë´¦ĞèÒª°ó¶¨Ò»´Î¹ØÏµ
+		// å¦‚æœæ˜¯è¯¥è¿›ç¨‹å®ä½“çš„ç»„ä»¶ï¼Œæ­¤å¤„éœ€è¦ç»‘å®šä¸€æ¬¡å…³ç³»
 		onAttached();
 	}
 	else if (!owner_ && g_componentType == CELLAPP_TYPE)
 	{
-		// ÕâÖÖÇé¿öÊÇÒòÎªÊµÌå¿ç½ø³ÌÇ¨ÒÆµ¼ÖÂ£¬ĞèÒªÖØĞÂ°ó¶¨Ò»ÏÂowner
+		// è¿™ç§æƒ…å†µæ˜¯å› ä¸ºå®ä½“è·¨è¿›ç¨‹è¿ç§»å¯¼è‡´ï¼Œéœ€è¦é‡æ–°ç»‘å®šä¸€ä¸‹owner
 		owner(true);
 	}
 
@@ -1226,7 +1226,7 @@ PyObject* EntityComponent::createFromStream(MemoryStream* mstream)
 		{
 			uint8 aliasID = 0;
 
-			// ¸¸ÊôĞÔID
+			// çˆ¶å±æ€§ID
 			(*mstream) >> aliasID;
 			(*mstream) >> aliasID;
 
@@ -1237,7 +1237,7 @@ PyObject* EntityComponent::createFromStream(MemoryStream* mstream)
 		{
 			ENTITY_PROPERTY_UID utype;
 
-			// ¸¸ÊôĞÔID
+			// çˆ¶å±æ€§ID
 			(*mstream) >> utype;
 			(*mstream) >> utype;
 
@@ -1295,7 +1295,7 @@ PropertyDescription* EntityComponent::getProperty(ENTITY_PROPERTY_UID child_uid)
 		{
 			if (componentType_ == BASEAPP_TYPE)
 			{
-				// µ±addClientDataToStreamÊ±»áÉèÖÃEntityDef::currComponentType() == CLIENT_TYPE
+				// å½“addClientDataToStreamæ—¶ä¼šè®¾ç½®EntityDef::currComponentType() == CLIENT_TYPE
 				if (EntityDef::context().currComponentType == CLIENT_TYPE)
 					propertyDescription = pComponentDescrs_->findClientPropertyDescription(child_uid);
 				else
@@ -1327,7 +1327,7 @@ PyObject* EntityComponent::createCellData()
 //-------------------------------------------------------------------------------------
 void EntityComponent::createFromDict(PyObject* pyDict, bool persistentData)
 {
-	// ÉèÖÃÎª-1£¬ ±ÜÃâonScriptSetAttributeÖĞ³¢ÊÔ¹ã²¥ÊôĞÔ
+	// è®¾ç½®ä¸º-1ï¼Œ é¿å…onScriptSetAttributeä¸­å°è¯•å¹¿æ’­å±æ€§
 	ENTITY_ID oid = ownerID_;
 	ownerID_ = -1;
 
@@ -1378,7 +1378,7 @@ void EntityComponent::createFromDict(PyObject* pyDict, bool persistentData)
 //-------------------------------------------------------------------------------------
 void EntityComponent::updateFromDict(PyObject* pOwner, PyObject* pyDict) 
 {
-	// ÉèÖÃÎª-1£¬ ±ÜÃâonScriptSetAttributeÖĞ³¢ÊÔ¹ã²¥ÊôĞÔ
+	// è®¾ç½®ä¸º-1ï¼Œ é¿å…onScriptSetAttributeä¸­å°è¯•å¹¿æ’­å±æ€§
 	ENTITY_ID oid = ownerID_;
 	ownerID_ = -1;
 
@@ -1466,7 +1466,7 @@ void EntityComponent::convertDictDataToEntityComponent(ENTITY_ID entityID, PyObj
 		PyObject* pyObj = PyDict_GetItemString(cellData, comps_iter->first.c_str());
 		if (!pyObj || !PyDict_Check(pyObj))
 		{
-			// ÓÉÓÚ´æÔÚÒ»ÖÖÇé¿ö£¬ ×é¼şdefÖĞÃ»ÓĞÄÚÈİ£¬ µ«ÓĞcell½Å±¾£¬´ËÊ±baseappÉÏÎŞ·¨ÅĞ¶ÏËûÊÇ·ñÓĞcellÊôĞÔ£¬ËùÒÔĞ´celldataÊ±Ã»ÓĞÊı¾İĞ´Èë
+			// ç”±äºå­˜åœ¨ä¸€ç§æƒ…å†µï¼Œ ç»„ä»¶defä¸­æ²¡æœ‰å†…å®¹ï¼Œ ä½†æœ‰cellè„šæœ¬ï¼Œæ­¤æ—¶baseappä¸Šæ— æ³•åˆ¤æ–­ä»–æ˜¯å¦æœ‰cellå±æ€§ï¼Œæ‰€ä»¥å†™celldataæ—¶æ²¡æœ‰æ•°æ®å†™å…¥
 			if (g_componentType == BASEAPP_TYPE)
 			{
 				SCRIPT_ERROR_CHECK();
@@ -1482,7 +1482,7 @@ void EntityComponent::convertDictDataToEntityComponent(ENTITY_ID entityID, PyObj
 
 		PyObject* pyobj = comps_iter->second->createObject();
 
-		// Ö´ĞĞEntity×é¼şµÄ¹¹Ôìº¯Êı
+		// æ‰§è¡ŒEntityç»„ä»¶çš„æ„é€ å‡½æ•°
 		PyObject* pyEntityComponent = new(pyobj) EntityComponent(entityID, comps_iter->second, g_componentType);
 
 		EntityComponent* pEntityComponent = static_cast<EntityComponent*>(pyEntityComponent);
@@ -1568,7 +1568,7 @@ PyObject* EntityComponent::pyGetCellEntityCall()
 
 	if (entityCall == Py_None)
 	{
-		// ÎŞĞè¼õÒıÓÃ
+		// æ— éœ€å‡å¼•ç”¨
 		return entityCall;
 	}
 
@@ -1601,7 +1601,7 @@ PyObject* EntityComponent::pyGetBaseEntityCall()
 
 	if (entityCall == Py_None)
 	{
-		// ÎŞĞè¼õÒıÓÃ
+		// æ— éœ€å‡å¼•ç”¨
 		return entityCall;
 	}
 
@@ -1634,7 +1634,7 @@ PyObject* EntityComponent::pyGetClientEntityCall()
 
 	if (entityCall == Py_None)
 	{
-		// ÎŞĞè¼õÒıÓÃ
+		// æ— éœ€å‡å¼•ç”¨
 		return entityCall;
 	}
 
@@ -1667,7 +1667,7 @@ PyObject* EntityComponent::pyGetAllClients()
 
 	if (entityCall == Py_None)
 	{
-		// ÎŞĞè¼õÒıÓÃ
+		// æ— éœ€å‡å¼•ç”¨
 		return entityCall;
 	}
 
@@ -1700,7 +1700,7 @@ PyObject* EntityComponent::pyGetOtherClients()
 
 	if (entityCall == Py_None)
 	{
-		// ÎŞĞè¼õÒıÓÃ
+		// æ— éœ€å‡å¼•ç”¨
 		return entityCall;
 	}
 

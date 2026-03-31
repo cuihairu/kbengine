@@ -47,7 +47,7 @@ NetworkInterface::NetworkInterface(Network::EventDispatcher * pDispatcher,
 		this->initialize("EXTERNAL-TCP", htons(extlisteningTcpPort_min), htons(extlisteningTcpPort_max),
 			extlisteningInterface, &extTcpEndpoint_, pExtListenerReceiver_, extrbuffer, extwbuffer);
 
-		// Èç¹ûÅäÖÃÁË¶ÔÍâ¶Ë¿Ú·¶Î§£¬ Èç¹û·¶Î§¹ıĞ¡ÕâÀïextEndpoint_¿ÉÄÜÃ»ÓĞ¶Ë¿Ú¿ÉÓÃÁË
+		// å¦‚æœé…ç½®äº†å¯¹å¤–ç«¯å£èŒƒå›´ï¼Œ å¦‚æœèŒƒå›´è¿‡å°è¿™é‡ŒextEndpoint_å¯èƒ½æ²¡æœ‰ç«¯å£å¯ç”¨äº†
 		if(extlisteningTcpPort_min != -1)
 		{
 			KBE_ASSERT(extTcpEndpoint_.good() && "Channel::EXTERNAL-TCP: no available port, "
@@ -62,7 +62,7 @@ NetworkInterface::NetworkInterface(Network::EventDispatcher * pDispatcher,
 		this->initialize("EXTERNAL-UDP", htons(extlisteningUdpPort_min), htons(extlisteningUdpPort_max),
 			extlisteningInterface, &extUdpEndpoint_, pExtUdpListenerReceiver_, extrbuffer, extwbuffer);
 
-		// Èç¹ûÅäÖÃÁË¶ÔÍâ¶Ë¿Ú·¶Î§£¬ Èç¹û·¶Î§¹ıĞ¡ÕâÀïextEndpoint_¿ÉÄÜÃ»ÓĞ¶Ë¿Ú¿ÉÓÃÁË
+		// å¦‚æœé…ç½®äº†å¯¹å¤–ç«¯å£èŒƒå›´ï¼Œ å¦‚æœèŒƒå›´è¿‡å°è¿™é‡ŒextEndpoint_å¯èƒ½æ²¡æœ‰ç«¯å£å¯ç”¨äº†
 		if (extlisteningUdpPort_min != -1)
 		{
 			KBE_ASSERT(extUdpEndpoint_.good() && "Channel::EXTERNAL-UDP: no available udp-port, "
@@ -175,7 +175,7 @@ bool NetworkInterface::initialize(const char* pEndPointName, uint16 listeningPor
 	bool listeningInterfaceEmpty =
 		(listeningInterface == NULL || listeningInterface[0] == 0);
 
-	// ²éÕÒÖ¸¶¨½Ó¿ÚÃû NIP¡¢MAC¡¢IPÊÇ·ñ¿ÉÓÃ
+	// æŸ¥æ‰¾æŒ‡å®šæ¥å£å NIPã€MACã€IPæ˜¯å¦å¯ç”¨
 	if(pEP->findIndicatedInterface(listeningInterface, ifIPAddr) == 0)
 	{
 		char szIp[MAX_IP] = {0};
@@ -185,14 +185,14 @@ bool NetworkInterface::initialize(const char* pEndPointName, uint16 listeningPor
 			pEndPointName, listeningInterface, szIp));
 	}
 
-	// Èç¹û²»Îª¿ÕÓÖÕÒ²»µ½ÄÇÃ´¾¯¸æÓÃ»§´íÎóµÄÉèÖÃ£¬Í¬Ê±ÎÒÃÇ²ÉÓÃÄ¬ÈÏµÄ·½Ê½(°ó¶¨µ½INADDR_ANY)
+	// å¦‚æœä¸ä¸ºç©ºåˆæ‰¾ä¸åˆ°é‚£ä¹ˆè­¦å‘Šç”¨æˆ·é”™è¯¯çš„è®¾ç½®ï¼ŒåŒæ—¶æˆ‘ä»¬é‡‡ç”¨é»˜è®¤çš„æ–¹å¼(ç»‘å®šåˆ°INADDR_ANY)
 	else if (!listeningInterfaceEmpty)
 	{
 		WARNING_MSG(fmt::format("NetworkInterface::initialize({}): Couldn't parse interface spec '{}' so using all interfaces\n",
 			pEndPointName, listeningInterface));
 	}
 	
-	// ³¢ÊÔ°ó¶¨µ½¶Ë¿Ú£¬Èç¹û±»Õ¼ÓÃÏòºóµİÔö
+	// å°è¯•ç»‘å®šåˆ°ç«¯å£ï¼Œå¦‚æœè¢«å ç”¨å‘åé€’å¢
 	bool foundport = false;
 	uint32 listeningPort = listeningPort_min;
 	if(listeningPort_min != listeningPort_max)
@@ -219,7 +219,7 @@ bool NetworkInterface::initialize(const char* pEndPointName, uint16 listeningPor
 		}
 	}
 
-	// Èç¹ûÎŞ·¨°ó¶¨µ½ºÏÊÊµÄ¶Ë¿ÚÄÇÃ´±¨´í·µ»Ø£¬½ø³Ì½«ÍË³ö
+	// å¦‚æœæ— æ³•ç»‘å®šåˆ°åˆé€‚çš„ç«¯å£é‚£ä¹ˆæŠ¥é”™è¿”å›ï¼Œè¿›ç¨‹å°†é€€å‡º
 	if(!foundport)
 	{
 		ERROR_MSG(fmt::format("NetworkInterface::initialize({}): Couldn't bind the socket to {}:{} ({})\n",
@@ -229,7 +229,7 @@ bool NetworkInterface::initialize(const char* pEndPointName, uint16 listeningPor
 		return false;
 	}
 
-	// »ñµÃµ±Ç°°ó¶¨µÄµØÖ·£¬Èç¹ûÊÇINADDR_ANYÕâÀï»ñµÃµÄIPÊÇ0
+	// è·å¾—å½“å‰ç»‘å®šçš„åœ°å€ï¼Œå¦‚æœæ˜¯INADDR_ANYè¿™é‡Œè·å¾—çš„IPæ˜¯0
 	pEP->getlocaladdress( (u_int16_t*)&address.port,
 		(u_int32_t*)&address.ip );
 

@@ -57,7 +57,7 @@ EntityCall::~EntityCall()
 	KBE_ASSERT(atIdx_ < EntityCall::entityCalls.size());
 	KBE_ASSERT(EntityCall::entityCalls[ atIdx_ ] == this);
 
-	// Èç¹ûÓĞ2¸ö»òÒÔÉÏµÄEntityCallÔò½«×îºóÒ»¸öEntityCallÒÆÖÁÉ¾³ıµÄÕâ¸öEntityCallËùÔÚÎ»ÖÃ
+	// å¦‚æœæœ‰2ä¸ªæˆ–ä»¥ä¸Šçš„EntityCallåˆ™å°†æœ€åä¸€ä¸ªEntityCallç§»è‡³åˆ é™¤çš„è¿™ä¸ªEntityCallæ‰€åœ¨ä½ç½®
 	EntityCall* pBack = EntityCall::entityCalls.back();
 	pBack->_setATIdx(atIdx_);
 	EntityCall::entityCalls[atIdx_] = pBack;
@@ -124,7 +124,7 @@ PyObject* EntityCall::onScriptGetAttribute(PyObject* attr)
 	}
 	else
 	{
-		// ÊÇ·ñÊÇ×é¼ş·½·¨µ÷ÓÃ
+		// æ˜¯å¦æ˜¯ç»„ä»¶æ–¹æ³•è°ƒç”¨
 		PropertyDescription* pComponentPropertyDescription = pScriptModule_->findComponentPropertyDescription(ccattr);
 		if (pComponentPropertyDescription)
 		{
@@ -132,7 +132,7 @@ PyObject* EntityCall::onScriptGetAttribute(PyObject* attr)
 		}
 	}
 
-	// Ê×ÏÈÒªÇóÃû³Æ²»ÄÜÎª×Ô¼º  ±ÈÈç£º×ÔÉíÊÇÒ»¸öcell£¬ ²»ÄÜÊ¹ÓÃcell.cell
+	// é¦–å…ˆè¦æ±‚åç§°ä¸èƒ½ä¸ºè‡ªå·±  æ¯”å¦‚ï¼šè‡ªèº«æ˜¯ä¸€ä¸ªcellï¼Œ ä¸èƒ½ä½¿ç”¨cell.cell
 	if(strcmp(ccattr, ENTITYCALL_TYPE_TO_NAME_TABLE[type_]) != 0)
 	{
 		int8 mbtype = -1;

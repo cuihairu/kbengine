@@ -16,7 +16,7 @@ class PyUrl
 {						
 public:	
 	/** 
-		³õÊ¼»¯
+		åˆå§‹åŒ–
 	*/
 	static bool initialize(Script* pScript);
 	static void finalise(void);
@@ -26,7 +26,7 @@ public:
 	static void onHttpCallback(bool success, const Network::Http::Request& pRequest, const std::string& data);
 
 private:
-	static bool	isInit; // ÊÇ·ñÒÑ¾­±»³õÊ¼»¯
+	static bool	isInit; // æ˜¯å¦å·²ç»è¢«åˆå§‹åŒ–
 	static std::map<PyObject*, PyObjectPtr> pyCallbacks;
 
 };

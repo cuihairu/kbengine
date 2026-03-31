@@ -9,7 +9,7 @@
 
 namespace KBEngine{ namespace script{
 
-/** python map²Ù×÷ËùĞèÒªµÄ·½·¨±í */
+/** python mapæ“ä½œæ‰€éœ€è¦çš„æ–¹æ³•è¡¨ */
 PyMappingMethods Map::mappingMethods =
 {
 	(lenfunc)Map::mp_length,					// mp_length
@@ -17,7 +17,7 @@ PyMappingMethods Map::mappingMethods =
 	(objobjargproc)Map::mp_ass_subscript		// mp_ass_subscript
 };
 
-// ²Î¿¼ objects/dictobject.c
+// å‚è€ƒ objects/dictobject.c
 // Hack to implement "key in dict"
 PySequenceMethods Map::mappingSequenceMethods = 
 {

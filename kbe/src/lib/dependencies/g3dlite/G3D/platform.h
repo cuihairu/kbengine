@@ -209,23 +209,25 @@
     #endif
 #endif
 
-    #ifdef _DEBUG
-        #pragma comment (linker, "/NODEFAULTLIB:libc.lib")
-        #pragma comment (linker, "/NODEFAULTLIB:libcmt.lib")
-        #pragma comment (linker, "/NODEFAULTLIB:msvcrt.lib")
-        #pragma comment (linker, "/NODEFAULTLIB:libcd.lib")
-        #pragma comment (linker, "/NODEFAULTLIB:msvcrtd.lib")
-    #else
-        #pragma comment(linker, "/NODEFAULTLIB:LIBC.LIB")
-        #pragma comment(linker, "/NODEFAULTLIB:msvcrt.lib")
-        #pragma comment(linker, "/NODEFAULTLIB:libcd.lib")
-        #pragma comment(linker, "/NODEFAULTLIB:libcmtd.lib")
-        #pragma comment(linker, "/NODEFAULTLIB:msvcrtd.lib")
+#   if !defined(KBE_CMAKE_MANAGED_MSVC_RUNTIME)
+        #ifdef _DEBUG
+            #pragma comment (linker, "/NODEFAULTLIB:libc.lib")
+            #pragma comment (linker, "/NODEFAULTLIB:libcmt.lib")
+            #pragma comment (linker, "/NODEFAULTLIB:msvcrt.lib")
+            #pragma comment (linker, "/NODEFAULTLIB:libcd.lib")
+            #pragma comment (linker, "/NODEFAULTLIB:msvcrtd.lib")
+        #else
+            #pragma comment(linker, "/NODEFAULTLIB:LIBC.LIB")
+            #pragma comment(linker, "/NODEFAULTLIB:msvcrt.lib")
+            #pragma comment(linker, "/NODEFAULTLIB:libcd.lib")
+            #pragma comment(linker, "/NODEFAULTLIB:libcmtd.lib")
+            #pragma comment(linker, "/NODEFAULTLIB:msvcrtd.lib")
+        #endif
     #endif
 
     // Now set up external linking
 
-    #ifdef _DEBUG
+#   if defined(_DEBUG) && !defined(KBE_CMAKE_MANAGED_MSVC_RUNTIME)
         // zlib and SDL were linked against the release MSVCRT; force
         // the debug version.
         #pragma comment(linker, "/NODEFAULTLIB:MSVCRT.LIB")

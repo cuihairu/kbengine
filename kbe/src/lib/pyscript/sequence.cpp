@@ -136,7 +136,7 @@ PyObject* Sequence::seq_repeat(PyObject* self, Py_ssize_t n)
 	int seqSize1 = (int)values.size();
 
 	PyObject* pyList = PyList_New(seqSize1 * n);
-	// ¿ÉÄÜÃ»ÄÚ´æÁË
+	// å¯èƒ½æ²¡å†…å­˜äº†
 	if (pyList == NULL) 
 		return NULL;
 
@@ -263,7 +263,7 @@ int Sequence::seq_ass_item(PyObject* self, Py_ssize_t index, PyObject* value)
 
 	if(value)
 	{
-		// ¼ì²éÀà±ğÊÇ·ñÕıÈ·
+		// æ£€æŸ¥ç±»åˆ«æ˜¯å¦æ­£ç¡®
 		if(seq->isSameItemType(value))
 		{
 			values[index] = seq->createNewItemFromObj(value);
@@ -297,7 +297,7 @@ int Sequence::seq_ass_slice(PyObject* self, Py_ssize_t index1, Py_ssize_t index2
 	Sequence* seq = static_cast<Sequence*>(self);
 	std::vector<PyObject*>& values = seq->getValues();
 		
-	// ÊÇ·ñÊÇÉ¾³ıÔªËØ
+	// æ˜¯å¦æ˜¯åˆ é™¤å…ƒç´ 
 	if (!oterSeq)
 	{
 		if (index1 < index2)
@@ -313,7 +313,7 @@ int Sequence::seq_ass_slice(PyObject* self, Py_ssize_t index1, Py_ssize_t index2
 		return 0;
 	}
 
-	// oterSeq±ØĞëÊÇÒ»¸ö sequence
+	// oterSeqå¿…é¡»æ˜¯ä¸€ä¸ª sequence
 	if (!PySequence_Check(oterSeq))
 	{
 		PyErr_Format(PyExc_TypeError, "Sequence slices can only be assigned to a sequence");
@@ -331,13 +331,13 @@ int Sequence::seq_ass_slice(PyObject* self, Py_ssize_t index1, Py_ssize_t index2
 	int sz = (int)values.size();
 	int osz = (int)PySequence_Size(oterSeq);
 
-	// ±£Ö¤index²»»áÔ½½ç
+	// ä¿è¯indexä¸ä¼šè¶Šç•Œ
 	if (index1 > sz) index1 = sz;
 	if (index1 < 0) index1 = 0;
 	if (index2 > sz) index2 = sz;
 	if (index2 < 0) index2 = 0;
 
-	// ¼ì²éÒ»ÏÂ ¿´¿´ÓĞÎŞ´íÎóÀà±ğ
+	// æ£€æŸ¥ä¸€ä¸‹ çœ‹çœ‹æœ‰æ— é”™è¯¯ç±»åˆ«
 	for (int i = 0; i < osz; ++i)
 	{
 		PyObject* pyVal = PySequence_GetItem(oterSeq, i);
@@ -362,7 +362,7 @@ int Sequence::seq_ass_slice(PyObject* self, Py_ssize_t index1, Py_ssize_t index2
 		values.erase(values.begin() + index1, values.begin() + index2);
 	}
 
-	// ÏÈÈÃvector·ÖÅäºÃÄÚ´æ
+	// å…ˆè®©vectoråˆ†é…å¥½å†…å­˜
 	values.insert(values.begin() + index1, osz, (PyObject*)NULL);
 	for(int i = 0; i < osz; ++i)
 	{
@@ -411,7 +411,7 @@ PyObject* Sequence::seq_inplace_concat(PyObject* self, PyObject* oterSeq)
 		return seq;
 	}
 
-	// ¼ì²éÀàĞÍÊÇ·ñÕıÈ·
+	// æ£€æŸ¥ç±»å‹æ˜¯å¦æ­£ç¡®
 	for (int i = 0; i < szB; ++i)
 	{
 		PyObject * pyVal = PySequence_GetItem(oterSeq, i);
@@ -426,7 +426,7 @@ PyObject* Sequence::seq_inplace_concat(PyObject* self, PyObject* oterSeq)
 		}
 	}
 	
-	// ÏÈÈÃvector·ÖÅäºÃÄÚ´æ
+	// å…ˆè®©vectoråˆ†é…å¥½å†…å­˜
 	values.insert(values.end(), szB, (PyObject*)NULL);
 
 	for (int i = 0; i < szB; ++i)

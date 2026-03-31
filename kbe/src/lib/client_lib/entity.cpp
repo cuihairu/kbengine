@@ -258,7 +258,7 @@ void Entity::onRemoteMethodCall(Network::Channel* pChannel, MemoryStream& s)
 //-------------------------------------------------------------------------------------
 void Entity::onUpdatePropertys(MemoryStream& s)
 {
-	// ÓÉÓÚÔÚÊôĞÔ¸üĞÂ¹ı³ÌÖĞ¿ÉÄÜ²úÉúĞÂµÄ×é¼şÊôĞÔ£¬ĞèÒªÔÚ´ËÉèÖÃ
+	// ç”±äºåœ¨å±æ€§æ›´æ–°è¿‡ç¨‹ä¸­å¯èƒ½äº§ç”Ÿæ–°çš„ç»„ä»¶å±æ€§ï¼Œéœ€è¦åœ¨æ­¤è®¾ç½®
 	EntityDef::context().currClientappID = pClientApp_->appID();
 	EntityDef::context().currEntityID = id();
 	EntityDef::context().currComponentType = CLIENT_TYPE;
@@ -302,7 +302,7 @@ void Entity::onUpdatePropertys(MemoryStream& s)
 
 		if(pScriptModule_->usePropertyDescrAlias())
 		{
-			// ¸¸ÊôĞÔID
+			// çˆ¶å±æ€§ID
 			s >> aliasID;
 			s >> child_aliasID;
 			uid = aliasID;
@@ -310,12 +310,12 @@ void Entity::onUpdatePropertys(MemoryStream& s)
 		}
 		else
 		{
-			// ¸¸ÊôĞÔID
+			// çˆ¶å±æ€§ID
 			s >> uid;
 			s >> child_uid;
 		}
 
-		// Èç¹ûÊÇÎ»ÖÃ»òÕß³¯ÏòĞÅÏ¢Ôò
+		// å¦‚æœæ˜¯ä½ç½®æˆ–è€…æœå‘ä¿¡æ¯åˆ™
 		if (uid == 0)
 		{
 			if (child_uid == posuid)
@@ -374,7 +374,7 @@ void Entity::onUpdatePropertys(MemoryStream& s)
 		}
 		else
 		{
-			// ÏÈµÃµ½¸¸ÊôĞÔÕÒµ½ÊôĞÔÃû³Æ
+			// å…ˆå¾—åˆ°çˆ¶å±æ€§æ‰¾åˆ°å±æ€§åç§°
 			if (pScriptModule_->usePropertyDescrAlias())
 				pPropertyDescription = pScriptModule()->findAliasPropertyDescription(aliasID);
 			else
@@ -386,7 +386,7 @@ void Entity::onUpdatePropertys(MemoryStream& s)
 				return;
 			}
 
-			// È»ºóµÃµ½×é¼şÊôĞÔ£¬ÔÙ´ÓÆäÖĞÕÒµ½×ÓÊôĞÔ
+			// ç„¶åå¾—åˆ°ç»„ä»¶å±æ€§ï¼Œå†ä»å…¶ä¸­æ‰¾åˆ°å­å±æ€§
 			EntityComponent* pEntityComponent = static_cast<EntityComponent*>(PyObject_GetAttrString(this, pPropertyDescription->getName()));
 			if (!pEntityComponent)
 			{
@@ -626,7 +626,7 @@ void Entity::onBecomePlayer()
 
 		if(pyClass == NULL)
 		{
-			// ²»ÔÚÇ¿ÖÆĞèÒªÊµÏÖPlayer**Àà
+			// ä¸åœ¨å¼ºåˆ¶éœ€è¦å®ç°Player**ç±»
 			PyErr_Clear();
 		}
 		else
@@ -716,7 +716,7 @@ PyObject* Entity::pyMoveToPoint(PyObject_ptr pyDestination, float velocity, floa
 		return 0;
 	}
 
-	// ½«×ø±êĞÅÏ¢ÌáÈ¡³öÀ´
+	// å°†åæ ‡ä¿¡æ¯æå–å‡ºæ¥
 	script::ScriptVector3::convertPyObjectToVector3(destination, pyDestination);
 	Py_INCREF(userData);
 
@@ -768,7 +768,7 @@ void Entity::cancelController(uint32 id)
 		return;
 	}
 
-	// ÔİÊ±Ö»ÓĞ»Øµ÷, Ö÷ÒªÊÇÒòÎªÓÃÔÚÁËÒÆ¶¯ÖĞ£¬µ±Ç°¿ÉÄÜ²»ÊÇ·Ç³£ºÏÊÊ
+	// æš‚æ—¶åªæœ‰å›è°ƒ, ä¸»è¦æ˜¯å› ä¸ºç”¨åœ¨äº†ç§»åŠ¨ä¸­ï¼Œå½“å‰å¯èƒ½ä¸æ˜¯éå¸¸åˆé€‚
 	if(id == (uint32)pMoveHandlerID_)
 		this->stopMove();
 }

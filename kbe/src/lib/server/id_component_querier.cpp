@@ -107,7 +107,7 @@ COMPONENT_ID IDComponentQuerier::query(COMPONENT_TYPE componentType, int32 uid)
 
 		hasContinue = true;
 
-		// Èç¹ûÊÇÎ´ÖªÀàÐÍÔò¼ÌÐøÒ»´Î
+		// å¦‚æžœæ˜¯æœªçŸ¥ç±»åž‹åˆ™ç»§ç»­ä¸€æ¬¡
 		if (args.componentType == UNKNOWN_COMPONENT_TYPE)
 			continue;
 

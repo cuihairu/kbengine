@@ -11,18 +11,18 @@ namespace KBEngine{ namespace script{
 class Copy
 {						
 public:	
-	/** 代理 copy.copy */
+	/** 浠ｇ悊 copy.copy */
 	static PyObject* copy(PyObject* pyobj);
 	static PyObject* deepcopy(PyObject* pyobj);
 
-	/** 初始化copy */
+	/** 鍒濆鍖朿opy */
 	static bool initialize(void);
 	static void finalise(void);
 
 private:
 	static PyObject* copyMethod_;
 	static PyObject* deepcopyMethod_;
-	static bool	isInit;										// 是否已经被初始化
+	static bool	isInit;										// 鏄惁宸茬粡琚垵濮嬪寲
 } ;
 
 }

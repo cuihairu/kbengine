@@ -121,7 +121,7 @@ bool BundleBroadcast::broadcast(uint16 port)
 
 	epBroadcast_.sendto(packets()[0]->data(), packets()[0]->length(), htons(port), Network::BROADCAST);
 
-	// Èç¹ûÖ¸¶¨ÁËµØÖ·³Ø£¬ÔòÏòËùÓĞµØÖ··¢ËÍÏûÏ¢
+	// å¦‚æœæŒ‡å®šäº†åœ°å€æ± ï¼Œåˆ™å‘æ‰€æœ‰åœ°å€å‘é€æ¶ˆæ¯
 	std::vector< std::string >::iterator addr_iter = machine_addresses_.begin();
 	for (; addr_iter != machine_addresses_.end(); ++addr_iter)
 	{
