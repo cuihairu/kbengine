@@ -64,7 +64,7 @@ NavigationHandlePtr Navigation::findNavigation(std::string resPath)
 		}
 		else if (iter->second->type() == NavigationHandle::NAV_TILE)
 		{
-			// ÓÉÓÚtileÐèÒª×öÅö×²£¬ Ã¿Ò»¸öspace¶¼ÐèÒªÒ»·ÝÐÂµÄÊý¾Ý£¬ ÎÒÃÇÕâÀï²ÉÓÃ¿½±´µÄ·½Ê½À´Ôö¼Ó¹¹ÔìËÙ¶È
+			// ç”±äºŽtileéœ€è¦åšç¢°æ’žï¼Œ æ¯ä¸€ä¸ªspaceéƒ½éœ€è¦ä¸€ä»½æ–°çš„æ•°æ®ï¼Œ æˆ‘ä»¬è¿™é‡Œé‡‡ç”¨æ‹·è´çš„æ–¹å¼æ¥å¢žåŠ æž„é€ é€Ÿåº¦
 			NavTileHandle* pNavTileHandle = new NavTileHandle(*(KBEngine::NavTileHandle*)iter->second.get());
 			DEBUG_MSG(fmt::format("Navigation::findNavigation: copy NavTileHandle({:p})!\n", (void*)pNavTileHandle));
 			return NavigationHandlePtr(pNavTileHandle);
