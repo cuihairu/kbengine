@@ -1806,11 +1806,6 @@ add_library(kbe_pyscript STATIC
 
 add_library(KBEngine::pyscript ALIAS kbe_pyscript)
 
-target_compile_definitions(kbe_pyscript
-  PUBLIC
-    Py_NO_LINK_LIB
-)
-
 target_link_libraries(kbe_pyscript
   PUBLIC
     KBEngine::build_config

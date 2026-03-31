@@ -8,6 +8,7 @@
     "gtest",
     "libmariadb",
     "openssl",
+    "python3",
     "hiredis",
     "zlib"
   ]
