@@ -30,11 +30,11 @@ public:
 	}
 
 	/**
-		´Ó±íÖĞ²éÑ¯Êı¾İ
+		ä»è¡¨ä¸­æŸ¥è¯¢æ•°æ®
 	*/
 	static bool queryDB(DBInterface* pdbi, mysql::DBContext& context)
 	{
-		// ¸ù¾İÄ³¸ödbid»ñµÃÒ»ÕÅ±íÉÏµÄÏà¹ØÊı¾İ
+		// æ ¹æ®æŸä¸ªdbidè·å¾—ä¸€å¼ è¡¨ä¸Šçš„ç›¸å…³æ•°æ®
 		SqlStatement* pSqlcmd = new SqlStatementQuery(pdbi, context.tableName, 
 			context.dbids[context.dbid], 
 			context.dbid, context.items);
@@ -46,7 +46,7 @@ public:
 		if(!ret)
 			return ret;
 
-		// ½«²éÑ¯µ½µÄ½á¹ûĞ´ÈëÉÏÏÂÎÄ
+		// å°†æŸ¥è¯¢åˆ°çš„ç»“æœå†™å…¥ä¸Šä¸‹æ–‡
 		MYSQL_RES * pResult = mysql_store_result(static_cast<DBInterfaceMysql*>(pdbi)->mysql());
 
 		if(pResult)
@@ -61,18 +61,18 @@ public:
 
 				unsigned long *lengths = mysql_fetch_lengths(pResult);
 
-				// ²éÑ¯ÃüÁî±£Ö¤ÁË²éÑ¯µ½µÄÃ¿Ìõ¼ÇÂ¼¶¼»áÓĞdbid
+				// æŸ¥è¯¢å‘½ä»¤ä¿è¯äº†æŸ¥è¯¢åˆ°çš„æ¯æ¡è®°å½•éƒ½ä¼šæœ‰dbid
 				std::stringstream sval;
 				sval << arow[0];
 
 				DBID item_dbid;
 				sval >> item_dbid;
 
-				// ½«dbid¼ÇÂ¼µ½ÁĞ±íÖĞ£¬Èç¹ûµ±Ç°±í»¹´æÔÚ×Ó±íÒıÓÃÔò»áÈ¥×Ó±í²éÃ¿Ò»ÌõÓë´ËdbidÏà¹ØµÄ¼ÇÂ¼
+				// å°†dbidè®°å½•åˆ°åˆ—è¡¨ä¸­ï¼Œå¦‚æœå½“å‰è¡¨è¿˜å­˜åœ¨å­è¡¨å¼•ç”¨åˆ™ä¼šå»å­è¡¨æŸ¥æ¯ä¸€æ¡ä¸æ­¤dbidç›¸å…³çš„è®°å½•
 				std::vector<DBID>& itemDBIDs = context.dbids[context.dbid];
 				int fidx = -100;
 
-				// Èç¹ûµ±Ç°Õâ¸öitemµÄdbidĞ¡ÓÚ¸Ã±íÏÂ×îºóÒ»¸ö¼ÇÂ¼µÄdbid´óĞ¡£¬ÄÇÃ´ĞèÒªÔÚitemDBIDsÖĞÖ¸¶¨µÄÎ»ÖÃ²åÈëÕâ¸ödbid£¬ÒÔ±£Ö¤´ÓĞ¡µ½´óµÄË³Ğò
+				// å¦‚æœå½“å‰è¿™ä¸ªitemçš„dbidå°äºè¯¥è¡¨ä¸‹æœ€åä¸€ä¸ªè®°å½•çš„dbidå¤§å°ï¼Œé‚£ä¹ˆéœ€è¦åœ¨itemDBIDsä¸­æŒ‡å®šçš„ä½ç½®æ’å…¥è¿™ä¸ªdbidï¼Œä»¥ä¿è¯ä»å°åˆ°å¤§çš„é¡ºåº
 				if (itemDBIDs.size() > 0 && itemDBIDs[itemDBIDs.size() - 1] > item_dbid)
 				{
 					for (fidx = itemDBIDs.size() - 1; fidx > 0; --fidx)
@@ -88,7 +88,7 @@ public:
 					itemDBIDs.push_back(item_dbid);
 				}
 
-				// Èç¹ûÕâÌõ¼ÇÂ¼³ıÁËdbidÒÔÍâ»¹´æÔÚÆäËûÊı¾İ£¬Ôò½«Êı¾İÌî³äµ½½á¹û¼¯ÖĞ
+				// å¦‚æœè¿™æ¡è®°å½•é™¤äº†dbidä»¥å¤–è¿˜å­˜åœ¨å…¶ä»–æ•°æ®ï¼Œåˆ™å°†æ•°æ®å¡«å……åˆ°ç»“æœé›†ä¸­
 				if(nfields > 1)
 				{
 					std::vector<std::string>& itemResults = context.results[item_dbid].second;
@@ -102,7 +102,7 @@ public:
 						std::string data;
 						data.assign(arow[i], lengths[i]);
 
-						// Èç¹ûÉÏÃæ¼ÆËã¼ÓÈëdbidÊ±ÊÇ²åÈë·½Ê½£¬ÄÇÃ´½á¹û¼¯ÖĞÒ²ĞèÒª²åÈëµ½¶ÔÓ¦µÄÎ»ÖÃ
+						// å¦‚æœä¸Šé¢è®¡ç®—åŠ å…¥dbidæ—¶æ˜¯æ’å…¥æ–¹å¼ï¼Œé‚£ä¹ˆç»“æœé›†ä¸­ä¹Ÿéœ€è¦æ’å…¥åˆ°å¯¹åº”çš„ä½ç½®
 						if (fidx != -100)
 							itemResults.insert(itemResults.begin() + fidx++, data);
 						else
@@ -116,13 +116,13 @@ public:
 		
 		std::vector<DBID>& dbids = context.dbids[context.dbid];
 
-		// Èç¹ûÃ»ÓĞÊı¾İÔò²éÑ¯Íê±ÏÁË
+		// å¦‚æœæ²¡æœ‰æ•°æ®åˆ™æŸ¥è¯¢å®Œæ¯•äº†
 		if(dbids.size() == 0)
 			return true;
 
-		// Èç¹ûµ±Ç°±í´æÔÚ×Ó±íÒıÓÃÔòĞèÒª¼ÌĞø²éÑ¯×Ó±í
-		// Ã¿Ò»¸ödbid¶¼ĞèÒª»ñµÃ×Ó±íÉÏµÄÊı¾İ
-		// ÔÚÕâÀïÎÒÃÇÈÃ×Ó±íÒ»´Î²éÑ¯³öËùÓĞµÄdbidsÊı¾İÈ»ºóÌî³äµ½½á¹û¼¯
+		// å¦‚æœå½“å‰è¡¨å­˜åœ¨å­è¡¨å¼•ç”¨åˆ™éœ€è¦ç»§ç»­æŸ¥è¯¢å­è¡¨
+		// æ¯ä¸€ä¸ªdbidéƒ½éœ€è¦è·å¾—å­è¡¨ä¸Šçš„æ•°æ®
+		// åœ¨è¿™é‡Œæˆ‘ä»¬è®©å­è¡¨ä¸€æ¬¡æŸ¥è¯¢å‡ºæ‰€æœ‰çš„dbidsæ•°æ®ç„¶åå¡«å……åˆ°ç»“æœé›†
 
 		mysql::DBContext::DB_RW_CONTEXTS::iterator iter1 = context.optable.begin();
 		for(; iter1 != context.optable.end(); ++iter1)
@@ -137,11 +137,11 @@ public:
 
 
 	/**
-		´Ó×Ó±íÖĞ²éÑ¯Êı¾İ
+		ä»å­è¡¨ä¸­æŸ¥è¯¢æ•°æ®
 	*/
 	static bool queryChildDB(DBInterface* pdbi, mysql::DBContext& context, std::vector<DBID>& parentTableDBIDs)
 	{
-		// ¸ù¾İÄ³¸ödbid»ñµÃÒ»ÕÅ±íÉÏµÄÏà¹ØÊı¾İ
+		// æ ¹æ®æŸä¸ªdbidè·å¾—ä¸€å¼ è¡¨ä¸Šçš„ç›¸å…³æ•°æ®
 		SqlStatement* pSqlcmd = new SqlStatementQuery(pdbi, context.tableName, 
 			parentTableDBIDs, 
 			context.dbid, context.items);
@@ -155,7 +155,7 @@ public:
 
 		std::vector<DBID> t_parentTableDBIDs;
 
-		// ½«²éÑ¯µ½µÄ½á¹ûĞ´ÈëÉÏÏÂÎÄ
+		// å°†æŸ¥è¯¢åˆ°çš„ç»“æœå†™å…¥ä¸Šä¸‹æ–‡
 		MYSQL_RES * pResult = mysql_store_result(static_cast<DBInterfaceMysql*>(pdbi)->mysql());
 
 		if(pResult)
@@ -170,7 +170,7 @@ public:
 
 				unsigned long *lengths = mysql_fetch_lengths(pResult);
 
-				// ²éÑ¯ÃüÁî±£Ö¤ÁË²éÑ¯µ½µÄÃ¿Ìõ¼ÇÂ¼¶¼»áÓĞdbid
+				// æŸ¥è¯¢å‘½ä»¤ä¿è¯äº†æŸ¥è¯¢åˆ°çš„æ¯æ¡è®°å½•éƒ½ä¼šæœ‰dbid
 				std::stringstream sval;
 				sval << arow[0];
 
@@ -183,11 +183,11 @@ public:
 				DBID parentID;
 				sval >> parentID;
 
-				// ½«dbid¼ÇÂ¼µ½ÁĞ±íÖĞ£¬Èç¹ûµ±Ç°±í»¹´æÔÚ×Ó±íÒıÓÃÔò»áÈ¥×Ó±í²éÃ¿Ò»ÌõÓë´ËdbidÏà¹ØµÄ¼ÇÂ¼
+				// å°†dbidè®°å½•åˆ°åˆ—è¡¨ä¸­ï¼Œå¦‚æœå½“å‰è¡¨è¿˜å­˜åœ¨å­è¡¨å¼•ç”¨åˆ™ä¼šå»å­è¡¨æŸ¥æ¯ä¸€æ¡ä¸æ­¤dbidç›¸å…³çš„è®°å½•
 				std::vector<DBID>& itemDBIDs = context.dbids[parentID];
 				int fidx = -100;
 
-				// Èç¹ûµ±Ç°Õâ¸öitemµÄdbidĞ¡ÓÚ¸Ã±íÏÂ×îºóÒ»¸ö¼ÇÂ¼µÄdbid´óĞ¡£¬ÄÇÃ´ĞèÒªÔÚitemDBIDsÖĞÖ¸¶¨µÄÎ»ÖÃ²åÈëÕâ¸ödbid£¬ÒÔ±£Ö¤´ÓĞ¡µ½´óµÄË³Ğò
+				// å¦‚æœå½“å‰è¿™ä¸ªitemçš„dbidå°äºè¯¥è¡¨ä¸‹æœ€åä¸€ä¸ªè®°å½•çš„dbidå¤§å°ï¼Œé‚£ä¹ˆéœ€è¦åœ¨itemDBIDsä¸­æŒ‡å®šçš„ä½ç½®æ’å…¥è¿™ä¸ªdbidï¼Œä»¥ä¿è¯ä»å°åˆ°å¤§çš„é¡ºåº
 				if (itemDBIDs.size() > 0 && itemDBIDs[itemDBIDs.size() - 1] > item_dbid)
 				{
 					for (fidx = itemDBIDs.size() - 1; fidx > 0; --fidx)
@@ -205,7 +205,7 @@ public:
 					t_parentTableDBIDs.push_back(item_dbid);
 				}
 
-				// Èç¹ûÕâÌõ¼ÇÂ¼³ıÁËdbidÒÔÍâ»¹´æÔÚÆäËûÊı¾İ£¬Ôò½«Êı¾İÌî³äµ½½á¹û¼¯ÖĞ
+				// å¦‚æœè¿™æ¡è®°å½•é™¤äº†dbidä»¥å¤–è¿˜å­˜åœ¨å…¶ä»–æ•°æ®ï¼Œåˆ™å°†æ•°æ®å¡«å……åˆ°ç»“æœé›†ä¸­
 				const uint32 const_fields = 2; // id, parentID
 				if(nfields > const_fields)
 				{
@@ -220,7 +220,7 @@ public:
 						std::string data;
 						data.assign(arow[i], lengths[i]);
 
-						// Èç¹ûµ±Ç°Õâ¸öitemµÄdbid´óÓÚ¸Ã±íÏÂËùÓĞ¼ÇÂ¼¼¯µÄdbid´óĞ¡£¬ÄÇÃ´ĞèÒªÔÚitemDBIDsÖĞÖ¸¶¨µÄÎ»ÖÃ²åÈëÕâ¸ödbid£¬ÒÔ±£Ö¤´ÓĞ¡µ½´óµÄË³Ğò
+						// å¦‚æœå½“å‰è¿™ä¸ªitemçš„dbidå¤§äºè¯¥è¡¨ä¸‹æ‰€æœ‰è®°å½•é›†çš„dbidå¤§å°ï¼Œé‚£ä¹ˆéœ€è¦åœ¨itemDBIDsä¸­æŒ‡å®šçš„ä½ç½®æ’å…¥è¿™ä¸ªdbidï¼Œä»¥ä¿è¯ä»å°åˆ°å¤§çš„é¡ºåº
 						if (fidx != -100)
 							itemResults.insert(itemResults.begin() + fidx++, data);
 						else
@@ -232,13 +232,13 @@ public:
 			mysql_free_result(pResult);
 		}
 
-		// Èç¹ûÃ»ÓĞÊı¾İÔò²éÑ¯Íê±ÏÁË
+		// å¦‚æœæ²¡æœ‰æ•°æ®åˆ™æŸ¥è¯¢å®Œæ¯•äº†
 		if(t_parentTableDBIDs.size() == 0)
 			return true;
 
-		// Èç¹ûµ±Ç°±í´æÔÚ×Ó±íÒıÓÃÔòĞèÒª¼ÌĞø²éÑ¯×Ó±í
-		// Ã¿Ò»¸ödbid¶¼ĞèÒª»ñµÃ×Ó±íÉÏµÄÊı¾İ
-		// ÔÚÕâÀïÎÒÃÇÈÃ×Ó±íÒ»´Î²éÑ¯³öËùÓĞµÄdbidsÊı¾İÈ»ºóÌî³äµ½½á¹û¼¯
+		// å¦‚æœå½“å‰è¡¨å­˜åœ¨å­è¡¨å¼•ç”¨åˆ™éœ€è¦ç»§ç»­æŸ¥è¯¢å­è¡¨
+		// æ¯ä¸€ä¸ªdbidéƒ½éœ€è¦è·å¾—å­è¡¨ä¸Šçš„æ•°æ®
+		// åœ¨è¿™é‡Œæˆ‘ä»¬è®©å­è¡¨ä¸€æ¬¡æŸ¥è¯¢å‡ºæ‰€æœ‰çš„dbidsæ•°æ®ç„¶åå¡«å……åˆ°ç»“æœé›†
 		mysql::DBContext::DB_RW_CONTEXTS::iterator iter1 = context.optable.begin();
 		for(; iter1 != context.optable.end(); ++iter1)
 		{

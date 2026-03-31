@@ -29,10 +29,10 @@ EntityTableRedis::~EntityTableRedis()
 //-------------------------------------------------------------------------------------
 bool EntityTableRedis::initialize(ScriptDefModule* sm, std::string name)
 {
-	// »ñÈ¡±íÃû
+	// è·å–è¡¨å
 	tableName(name);
 
-	// ÕÒµ½ËùÓĞ´æ´¢ÊôĞÔ²¢ÇÒ´´½¨³öËùÓĞµÄ×Ö¶Î
+	// æ‰¾åˆ°æ‰€æœ‰å­˜å‚¨å±æ€§å¹¶ä¸”åˆ›å»ºå‡ºæ‰€æœ‰çš„å­—æ®µ
 	ScriptDefModule::PROPERTYDESCRIPTION_MAP& pdescrsMap = sm->getPersistentPropertyDescriptions();
 	ScriptDefModule::PROPERTYDESCRIPTION_MAP::const_iterator iter = pdescrsMap.begin();
 
@@ -57,7 +57,7 @@ bool EntityTableRedis::initialize(ScriptDefModule* sm, std::string name)
 		addItem(pETItem);
 	}
 
-	// ÌØÊâ´¦Àí£¬ Êı¾İ¿â±£´æ·½ÏòºÍÎ»ÖÃ
+	// ç‰¹æ®Šå¤„ç†ï¼Œ æ•°æ®åº“ä¿å­˜æ–¹å‘å’Œä½ç½®
 	if(sm->hasCell())
 	{
 		ENTITY_PROPERTY_UID posuid = ENTITY_BASE_PROPERTY_UTYPE_POSITION_XYZ;
@@ -104,7 +104,7 @@ void EntityTableRedis::init_db_item_name()
 	EntityTable::TABLEITEM_MAP::iterator iter = tableItems_.begin();
 	for(; iter != tableItems_.end(); ++iter)
 	{
-		// ´¦ÀífixedDict×Ö¶ÎÃû³ÆµÄÌØÀıÇé¿ö
+		// å¤„ç†fixedDictå­—æ®µåç§°çš„ç‰¹ä¾‹æƒ…å†µ
 		std::string exstrFlag = "";
 		if(iter->second->type() == TABLE_ITEM_TYPE_FIXEDDICT)
 		{
@@ -131,8 +131,8 @@ bool EntityTableRedis::syncToDB(DBInterface* pdbi)
 
 	// DEBUG_MSG(fmt::format("EntityTableRedis::syncToDB(): {}.\n", tableName()));
 
-	// ¶ÔÓÚredis²»ĞèÒªÒ»¿ªÊ¼½«±í´´½¨³öÀ´£¬Êı¾İĞ´Ê±²Å²úÉúÊı¾İ£¬Òò´ËÕâÀï²»ĞèÒª´´½¨±í
-	// »ñÈ¡µ±Ç°±íµÄitems£¬¼ì²éÃ¿¸öitemÊÇ·ñÓëµ±Ç°Æ¥Åä£¬½«ÆäÍ¬²½Îªµ±Ç°±íÃèÊö
+	// å¯¹äºredisä¸éœ€è¦ä¸€å¼€å§‹å°†è¡¨åˆ›å»ºå‡ºæ¥ï¼Œæ•°æ®å†™æ—¶æ‰äº§ç”Ÿæ•°æ®ï¼Œå› æ­¤è¿™é‡Œä¸éœ€è¦åˆ›å»ºè¡¨
+	// è·å–å½“å‰è¡¨çš„itemsï¼Œæ£€æŸ¥æ¯ä¸ªitemæ˜¯å¦ä¸å½“å‰åŒ¹é…ï¼Œå°†å…¶åŒæ­¥ä¸ºå½“å‰è¡¨æè¿°
 
 	//DBInterfaceRedis::TABLE_FIELDS outs;
 	//static_cast<DBInterfaceRedis*>(pdbi)->getFields(outs, this->tableName());
@@ -154,7 +154,7 @@ bool EntityTableRedis::syncToDB(DBInterface* pdbi)
 
 	pdbi->getTableItemNames(ttablename.c_str(), dbTableItemNames);
 
-	// ¼ì²éÊÇ·ñÓĞĞèÒªÉ¾³ıµÄ±í×Ö¶Î
+	// æ£€æŸ¥æ˜¯å¦æœ‰éœ€è¦åˆ é™¤çš„è¡¨å­—æ®µ
 	std::vector<std::string>::iterator iter0 = dbTableItemNames.begin();
 	for (; iter0 != dbTableItemNames.end(); ++iter0)
 	{
@@ -186,7 +186,7 @@ bool EntityTableRedis::syncToDB(DBInterface* pdbi)
 		}
 	}
 
-	// Í¬²½±íË÷Òı
+	// åŒæ­¥è¡¨ç´¢å¼•
 	if (!syncIndexToDB(pdbi))
 		return false;
 

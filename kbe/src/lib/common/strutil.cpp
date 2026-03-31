@@ -91,7 +91,7 @@ namespace strutil {
 		return kbe_ltrim(kbe_rtrim(s));
 	}
 
-	// ×Ö·û´®Ìæ»»
+	// å­—ç¬¦ä¸²æ›¿æ¢
 	int kbe_replace(std::string& str,  const std::string& pattern,  const std::string& newpat) 
 	{ 
 		int count = 0; 
