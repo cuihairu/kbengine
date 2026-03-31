@@ -494,6 +494,13 @@ add_library(kbe_helper_debug_helper STATIC
   "${KBE_SOURCE_DIR}/lib/helper/debug_helper.cpp"
 )
 
+if(WIN32)
+  target_sources(kbe_helper_debug_helper
+    PRIVATE
+      "${KBE_SOURCE_DIR}/lib/helper/crashhandler.cpp"
+  )
+endif()
+
 add_library(KBEngine::helper_debug_helper ALIAS kbe_helper_debug_helper)
 
 target_link_libraries(kbe_helper_debug_helper
