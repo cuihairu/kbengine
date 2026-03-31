@@ -168,6 +168,25 @@ find_package(Python3 REQUIRED COMPONENTS Development)
 
 if(TARGET Python3::Python)
   message(STATUS "Using system Python target: Python3::Python")
+
+  if(WIN32)
+    get_target_property(_kbe_python_implib_debug Python3::Python IMPORTED_IMPLIB_DEBUG)
+    get_target_property(_kbe_python_implib_release Python3::Python IMPORTED_IMPLIB_RELEASE)
+    get_target_property(_kbe_python_location_release Python3::Python IMPORTED_LOCATION_RELEASE)
+
+    if((NOT _kbe_python_implib_release OR _kbe_python_implib_release STREQUAL "_kbe_python_implib_release-NOTFOUND") AND DEFINED Python3_LIBRARIES)
+      list(GET Python3_LIBRARIES 0 _kbe_python_implib_release)
+    endif()
+
+    if(_kbe_python_implib_debug AND NOT EXISTS "${_kbe_python_implib_debug}" AND _kbe_python_implib_release AND EXISTS "${_kbe_python_implib_release}")
+      message(STATUS "Python debug import library not found, falling back to release import library: ${_kbe_python_implib_release}")
+      set_property(TARGET Python3::Python PROPERTY IMPORTED_IMPLIB_DEBUG "${_kbe_python_implib_release}")
+
+      if(_kbe_python_location_release AND EXISTS "${_kbe_python_location_release}")
+        set_property(TARGET Python3::Python PROPERTY IMPORTED_LOCATION_DEBUG "${_kbe_python_location_release}")
+      endif()
+    endif()
+  endif()
 endif()
 
 add_library(kbe_dependency_jwsmtp STATIC
