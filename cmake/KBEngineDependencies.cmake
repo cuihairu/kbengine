@@ -174,6 +174,8 @@ if(TARGET Python3::Python)
     get_target_property(_kbe_python_implib_release Python3::Python IMPORTED_IMPLIB_RELEASE)
     get_target_property(_kbe_python_location_release Python3::Python IMPORTED_LOCATION_RELEASE)
 
+    set_property(TARGET Python3::Python PROPERTY MAP_IMPORTED_CONFIG_DEBUG Release)
+
     if((NOT _kbe_python_implib_release OR _kbe_python_implib_release STREQUAL "_kbe_python_implib_release-NOTFOUND") AND DEFINED Python3_LIBRARIES)
       list(GET Python3_LIBRARIES 0 _kbe_python_implib_release)
     endif()
