@@ -9,7 +9,6 @@ target_compile_definitions(kbe_build_config INTERFACE ${KBE_COMMON_DEFINITIONS})
 target_include_directories(kbe_build_config INTERFACE
   "${KBE_SOURCE_DIR}"
   "${KBE_SOURCE_DIR}/lib"
-  "${KBE_SOURCE_DIR}/lib/dependencies"
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
