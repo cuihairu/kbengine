@@ -1,12 +1,14 @@
 if(KBE_USING_VCPKG)
-  find_package(fmt CONFIG QUIET)
-  find_package(hiredis CONFIG QUIET)
+  find_package(fmt CONFIG REQUIRED)
+  find_package(hiredis CONFIG REQUIRED)
   find_package(unofficial-libmysql CONFIG QUIET)
   find_package(unofficial-libmariadb CONFIG QUIET)
 endif()
 
 if(TARGET fmt::fmt)
   message(STATUS "KBEngine: using package-provided fmt target")
+elseif(KBE_USING_VCPKG)
+  message(FATAL_ERROR "KBEngine: vcpkg mode requires fmt::fmt from the manifest-managed fmt package.")
 else()
   add_library(fmt STATIC
     "${KBE_SOURCE_DIR}/lib/dependencies/fmt/src/format.cc"
@@ -79,6 +81,8 @@ elseif(TARGET hiredis::hiredis_static)
   add_library(kbe_dependency_hiredis INTERFACE)
   target_link_libraries(kbe_dependency_hiredis INTERFACE hiredis::hiredis_static)
   message(STATUS "KBEngine: using package-provided hiredis::hiredis_static target")
+elseif(KBE_USING_VCPKG)
+  message(FATAL_ERROR "KBEngine: vcpkg mode requires a package-provided hiredis target.")
 else()
   add_library(kbe_dependency_hiredis STATIC
     "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/hiredis.c"
@@ -113,6 +117,8 @@ if(KBE_MYSQLCLIENT_IMPORTED_TARGET)
   add_library(kbe_dependency_mysqlclient INTERFACE)
   target_link_libraries(kbe_dependency_mysqlclient INTERFACE ${KBE_MYSQLCLIENT_IMPORTED_TARGET})
   message(STATUS "KBEngine: using package-provided MySQL client target: ${KBE_MYSQLCLIENT_IMPORTED_TARGET}")
+elseif(KBE_USING_VCPKG)
+  message(FATAL_ERROR "KBEngine: vcpkg mode requires libmariadb/libmysql from the manifest-managed package set.")
 else()
   find_path(KBE_MYSQL_INCLUDE_DIR
     NAMES mysql/mysql.h mysql.h
@@ -209,11 +215,13 @@ endif()
 
 if(BUILD_TESTING AND KBE_ENABLE_TESTING)
   if(KBE_USING_VCPKG)
-    find_package(GTest CONFIG QUIET)
+    find_package(GTest CONFIG REQUIRED)
   endif()
 
   if(TARGET GTest::gtest_main)
     message(STATUS "KBEngine: using package-provided GTest targets")
+  elseif(KBE_USING_VCPKG)
+    message(FATAL_ERROR "KBEngine: vcpkg mode requires GTest::gtest_main from the manifest-managed gtest package.")
   else()
     include(FetchContent)
 
