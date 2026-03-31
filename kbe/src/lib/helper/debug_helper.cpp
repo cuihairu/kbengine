@@ -147,19 +147,19 @@ void myassert(const char * exp, const char * func, const char * file, unsigned i
 #endif
 
 #if KBE_PLATFORM == PLATFORM_WIN32
-	#define ALERT_LOG_TO(NAME, CHANGED)							\
-	{															\
-		wchar_t exe_path[MAX_PATH];								\
-		memset(exe_path, 0, MAX_PATH * sizeof(wchar_t));		\
-		GetCurrentDirectory(MAX_PATH, exe_path);				\
-																\
-		char* ccattr = strutil::wchar2char(exe_path);			\
-		if(CHANGED)												\
-			printf("Logging(changed) to: %s/logs/" NAME "%s.*.log\n\n", ccattr, COMPONENT_NAME_EX(g_componentType));\
-		else													\
-			printf("Logging to: %s/logs/" NAME "%s.*.log\n\n", ccattr, COMPONENT_NAME_EX(g_componentType));\
-		free(ccattr);											\
-	}															\
+		#define ALERT_LOG_TO(NAME, CHANGED)							\
+		{															\
+			wchar_t exe_path[MAX_PATH];								\
+			memset(exe_path, 0, MAX_PATH * sizeof(wchar_t));		\
+			GetCurrentDirectoryW(MAX_PATH, exe_path);				\
+																	\
+			char* ccattr = strutil::wchar2char(exe_path);			\
+			if(CHANGED)												\
+				printf("Logging(changed) to: %s/logs/" NAME "%s.*.log\n\n", ccattr, COMPONENT_NAME_EX(g_componentType));\
+			else													\
+				printf("Logging to: %s/logs/" NAME "%s.*.log\n\n", ccattr, COMPONENT_NAME_EX(g_componentType));\
+			free(ccattr);											\
+		}															\
 
 #else
 #define ALERT_LOG_TO(NAME, CHANGED) {}
