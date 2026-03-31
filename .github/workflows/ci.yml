@@ -22,8 +22,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+            autoconf \
+            autoconf-archive \
+            automake \
             build-essential \
             cmake \
+            libtool \
             ninja-build \
             pkg-config \
             zip \
@@ -132,6 +136,14 @@ jobs:
           cmake --version
           ninja --version
           clang++ --version
+
+      - name: Install autotools dependencies
+        run: |
+          brew install \
+            autoconf \
+            autoconf-archive \
+            automake \
+            libtool
 
       - name: Bootstrap vcpkg
         run: |
