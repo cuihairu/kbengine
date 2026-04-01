@@ -252,11 +252,12 @@ __RECONNECT:
 		// 不需要关闭自动提交，底层会START TRANSACTION之后再COMMIT
 		// mysql_autocommit(mysql(), 0);
 
-		char characterset_sql[MAX_BUF];
-		kbe_snprintf(characterset_sql, MAX_BUF, "ALTER DATABASE CHARACTER SET %s COLLATE %s", 
-			characterSet_.c_str(), collation_.c_str());
+		std::string characterset_sql = "ALTER DATABASE CHARACTER SET ";
+		characterset_sql += characterSet_;
+		characterset_sql += " COLLATE ";
+		characterset_sql += collation_;
 
-		query(&characterset_sql[0], strlen(characterset_sql), false);
+		query(characterset_sql.c_str(), characterset_sql.size(), false);
 	}
 	catch (std::exception& e)
 	{
@@ -428,9 +429,10 @@ bool DBInterfaceMysql::dropEntityTableFromDB(const char* tableName)
   
 	DEBUG_MSG(fmt::format("DBInterfaceMysql::dropEntityTableFromDB: {}.\n", tableName));
 
-	char sql_str[SQL_BUF];
-	kbe_snprintf(sql_str, SQL_BUF, "Drop table if exists %s;", tableName);
-	return query(sql_str, strlen(sql_str));
+	std::string sql = "Drop table if exists ";
+	sql += tableName;
+	sql += ";";
+	return query(sql.c_str(), sql.size());
 }
 
 //-------------------------------------------------------------------------------------
@@ -441,9 +443,12 @@ bool DBInterfaceMysql::dropEntityTableItemFromDB(const char* tableName, const ch
 	DEBUG_MSG(fmt::format("DBInterfaceMysql::dropEntityTableItemFromDB: {} {}.\n", 
 		tableName, tableItemName));
 
-	char sql_str[SQL_BUF];
-	kbe_snprintf(sql_str, SQL_BUF, "alter table %s drop column %s;", tableName, tableItemName);
-	return query(sql_str, strlen(sql_str));
+	std::string sql = "alter table ";
+	sql += tableName;
+	sql += " drop column ";
+	sql += tableItemName;
+	sql += ";";
+	return query(sql.c_str(), sql.size());
 }
 
 //-------------------------------------------------------------------------------------

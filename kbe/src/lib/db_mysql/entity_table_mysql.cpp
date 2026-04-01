@@ -48,14 +48,17 @@ bool sync_item_to_db(DBInterface* pdbi,
 
 	DEBUG_MSG(fmt::format("syncToDB(): {}->{}({}).\n", tableName, itemName, datatype));
 
-	char __sql_str__[MAX_BUF];
-
-	kbe_snprintf(__sql_str__, MAX_BUF, "ALTER TABLE `" ENTITY_TABLE_PERFIX "_%s` ADD `%s` %s;",
-		tableName, itemName, datatype);	
+	std::string sql = "ALTER TABLE `" ENTITY_TABLE_PERFIX "_";
+	sql += tableName;
+	sql += "` ADD `";
+	sql += itemName;
+	sql += "` ";
+	sql += datatype;
+	sql += ";";
 
 	try
 	{
-		pdbi->query(__sql_str__, strlen(__sql_str__), false);	
+		pdbi->query(sql.c_str(), sql.size(), false);	
 	}
 	catch(...)
 	{
@@ -64,12 +67,17 @@ bool sync_item_to_db(DBInterface* pdbi,
 	unsigned int mysql_errorno = pdbi->getlasterror();
 	if (mysql_errorno == 1060/* Duplicate column name */)
 	{
-		kbe_snprintf(__sql_str__, MAX_BUF, "ALTER TABLE `" ENTITY_TABLE_PERFIX "_%s` MODIFY COLUMN `%s` %s;",	
-			tableName, itemName, datatype);
+		sql = "ALTER TABLE `" ENTITY_TABLE_PERFIX "_";
+		sql += tableName;
+		sql += "` MODIFY COLUMN `";
+		sql += itemName;
+		sql += "` ";
+		sql += datatype;
+		sql += ";";
 
 		try
 		{
-			if(pdbi->query(__sql_str__, strlen(__sql_str__), false))
+			if(pdbi->query(sql.c_str(), sql.size(), false))
 			{
 				if(callback)
 					(*callback)(pdbi, tableName, itemName);
@@ -236,14 +244,12 @@ bool EntityTableMysql::syncIndexToDB(DBInterface* pdbi)
 		indexs.push_back(iter->second.get());
 	}
 
-	char sql_str[SQL_BUF];
-
-	kbe_snprintf(sql_str, SQL_BUF, "show index from " ENTITY_TABLE_PERFIX "_%s",
-		tableName());
+	std::string sql = "show index from " ENTITY_TABLE_PERFIX "_";
+	sql += tableName();
 
 	try
 	{
-		bool ret = pdbi->query(sql_str, strlen(sql_str), false);
+		bool ret = pdbi->query(sql.c_str(), sql.size(), false);
 		if(!ret)
 		{
 			return false;
@@ -368,28 +374,29 @@ bool EntityTableMysql::syncToDB(DBInterface* pdbi)
 
 	// DEBUG_MSG(fmt::format("EntityTableMysql::syncToDB(): {}.\n", tableName()));
 
-	char sql_str[SQL_BUF];
 	std::string exItems = "";
 
 	if(this->isChild())
 		exItems = ", " TABLE_PARENTID_CONST_STR " bigint(20) unsigned NOT NULL, INDEX(" TABLE_PARENTID_CONST_STR ")";
 
-	char autoIncrement_str[SQL_BUF];
-	memset(autoIncrement_str, 0, sizeof(autoIncrement_str));
+	std::string autoIncrement_str;
 	const char* autoIncrementInit = pdbi->getAutoIncrementInit();
 	if (autoIncrementInit != NULL && strlen(autoIncrementInit) > 0)
 	{
-		kbe_snprintf(autoIncrement_str, SQL_BUF, " AUTO_INCREMENT=%s", autoIncrementInit);
+		autoIncrement_str = " AUTO_INCREMENT=";
+		autoIncrement_str += autoIncrementInit;
 	}
 
-	kbe_snprintf(sql_str, SQL_BUF, "CREATE TABLE IF NOT EXISTS " ENTITY_TABLE_PERFIX "_%s "
-			"(id bigint(20) unsigned AUTO_INCREMENT, PRIMARY KEY idKey (id)%s)"
-		"ENGINE=" MYSQL_ENGINE_TYPE "%s", 
-		tableName(), exItems.c_str(), autoIncrement_str);
+	std::string sql = "CREATE TABLE IF NOT EXISTS " ENTITY_TABLE_PERFIX "_";
+	sql += tableName();
+	sql += " (id bigint(20) unsigned AUTO_INCREMENT, PRIMARY KEY idKey (id)";
+	sql += exItems;
+	sql += ") ENGINE=" MYSQL_ENGINE_TYPE;
+	sql += autoIncrement_str;
 
 	try
 	{
-		bool ret = pdbi->query(sql_str, strlen(sql_str), false);
+		bool ret = pdbi->query(sql.c_str(), sql.size(), false);
 		if(!ret)
 		{
 			return false;
@@ -1641,20 +1648,17 @@ bool EntityTableItemMysql_DIGIT::syncToDB(DBInterface* pdbi, void* pData)
 	}
 
 	uint32 length = pPropertyDescription_->getDatabaseLength();
-	char sql_str[SQL_BUF];
 
 	if (length <= 0)
 	{
 		KBEngine::strutil::kbe_replace(itemDBType_, "(@DATALEN@)", "");
-		kbe_snprintf(sql_str, SQL_BUF, "%s", itemDBType_.c_str());
 	}
 	else
 	{
 		KBEngine::strutil::kbe_replace(itemDBType_, "@DATALEN@", fmt::format("{}", length).c_str());
-		kbe_snprintf(sql_str, SQL_BUF, "%s", itemDBType_.c_str());
 	}
 
-	return sync_item_to_db(pdbi, sql_str, tableName_.c_str(), db_item_name(), length, this->mysqlItemtype_, this->flags(), pData);
+	return sync_item_to_db(pdbi, itemDBType_.c_str(), tableName_.c_str(), db_item_name(), length, this->mysqlItemtype_, this->flags(), pData);
 }
 
 //-------------------------------------------------------------------------------------
@@ -1815,7 +1819,6 @@ void EntityTableItemMysql_DIGIT::getReadSqlItem(mysql::DBContext& context)
 bool EntityTableItemMysql_STRING::syncToDB(DBInterface* pdbi, void* pData)
 {
 	uint32 length = pPropertyDescription_->getDatabaseLength();
-	char sql_str[SQL_BUF];
 
 	// 如果父表Item是个固定字典，那么需要判断当前item有无在固定字典中设置DatabaseLength
 	if (this->pParentTableItem() && this->pParentTableItem()->type() == TABLE_ITEM_TYPE_FIXEDDICT)
@@ -1830,9 +1833,8 @@ bool EntityTableItemMysql_STRING::syncToDB(DBInterface* pdbi, void* pData)
 	}
 
 	KBEngine::strutil::kbe_replace(itemDBType_, "@DATALEN@", fmt::format("{}", length).c_str());
-	kbe_snprintf(sql_str, SQL_BUF, "%s", itemDBType_.c_str());
 
-	return sync_item_to_db(pdbi, sql_str, tableName_.c_str(), db_item_name(), length, 
+	return sync_item_to_db(pdbi, itemDBType_.c_str(), tableName_.c_str(), db_item_name(), length, 
 		this->mysqlItemtype_, this->flags(), pData);
 }
 
@@ -1887,7 +1889,6 @@ void EntityTableItemMysql_STRING::getReadSqlItem(mysql::DBContext& context)
 bool EntityTableItemMysql_UNICODE::syncToDB(DBInterface* pdbi, void* pData)
 {
 	uint32 length = pPropertyDescription_->getDatabaseLength();
-	char sql_str[SQL_BUF];
 
 	// 如果父表Item是个固定字典，那么需要判断当前item有无在固定字典中设置DatabaseLength
 	if (this->pParentTableItem() && this->pParentTableItem()->type() == TABLE_ITEM_TYPE_FIXEDDICT)
@@ -1902,9 +1903,8 @@ bool EntityTableItemMysql_UNICODE::syncToDB(DBInterface* pdbi, void* pData)
 	}
 
 	KBEngine::strutil::kbe_replace(itemDBType_, "@DATALEN@", fmt::format("{}", length).c_str());
-	kbe_snprintf(sql_str, SQL_BUF, "%s", itemDBType_.c_str());
 
-	return sync_item_to_db(pdbi, sql_str, tableName_.c_str(), db_item_name(), length, 
+	return sync_item_to_db(pdbi, itemDBType_.c_str(), tableName_.c_str(), db_item_name(), length, 
 		this->mysqlItemtype_, this->flags(), pData);
 }
 
