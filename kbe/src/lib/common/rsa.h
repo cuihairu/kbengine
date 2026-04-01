@@ -38,6 +38,8 @@ public:
 	virtual bool isGood() const { return rsa_public != NULL && rsa_private != NULL; }
 
 protected:
+	// Changed to support OpenSSL 3.x EVP_PKEY structure
+	// rsa_public and rsa_private are now EVP_PKEY* instead of RSA*
 	void* rsa_public, *rsa_private;
 };
 
