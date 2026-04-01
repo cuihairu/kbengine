@@ -25,7 +25,7 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <tinyxml.h>
+#include <tinyxml2.h>
 
 #include "TmxObject.h"
 #include "TmxPolygon.h"
@@ -67,9 +67,9 @@ namespace Tmx
 		}
 	}
 
-	void Object::Parse(const TiXmlNode *objectNode) 
+	void Object::Parse(const tinyxml2::XMLNode *objectNode) 
 	{
-		const TiXmlElement *objectElem = objectNode->ToElement();
+		const tinyxml2::XMLElement *objectElem = objectNode->ToElement();
 
 		// Read the attributes of the object.
 		const char *tempName = objectElem->Attribute("name");
@@ -78,14 +78,14 @@ namespace Tmx
 		if (tempName) name = tempName;
 		if (tempType) type = tempType;
 		
-		objectElem->Attribute("x", &x);
-		objectElem->Attribute("y", &y);
-		objectElem->Attribute("width", &width);
-		objectElem->Attribute("height", &height);
-		objectElem->Attribute("gid", &gid);
+		objectElem->QueryIntAttribute("x", &x);
+		objectElem->QueryIntAttribute("y", &y);
+		objectElem->QueryIntAttribute("width", &width);
+		objectElem->QueryIntAttribute("height", &height);
+		objectElem->QueryIntAttribute("gid", &gid);
 
 		// Read the ellipse of the object if there are any.
-		const TiXmlNode *ellipseNode = objectNode->FirstChild("ellipse");
+		const tinyxml2::XMLNode *ellipseNode = objectNode->FirstChildElement("ellipse");
 		if (ellipseNode)
 		{
 			if (ellipse != 0)
@@ -95,7 +95,7 @@ namespace Tmx
 		}
 
 		// Read the Polygon and Polyline of the object if there are any.
-		const TiXmlNode *polygonNode = objectNode->FirstChild("polygon");
+		const tinyxml2::XMLNode *polygonNode = objectNode->FirstChildElement("polygon");
 		if (polygonNode)
 		{
 			if (polygon != 0)
@@ -104,7 +104,7 @@ namespace Tmx
 			polygon = new Polygon();
 			polygon->Parse(polygonNode);
 		}
-		const TiXmlNode *polylineNode = objectNode->FirstChild("polyline");
+		const tinyxml2::XMLNode *polylineNode = objectNode->FirstChildElement("polyline");
 		if (polylineNode)
 		{
 			if (polyline != 0)
@@ -115,7 +115,7 @@ namespace Tmx
 		}
 
 		// Read the properties of the object.
-		const TiXmlNode *propertiesNode = objectNode->FirstChild("properties");
+		const tinyxml2::XMLNode *propertiesNode = objectNode->FirstChildElement("properties");
 		if (propertiesNode) 
 		{
 			properties.Parse(propertiesNode);

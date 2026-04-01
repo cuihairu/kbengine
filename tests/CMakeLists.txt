@@ -3,6 +3,8 @@ include(GoogleTest)
 add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_fmt_bootstrap.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_tinyxml_bootstrap.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_xml_wrapper.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_tmxparser.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_zlib_bootstrap.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_base64_sha1.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_strutil.cpp"
@@ -98,6 +100,8 @@ target_link_libraries(kbe_smoke_tests
     GTest::gtest_main
     KBEngine::build_config
     KBEngine::third_party
+    KBEngine::xml
+    KBEngine::dependency_tmxparser
     KBEngine::common_core
     KBEngine::common_md5
     KBEngine::common_ssl

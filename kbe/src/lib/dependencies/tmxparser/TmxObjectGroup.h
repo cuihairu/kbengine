@@ -33,7 +33,7 @@
 
 #include "TmxPropertySet.h"
 
-class TiXmlNode;
+namespace tinyxml2 { class XMLNode; }
 
 namespace Tmx 
 {
@@ -50,7 +50,7 @@ namespace Tmx
 		~ObjectGroup();
 
 		// Parse an objectgroup node.
-		void Parse(const TiXmlNode *objectGroupNode);
+		void Parse(const tinyxml2::XMLNode *objectGroupNode);
 
 		// Get the name of the object group.
 		const std::string &GetName() const { return name; }

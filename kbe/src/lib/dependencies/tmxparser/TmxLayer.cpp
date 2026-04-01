@@ -25,7 +25,7 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <tinyxml.h>
+#include <tinyxml2.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -93,15 +93,15 @@ namespace Tmx
 		}
 	}
 
-	void Layer::Parse(const TiXmlNode *layerNode) 
+	void Layer::Parse(const tinyxml2::XMLNode *layerNode) 
 	{
-		const TiXmlElement *layerElem = layerNode->ToElement();
+		const tinyxml2::XMLElement *layerElem = layerNode->ToElement();
 	
 		// Read the attributes.
 		name = layerElem->Attribute("name");
 
-		layerElem->Attribute("width", &width);
-		layerElem->Attribute("height", &height);
+		layerElem->QueryIntAttribute("width", &width);
+		layerElem->QueryIntAttribute("height", &height);
 
 		const char *opacityStr = layerElem->Attribute("opacity");
 		if (opacityStr) 
@@ -116,7 +116,7 @@ namespace Tmx
 		}
 
 		// Read the properties.
-		const TiXmlNode *propertiesNode = layerNode->FirstChild("properties");
+		const tinyxml2::XMLNode *propertiesNode = layerNode->FirstChildElement("properties");
 		if (propertiesNode) 
 		{
 			properties.Parse(propertiesNode);
@@ -125,8 +125,8 @@ namespace Tmx
 		// Allocate memory for reading the tiles.
 		tile_map = new MapTile[width * height];
 
-		const TiXmlNode *dataNode = layerNode->FirstChild("data");
-		const TiXmlElement *dataElem = dataNode->ToElement();
+		const tinyxml2::XMLNode *dataNode = layerNode->FirstChildElement("data");
+		const tinyxml2::XMLElement *dataElem = dataNode->ToElement();
 
 		const char *encodingStr = dataElem->Attribute("encoding");
 		const char *compressionStr = dataElem->Attribute("compression");
@@ -174,14 +174,14 @@ namespace Tmx
 		}
 	}
 
-	void Layer::ParseXML(const TiXmlNode *dataNode) 
+	void Layer::ParseXML(const tinyxml2::XMLNode *dataNode) 
 	{
-		const TiXmlNode *tileNode = dataNode->FirstChild("tile");
+		const tinyxml2::XMLNode *tileNode = dataNode->FirstChildElement("tile");
 		int tileCount = 0;
 
 		while (tileNode) 
 		{
-			const TiXmlElement *tileElem = tileNode->ToElement();
+			const tinyxml2::XMLElement *tileElem = tileNode->ToElement();
 			
 			unsigned gid = 0;
 
@@ -205,7 +205,7 @@ namespace Tmx
 				tile_map[tileCount] = MapTile(gid, 0, -1);
 			}
 
-			tileNode = dataNode->IterateChildren("tile", tileNode);
+			tileNode = tileNode->NextSiblingElement("tile");
 			tileCount++;
 		}
 	}

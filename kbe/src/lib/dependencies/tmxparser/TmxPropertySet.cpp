@@ -25,7 +25,7 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <tinyxml.h>
+#include <tinyxml2.h>
 
 #include "TmxPropertySet.h"
 
@@ -52,24 +52,23 @@ namespace Tmx
 		properties.clear();
 	}
 
-	void PropertySet::Parse(const TiXmlNode *propertiesNode) 
+	void PropertySet::Parse(const tinyxml2::XMLNode *propertiesNode) 
 	{
 		// Iterate through all of the property nodes.
-		const TiXmlNode *propertyNode = propertiesNode->FirstChild("property");
+		const tinyxml2::XMLNode *propertyNode = propertiesNode->FirstChildElement("property");
 		string propertyName;
 		string propertyValue;
 
 		while (propertyNode) 
 		{
-			const TiXmlElement* propertyElem = propertyNode->ToElement();
+			const tinyxml2::XMLElement* propertyElem = propertyNode->ToElement();
 
 			// Read the attributes of the property and add it to the map
 			propertyName = string(propertyElem->Attribute("name"));
 			propertyValue = string(propertyElem->Attribute("value"));
 			properties[propertyName] = propertyValue;
 			
-			propertyNode = propertiesNode->IterateChildren(
-				"property", propertyNode);
+			propertyNode = propertyNode->NextSiblingElement("property");
 		}
 	}
 

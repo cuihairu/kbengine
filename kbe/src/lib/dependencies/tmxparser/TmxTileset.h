@@ -33,7 +33,7 @@
 
 #include "TmxPropertySet.h"
 
-class TiXmlNode;
+namespace tinyxml2 { class XMLNode; }
 
 namespace Tmx 
 {
@@ -53,7 +53,7 @@ namespace Tmx
 		~Tileset();
 
 		// Parse a tileset element.
-		void Parse(const TiXmlNode *tilesetNode);
+		void Parse(const tinyxml2::XMLNode *tilesetNode);
 
 		// Returns the global id of the first tile.
 		int GetFirstGid() const { return first_gid; }

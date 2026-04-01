@@ -25,7 +25,7 @@
 //
 // Author: Tamir Atias
 //-----------------------------------------------------------------------------
-#include <tinyxml.h>
+#include <tinyxml2.h>
 
 #include "TmxPolyline.h"
 
@@ -36,7 +36,7 @@ namespace Tmx
 	{
 	}
 
-	void Polyline::Parse(const TiXmlNode *polylineNode)
+	void Polyline::Parse(const tinyxml2::XMLNode *polylineNode)
 	{
 		char *pointsLine = strdup(polylineNode->ToElement()->Attribute("points"));
 		

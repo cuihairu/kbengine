@@ -11,6 +11,7 @@
 #include "server/components.h"
 #include "helper/console_helper.h"
 #include "xml/xml.h"
+#include <tinyxml2.h>
 
 #undef DEFINE_IN_INTERFACE
 #include "client_lib/client_interface.h"
@@ -619,27 +620,25 @@ void CguiconsoleDlg::commitPythonCommand(CString strCommand)
 
 void CguiconsoleDlg::saveHistory()
 {
-    //创建一个XML的文档对象。
-    TiXmlDocument *pDocument = new TiXmlDocument();
+	tinyxml2::XMLDocument document;
 
 	int i = 0;
 	std::deque<CString>::iterator iter = m_historyCommand.begin();
-	TiXmlElement *rootElement = new TiXmlElement("root");
-	pDocument->LinkEndChild(rootElement);
+	tinyxml2::XMLElement* rootElement = document.NewElement("root");
+	document.InsertEndChild(rootElement);
 
 	for(; iter != m_historyCommand.end(); iter++)
 	{
 		char key[256] = {0};
 		kbe_snprintf(key, 256, "item%d", i++);
-		TiXmlElement *rootElementChild = new TiXmlElement(key);
-		rootElement->LinkEndChild(rootElementChild);
+		tinyxml2::XMLElement* rootElementChild = document.NewElement(key);
+		rootElement->InsertEndChild(rootElementChild);
 
 		std::wstring strCommand = (*iter);
 		std::string str;
 
 		strutil::wchar2utf8(strCommand, str);
-		TiXmlText *content = new TiXmlText(str.data());
-		rootElementChild->LinkEndChild(content);
+		rootElementChild->SetText(str.c_str());
 	}
 
     CString appPath = GetAppPath();
@@ -651,7 +650,7 @@ void CguiconsoleDlg::saveHistory()
 	WideCharToMultiByte(CP_ACP,0, fullPath, fullPath.GetLength(), fname, len, NULL, NULL);
 	fname[len] = '\0';
 
-	pDocument->SaveFile(fname);
+	document.SaveFile(fname);
 }
 
 void CguiconsoleDlg::loadHistory()
@@ -665,12 +664,12 @@ void CguiconsoleDlg::loadHistory()
 	WideCharToMultiByte(CP_ACP,0, fullPath, fullPath.GetLength(), fname, len, NULL, NULL);
 	fname[len + 1] = '\0';
 
-	TiXmlDocument *pDocument = new TiXmlDocument(fname);
-	if(pDocument == NULL || !pDocument->LoadFile(TIXML_ENCODING_UTF8))
+	tinyxml2::XMLDocument document;
+	if(document.LoadFile(fname) != tinyxml2::XML_SUCCESS)
 		return;
 
-	TiXmlElement *rootElement = pDocument->RootElement();
-	TiXmlNode* node = rootElement->FirstChild();
+	tinyxml2::XMLElement* rootElement = document.RootElement();
+	tinyxml2::XMLNode* node = rootElement != NULL ? rootElement->FirstChild() : NULL;
 	if(node)
 	{
 		do
@@ -689,8 +688,7 @@ void CguiconsoleDlg::loadHistory()
 		}while((node = node->NextSibling()));
 	}
 
-	pDocument->Clear();
-	delete pDocument;
+	document.Clear();
 }
 
 BOOL CguiconsoleDlg::PreTranslateMessage(MSG* pMsg)

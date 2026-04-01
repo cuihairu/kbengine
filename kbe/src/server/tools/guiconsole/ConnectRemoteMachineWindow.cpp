@@ -8,6 +8,7 @@
 #include "machine/machine_interface.h"
 #include "server/components.h"
 #include "helper/console_helper.h"
+#include <tinyxml2.h>
 
 // CConnectRemoteMachineWindow dialog
 
@@ -221,20 +222,19 @@ END:
 
 void CConnectRemoteMachineWindow::saveHistory()
 {
-    //创建一个XML的文档对象。
-    TiXmlDocument *pDocument = new TiXmlDocument();
+	tinyxml2::XMLDocument document;
 
 	int i = 0;
 	std::deque<CString>::iterator iter = m_historyCommand.begin();
-	TiXmlElement *rootElement = new TiXmlElement("root");
-	pDocument->LinkEndChild(rootElement);
+	tinyxml2::XMLElement* rootElement = document.NewElement("root");
+	document.InsertEndChild(rootElement);
 
 	for(; iter != m_historyCommand.end(); iter++)
 	{
 		char key[256] = {0};
 		kbe_snprintf(key, 256, "item%d", i++);
-		TiXmlElement *rootElementChild = new TiXmlElement(key);
-		rootElement->LinkEndChild(rootElementChild);
+		tinyxml2::XMLElement* rootElementChild = document.NewElement(key);
+		rootElement->InsertEndChild(rootElementChild);
 
 		char buffer[4096] = {0};
 		CString strCommand = (*iter);
@@ -244,8 +244,7 @@ void CConnectRemoteMachineWindow::saveHistory()
 		buffer[len + 1] = '\0';
 
 
-		TiXmlText *content = new TiXmlText(buffer);
-		rootElementChild->LinkEndChild(content);
+		rootElementChild->SetText(buffer);
 	}
 
     CString appPath = GetAppPath();
@@ -257,7 +256,7 @@ void CConnectRemoteMachineWindow::saveHistory()
 	WideCharToMultiByte(CP_ACP,0, fullPath, fullPath.GetLength(), fname, len, NULL, NULL);
 	fname[len + 1] = '\0';
 
-	pDocument->SaveFile(fname);
+	document.SaveFile(fname);
 
 	m_log.ResetContent();
 	std::deque<CString>::iterator iter1 = m_historyCommand.begin();
@@ -290,17 +289,17 @@ void CConnectRemoteMachineWindow::saveIpMapping()
 		}
 	}
 
-	TiXmlDocument *pDocument = new TiXmlDocument();
-	TiXmlElement *rootElement = new TiXmlElement("root");
-	pDocument->LinkEndChild(rootElement);
+	tinyxml2::XMLDocument document;
+	tinyxml2::XMLElement* rootElement = document.NewElement("root");
+	document.InsertEndChild(rootElement);
 
 	for (auto iter = m_ipMapping.begin(); iter != m_ipMapping.end(); iter = m_ipMapping.upper_bound(iter->first))
 	{
-		TiXmlElement *hostElement = new TiXmlElement("host");
+		tinyxml2::XMLElement* hostElement = document.NewElement("host");
 		host = iter->first;
 		char* value = KBEngine::strutil::wchar2char(host.GetBuffer(0));
 		hostElement->SetAttribute("value", value);
-		rootElement->LinkEndChild(hostElement);
+		rootElement->InsertEndChild(hostElement);
 		free(value);
 
 		auto items = m_ipMapping.equal_range(host);
@@ -310,12 +309,10 @@ void CConnectRemoteMachineWindow::saveIpMapping()
 			std::vector<std::string> result;
 			strutil::kbe_splits(strTemp, ">", result);
 
-			TiXmlElement *lanipElement = new TiXmlElement("lan_ip");
+			tinyxml2::XMLElement* lanipElement = document.NewElement("lan_ip");
 			lanipElement->SetAttribute("value", result[0].c_str());
-			hostElement->LinkEndChild(lanipElement);
-
-			TiXmlText *content = new TiXmlText(result[1].c_str());
-			lanipElement->LinkEndChild(content);
+			lanipElement->SetText(result[1].c_str());
+			hostElement->InsertEndChild(lanipElement);
 		}
 	}
 
@@ -328,9 +325,8 @@ void CConnectRemoteMachineWindow::saveIpMapping()
 	WideCharToMultiByte(CP_ACP, 0, fullPath, fullPath.GetLength(), fname, len, NULL, NULL);
 	fname[len + 1] = '\0';
 
-	pDocument->SaveFile(fname);
-	pDocument->Clear();
-	delete pDocument;
+	document.SaveFile(fname);
+	document.Clear();
 }
 
 void CConnectRemoteMachineWindow::loadHistory()
@@ -344,12 +340,12 @@ void CConnectRemoteMachineWindow::loadHistory()
 	WideCharToMultiByte(CP_ACP,0, fullPath, fullPath.GetLength(), fname, len, NULL, NULL);
 	fname[len + 1] = '\0';
 
-	TiXmlDocument *pDocument = new TiXmlDocument(fname);
-	if(pDocument == NULL || !pDocument->LoadFile(TIXML_ENCODING_UTF8))
+	tinyxml2::XMLDocument document;
+	if(document.LoadFile(fname) != tinyxml2::XML_SUCCESS)
 		return;
 
-	TiXmlElement *rootElement = pDocument->RootElement();
-	TiXmlNode* node = rootElement->FirstChild();
+	tinyxml2::XMLElement* rootElement = document.RootElement();
+	tinyxml2::XMLNode* node = rootElement != NULL ? rootElement->FirstChild() : NULL;
 	if(node)
 	{
 		do
@@ -361,8 +357,7 @@ void CConnectRemoteMachineWindow::loadHistory()
 		}while((node = node->NextSibling()));
 	}
 
-	pDocument->Clear();
-	delete pDocument;
+	document.Clear();
 }
 
 void CConnectRemoteMachineWindow::loadIpMapping()
@@ -376,16 +371,18 @@ void CConnectRemoteMachineWindow::loadIpMapping()
 	WideCharToMultiByte(CP_ACP, 0, fullPath, fullPath.GetLength(), fname, len, NULL, NULL);
 	fname[len + 1] = '\0';
 
-	TiXmlDocument *pDocument = new TiXmlDocument(fname);
-	if (pDocument == NULL || !pDocument->LoadFile(TIXML_ENCODING_UTF8))
+	tinyxml2::XMLDocument document;
+	if (document.LoadFile(fname) != tinyxml2::XML_SUCCESS)
 		return;
 
-	TiXmlElement *rootElement = pDocument->RootElement();
-	for (TiXmlElement* elem = rootElement->FirstChildElement(); elem != NULL; elem = elem->NextSiblingElement())
+	tinyxml2::XMLElement* rootElement = document.RootElement();
+	for (tinyxml2::XMLElement* elem = rootElement != NULL ? rootElement->FirstChildElement() : NULL;
+		elem != NULL;
+		elem = elem->NextSiblingElement())
 	{
 		CString host(elem->Attribute("value"));
 
-		for (TiXmlElement *childElem = elem->FirstChildElement(); childElem != NULL; childElem = childElem->NextSiblingElement())
+		for (tinyxml2::XMLElement* childElem = elem->FirstChildElement(); childElem != NULL; childElem = childElem->NextSiblingElement())
 		{
 			const char *lan_ip = childElem->Attribute("value");
 			const char *internet_ip = childElem->GetText();
@@ -397,8 +394,7 @@ void CConnectRemoteMachineWindow::loadIpMapping()
 		}
 	}
 
-	pDocument->Clear();
-	delete pDocument;
+	document.Clear();
 }
 
 CString CConnectRemoteMachineWindow::getCurrentHost()

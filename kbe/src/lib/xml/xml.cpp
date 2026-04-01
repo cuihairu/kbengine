@@ -35,11 +35,13 @@ bool XML::openSection(const char* xmlFile)
 	char pathbuf[MAX_PATH];
 	kbe_snprintf(pathbuf, MAX_PATH, "%s", xmlFile);
 
-	txdoc_ = new TiXmlDocument((char*)&pathbuf);
+	delete txdoc_;
+	txdoc_ = new tinyxml2::XMLDocument();
+	rootElement_ = NULL;
 
-	if(!txdoc_->LoadFile())
+	if(txdoc_->LoadFile(pathbuf) != tinyxml2::XML_SUCCESS)
 	{
-		const std::string message = fmt::format("TiXmlNode::openXML: {}, error!\n", pathbuf);
+		const std::string message = fmt::format("XML::openSection: {}, error: {}\n", pathbuf, txdoc_->ErrorStr());
 		fprintf(stderr, "%s", message.c_str());
 
 		isGood_ = false;
@@ -51,14 +53,14 @@ bool XML::openSection(const char* xmlFile)
 	return true;
 }
 
-TiXmlNode* XML::getRootNode(const char* key)
+tinyxml2::XMLNode* XML::getRootNode(const char* key)
 {
 	if(rootElement_ == NULL)
 		return rootElement_;
 
 	if(strlen(key) > 0)
 	{
-		TiXmlNode* node = rootElement_->FirstChild(key);
+		tinyxml2::XMLElement* node = rootElement_->FirstChildElement(key);
 		if(node == NULL)
 			return NULL;
 		return node->FirstChild();
@@ -67,19 +69,19 @@ TiXmlNode* XML::getRootNode(const char* key)
 	return rootElement_->FirstChild();
 }
 
-TiXmlNode* XML::enterNode(TiXmlNode* node, const char* key)
+tinyxml2::XMLNode* XML::enterNode(tinyxml2::XMLNode* node, const char* key)
 {
 	do
 	{
-		if(node->Type() != TiXmlNode::TINYXML_ELEMENT)
+		if(node == NULL || node->ToElement() == NULL)
 			continue;
 
 		if(getKey(node) == key)
 		{
-			TiXmlNode* childNode = node->FirstChild();
+			tinyxml2::XMLNode* childNode = node->FirstChild();
 			do
 			{
-				if(!childNode || childNode->Type() != TiXmlNode::TINYXML_COMMENT)
+				if(!childNode || childNode->ToComment() == NULL)
 					break;
 			}
 			while((childNode = childNode->NextSibling()));
@@ -92,11 +94,11 @@ TiXmlNode* XML::enterNode(TiXmlNode* node, const char* key)
 	return NULL;
 }
 
-bool XML::hasNode(TiXmlNode* node, const char* key)
+bool XML::hasNode(tinyxml2::XMLNode* node, const char* key)
 {
 	do
 	{
-		if(node->Type() != TiXmlNode::TINYXML_ELEMENT)
+		if(node == NULL || node->ToElement() == NULL)
 			continue;
 
 		if(getKey(node) == key)
@@ -108,7 +110,7 @@ bool XML::hasNode(TiXmlNode* node, const char* key)
 	return false;
 }
 
-std::string XML::getKey(const TiXmlNode* node)
+std::string XML::getKey(const tinyxml2::XMLNode* node)
 {
 	if(node == NULL)
 		return "";
@@ -116,43 +118,43 @@ std::string XML::getKey(const TiXmlNode* node)
 	return strutil::kbe_trim(node->Value());
 }
 
-std::string XML::getValStr(const TiXmlNode* node)
+std::string XML::getValStr(const tinyxml2::XMLNode* node)
 {
-	const TiXmlText* ptext = node->ToText();
+	const tinyxml2::XMLText* ptext = node != NULL ? node->ToText() : NULL;
 	if(ptext == NULL)
 		return "";
 
 	return strutil::kbe_trim(ptext->Value());
 }
 
-std::string XML::getVal(const TiXmlNode* node)
+std::string XML::getVal(const tinyxml2::XMLNode* node)
 {
-	const TiXmlText* ptext = node->ToText();
+	const tinyxml2::XMLText* ptext = node != NULL ? node->ToText() : NULL;
 	if(ptext == NULL)
 		return "";
 
 	return ptext->Value();
 }
 
-int XML::getValInt(const TiXmlNode* node)
+int XML::getValInt(const tinyxml2::XMLNode* node)
 {
-	const TiXmlText* ptext = node->ToText();
+	const tinyxml2::XMLText* ptext = node != NULL ? node->ToText() : NULL;
 	if(ptext == NULL)
 		return 0;
 
 	return atoi(strutil::kbe_trim(ptext->Value()).c_str());
 }
 
-double XML::getValFloat(const TiXmlNode* node)
+double XML::getValFloat(const tinyxml2::XMLNode* node)
 {
-	const TiXmlText* ptext = node->ToText();
+	const tinyxml2::XMLText* ptext = node != NULL ? node->ToText() : NULL;
 	if(ptext == NULL)
 		return 0.f;
 
 	return atof(strutil::kbe_trim(ptext->Value()).c_str());
 }
 
-bool XML::getBool(const TiXmlNode* node)
+bool XML::getBool(const tinyxml2::XMLNode* node)
 {
 	std::string s = strutil::toUpper(getValStr(node));
 

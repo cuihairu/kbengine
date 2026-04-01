@@ -10,6 +10,7 @@
     "openssl",
     "python3",
     "hiredis",
+    "tinyxml2",
     "zlib"
   ]
 }

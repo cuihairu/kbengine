@@ -1,6 +1,7 @@
 if(KBE_USING_VCPKG)
   find_package(fmt CONFIG REQUIRED)
   find_package(hiredis CONFIG REQUIRED)
+  find_package(tinyxml2 CONFIG REQUIRED)
   find_package(unofficial-libmysql CONFIG QUIET)
   find_package(unofficial-libmariadb CONFIG QUIET)
 endif()
@@ -26,19 +27,15 @@ else()
   message(STATUS "KBEngine: using vendored fmt sources")
 endif()
 
-add_library(tinyxml STATIC
-  "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml/tinystr.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml/tinyxml.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml/tinyxmlerror.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml/tinyxmlparser.cpp"
-)
+find_package(tinyxml2 CONFIG REQUIRED)
 
-add_library(KBEngine::tinyxml ALIAS tinyxml)
+add_library(kbe_dependency_tinyxml INTERFACE)
+add_library(KBEngine::tinyxml ALIAS kbe_dependency_tinyxml)
+add_library(KBEngine::tinyxml2 ALIAS kbe_dependency_tinyxml)
 
-target_compile_features(tinyxml PUBLIC cxx_std_17)
-target_include_directories(tinyxml
-  PUBLIC
-    "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml"
+target_link_libraries(kbe_dependency_tinyxml
+  INTERFACE
+    tinyxml2::tinyxml2
 )
 
 add_library(kbe_dependency_tmxparser STATIC

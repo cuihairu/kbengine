@@ -110,7 +110,7 @@ bool DataType::finalise()
 }
 
 //-------------------------------------------------------------------------------------
-bool DataType::initialize(XML* xml, TiXmlNode* node)
+bool DataType::initialize(XML* xml, tinyxml2::XMLNode* node)
 {
 	return true;
 }
@@ -1655,11 +1655,11 @@ PyObject* FixedArrayType::createNewFromObj(PyObject* pyobj)
 }
 
 //-------------------------------------------------------------------------------------
-bool FixedArrayType::initialize(XML* xml, TiXmlNode* node, const std::string& parentName)
+bool FixedArrayType::initialize(XML* xml, tinyxml2::XMLNode* node, const std::string& parentName)
 {
 	dataType_ = NULL;
 
-	TiXmlNode* arrayNode = xml->enterNode(node, "of");
+	tinyxml2::XMLNode* arrayNode = xml->enterNode(node, "of");
 	if (arrayNode == NULL)
 	{
 		ERROR_MSG("FixedArrayType::initialize: not found \"of\".\n");
@@ -2045,9 +2045,9 @@ PyObject* FixedDictType::createNewFromObj(PyObject* pyobj)
 }
 
 //-------------------------------------------------------------------------------------
-bool FixedDictType::initialize(XML* xml, TiXmlNode* node, std::string& parentName)
+bool FixedDictType::initialize(XML* xml, tinyxml2::XMLNode* node, std::string& parentName)
 {
-	TiXmlNode* propertiesNode = xml->enterNode(node, "Properties");
+	tinyxml2::XMLNode* propertiesNode = xml->enterNode(node, "Properties");
 	if(propertiesNode == NULL)
 	{
 		ERROR_MSG("FixedDictType::initialize: not found \"Properties\".\n");
@@ -2060,9 +2060,9 @@ bool FixedDictType::initialize(XML* xml, TiXmlNode* node, std::string& parentNam
 	{
 		typeName = xml->getKey(propertiesNode);
 
-		TiXmlNode* typeNode = xml->enterNode(propertiesNode->FirstChild(), "Type");
-		TiXmlNode* PersistentNode = xml->enterNode(propertiesNode->FirstChild(), "Persistent");
-		TiXmlNode* DatabaseLengthNode = xml->enterNode(propertiesNode->FirstChild(), "DatabaseLength");
+		tinyxml2::XMLNode* typeNode = xml->enterNode(propertiesNode->FirstChild(), "Type");
+		tinyxml2::XMLNode* PersistentNode = xml->enterNode(propertiesNode->FirstChild(), "Persistent");
+		tinyxml2::XMLNode* DatabaseLengthNode = xml->enterNode(propertiesNode->FirstChild(), "DatabaseLength");
 
 		bool persistent = true;
 		if(PersistentNode)
@@ -2166,7 +2166,7 @@ bool FixedDictType::initialize(XML* xml, TiXmlNode* node, std::string& parentNam
 	}
 	XML_FOR_END(propertiesNode);
 
-	TiXmlNode* implementedByNode = xml->enterNode(node, "implementedBy");
+	tinyxml2::XMLNode* implementedByNode = xml->enterNode(node, "implementedBy");
 	if(implementedByNode)
 	{
 		strType = xml->getValStr(implementedByNode);

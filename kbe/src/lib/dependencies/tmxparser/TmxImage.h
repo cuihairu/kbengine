@@ -30,7 +30,7 @@
 
 #include <string>
 
-class TiXmlNode;
+namespace tinyxml2 { class XMLNode; }
 
 namespace Tmx 
 {
@@ -44,7 +44,7 @@ namespace Tmx
 		~Image();
 
 		// Parses an image element.
-		void Parse(const TiXmlNode *imageNode);
+		void Parse(const tinyxml2::XMLNode *imageNode);
 
 		// Get the path to the file of the image (relative to the map)
 		const std::string &GetSource() const { return source; }

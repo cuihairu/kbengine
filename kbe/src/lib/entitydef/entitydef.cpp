@@ -190,7 +190,7 @@ bool EntityDef::initialize(std::vector<PyTypeObject*>& scriptBaseTypes,
 			return false;
 
 		// 获得entities.xml根节点, 如果没有定义一个entity那么直接返回true
-		TiXmlNode* node = xml->getRootNode();
+		tinyxml2::XMLNode* node = xml->getRootNode();
 		if (node == NULL)
 			return true;
 
@@ -207,7 +207,7 @@ bool EntityDef::initialize(std::vector<PyTypeObject*>& scriptBaseTypes,
 			if (!defxml->openSection(deffile.c_str()))
 				return false;
 
-			TiXmlNode* defNode = defxml->getRootNode();
+			tinyxml2::XMLNode* defNode = defxml->getRootNode();
 			if (defNode == NULL)
 			{
 				// root节点下没有子节点了
@@ -339,7 +339,7 @@ MethodDescription* EntityDef::createMethodDescription(ScriptDefModule* pScriptMo
 bool EntityDef::loadDefInfo(const std::string& defFilePath, 
 							const std::string& moduleName, 
 							XML* defxml, 
-							TiXmlNode* defNode, 
+							tinyxml2::XMLNode* defNode, 
 							ScriptDefModule* pScriptModule)
 {
 	if(!loadAllDefDescriptions(moduleName, defxml, defNode, pScriptModule))
@@ -403,18 +403,18 @@ bool EntityDef::loadDefInfo(const std::string& defFilePath,
 bool EntityDef::loadDetailLevelInfo(const std::string& defFilePath, 
 									const std::string& moduleName, 
 									XML* defxml, 
-									TiXmlNode* defNode, 
+									tinyxml2::XMLNode* defNode, 
 									ScriptDefModule* pScriptModule)
 {
-	TiXmlNode* detailLevelNode = defxml->enterNode(defNode, "DetailLevels");
+	tinyxml2::XMLNode* detailLevelNode = defxml->enterNode(defNode, "DetailLevels");
 	if(detailLevelNode == NULL)
 		return true;
 
 	DetailLevel& dlInfo = pScriptModule->getDetailLevel();
 	
-	TiXmlNode* node = defxml->enterNode(detailLevelNode, "NEAR");
-	TiXmlNode* radiusNode = defxml->enterNode(node, "radius");
-	TiXmlNode* hystNode = defxml->enterNode(node, "hyst");
+	tinyxml2::XMLNode* node = defxml->enterNode(detailLevelNode, "NEAR");
+	tinyxml2::XMLNode* radiusNode = defxml->enterNode(node, "radius");
+	tinyxml2::XMLNode* hystNode = defxml->enterNode(node, "hyst");
 	if(node == NULL || radiusNode == NULL || hystNode == NULL) 
 	{
 		ERROR_MSG(fmt::format("EntityDef::loadDetailLevelInfo: failed to load entity:{} NEAR-DetailLevelInfo.\n",
@@ -470,16 +470,16 @@ bool EntityDef::loadDetailLevelInfo(const std::string& defFilePath,
 bool EntityDef::loadVolatileInfo(const std::string& defFilePath, 
 									const std::string& moduleName, 
 									XML* defxml, 
-									TiXmlNode* defNode, 
+									tinyxml2::XMLNode* defNode, 
 									ScriptDefModule* pScriptModule)
 {
-	TiXmlNode* pNode = defxml->enterNode(defNode, "Volatile");
+	tinyxml2::XMLNode* pNode = defxml->enterNode(defNode, "Volatile");
 	if(pNode == NULL)
 		return true;
 
 	VolatileInfo* pVolatileInfo = pScriptModule->getPVolatileInfo();
 	
-	TiXmlNode* node = defxml->enterNode(pNode, "position");
+	tinyxml2::XMLNode* node = defxml->enterNode(pNode, "position");
 	if(node) 
 	{
 		pVolatileInfo->position((float)defxml->getValFloat(node));
@@ -551,10 +551,10 @@ bool EntityDef::loadVolatileInfo(const std::string& defFilePath,
 bool EntityDef::loadInterfaces(const std::string& defFilePath, 
 							   const std::string& moduleName, 
 							   XML* defxml, 
-							   TiXmlNode* defNode, 
+							   tinyxml2::XMLNode* defNode, 
 							   ScriptDefModule* pScriptModule, bool ignoreComponents)
 {
-	TiXmlNode* implementsNode = defxml->enterNode(defNode, "Interfaces");
+	tinyxml2::XMLNode* implementsNode = defxml->enterNode(defNode, "Interfaces");
 	if(implementsNode == NULL)
 		return true;
 
@@ -564,7 +564,7 @@ bool EntityDef::loadInterfaces(const std::string& defFilePath,
 			defxml->getKey(implementsNode) != "type" && defxml->getKey(implementsNode) != "Type")
 			continue;
 
-		TiXmlNode* interfaceNode = defxml->enterNode(implementsNode, "Interface");
+		tinyxml2::XMLNode* interfaceNode = defxml->enterNode(implementsNode, "Interface");
 		if (!interfaceNode)
 		{
 			interfaceNode = defxml->enterNode(implementsNode, "interface");
@@ -588,7 +588,7 @@ bool EntityDef::loadInterfaces(const std::string& defFilePath,
 		if(!interfaceXml.get()->openSection(interfacefile.c_str()))
 			return false;
 
-		TiXmlNode* interfaceRootNode = interfaceXml->getRootNode();
+		tinyxml2::XMLNode* interfaceRootNode = interfaceXml->getRootNode();
 		if(interfaceRootNode == NULL)
 		{
 			// root节点下没有子节点了
@@ -642,10 +642,10 @@ bool EntityDef::loadInterfaces(const std::string& defFilePath,
 bool EntityDef::loadComponents(const std::string& defFilePath,
 	const std::string& moduleName,
 	XML* defxml,
-	TiXmlNode* defNode,
+	tinyxml2::XMLNode* defNode,
 	ScriptDefModule* pScriptModule)
 {
-	TiXmlNode* implementsNode = defxml->enterNode(defNode, "Components");
+	tinyxml2::XMLNode* implementsNode = defxml->enterNode(defNode, "Components");
 	if (implementsNode == NULL)
 		return true;
 
@@ -653,7 +653,7 @@ bool EntityDef::loadComponents(const std::string& defFilePath,
 	{
 		std::string componentName = defxml->getKey(implementsNode);
 
-		TiXmlNode* componentNode = defxml->enterNode(implementsNode, componentName.c_str());
+		tinyxml2::XMLNode* componentNode = defxml->enterNode(implementsNode, componentName.c_str());
 		if (!componentNode)
 			continue;
 
@@ -666,7 +666,7 @@ bool EntityDef::loadComponents(const std::string& defFilePath,
 		}
 
 		std::string componentTypeName = "";
-		TiXmlNode* componentTypeNameNode = defxml->enterNode(componentNode, "Type");
+		tinyxml2::XMLNode* componentTypeNameNode = defxml->enterNode(componentNode, "Type");
 		if (componentTypeNameNode)
 			componentTypeName = defxml->getKey(componentTypeNameNode);
 
@@ -695,12 +695,12 @@ bool EntityDef::loadComponents(const std::string& defFilePath,
 		std::string					strisPersistent;
 		std::string					defaultStr = "";
 
-		TiXmlNode* utypeValNode = defxml->enterNode(componentNode, "Utype");
+		tinyxml2::XMLNode* utypeValNode = defxml->enterNode(componentNode, "Utype");
 
 		if (!calcDefPropertyUType(moduleName, componentName, (utypeValNode ? defxml->getValInt(utypeValNode) : -1), pScriptModule, futype))
 			return false;
 
-		TiXmlNode* persistentNode = defxml->enterNode(componentNode, "Persistent");
+		tinyxml2::XMLNode* persistentNode = defxml->enterNode(componentNode, "Persistent");
 		if (persistentNode)
 		{
 			strisPersistent = defxml->getValStr(persistentNode);
@@ -746,7 +746,7 @@ bool EntityDef::loadComponents(const std::string& defFilePath,
 			continue;
 		}
 
-		TiXmlNode* componentRootNode = componentXml->getRootNode();
+		tinyxml2::XMLNode* componentRootNode = componentXml->getRootNode();
 		if (componentRootNode == NULL)
 		{
 			// root节点下没有子节点了
@@ -890,10 +890,10 @@ PropertyDescription* EntityDef::addComponentProperty(ENTITY_PROPERTY_UID utype,
 bool EntityDef::loadParentClass(const std::string& defFilePath, 
 								const std::string& moduleName, 
 								XML* defxml, 
-								TiXmlNode* defNode, 
+								tinyxml2::XMLNode* defNode, 
 								ScriptDefModule* pScriptModule)
 {
-	TiXmlNode* parentClassNode = defxml->enterNode(defNode, "Parent");
+	tinyxml2::XMLNode* parentClassNode = defxml->enterNode(defNode, "Parent");
 	if(parentClassNode == NULL)
 		return true;
 
@@ -904,7 +904,7 @@ bool EntityDef::loadParentClass(const std::string& defFilePath,
 	if(!parentClassXml->openSection(parentClassfile.c_str()))
 		return false;
 	
-	TiXmlNode* parentClassdefNode = parentClassXml->getRootNode();
+	tinyxml2::XMLNode* parentClassdefNode = parentClassXml->getRootNode();
 	if(parentClassdefNode == NULL)
 	{
 		// root节点下没有子节点了
@@ -926,7 +926,7 @@ bool EntityDef::loadParentClass(const std::string& defFilePath,
 //-------------------------------------------------------------------------------------
 bool EntityDef::loadAllDefDescriptions(const std::string& moduleName, 
 									  XML* defxml, 
-									  TiXmlNode* defNode, 
+									  tinyxml2::XMLNode* defNode, 
 									  ScriptDefModule* pScriptModule)
 {
 	// 加载属性描述
@@ -1096,7 +1096,7 @@ bool EntityDef::calcDefPropertyUType(const std::string& moduleName,
 //-------------------------------------------------------------------------------------
 bool EntityDef::loadDefPropertys(const std::string& moduleName, 
 								 XML* xml, 
-								 TiXmlNode* defPropertyNode, 
+								 tinyxml2::XMLNode* defPropertyNode, 
 								 ScriptDefModule* pScriptModule)
 {
 	if(defPropertyNode)
@@ -1131,7 +1131,7 @@ bool EntityDef::loadDefPropertys(const std::string& moduleName,
 				return false;
 			}
 
-			TiXmlNode* flagsNode = xml->enterNode(defPropertyNode->FirstChild(), "Flags");
+			tinyxml2::XMLNode* flagsNode = xml->enterNode(defPropertyNode->FirstChild(), "Flags");
 			if(flagsNode)
 			{
 				strFlags = xml->getValStr(flagsNode);
@@ -1175,7 +1175,7 @@ bool EntityDef::loadDefPropertys(const std::string& moduleName,
 				return false;
 			}
 
-			TiXmlNode* persistentNode = xml->enterNode(defPropertyNode->FirstChild(), "Persistent");
+			tinyxml2::XMLNode* persistentNode = xml->enterNode(defPropertyNode->FirstChild(), "Persistent");
 			if(persistentNode)
 			{
 				strisPersistent = xml->getValStr(persistentNode);
@@ -1187,7 +1187,7 @@ bool EntityDef::loadDefPropertys(const std::string& moduleName,
 					isPersistent = true;
 			}
 
-			TiXmlNode* typeNode = xml->enterNode(defPropertyNode->FirstChild(), "Type");
+			tinyxml2::XMLNode* typeNode = xml->enterNode(defPropertyNode->FirstChild(), "Type");
 			if(typeNode)
 			{
 				strType = xml->getValStr(typeNode);
@@ -1218,7 +1218,7 @@ bool EntityDef::loadDefPropertys(const std::string& moduleName,
 				return false;
 			}
 
-			TiXmlNode* indexTypeNode = xml->enterNode(defPropertyNode->FirstChild(), "Index");
+			tinyxml2::XMLNode* indexTypeNode = xml->enterNode(defPropertyNode->FirstChild(), "Index");
 			if(indexTypeNode)
 			{
 				indexType = xml->getValStr(indexTypeNode);
@@ -1227,7 +1227,7 @@ bool EntityDef::loadDefPropertys(const std::string& moduleName,
 					indexType.begin(), toupper);
 			}
 
-			TiXmlNode* identifierNode = xml->enterNode(defPropertyNode->FirstChild(), "Identifier");
+			tinyxml2::XMLNode* identifierNode = xml->enterNode(defPropertyNode->FirstChild(), "Identifier");
 			if(identifierNode)
 			{
 				strIdentifierNode = xml->getValStr(identifierNode);
@@ -1238,13 +1238,13 @@ bool EntityDef::loadDefPropertys(const std::string& moduleName,
 					isIdentifier = true;
 			}
 
-			TiXmlNode* databaseLengthNode = xml->enterNode(defPropertyNode->FirstChild(), "DatabaseLength");
+			tinyxml2::XMLNode* databaseLengthNode = xml->enterNode(defPropertyNode->FirstChild(), "DatabaseLength");
 			if(databaseLengthNode)
 			{
 				databaseLength = xml->getValInt(databaseLengthNode);
 			}
 
-			TiXmlNode* defaultValNode = 
+			tinyxml2::XMLNode* defaultValNode = 
 				xml->enterNode(defPropertyNode->FirstChild(), "Default");
 
 			if(defaultValNode)
@@ -1252,7 +1252,7 @@ bool EntityDef::loadDefPropertys(const std::string& moduleName,
 				defaultStr = xml->getValStr(defaultValNode);
 			}
 			
-			TiXmlNode* detailLevelNode = 
+			tinyxml2::XMLNode* detailLevelNode = 
 				xml->enterNode(defPropertyNode->FirstChild(), "DetailLevel");
 
 			if(detailLevelNode)
@@ -1268,7 +1268,7 @@ bool EntityDef::loadDefPropertys(const std::string& moduleName,
 					detailLevel = DETAIL_LEVEL_FAR;
 			}
 			
-			TiXmlNode* utypeValNode = 
+			tinyxml2::XMLNode* utypeValNode = 
 				xml->enterNode(defPropertyNode->FirstChild(), "Utype");
 
 			if (!calcDefPropertyUType(moduleName, name, (utypeValNode ? xml->getValInt(utypeValNode) : -1), pScriptModule, futype))
@@ -1313,7 +1313,7 @@ bool EntityDef::loadDefPropertys(const std::string& moduleName,
 //-------------------------------------------------------------------------------------
 bool EntityDef::loadDefCellMethods(const std::string& moduleName, 
 								   XML* xml, 
-								   TiXmlNode* defMethodNode, 
+								   tinyxml2::XMLNode* defMethodNode, 
 								   ScriptDefModule* pScriptModule)
 {
 	if(defMethodNode)
@@ -1322,7 +1322,7 @@ bool EntityDef::loadDefCellMethods(const std::string& moduleName,
 		{
 			std::string name = xml->getKey(defMethodNode);
 			MethodDescription* methodDescription = new MethodDescription(0, CELLAPP_TYPE, name);
-			TiXmlNode* argNode = defMethodNode->FirstChild();
+			tinyxml2::XMLNode* argNode = defMethodNode->FirstChild();
 			
 			// 可能没有参数
 			if(argNode)
@@ -1338,7 +1338,7 @@ bool EntityDef::loadDefCellMethods(const std::string& moduleName,
 					else if(argType == "Arg")
 					{
 						DataType* dataType = NULL;
-						TiXmlNode* typeNode = argNode->FirstChild();
+						tinyxml2::XMLNode* typeNode = argNode->FirstChild();
 						std::string strType = xml->getValStr(typeNode);
 
 						if(strType == "ARRAY")
@@ -1364,7 +1364,7 @@ bool EntityDef::loadDefCellMethods(const std::string& moduleName,
 					}
 					else if(argType == "Utype")
 					{
-						TiXmlNode* typeNode = argNode->FirstChild();
+						tinyxml2::XMLNode* typeNode = argNode->FirstChild();
 
 						int iUtype = xml->getValInt(typeNode);
 						ENTITY_METHOD_UID muid = iUtype;
@@ -1457,7 +1457,7 @@ bool EntityDef::loadDefCellMethods(const std::string& moduleName,
 
 //-------------------------------------------------------------------------------------
 bool EntityDef::loadDefBaseMethods(const std::string& moduleName, XML* xml, 
-								   TiXmlNode* defMethodNode, ScriptDefModule* pScriptModule)
+								   tinyxml2::XMLNode* defMethodNode, ScriptDefModule* pScriptModule)
 {
 	if(defMethodNode)
 	{
@@ -1465,7 +1465,7 @@ bool EntityDef::loadDefBaseMethods(const std::string& moduleName, XML* xml,
 		{
 			std::string name = xml->getKey(defMethodNode);
 			MethodDescription* methodDescription = new MethodDescription(0, BASEAPP_TYPE, name);
-			TiXmlNode* argNode = defMethodNode->FirstChild();
+			tinyxml2::XMLNode* argNode = defMethodNode->FirstChild();
 
 			// 可能没有参数
 			if(argNode)
@@ -1481,7 +1481,7 @@ bool EntityDef::loadDefBaseMethods(const std::string& moduleName, XML* xml,
 					else if(argType == "Arg")
 					{
 						DataType* dataType = NULL;
-						TiXmlNode* typeNode = argNode->FirstChild();
+						tinyxml2::XMLNode* typeNode = argNode->FirstChild();
 						std::string strType = xml->getValStr(typeNode);
 
 						if(strType == "ARRAY")
@@ -1507,7 +1507,7 @@ bool EntityDef::loadDefBaseMethods(const std::string& moduleName, XML* xml,
 					}
 					else if(argType == "Utype")
 					{
-						TiXmlNode* typeNode = argNode->FirstChild();
+						tinyxml2::XMLNode* typeNode = argNode->FirstChild();
 
 						int iUtype = xml->getValInt(typeNode);
 						ENTITY_METHOD_UID muid = iUtype;
@@ -1600,7 +1600,7 @@ bool EntityDef::loadDefBaseMethods(const std::string& moduleName, XML* xml,
 
 //-------------------------------------------------------------------------------------
 bool EntityDef::loadDefClientMethods(const std::string& moduleName, XML* xml, 
-									 TiXmlNode* defMethodNode, ScriptDefModule* pScriptModule)
+									 tinyxml2::XMLNode* defMethodNode, ScriptDefModule* pScriptModule)
 {
 	if(defMethodNode)
 	{
@@ -1608,7 +1608,7 @@ bool EntityDef::loadDefClientMethods(const std::string& moduleName, XML* xml,
 		{
 			std::string name = xml->getKey(defMethodNode);
 			MethodDescription* methodDescription = new MethodDescription(0, CLIENT_TYPE, name);
-			TiXmlNode* argNode = defMethodNode->FirstChild();
+			tinyxml2::XMLNode* argNode = defMethodNode->FirstChild();
 
 			// 可能没有参数
 			if(argNode)
@@ -1620,7 +1620,7 @@ bool EntityDef::loadDefClientMethods(const std::string& moduleName, XML* xml,
 					if(argType == "Arg")
 					{
 						DataType* dataType = NULL;
-						TiXmlNode* typeNode = argNode->FirstChild();
+						tinyxml2::XMLNode* typeNode = argNode->FirstChild();
 						std::string strType = xml->getValStr(typeNode);
 
 						if(strType == "ARRAY")
@@ -1646,7 +1646,7 @@ bool EntityDef::loadDefClientMethods(const std::string& moduleName, XML* xml,
 					}
 					else if(argType == "Utype")
 					{
-						TiXmlNode* typeNode = argNode->FirstChild();
+						tinyxml2::XMLNode* typeNode = argNode->FirstChild();
 
 						int iUtype = xml->getValInt(typeNode);
 						ENTITY_METHOD_UID muid = iUtype;
@@ -1996,7 +1996,7 @@ bool EntityDef::loadAllComponentScriptModules(std::string entitiesPath, std::vec
 	if (!xml->openSection(entitiesFile.c_str()))
 		return false;
 
-	TiXmlNode* node = xml->getRootNode();
+	tinyxml2::XMLNode* node = xml->getRootNode();
 	if (node == NULL)
 		return true;
 
@@ -2268,7 +2268,7 @@ bool EntityDef::loadAllEntityScriptModules(std::string entitiesPath,
 	if(!xml->openSection(entitiesFile.c_str()))
 		return false;
 
-	TiXmlNode* node = xml->getRootNode();
+	tinyxml2::XMLNode* node = xml->getRootNode();
 	if(node == NULL)
 		return true;
 

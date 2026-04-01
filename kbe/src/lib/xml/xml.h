@@ -7,14 +7,14 @@
 
 #include "common/common.h"
 #include "common/smartpointer.h"
-#include "dependencies/tinyxml/tinyxml.h"
+#include <tinyxml2.h>
 
 namespace KBEngine {
 
 #define XML_FOR_BEGIN(node) \
 	do \
 	{ \
-	if(node->Type() != TiXmlNode::TINYXML_ELEMENT) \
+	if((node) == nullptr || (node)->ToElement() == nullptr) \
 			continue;
 
 #define XML_FOR_END(node) \
@@ -31,23 +31,23 @@ public:
 
 	bool openSection(const char* xmlFile);
 
-	TiXmlElement* getRootElement(void) { return rootElement_; }
-	TiXmlNode* getRootNode(const char* key = "");
-	TiXmlNode* enterNode(TiXmlNode* node, const char* key);
-	bool hasNode(TiXmlNode* node, const char* key);
+	tinyxml2::XMLElement* getRootElement(void) { return rootElement_; }
+	tinyxml2::XMLNode* getRootNode(const char* key = "");
+	tinyxml2::XMLNode* enterNode(tinyxml2::XMLNode* node, const char* key);
+	bool hasNode(tinyxml2::XMLNode* node, const char* key);
 
-	TiXmlDocument* getTxdoc() const { return txdoc_; }
+	tinyxml2::XMLDocument* getTxdoc() const { return txdoc_; }
 
-	std::string getKey(const TiXmlNode* node);
-	std::string getValStr(const TiXmlNode* node);
-	std::string getVal(const TiXmlNode* node);
-	int getValInt(const TiXmlNode* node);
-	double getValFloat(const TiXmlNode* node);
-	bool getBool(const TiXmlNode* node);
+	std::string getKey(const tinyxml2::XMLNode* node);
+	std::string getValStr(const tinyxml2::XMLNode* node);
+	std::string getVal(const tinyxml2::XMLNode* node);
+	int getValInt(const tinyxml2::XMLNode* node);
+	double getValFloat(const tinyxml2::XMLNode* node);
+	bool getBool(const tinyxml2::XMLNode* node);
 
 protected:
-	TiXmlDocument* txdoc_;
-	TiXmlElement* rootElement_;
+	tinyxml2::XMLDocument* txdoc_;
+	tinyxml2::XMLElement* rootElement_;
 	bool isGood_;
 };
 

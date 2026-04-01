@@ -31,7 +31,7 @@
 #include <map>
 #include <string>
 
-class TiXmlNode;
+namespace tinyxml2 { class XMLNode; }
 
 namespace Tmx 
 {
@@ -46,7 +46,7 @@ namespace Tmx
 		~PropertySet();
 
 		// Parse a node containing all the property nodes.
-		void Parse(const TiXmlNode *propertiesNode);
+		void Parse(const tinyxml2::XMLNode *propertiesNode);
 	
 		// Get a numeric property (integer).
 		int GetNumericProperty(const std::string &name) const;

@@ -6,6 +6,7 @@
 #include "StartServerWindow.h"
 #include "StartServerLayoutWindow.h"
 #include "machine/machine_interface.h"
+#include <tinyxml2.h>
 
 // CStartServerWindow dialog
 
@@ -360,12 +361,12 @@ void CStartServerWindow::loadLayouts()
 	WideCharToMultiByte(CP_ACP,0, fullPath, fullPath.GetLength(), fname, len, NULL, NULL);
 	fname[len + 1] = '\0';
 
-	TiXmlDocument *pDocument = new TiXmlDocument(fname);
-	if(pDocument == NULL || !pDocument->LoadFile(TIXML_ENCODING_UTF8))
+	tinyxml2::XMLDocument document;
+	if(document.LoadFile(fname) != tinyxml2::XML_SUCCESS)
 		return;
 
-	TiXmlElement *rootElement = pDocument->RootElement();
-	TiXmlNode* node = rootElement->FirstChild();
+	tinyxml2::XMLElement* rootElement = document.RootElement();
+	tinyxml2::XMLNode* node = rootElement != NULL ? rootElement->FirstChild() : NULL;
 	if(node)
 	{
 		do
@@ -376,7 +377,7 @@ void CStartServerWindow::loadLayouts()
 			m_layoutlist.AddString(ws);
 			free(ws);
 
-			TiXmlNode* childnode = node->FirstChild();
+			tinyxml2::XMLNode* childnode = node->FirstChild();
 			if(childnode == NULL)
 				break;
 			do
@@ -389,36 +390,32 @@ void CStartServerWindow::loadLayouts()
 		}while((node = node->NextSibling()));
 	}
 
-	pDocument->Clear();
-	delete pDocument;
+	document.Clear();
 }
 
 void CStartServerWindow::saveLayouts()
 {
-    //创建一个XML的文档对象。
-    TiXmlDocument *pDocument = new TiXmlDocument();
+	tinyxml2::XMLDocument document;
 
 	int i = 0;
 	KBEUnordered_map< std::string, std::vector<LAYOUT_ITEM> >::iterator iter = layouts_.begin();
-	TiXmlElement *rootElement = new TiXmlElement("root");
-	pDocument->LinkEndChild(rootElement);
+	tinyxml2::XMLElement* rootElement = document.NewElement("root");
+	document.InsertEndChild(rootElement);
 
 	for(; iter != layouts_.end(); iter++)
 	{
 		std::vector<LAYOUT_ITEM>::iterator iter1 = iter->second.begin();
 
-		TiXmlElement *rootElementChild = new TiXmlElement(iter->first.c_str());
-		rootElement->LinkEndChild(rootElementChild);
+		tinyxml2::XMLElement* rootElementChild = document.NewElement(iter->first.c_str());
+		rootElement->InsertEndChild(rootElementChild);
 
 		for(; iter1 != iter->second.end(); iter1++)
 		{
 			LAYOUT_ITEM& item = (*iter1);
 
-			TiXmlElement *rootElementChild1 = new TiXmlElement(item.componentName.c_str());
-			rootElementChild->LinkEndChild(rootElementChild1);
-
-			TiXmlText *content = new TiXmlText(item.addr.c_str());
-			rootElementChild1->LinkEndChild(content);
+			tinyxml2::XMLElement* rootElementChild1 = document.NewElement(item.componentName.c_str());
+			rootElementChild1->SetText(item.addr.c_str());
+			rootElementChild->InsertEndChild(rootElementChild1);
 		}
 	}
 
@@ -431,7 +428,7 @@ void CStartServerWindow::saveLayouts()
 	WideCharToMultiByte(CP_ACP,0, fullPath, fullPath.GetLength(), fname, len, NULL, NULL);
 	fname[len + 1] = '\0';
 
-	pDocument->SaveFile(fname);
+	document.SaveFile(fname);
 }
 //void CStartServerWindow::OnCbnSelchangeCombo3()
 //{
