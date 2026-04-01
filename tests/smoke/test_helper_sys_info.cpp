@@ -1,8 +1,16 @@
 #include <gtest/gtest.h>
 
-#include "../test_platform.h"
-
 #include "helper/sys_info.h"
+
+// Platform-specific getpid wrapper
+#ifdef _WIN32
+	#include <process.h>
+	#ifndef getpid
+		#define getpid() _getpid()
+	#endif
+#else
+	#include <unistd.h>
+#endif
 
 TEST(HelperSysInfoBootstrapTest, ExposesBasicSystemInfoApis)
 {
@@ -16,7 +24,7 @@ TEST(HelperSysInfoBootstrapTest, ExposesBasicSystemInfoApis)
   const auto total = info.totalmem();
   EXPECT_EQ(total, mem.total);
 
-  const auto process = info.getProcessInfo(static_cast<KBEngine::uint32>(KBE_GETPID()));
+  const auto process = info.getProcessInfo(static_cast<KBEngine::uint32>(getpid()));
   EXPECT_FALSE(process.error);
 }
 

@@ -2,10 +2,19 @@
 
 #include <filesystem>
 #include <string>
-#include "../test_platform.h"
 
 #include "common/common.h"
 #include "common/kbekey.h"
+
+// Platform-specific getpid wrapper
+#ifdef _WIN32
+	#include <process.h>
+	#ifndef getpid
+		#define getpid() _getpid()
+	#endif
+#else
+	#include <unistd.h>
+#endif
 
 namespace KBEngine
 {
@@ -19,7 +28,7 @@ namespace
 std::filesystem::path make_temp_key_path(const char* suffix)
 {
   const auto temp_dir = std::filesystem::temp_directory_path();
-  const auto unique = std::to_string(KBE_GETPID()) + std::string("_kbe_kbekey_") + suffix;
+  const auto unique = std::to_string(getpid()) + std::string("_kbe_kbekey_") + suffix;
   return temp_dir / unique;
 }
 }
