@@ -171,7 +171,10 @@ jobs:
             --base-directory . \
             --output-file coverage.info \
             --ignore-errors empty \
-            --ignore-errors source
+            --ignore-errors source \
+            --ignore-errors mismatch \
+            --ignore-errors gcov \
+            --ignore-errors gcov_module
 
           # Check if we got any coverage data
           if [ -s coverage.info ]; then
