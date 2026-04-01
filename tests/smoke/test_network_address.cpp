@@ -15,7 +15,7 @@ TEST(NetworkAddressBootstrapTest, FormatsAddressAndIpStrings)
 
 TEST(NetworkAddressBootstrapTest, ConvertsBetweenStringAndNumericIp)
 {
-  KBEngine::u_int32_t raw = 0;
+  KBEngine::uint32 raw = 0;
   ASSERT_EQ(KBEngine::Network::Address::string2ip("127.0.0.1", raw), 0);
 
   char buffer[32] = {0};
