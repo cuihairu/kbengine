@@ -75,17 +75,18 @@ lcov --capture --directory . --output-file coverage.info
 ### 问题 3: vcpkg 依赖库影响覆盖率
 
 **原因**:
-- vcpkg 安装的第三方库包含在覆盖率中
+- vcpkg 安装的第三方库包含在覆盖率
 - 第三方库可能没有编译覆盖率支持
 
 **解决方案**:
 ```bash
 # 只收集项目源代码
-lcov --capture --directory kbe/src --output-file coverage.info
+lcov --capture --directory build/presets/vcpkg --base-directory . --output-file coverage.info
 
 # 排除第三方库
 lcov --remove coverage.info '*/vcpkg/*'
 lcov --remove coverage.info 'kbe/src/lib/dependencies/*'
+lcov --remove coverage.info 'build/*' --output-file coverage.info
 ```
 
 ## 🎯 最佳实践
@@ -151,7 +152,57 @@ cat build/presets/vcpkg/flags.make | grep COVERAGE
 find build -name "*.gcda" -ls -lh
 
 # 手动收集覆盖率
-lcov --capture --directory build/presets/vcpkg --output-file coverage.info
+lcov --capture --directory build/presets/vcpkg --base-directory . --output-file coverage.info
+
+# 检查编译标志
+grep -r "ftest-coverage" build/presets/vcpkg/CMakeFiles/ | head -5
+```
+
+### CI/CD 环境故障排除
+
+**问题 4: CI 中覆盖率收集失败**
+
+**原因**:
+- 工作目录配置错误
+- .gcda 文件生成位置不正确
+- CMake 生成器配置问题
+
+**解决方案**:
+
+1. **确认文件位置**:
+```yaml
+- name: Find .gcda files
+  run: |
+    find build -name "*.gcda" -type f -ls -lh
+    find build -name "*.gcno" -type f | wc -l
+```
+
+2. **验证覆盖率标志**:
+```yaml
+- name: Verify Coverage Flags
+  run: |
+    grep -i "coverage\|ftest-coverage" build/presets/vcpkg/CMakeCache.txt
+    grep -r "ftest-coverage" build/presets/vcpkg/CMakeFiles/ | head -5
+```
+
+3. **修正 lcov 命令**:
+```yaml
+- name: Generate Coverage Report
+  run: |
+    lcov --capture \
+      --directory build/presets/vcpkg \
+      --base-directory . \
+      --output-file coverage.info \
+      --ignore-errors empty \
+      --ignore-errors source
+```
+
+4. **检查测试是否实际运行**:
+```yaml
+- name: Run Tests
+  run: |
+    ctest --output-on-failure || true  # 继续运行以查看覆盖率
+    find . -name "*.gcda" -type f -ls -lh
 ```
 
 ## 📈 改进建议

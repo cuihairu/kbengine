@@ -44,9 +44,16 @@ if(KBE_ENABLE_CODE_COVERAGE)
 
   # Disable garbage collection and unused functions for better coverage
   add_compile_definitions(
-    GCOV_PREFIX=$<CONFIG:CFG>
     __NO_INLINE__
   )
+
+  # For coverage, we need to ensure the runtime can find the .gcda files
+  # Set GCOV_PREFIX_STRIP to avoid absolute paths in .gcda files
+  if(NOT DEFINED GCOV_PREFIX_STRIP)
+    set(GCOV_PREFIX_STRIP 0)
+  endif()
+
+  message(STATUS "KBEngine: coverage flags set for C/C++")
 endif()
 
 if(KBE_USING_VCPKG)

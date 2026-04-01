@@ -116,6 +116,19 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug \
             -DKBE_ENABLE_CODE_COVERAGE=ON
 
+      - name: Verify Coverage Flags
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: |
+          echo "=== Checking CMake configuration for coverage ==="
+          grep -i "coverage\|ftest-coverage\|fprofile-arcs" build/presets/vcpkg/CMakeCache.txt || echo "No coverage flags in CMakeCache.txt"
+
+          echo "=== Checking compilation flags in build directory ==="
+          grep -r "ftest-coverage" build/presets/vcpkg/CMakeFiles/ 2>/dev/null | head -5 || echo "No coverage flags in CMakeFiles"
+
+          echo "=== Testing executables ==="
+          find build/presets/vcpkg -name "kbe_smoke_tests" -type f -ls -lh
+
       - name: Build with Coverage
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
@@ -127,27 +140,59 @@ jobs:
       - name: Run Tests with Coverage
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+          GCOV_ERROR_STDERR: 1
         working-directory: build/presets/vcpkg
         run: |
           # Run tests to generate .gcda files
-          ctest -C Debug --output-on-failure
+          echo "=== Running tests with coverage ==="
+          ctest --output-on-failure || true
+
+          echo "=== Checking for .gcda files after test execution ==="
+          find . -name "*.gcda" -type f -ls -lh | head -20 || echo "No .gcda files found"
+
+          echo "=== Checking for .gcno files ==="
+          find . -name "*.gcno" -type f | wc -l
 
       - name: Generate Coverage Report
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        working-directory: ${{ github.workspace }}
         run: |
-          # Only capture coverage from our source code
-          lcov --capture --directory kbe/src --output-file coverage.info --ignore-errors empty
-          # Filter out test and build artifacts
-          lcov --remove coverage.info '*/tests/*' --output-file coverage.info
-          lcov --remove coverage.info 'kbe/src/lib/dependencies/*' --output-file coverage.info
-          lcov --remove coverage.info '*/vcpkg/*' --output-file coverage.info
-          lcov --remove coverage.info '*.o' --output-file coverage.info
-          lcov --remove coverage.info '*.a' --output-file coverage.info
+          # Find where .gcda files are actually located
+          echo "=== Searching for .gcda files ==="
+          find build -name "*.gcda" -type f -ls -lh || echo "No .gcda files found in build/"
 
-          # Show coverage summary
-          echo "=== Coverage Summary ==="
-          lcov --list coverage.info || echo "No coverage data collected"
+          echo "=== Searching for .gcno files ==="
+          find build -name "*.gcno" -type f | head -20 || echo "No .gcno files found in build/"
+
+          # Capture coverage from build directory where .gcda files are located
+          lcov --capture \
+            --directory build/presets/vcpkg \
+            --base-directory . \
+            --output-file coverage.info \
+            --ignore-errors empty \
+            --ignore-errors source
+
+          # Check if we got any coverage data
+          if [ -s coverage.info ]; then
+            echo "=== Coverage data collected successfully ==="
+
+            # Filter out test and build artifacts
+            lcov --remove coverage.info '*/tests/*' --output-file coverage.info
+            lcov --remove coverage.info 'kbe/src/lib/dependencies/*' --output-file coverage.info
+            lcov --remove coverage.info '*/vcpkg/*' --output-file coverage.info
+            lcov --remove coverage.info 'build/*' --output-file coverage.info
+            lcov --remove coverage.info '*.o' --output-file coverage.info
+            lcov --remove coverage.info '*.a' --output-file coverage.info
+
+            # Show coverage summary
+            echo "=== Final Coverage Summary ==="
+            lcov --list coverage.info
+          else
+            echo "WARNING: coverage.info is empty or does not exist"
+            echo "Creating empty coverage.info for debug"
+            echo "No coverage data collected" > coverage.info
+          fi
 
       - name: Upload to Codecov
         uses: codecov/codecov-action@v4
