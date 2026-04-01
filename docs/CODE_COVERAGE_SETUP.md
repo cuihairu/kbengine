@@ -84,6 +84,33 @@ lcov --capture \
 
 **说明**: 这些错误在C++项目中很常见，忽略它们仍然可以得到有效的覆盖率数据
 
+### 问题 1.6: "geninfo: ERROR: Unexpected negative count"
+
+**原因**:
+- 多线程测试中并发更新覆盖率计数器
+- 线程竞态条件导致计数器出现负值
+
+**解决方案**:
+
+**方案1: 添加错误忽略（临时方案）**
+```bash
+lcov --capture \
+  --directory build/presets/vcpkg \
+  --base-directory . \
+  --output-file coverage.info \
+  --ignore-errors negative
+```
+
+**方案2: 使用原子更新（推荐）**
+```cmake
+# CMakeLists.txt
+add_compile_options(
+  $<$<COMPILE_LANGUAGE:C,CXX>:-fprofile-update=atomic>
+)
+```
+
+**说明**: `-fprofile-update=atomic` 需要GCC 8+，使用原子操作更新计数器，从根本上避免竞态条件
+
 ### 问题 2: 覆盖率数据为空
 
 **原因**:
