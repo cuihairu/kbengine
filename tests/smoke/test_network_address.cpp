@@ -45,18 +45,25 @@ TEST(NetworkAddressBootstrapTest, ReusesPoolObjectsAfterReclaim)
   ASSERT_NE(first, nullptr);
   first->ip = 1;
   first->port = 2;
+
+  // Verify the values were set correctly
+  EXPECT_EQ(first->ip, 1u);
+  EXPECT_EQ(first->port, 2u);
+
   KBEngine::Network::Address::reclaimPoolObject(first);
 
-  EXPECT_EQ(first->ip, 0u);
-  EXPECT_EQ(first->port, 0u);
+  // Note: After reclaim, the object should be reset but we shouldn't access 'first' anymore
+  // Instead, create a new object and verify it comes from the pool and is properly initialized
   EXPECT_GE(KBEngine::Network::Address::ObjPool().size(), 1u);
   EXPECT_EQ(KBEngine::Network::Address::ObjPool().logPoints()["network-address-test"].count, 0);
 
   KBEngine::Network::Address* second =
     KBEngine::Network::Address::createPoolObject("network-address-test");
   ASSERT_NE(second, nullptr);
-  EXPECT_EQ(second->ip, 0u);
-  EXPECT_EQ(second->port, 0u);
+
+  // The new object should be properly initialized (either newly created or reused from pool)
+  EXPECT_EQ(second->ip, 0u) << "Reused object should have been reset by onReclaimObject()";
+  EXPECT_EQ(second->port, 0u) << "Reused object should have been reset by onReclaimObject()";
 
   KBEngine::Network::Address::reclaimPoolObject(second);
   KBEngine::Network::Address::destroyObjPool();

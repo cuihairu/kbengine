@@ -198,7 +198,8 @@ private:
 			return pTime;
 		}
 
-		Container & container()		{ return container_; }
+		Container & container()				{ return container_; }
+	const Container & container() const	{ return container_; }
 
 		void make_heap()
 		{

@@ -14,7 +14,6 @@
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/evp.h>
-#include <openssl/x509.h>
 
 // Fix Windows GUI application OpenSSL compatibility
 #ifdef _WIN32
@@ -42,6 +41,18 @@ void log_rsa_info(const std::string& message)
 	{
 		INFO_MSG(message);
 	}
+}
+
+// Helper to get RSA from EVP_PKEY
+RSA* EVP_PKEY_get_RSA(EVP_PKEY* pkey)
+{
+	if (!pkey) return NULL;
+	#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+		// OpenSSL 3.x: Use EVP_PKEY_get0_RSA with correct signature
+		return (RSA*)EVP_PKEY_get0_RSA(pkey);
+	#else
+		return EVP_PKEY_get0_RSA(pkey);
+	#endif
 }
 }
 
@@ -94,37 +105,12 @@ bool KBE_RSA::loadPublic(const std::string& keyname)
 		}
 
 		#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-		// OpenSSL 3.x: Read RSA specific format, then convert to EVP_PKEY
-		RSA* rsa = PEM_read_RSAPublicKey(fp, NULL, NULL, NULL);
-		fclose(fp);
-
-		if(NULL == rsa)
-		{
-			char err[1024];
-			char* errret = ERR_error_string(ERR_get_error(), err);
-			log_rsa_error(fmt::format("KBE_RSA::loadPublic: PEM_read_RSAPublicKey error({} : {})\n",
-				errret, err));
-			return false;
-		}
-
-		EVP_PKEY* pkey = EVP_PKEY_new();
-		if (!pkey || EVP_PKEY_assign_RSA(pkey, rsa) != 1)
-		{
-			char err[1024];
-			char* errret = ERR_error_string(ERR_get_error(), err);
-			log_rsa_error(fmt::format("KBE_RSA::loadPublic: EVP_PKEY_assign_RSA error({} : {})\n",
-				errret, err));
-
-			RSA_free(rsa);
-			if(pkey) EVP_PKEY_free(pkey);
-			return false;
-		}
-
-		rsa_public = pkey;
-		#else
-		// OpenSSL 1.x: Use EVP_PKEY format
+		// OpenSSL 3.x: Use EVP_PKEY API
 		EVP_PKEY* pkey = PEM_read_PUBKEY(fp, NULL, NULL, NULL);
-		fclose(fp);
+		#else
+		// OpenSSL 1.x: Fall back to RSA API
+		EVP_PKEY* pkey = PEM_read_PUBKEY(fp, NULL, NULL, NULL);
+		#endif
 
 		if(NULL == pkey)
 		{
@@ -132,11 +118,13 @@ bool KBE_RSA::loadPublic(const std::string& keyname)
 			char* errret = ERR_error_string(ERR_get_error(), err);
 			log_rsa_error(fmt::format("KBE_RSA::loadPublic: PEM_read_PUBKEY error({} : {})\n",
 				errret, err));
+
+			fclose(fp);
 			return false;
 		}
 
 		rsa_public = pkey;
-		#endif
+		fclose(fp);
 	}
 
 	return rsa_public != NULL;
@@ -275,37 +263,13 @@ bool KBE_RSA::generateKey(const std::string& pubkeyname,
 
 	fclose(fp);
 
-	// Write public key - Use RSA specific format for backward compatibility
+	// Write public key
 	fp = fopen(pubkeyname.c_str(), "w");
 	if (!fp) {
 		EVP_PKEY_free(pkey);
 		return false;
 	}
 
-	#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-	// OpenSSL 3.x: Use PEM_write_RSAPublicKey for format compatibility
-	RSA* rsa = EVP_PKEY_get1_RSA(pkey);
-	if (!rsa) {
-		fclose(fp);
-		EVP_PKEY_free(pkey);
-		return false;
-	}
-
-	if (!PEM_write_RSAPublicKey(fp, rsa))
-	{
-		RSA_free(rsa);
-		char err[1024];
-		char* errret = ERR_error_string(ERR_get_error(), err);
-		log_rsa_error(fmt::format("KBE_RSA::generateKey: PEM_write_RSAPublicKey error({} : {})\n",
-			errret, err));
-
-		fclose(fp);
-		EVP_PKEY_free(pkey);
-		return false;
-	}
-	RSA_free(rsa);
-	#else
-	// OpenSSL 1.x: Use EVP_PKEY format
 	if (!PEM_write_PUBKEY(fp, pkey))
 	{
 		char err[1024];
@@ -317,7 +281,6 @@ bool KBE_RSA::generateKey(const std::string& pubkeyname,
 		EVP_PKEY_free(pkey);
 		return false;
 	}
-	#endif
 
 	log_rsa_info(fmt::format("KBE_RSA::generateKey: RSA key generated. keysize({}) bits.\n", keySize));
 
@@ -334,10 +297,14 @@ std::string KBE_RSA::encrypt(const std::string& instr)
 	if(encrypt(instr, encrypted) < 0)
 		return "";
 
-	char strencrypted[1024];
-	memset(strencrypted, 0, 1024);
-	strutil::bytes2string((unsigned char *)encrypted.data(), encrypted.size(), (unsigned char *)strencrypted, 1024);
-	return strencrypted;
+	// Calculate required buffer size (2 bytes per byte for hex encoding)
+	size_t required_size = encrypted.size() * 2 + 1;
+	char* strencrypted = new char[required_size];
+	memset(strencrypted, 0, required_size);
+	strutil::bytes2string((unsigned char *)encrypted.data(), encrypted.size(), (unsigned char *)strencrypted, required_size);
+	std::string result(strencrypted);
+	delete[] strencrypted;
+	return result;
 }
 
 //-------------------------------------------------------------------------------------
@@ -480,8 +447,8 @@ int KBE_RSA::decrypt(const std::string& inCertifdata, std::string& outstr)
 	{
 		char err[1024];
 		char* errret = ERR_error_string(ERR_get_error(), err);
-		log_rsa_error(fmt::format("KBE_RSA::decrypt: EVP_PKEY_decrypt error({} : {}), input_size={}\n",
-			errret, err, inCertifdata.size()));
+		log_rsa_error(fmt::format("KBE_RSA::decrypt: EVP_PKEY_decrypt error({} : {})\n",
+			errret, err));
 
 		OPENSSL_free(out);
 		EVP_PKEY_CTX_free(ctx);
@@ -498,11 +465,14 @@ int KBE_RSA::decrypt(const std::string& inCertifdata, std::string& outstr)
 //-------------------------------------------------------------------------------------
 std::string KBE_RSA::decrypt(const std::string& instr)
 {
-	unsigned char strencrypted[1024];
-	memset(strencrypted, 0, 1024);
-	strutil::string2bytes((unsigned char *)instr.data(), (unsigned char *)&strencrypted[0], 1024);
+	// Calculate required buffer size (hex string is 2x the binary size)
+	size_t binary_size = instr.length() / 2;
+	unsigned char* strencrypted = new unsigned char[binary_size];
+	memset(strencrypted, 0, binary_size);
+	strutil::string2bytes((unsigned char *)instr.data(), strencrypted, binary_size);
 	std::string encrypted;
-	encrypted.assign((char*)strencrypted, 1024);
+	encrypted.assign((char*)strencrypted, binary_size);
+	delete[] strencrypted;
 
 	std::string out;
 	if(decrypt(encrypted, out) < 0)

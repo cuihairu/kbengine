@@ -155,10 +155,14 @@ bool TimersT< TIME_STAMP >::legal(TimerHandle handle) const
 		return true;
 	}
 
-	TimeIter begin = &timeQueue_.top();
-	TimeIter end = begin + timeQueue_.size();
+	if (timeQueue_.empty())
+	{
+		return false;
+	}
 
-	for (TimeIter it = begin; it != end; ++it)
+	const typename PriorityQueue::Container& container = timeQueue_.container();
+	for (typename PriorityQueue::Container::const_iterator it = container.begin();
+		it != container.end(); ++it)
 	{
 		if (*it == pTime)
 		{

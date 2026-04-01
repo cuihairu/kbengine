@@ -119,8 +119,9 @@ TEST_F(OpenSSLRSACompatTest, HandlesBinaryData)
 	ASSERT_TRUE(rsa.generateKey(public_key_.string(), private_key_.string(), 2048, 65537));
 
 	// Binary test data with various byte values
+	// For 2048-bit RSA with OAEP padding, max plaintext is ~214 bytes
 	std::string binary_data;
-	for (int i = 0; i < 256; ++i)
+	for (int i = 0; i < 200; ++i)
 	{
 		binary_data += static_cast<char>(i);
 	}
