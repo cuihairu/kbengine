@@ -44,6 +44,7 @@ endif()
 - 测试没有运行
 - 编译时没有添加覆盖率标志
 - .gcda 文件在错误的目录
+- 使用了错误的收集目录（kbe/src 而不是 build/presets/vcpkg）
 
 **解决方案**:
 ```bash
@@ -55,7 +56,33 @@ cmake --preset vcpkg -DKBE_ENABLE_CODE_COVERAGE=ON
 
 # 查找 .gcda 文件
 find build -name "*.gcda"
+
+# 从构建目录收集，不是源代码目录
+lcov --capture --directory build/presets/vcpkg --base-directory . --output-file coverage.info
 ```
+
+### 问题 1.5: "geninfo: ERROR: mismatched end line"
+
+**原因**:
+- C++ 模板函数的行号不匹配
+- 内联函数的行号映射问题
+- 编译器优化导致的行号变化
+
+**解决方案**:
+```bash
+# 添加错误忽略标志
+lcov --capture \
+  --directory build/presets/vcpkg \
+  --base-directory . \
+  --output-file coverage.info \
+  --ignore-errors empty \
+  --ignore-errors source \
+  --ignore-errors mismatch \
+  --ignore-errors gcov \
+  --ignore-errors gcov_module
+```
+
+**说明**: 这些错误在C++项目中很常见，忽略它们仍然可以得到有效的覆盖率数据
 
 ### 问题 2: 覆盖率数据为空
 

@@ -153,10 +153,45 @@ fi
 
 ## 🚀 下一步
 
-1. **推送更改**: 提交到 `chore/cmake-bootstrap` 分支
-2. **观察CI运行**: 检查GitHub Actions输出
+1. ~~**推送更改**: 提交到 `chore/cmake-bootstrap` 分支~~ ✅ 完成
+2. ~~**观察CI运行**: 检查GitHub Actions输出~~ ✅ 进行中
 3. **验证覆盖率**: 确认Codecov收到有效数据
 4. **迭代优化**: 根据CI结果进一步调整
+
+## 📈 最新进展 (2026-04-01)
+
+### ✅ 重大突破
+
+CI运行成功找到 **151个 .gcda 文件**！
+
+```
+Found 151 data files in build/presets/vcpkg
+Processing build/presets/vcpkg/CMakeFiles/tinyxml.dir/...
+```
+
+### 🔧 新遇到的问题
+
+```
+geninfo: ERROR: mismatched end line for _ZN56NetworkTcpPacketSenderBootstrapTest_IncludeSucceeds_Test8TestBodyEv
+```
+
+**原因**: C++ 测试框架（Google Test）的模板函数导致行号映射不匹配
+
+**解决方案**: 添加更多错误忽略标志
+```yaml
+--ignore-errors mismatch
+--ignore-errors gcov
+--ignore-errors gcov_module
+```
+
+**提交**: `d412af51e` - "fix: ignore geninfo line mismatch errors"
+
+### 📊 预期结果
+
+添加这些忽略标志后，lcov应该能够：
+1. 成功处理所有151个 .gcda 文件
+2. 生成有效的 coverage.info
+3. 上传到 Codecov 进行分析
 
 ## 📚 相关文档
 
