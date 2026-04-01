@@ -7,6 +7,9 @@ on:
       - chore/python-3.12-support
       - chore/cmake-bootstrap
   pull_request:
+    branches:
+      - master
+      - chore/cmake-bootstrap
 
 jobs:
   linux:
@@ -68,6 +71,77 @@ jobs:
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: ctest --preset vcpkg --output-on-failure
+
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf \
+            autoconf-archive \
+            automake \
+            build-essential \
+            cmake \
+            gcov \
+            lcov \
+            libtool \
+            ninja-build \
+            pkg-config \
+            zip \
+            unzip \
+            tar \
+            curl
+
+      - name: Bootstrap vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
+          "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+
+      - name: Configure with Coverage
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+          CMAKE_CXX_FLAGS: --coverage
+          CMAKE_C_FLAGS: --coverage
+          CMAKE_EXE_LINKER_FLAGS: --coverage
+        run: |
+          cmake --preset vcpkg \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DKBE_ENABLE_CODE_COVERAGE=ON
+
+      - name: Build with Coverage
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: >
+          cmake --build --preset vcpkg --parallel
+          --target
+          kbe_smoke_tests
+
+      - name: Run Tests with Coverage
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: |
+          ctest --preset vcpkg --output-on-failure
+          lcov --capture --directory . --output-file coverage.info
+          lcov --remove coverage.info '/usr/*' --output-file coverage.info
+          lcov --remove coverage.info '*/tests/*' --output-file coverage.info
+          lcov --remove coverage.info '*/vcpkg/*' --output-file coverage.info
+          lcov --list coverage.info
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
 
   windows:
     name: Windows CMake

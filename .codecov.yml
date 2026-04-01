@@ -1,0 +1,36 @@
+# Codecov configuration
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 1%
+        base: auto
+    patch:
+      default:
+        target: 75%
+        threshold: 1%
+        base: auto
+
+ignore:
+  - "tests/**"
+  - "vcpkg/**"
+  - "build/**"
+  - "kbe/src/lib/dependencies/**"
+  - "*.generated.*"
+
+comment:
+  layout: "diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+flags:
+  unittests:
+    carryforward: true
+  integration:
+    carryforward: true
+
+github_checks:
+  annotations: true
