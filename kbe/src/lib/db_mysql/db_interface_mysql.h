@@ -16,7 +16,8 @@
 #ifndef SYSTEM_CHARSET_MBMAXLEN
 #define SYSTEM_CHARSET_MBMAXLEN 3
 #endif
-#if KBE_PLATFORM == PLATFORM_WIN32
+// Library linking is handled by CMake when using vcpkg
+#if KBE_PLATFORM == PLATFORM_WIN32 && !KBE_USE_VCPKG
 #ifdef X64
 // added for VS2015
 #if _MSC_VER >= 1900

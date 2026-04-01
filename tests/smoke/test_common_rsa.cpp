@@ -2,13 +2,13 @@
 
 #include <filesystem>
 #include <string>
-#include <unistd.h>
+#include "../test_platform.h"
 
 #include "common/rsa.h"
 
 TEST(CommonRsaBootstrapTest, GeneratesKeysAndRoundTripsCiphertext) {
   const auto temp_dir = std::filesystem::temp_directory_path();
-  const auto unique = std::to_string(::getpid()) + "_kbe_rsa_test";
+  const auto unique = std::to_string(KBE_GETPID()) + "_kbe_rsa_test";
   const auto public_key = temp_dir / (unique + "_pub.pem");
   const auto private_key = temp_dir / (unique + "_pri.pem");
 
@@ -32,7 +32,7 @@ TEST(CommonRsaBootstrapTest, GeneratesKeysAndRoundTripsCiphertext) {
 
 TEST(CommonRsaBootstrapTest, LoadsGeneratedKeyPairFromDisk) {
   const auto temp_dir = std::filesystem::temp_directory_path();
-  const auto unique = std::to_string(::getpid()) + "_kbe_rsa_reload";
+  const auto unique = std::to_string(KBE_GETPID()) + "_kbe_rsa_reload";
   const auto public_key = temp_dir / (unique + "_pub.pem");
   const auto private_key = temp_dir / (unique + "_pri.pem");
 

@@ -2,7 +2,7 @@
 
 #include <filesystem>
 #include <string>
-#include <unistd.h>
+#include "../test_platform.h"
 
 #include "common/common.h"
 #include "common/kbekey.h"
@@ -19,7 +19,7 @@ namespace
 std::filesystem::path make_temp_key_path(const char* suffix)
 {
   const auto temp_dir = std::filesystem::temp_directory_path();
-  const auto unique = std::to_string(::getpid()) + std::string("_kbe_kbekey_") + suffix;
+  const auto unique = std::to_string(KBE_GETPID()) + std::string("_kbe_kbekey_") + suffix;
   return temp_dir / unique;
 }
 }

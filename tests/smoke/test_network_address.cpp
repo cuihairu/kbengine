@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include "common/common.h"
 #include "network/address.h"
 
 TEST(NetworkAddressBootstrapTest, FormatsAddressAndIpStrings)
@@ -14,7 +15,7 @@ TEST(NetworkAddressBootstrapTest, FormatsAddressAndIpStrings)
 
 TEST(NetworkAddressBootstrapTest, ConvertsBetweenStringAndNumericIp)
 {
-  u_int32_t raw = 0;
+  KBEngine::u_int32_t raw = 0;
   ASSERT_EQ(KBEngine::Network::Address::string2ip("127.0.0.1", raw), 0);
 
   char buffer[32] = {0};

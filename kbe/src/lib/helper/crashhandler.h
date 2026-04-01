@@ -3,17 +3,17 @@
 #ifndef KBE_CRASHHANDLER_H
 #define KBE_CRASHHANDLER_H
 	
-// common include	
+// common include
 //#define NDEBUG
-// windows include	
-#ifdef WIN32
+// windows include
+#ifdef _WIN32
 #include "common/common.h"
 #include <windows.h>
 #include <tchar.h>
 #include <dbghelp.h>
 #include <stdio.h>
 #include <crtdbg.h>
-#include <time.h> 
+#include <time.h>
 #pragma comment (lib, "dbghelp.lib")
 #else
 // linux include

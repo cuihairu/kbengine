@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <unistd.h>
+#include "../test_platform.h"
 
 #include "helper/sys_info.h"
 
@@ -16,7 +16,7 @@ TEST(HelperSysInfoBootstrapTest, ExposesBasicSystemInfoApis)
   const auto total = info.totalmem();
   EXPECT_EQ(total, mem.total);
 
-  const auto process = info.getProcessInfo(static_cast<KBEngine::uint32>(::getpid()));
+  const auto process = info.getProcessInfo(static_cast<KBEngine::uint32>(KBE_GETPID()));
   EXPECT_FALSE(process.error);
 }
 
