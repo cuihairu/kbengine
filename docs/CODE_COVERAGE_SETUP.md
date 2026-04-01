@@ -149,7 +149,7 @@ cat build/presets/vcpkg/flags.make | grep COVERAGE
 ### 调试覆盖率收集
 ```bash
 # 检查 .gcda 文件
-find build -name "*.gcda" -ls -lh
+find build -name "*.gcda" -ls
 
 # 手动收集覆盖率
 lcov --capture --directory build/presets/vcpkg --base-directory . --output-file coverage.info
@@ -173,7 +173,7 @@ grep -r "ftest-coverage" build/presets/vcpkg/CMakeFiles/ | head -5
 ```yaml
 - name: Find .gcda files
   run: |
-    find build -name "*.gcda" -type f -ls -lh
+    find build -name "*.gcda" -type f -ls
     find build -name "*.gcno" -type f | wc -l
 ```
 
@@ -202,7 +202,7 @@ grep -r "ftest-coverage" build/presets/vcpkg/CMakeFiles/ | head -5
 - name: Run Tests
   run: |
     ctest --output-on-failure || true  # 继续运行以查看覆盖率
-    find . -name "*.gcda" -type f -ls -lh
+    find . -name "*.gcda" -type f -ls
 ```
 
 ## 📈 改进建议

@@ -127,7 +127,7 @@ jobs:
           grep -r "ftest-coverage" build/presets/vcpkg/CMakeFiles/ 2>/dev/null | head -5 || echo "No coverage flags in CMakeFiles"
 
           echo "=== Testing executables ==="
-          find build/presets/vcpkg -name "kbe_smoke_tests" -type f -ls -lh
+          find build/presets/vcpkg -name "kbe_smoke_tests" -type f -ls
 
       - name: Build with Coverage
         env:
@@ -148,7 +148,7 @@ jobs:
           ctest --output-on-failure || true
 
           echo "=== Checking for .gcda files after test execution ==="
-          find . -name "*.gcda" -type f -ls -lh | head -20 || echo "No .gcda files found"
+          find . -name "*.gcda" -type f -ls | head -20 || echo "No .gcda files found"
 
           echo "=== Checking for .gcno files ==="
           find . -name "*.gcno" -type f | wc -l
@@ -160,7 +160,7 @@ jobs:
         run: |
           # Find where .gcda files are actually located
           echo "=== Searching for .gcda files ==="
-          find build -name "*.gcda" -type f -ls -lh || echo "No .gcda files found in build/"
+          find build -name "*.gcda" -type f -ls || echo "No .gcda files found in build/"
 
           echo "=== Searching for .gcno files ==="
           find build -name "*.gcno" -type f | head -20 || echo "No .gcno files found in build/"

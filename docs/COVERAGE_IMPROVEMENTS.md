@@ -36,7 +36,7 @@ add_compile_definitions(
   run: |
     grep -i "coverage\|ftest-coverage\|fprofile-arcs" build/presets/vcpkg/CMakeCache.txt
     grep -r "ftest-coverage" build/presets/vcpkg/CMakeFiles/ | head -5
-    find build/presets/vcpkg -name "kbe_smoke_tests" -type f -ls -lh
+    find build/presets/vcpkg -name "kbe_smoke_tests" -type f -ls
 ```
 
 **目的**: 在构建后立即验证覆盖率标志是否正确应用
@@ -70,11 +70,11 @@ lcov --capture \
 **添加的调试步骤**:
 ```yaml
 # 测试运行后立即检查文件
-find . -name "*.gcda" -type f -ls -lh | head -20
+find . -name "*.gcda" -type f -ls | head -20
 find . -name "*.gcno" -type f | wc -l
 
 # 覆盖率收集前搜索文件
-find build -name "*.gcda" -type f -ls -lh
+find build -name "*.gcda" -type f -ls
 find build -name "*.gcno" -type f | head -20
 ```
 
