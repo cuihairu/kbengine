@@ -34,6 +34,7 @@ if(KBE_ENABLE_CODE_COVERAGE)
   add_compile_options(
     $<$<COMPILE_LANGUAGE:C,CXX>:-fprofile-arcs>
     $<$<COMPILE_LANGUAGE:C,CXX>:-ftest-coverage>
+    $<$<COMPILE_LANGUAGE:C,CXX>:-fprofile-update=atomic>
   )
 
   add_link_options(-fprofile-arcs)
@@ -53,7 +54,7 @@ if(KBE_ENABLE_CODE_COVERAGE)
     set(GCOV_PREFIX_STRIP 0)
   endif()
 
-  message(STATUS "KBEngine: coverage flags set for C/C++")
+  message(STATUS "KBEngine: coverage flags set for C/C++ with atomic updates")
 endif()
 
 if(KBE_USING_VCPKG)

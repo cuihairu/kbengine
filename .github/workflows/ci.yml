@@ -174,7 +174,8 @@ jobs:
             --ignore-errors source \
             --ignore-errors mismatch \
             --ignore-errors gcov \
-            --ignore-errors gcov_module
+            --ignore-errors gcov_module \
+            --ignore-errors negative
 
           # Check if we got any coverage data
           if [ -s coverage.info ]; then
