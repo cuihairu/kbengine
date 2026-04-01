@@ -111,9 +111,6 @@ jobs:
       - name: Configure with Coverage
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-          CMAKE_CXX_FLAGS: --coverage
-          CMAKE_C_FLAGS: --coverage
-          CMAKE_EXE_LINKER_FLAGS: --coverage
         run: |
           cmake --preset vcpkg \
             -DCMAKE_BUILD_TYPE=Debug \
@@ -130,13 +127,27 @@ jobs:
       - name: Run Tests with Coverage
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        working-directory: build/presets/vcpkg
         run: |
-          ctest --preset vcpkg --output-on-failure
-          lcov --capture --directory . --output-file coverage.info
-          lcov --remove coverage.info '/usr/*' --output-file coverage.info
+          # Run tests to generate .gcda files
+          ctest -C Debug --output-on-failure
+
+      - name: Generate Coverage Report
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: |
+          # Only capture coverage from our source code
+          lcov --capture --directory kbe/src --output-file coverage.info --ignore-errors empty
+          # Filter out test and build artifacts
           lcov --remove coverage.info '*/tests/*' --output-file coverage.info
+          lcov --remove coverage.info 'kbe/src/lib/dependencies/*' --output-file coverage.info
           lcov --remove coverage.info '*/vcpkg/*' --output-file coverage.info
-          lcov --list coverage.info
+          lcov --remove coverage.info '*.o' --output-file coverage.info
+          lcov --remove coverage.info '*.a' --output-file coverage.info
+
+          # Show coverage summary
+          echo "=== Coverage Summary ==="
+          lcov --list coverage.info || echo "No coverage data collected"
 
       - name: Upload to Codecov
         uses: codecov/codecov-action@v4

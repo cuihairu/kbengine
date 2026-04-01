@@ -27,6 +27,28 @@ endif()
 
 include(KBEngineOptions)
 
+if(KBE_ENABLE_CODE_COVERAGE)
+  message(STATUS "KBEngine: code coverage enabled")
+
+  # Add coverage flags for C and C++
+  add_compile_options(
+    $<$<COMPILE_LANGUAGE:C,CXX>:-fprofile-arcs>
+    $<$<COMPILE_LANGUAGE:C,CXX>:-ftest-coverage>
+  )
+
+  add_link_options(-fprofile-arcs)
+
+  # Remove optimization flags that interfere with coverage
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
+
+  # Disable garbage collection and unused functions for better coverage
+  add_compile_definitions(
+    GCOV_PREFIX=$<CONFIG:CFG>
+    __NO_INLINE__
+  )
+endif()
+
 if(KBE_USING_VCPKG)
   message(STATUS "KBEngine: vcpkg toolchain detected")
 endif()
