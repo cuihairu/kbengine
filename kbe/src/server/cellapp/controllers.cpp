@@ -1,17 +1,17 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
-#include "controllers.h"	
-#include "cellapp.h"	
-#include "entity.h"	
-#include "helper/profile.h"	
-#include "common/memorystream.h"	
+#include "controllers.h"
+#include "cellapp.h"
+#include "entity.h"
+#include "helper/profile.h"
+#include "common/memorystream.h"
 
-#include "proximity_controller.h"	
-#include "moveto_point_handler.h"	
-#include "moveto_entity_handler.h"	
-#include "navigate_handler.h"	
+#include "proximity_controller.h"
+#include "moveto_point_handler.h"
+#include "moveto_entity_handler.h"
+#include "navigate_handler.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ bool Controllers::add(KBEShared_ptr<Controller> pController)
 	}
 	else
 	{
-		// Ë¢ÐÂid¼ÆÊýÆ÷
+		// åˆ·æ–°idè®¡æ•°å™¨
 		if(lastid_ < id)
 			lastid_ = id;
 	}
@@ -74,7 +74,7 @@ bool Controllers::remove(uint32 id)
 	if (iter == objects_.end())
 		return true;
 
-	// ×ö¸öÒýÓÃ£¬·ÀÖ¹ÔÚControllerÎö¹¹ÖÐµ¼ÖÂÄ³Ð©Çé¿öÏÂÔÚeraseÎ´½áÊøµÄÇé¿öÏÂÓÖ½øÈëÕâÀïÖ´ÐÐerase¶ø²úÉúÎÊÌâ
+	// åšä¸ªå¼•ç”¨ï¼Œé˜²æ­¢åœ¨Controlleræžæž„ä¸­å¯¼è‡´æŸäº›æƒ…å†µä¸‹åœ¨eraseæœªç»“æŸçš„æƒ…å†µä¸‹åˆè¿›å…¥è¿™é‡Œæ‰§è¡Œeraseè€Œäº§ç”Ÿé—®é¢˜
 	KBEShared_ptr< Controller > pController = iter->second;
 	objects_.erase(iter);
 	return pController != NULL;
@@ -110,7 +110,7 @@ void Controllers::createFromStream(KBEngine::MemoryStream& s)
 		s >> itype;
 
 		Controller::ControllerType type = (Controller::ControllerType)itype;
-		
+
 		KBEShared_ptr<Controller> pController;
 
 		switch(type)
@@ -124,10 +124,10 @@ void Controllers::createFromStream(KBEngine::MemoryStream& s)
 			KBE_ASSERT(false);
 			break;
 		};
-		
+
 		if(pController == NULL)
 			continue;
-		
+
 		pController->type(type);
 		pController->createFromStream(s);
 

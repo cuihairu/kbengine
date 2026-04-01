@@ -34,7 +34,7 @@ OrdersCharge::OrdersCharge()
 //-------------------------------------------------------------------------------------
 OrdersCharge::~OrdersCharge()
 {
-	//INFO_MSG(fmt::format("OrdersCharge::~OrdersCharge({0:p}): orders={1}\n", 
+	//INFO_MSG(fmt::format("OrdersCharge::~OrdersCharge({0:p}): orders={1}\n",
 	//	(void*)this, ordersID));
 }
 

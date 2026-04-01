@@ -17,7 +17,7 @@ namespace KBEngine {
 bool KBEEntityLogTableRedis::syncToDB(DBInterface* pdbi)
 {
 	/*
-	ÓĞÊı¾İÊ±²Å²úÉú±íÊı¾İ
+	æœ‰æ•°æ®æ—¶æ‰äº§ç”Ÿè¡¨æ•°æ®
 	kbe_entitylog:dbid:entityType = hashes(entityID, ip, port, componentID, serverGroupID)
 	*/
 
@@ -164,7 +164,7 @@ bool KBEAccountTableRedis::setFlagsDeadline(DBInterface * pdbi, const std::strin
 	kbe_accountinfos:accountName = hashes(password, bindata, email, entityDBID, flags, deadline, regtime, lasttime, numlogin)
 	*/
 	
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(pdbi->query(fmt::format("HSET " KBE_TABLE_PERFIX "_accountinfos:{} flags {} deadline {}", 
 		name, flags, deadline), false))
 		return true;
@@ -248,14 +248,14 @@ bool KBEAccountTableRedis::updateCount(DBInterface * pdbi, const std::string& na
 	*/
 	redis::DBTransaction transaction(pdbi);
 	
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(fmt::format("HINCRBY " KBE_TABLE_PERFIX "_accountinfos:{} numlogin", name), false))
 	{
 		transaction.rollback();
 		return false;
 	}
 	
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(fmt::format("HSET " KBE_TABLE_PERFIX "_accountinfos:{} lasttime {}", name, time(NULL)), false))
 	{
 		transaction.rollback();
@@ -272,7 +272,7 @@ bool KBEAccountTableRedis::updateCount(DBInterface * pdbi, const std::string& na
 //-------------------------------------------------------------------------------------
 bool KBEAccountTableRedis::updatePassword(DBInterface * pdbi, const std::string& name, const std::string& password)
 {
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(fmt::format("HSET " KBE_TABLE_PERFIX "_accountinfos:{} password {}", name, password), false))
 		return false;
 
@@ -287,7 +287,7 @@ bool KBEAccountTableRedis::logAccount(DBInterface * pdbi, ACCOUNT_INFOS& info)
 		info.name, KBE_MD5::getDigest(info.password.data(), info.password.length()).c_str(),
 		info.datas, info.email, info.dbid, info.flags, info.deadline, time(NULL), time(NULL));
 
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
 	{
 		ERROR_MSG(fmt::format("KBEAccountTableRedis::logAccount({}): cmd({}) is failed({})!\n", 
@@ -396,7 +396,7 @@ bool KBEEmailVerificationTableRedis::logAccount(DBInterface * pdbi, int8 type, c
 	
 	redis::DBTransaction transaction(pdbi);
 	
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(fmt::format("HSET " KBE_TABLE_PERFIX "_email_verification:{} accountName {} type {} datas {} logtime {}", 
 		code, name, type, datas, time(NULL)), false))
 	{
@@ -407,7 +407,7 @@ bool KBEEmailVerificationTableRedis::logAccount(DBInterface * pdbi, int8 type, c
 		return false;
 	}
 
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(fmt::format("SET " KBE_TABLE_PERFIX "_email_verification:{} {}", name, code), false))
 	{
 		ERROR_MSG(fmt::format("KBEEmailVerificationTableMysql::logAccount({}): cmd({}) is failed({})!\n", 
@@ -417,7 +417,7 @@ bool KBEEmailVerificationTableRedis::logAccount(DBInterface * pdbi, int8 type, c
 		return false;
 	}
 
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(fmt::format("EXPIRE " KBE_TABLE_PERFIX "_email_verification:{} {}", 
 		code.c_str(), getDeadline(type)), false))
 	{
@@ -428,7 +428,7 @@ bool KBEEmailVerificationTableRedis::logAccount(DBInterface * pdbi, int8 type, c
 		return false;
 	}
 	
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(fmt::format("EXPIRE " KBE_TABLE_PERFIX "_email_verification:{} {}", 
 		name.c_str(), getDeadline(type)), false))
 	{
@@ -503,7 +503,7 @@ bool KBEEmailVerificationTableRedis::activateAccount(DBInterface * pdbi, const s
 
 	std::string password = info.password;
 
-	// Ñ°ÕÒdblogÊÇ·ñÓĞ´ËÕËºÅ
+	// å¯»æ‰¾dblogæ˜¯å¦æœ‰æ­¤è´¦å·
 	KBEAccountTable* pTable = static_cast<KBEAccountTable*>(EntityTables::findByInterfaceName(pdbi->name()).findKBETable(KBE_TABLE_PERFIX "_accountinfos"));
 	KBE_ASSERT(pTable);
 	
@@ -542,7 +542,7 @@ bool KBEEmailVerificationTableRedis::activateAccount(DBInterface * pdbi, const s
 
 	ScriptDefModule* pModule = EntityDef::findScriptModule(DBUtil::accountScriptName());
 
-	// ·ÀÖ¹¶àÏß³ÌÎÊÌâ£¬ ÕâÀï×öÒ»¸ö¿½±´¡£
+	// é˜²æ­¢å¤šçº¿ç¨‹é—®é¢˜ï¼Œ è¿™é‡Œåšä¸€ä¸ªæ‹·è´ã€‚
 	MemoryStream copyAccountDefMemoryStream(pTable->accountDefMemoryStream());
 
 	info.dbid = EntityTables::findByInterfaceName(pdbi->name()).writeEntity(pdbi, 0, -1,
@@ -554,7 +554,7 @@ bool KBEEmailVerificationTableRedis::activateAccount(DBInterface * pdbi, const s
 	kbe_accountinfos:accountName = hashes(password, bindata, email, entityDBID, flags, deadline, regtime, lasttime, numlogin)
 	*/
 	
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(fmt::format("HSET " KBE_TABLE_PERFIX "_accountinfos:{} entityDBID {}", 
 		info.name, info.dbid), false))
 	{
@@ -639,7 +639,7 @@ bool KBEEmailVerificationTableRedis::bindEMail(DBInterface * pdbi, const std::st
 	kbe_accountinfos:accountName = hashes(password, bindata, email, entityDBID, flags, deadline, regtime, lasttime, numlogin)
 	*/
 	
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(fmt::format("HSET " KBE_TABLE_PERFIX "_accountinfos:{} email {}", 
 		qname, qemail), false))
 	{
@@ -721,7 +721,7 @@ bool KBEEmailVerificationTableRedis::resetpassword(DBInterface * pdbi, const std
 		return false;
 	}
 	
-	// Ñ°ÕÒdblogÊÇ·ñÓĞ´ËÕËºÅ
+	// å¯»æ‰¾dblogæ˜¯å¦æœ‰æ­¤è´¦å·
 	KBEAccountTable* pTable = static_cast<KBEAccountTable*>(EntityTables::findByInterfaceName(pdbi->name()).findKBETable(KBE_TABLE_PERFIX "_accountinfos"));
 	KBE_ASSERT(pTable);
 
@@ -746,7 +746,7 @@ bool KBEEmailVerificationTableRedis::delAccount(DBInterface * pdbi, int8 type, c
 	*/
 	redisReply* pRedisReply = NULL;
 	
-	// Èç¹û²éÑ¯Ê§°ÜÔò·µ»Ø´æÔÚ£¬ ±ÜÃâ¿ÉÄÜ²úÉúµÄ´íÎó
+	// å¦‚æœæŸ¥è¯¢å¤±è´¥åˆ™è¿”å›å­˜åœ¨ï¼Œ é¿å…å¯èƒ½äº§ç”Ÿçš„é”™è¯¯
 	if(!pdbi->query(fmt::format("GET " KBE_TABLE_PERFIX "_email_verification:{}", name), false))
 	{
 		return false;
@@ -765,7 +765,7 @@ bool KBEEmailVerificationTableRedis::delAccount(DBInterface * pdbi, int8 type, c
 		pRedisReply = NULL;
 	}
 
-	// ÊÂÎñ¿ªÊ¼	
+	// äº‹åŠ¡å¼€å§‹	
 	redis::DBTransaction transaction(pdbi);
 	
 	if(code.size() > 0)

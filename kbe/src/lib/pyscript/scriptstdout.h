@@ -12,14 +12,14 @@ namespace KBEngine{ namespace script{
 class ScriptStdOutErr;
 class ScriptStdOut: public ScriptObject
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
 	INSTANCE_SCRIPT_HREADER(ScriptStdOut, ScriptObject)
 public:	
 	ScriptStdOut(ScriptStdOutErr* pScriptStdOutErr);
 	virtual ~ScriptStdOut();
 
 	/** 
-		pythonÖ´ĞĞĞ´²Ù×÷ 
+		pythonæ‰§è¡Œå†™æ“ä½œ 
 	*/
 	static PyObject* __py_write(PyObject* self, PyObject *args);
 	static PyObject* __py_flush(PyObject* self, PyObject *args);

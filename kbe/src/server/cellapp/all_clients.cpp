@@ -84,7 +84,7 @@ PyObject* AllClientsComponent::onScriptGetAttribute(PyObject* attr)
 	{
 		return new ClientsRemoteEntityMethod(pComponentPropertyDescription_, pScriptDefModule, pMethodDescription, pAllClients_->isOtherClients(), entityID);
 	}
-	
+
 	return ScriptObject::onScriptGetAttribute(attr);
 }
 
@@ -121,8 +121,8 @@ SCRIPT_GETSET_DECLARE_END()
 SCRIPT_INIT(AllClients, 0, 0, 0, 0, 0)
 
 //-------------------------------------------------------------------------------------
-AllClients::AllClients(const ScriptDefModule* pScriptModule, 
-						ENTITY_ID eid, 
+AllClients::AllClients(const ScriptDefModule* pScriptModule,
+						ENTITY_ID eid,
 						bool otherClients):
 ScriptObject(getScriptType(), false),
 pScriptModule_(pScriptModule),
@@ -138,8 +138,8 @@ AllClients::~AllClients()
 
 //-------------------------------------------------------------------------------------
 PyObject* AllClients::pyGetID()
-{ 
-	return PyLong_FromLong(id()); 
+{
+	return PyLong_FromLong(id());
 }
 
 //-------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ PyObject* AllClients::onScriptGetAttribute(PyObject* attr)
 	Entity* pEntity = Cellapp::getSingleton().findEntity(id_);
 	if(pEntity == NULL)
 	{
-		PyErr_Format(PyExc_AssertionError, "AllClients::onScriptGetAttribute: not found entity(%d).", 
+		PyErr_Format(PyExc_AssertionError, "AllClients::onScriptGetAttribute: not found entity(%d).",
 			id());
 
 		return 0;
@@ -156,23 +156,23 @@ PyObject* AllClients::onScriptGetAttribute(PyObject* attr)
 
 	if(!pEntity->isReal())
 	{
-		PyErr_Format(PyExc_AssertionError, "AllClients::onScriptGetAttribute: %s not is real entity(%d).", 
+		PyErr_Format(PyExc_AssertionError, "AllClients::onScriptGetAttribute: %s not is real entity(%d).",
 			pEntity->scriptName(), pEntity->id());
 
 		return 0;
 	}
-	
+
 	const char* ccattr = PyUnicode_AsUTF8AndSize(attr, NULL);
 
 	MethodDescription* pMethodDescription = const_cast<ScriptDefModule*>(pScriptModule_)->findClientMethodDescription(ccattr);
-	
+
 	if(pMethodDescription != NULL)
 	{
 		return new ClientsRemoteEntityMethod(NULL, pScriptModule_, pMethodDescription, otherClients_, id_);
 	}
 	else
 	{
-		// ÊÇ·ñÊÇ×é¼ş·½·¨µ÷ÓÃ
+		// æ˜¯å¦æ˜¯ç»„ä»¶æ–¹æ³•è°ƒç”¨
 		PropertyDescription* pComponentPropertyDescription = const_cast<ScriptDefModule*>(pScriptModule_)->findComponentPropertyDescription(ccattr);
 		if (pComponentPropertyDescription)
 		{

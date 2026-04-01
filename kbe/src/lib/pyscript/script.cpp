@@ -23,6 +23,70 @@ namespace KBEngine{
 KBE_SINGLETON_INIT(script::Script);
 namespace script{
 
+#if PY_VERSION_HEX >= 0x030B0000
+static bool initializePythonRuntime(const wchar_t* pythonHomeDir, const std::wstring& pyPaths)
+{
+	PyConfig config;
+	PyConfig_InitPythonConfig(&config);
+	config.parse_argv = 0;
+	config.site_import = 0;
+	config.use_environment = 0;
+	config.install_signal_handlers = 0;
+	config.module_search_paths_set = 1;
+	config.use_frozen_modules = 1;
+
+	PyStatus status = PyConfig_SetString(&config, &config.home, pythonHomeDir);
+	if (PyStatus_Exception(status))
+	{
+		const char* err = status.err_msg ? status.err_msg : "PyConfig_SetString(home) failed";
+		ERROR_MSG(fmt::format("Script::install(): {}\n", err));
+		PyConfig_Clear(&config);
+		return false;
+	}
+
+#if KBE_PLATFORM == PLATFORM_WIN32
+	const wchar_t separator = L';';
+#else
+	const wchar_t separator = L':';
+#endif
+
+	std::wstring::size_type start = 0;
+	while (start <= pyPaths.size())
+	{
+		std::wstring::size_type end = pyPaths.find(separator, start);
+		std::wstring path = pyPaths.substr(start, end == std::wstring::npos ? std::wstring::npos : end - start);
+		if (!path.empty())
+		{
+			status = PyWideStringList_Append(&config.module_search_paths, path.c_str());
+			if (PyStatus_Exception(status))
+			{
+				const char* err = status.err_msg ? status.err_msg : "PyWideStringList_Append failed";
+				ERROR_MSG(fmt::format("Script::install(): {}\n", err));
+				PyConfig_Clear(&config);
+				return false;
+			}
+		}
+
+		if (end == std::wstring::npos)
+			break;
+
+		start = end + 1;
+	}
+
+	status = Py_InitializeFromConfig(&config);
+	if (PyStatus_Exception(status))
+	{
+		const char* err = status.err_msg ? status.err_msg : "Py_InitializeFromConfig failed";
+		ERROR_MSG(fmt::format("Script::install(): {}\n", err));
+		PyConfig_Clear(&config);
+		return false;
+	}
+
+	PyConfig_Clear(&config);
+	return Py_IsInitialized();
+}
+#endif
+
 //-------------------------------------------------------------------------------------
 static PyObject* __py_genUUID64(PyObject *self, void *closure)	
 {
@@ -135,7 +199,7 @@ bool Script::install(const wchar_t* pythonHomeDir, std::wstring pyPaths,
 {
 	APPEND_PYSYSPATH(pyPaths);
 
-	// 先设置python的环境变量
+	// 脧脠脡猫脰脙python碌脛禄路戮鲁卤盲脕驴
 	Py_SetPythonHome(const_cast<wchar_t*>(pythonHomeDir));								
 
 #if KBE_PLATFORM != PLATFORM_WIN32
@@ -148,6 +212,10 @@ bool Script::install(const wchar_t* pythonHomeDir, std::wstring pyPaths,
 
 	// Initialise python
 	// Py_VerboseFlag = 2;
+#if PY_VERSION_HEX >= 0x030B0000
+	if (!initializePythonRuntime(pythonHomeDir, pyPaths))
+		return false;
+#else
 	Py_FrozenFlag = 1;
 
 	// Warn if tab and spaces are mixed in indentation.
@@ -157,20 +225,21 @@ bool Script::install(const wchar_t* pythonHomeDir, std::wstring pyPaths,
 
 	Py_SetPath(pyPaths.c_str());
 
-	// python解释器的初始化  
+	// python陆芒脢脥脝梅碌脛鲁玫脢录禄炉  
 	Py_Initialize();
-    if (!Py_IsInitialized())
-    {
-    	ERROR_MSG("Script::install(): Py_Initialize is failed!\n");
-        return false;
-    } 
+	if (!Py_IsInitialized())
+	{
+		ERROR_MSG("Script::install(): Py_Initialize is failed!\n");
+		return false;
+	}
+#endif
 
 	sysInitModules_ = PyDict_Copy(PySys_GetObject("modules"));
 
 	PySys_SetArgvEx(0, NULL, 0);
 	PyObject *m = PyImport_AddModule("__main__");
 
-	// 添加一个脚本基础模块
+	// 脤铆录脫脪禄赂枚陆脜卤戮禄霉麓隆脛拢驴茅
 	module_ = PyImport_AddModule(moduleName);
 	if (module_ == NULL)
 		return false;
@@ -185,23 +254,23 @@ bool Script::install(const wchar_t* pythonHomeDir, std::wstring pyPaths,
 	
 	PyEval_InitThreads();
 
-	// 注册产生uuid方法到py
+	// 脳垄虏谩虏煤脡煤uuid路陆路篓碌陆py
 	APPEND_SCRIPT_MODULE_METHOD(module_,		genUUID64,			__py_genUUID64,					METH_VARARGS,			0);
 
-	// 安装py重定向模块
+	// 掳虏脳掳py脰脴露篓脧貌脛拢驴茅
 	ScriptStdOut::installScript(NULL);
 	ScriptStdErr::installScript(NULL);
 
-	// 将模块对象加入main
+	// 陆芦脛拢驴茅露脭脧贸录脫脠毛main
 	PyObject_SetAttrString(m, moduleName, module_);
 	PyObject* pyDoc = PyUnicode_FromString("This module is created by KBEngine!");
 	PyObject_SetAttrString(module_, "__doc__", pyDoc);
 	Py_DECREF(pyDoc);
 
-	// 重定向python输出
+	// 脰脴露篓脧貌python脢盲鲁枚
 	pyStdouterr_ = new ScriptStdOutErr();
 	
-	// 安装py重定向脚本模块
+	// 掳虏脳掳py脰脴露篓脧貌陆脜卤戮脛拢驴茅
 	if(!pyStdouterr_->install()){
 		ERROR_MSG("Script::install::pyStdouterr_->install() is failed!\n");
 		delete pyStdouterr_;
@@ -257,7 +326,7 @@ bool Script::uninstall()
 		sysInitModules_ = NULL;
 	}
 
-	// 卸载python解释器
+	// 脨露脭脴python陆芒脢脥脝梅
 	Py_Finalize();
 
 	INFO_MSG("Script::uninstall(): is successfully!\n");
@@ -269,12 +338,12 @@ bool Script::installExtraModule(const char* moduleName)
 {
 	PyObject *m = PyImport_AddModule("__main__");
 
-	// 添加一个脚本扩展模块
+	// 脤铆录脫脪禄赂枚陆脜卤戮脌漏脮鹿脛拢驴茅
 	extraModule_ = PyImport_AddModule(moduleName);
 	if (extraModule_ == NULL)
 		return false;
 
-	// 将扩展模块对象加入main
+	// 陆芦脌漏脮鹿脛拢驴茅露脭脧贸录脫脠毛main
 	PyObject_SetAttrString(m, moduleName, extraModule_);
 
 	INFO_MSG(fmt::format("Script::install(): {} is successfully!\n", moduleName));

@@ -8,7 +8,7 @@ static wchar_t _g_fileName[512] = {0};
 void installCrashHandler(int svnVer, const char* dumpType)
 {
 	wchar_t* wsz = strutil::char2wchar(const_cast<char*>(dumpType));
-	wsprintf(_g_fileName, L"CrashDumps\\%ls_v%d.dmp", wsz, svnVer);
+	wsprintfW(_g_fileName, L"CrashDumps\\%ls_v%d.dmp", wsz, svnVer);
 	free(wsz);
 }
 
@@ -27,11 +27,11 @@ void createMiniDump(EXCEPTION_POINTERS* pep)
 		}		
 	}
 	
-	// 每次都尝试创建一个存放CrashDump目录
-	CreateDirectory(L"CrashDumps", 0);
+	// Ensure the crash dump directory exists.
+	CreateDirectoryW(L"CrashDumps", 0);
 
 	// Open the file 
-	HANDLE hFile = CreateFile(_g_fileName, GENERIC_READ | GENERIC_WRITE, 
+	HANDLE hFile = CreateFileW(_g_fileName, GENERIC_READ | GENERIC_WRITE, 
 		0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL ); 
 
 	if( ( hFile != NULL ) && ( hFile != INVALID_HANDLE_VALUE ) ) 

@@ -7,7 +7,7 @@
 
 namespace KBEngine{
 
-// vector<string>Ö®ÀàµÄÈİÒ×Ê¹ÓÃ std::find_if À´²éÕÒÊÇ·ñ´æÔÚÄ³¸ö×Ö·û´®
+// vector<string>ä¹‹ç±»çš„å®¹æ˜“ä½¿ç”¨ std::find_if æ¥æŸ¥æ‰¾æ˜¯å¦å­˜åœ¨æŸä¸ªå­—ç¬¦ä¸²
 template<typename T>
 class find_vec_string_exist_handle
 {
@@ -30,7 +30,7 @@ private:
 };
 
 
-// vector<obj*>Ö®ÀàµÄÈİÒ×Ê¹ÓÃ std::find_if À´²éÕÒÊÇ·ñ´æÔÚÄ³¸ö¶ÔÏó
+// vector<obj*>ä¹‹ç±»çš„å®¹æ˜“ä½¿ç”¨ std::find_if æ¥æŸ¥æ‰¾æ˜¯å¦å­˜åœ¨æŸä¸ªå¯¹è±¡
 template<typename T>
 class findif_vector_obj_exist_handler
 {

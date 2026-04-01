@@ -7,10 +7,10 @@
 
 #include "client_lib/client_interface.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
-DataDownload::DataDownload(PyObjectPtr objptr, 
+DataDownload::DataDownload(PyObjectPtr objptr,
 						   const std::string & descr, int16 id):
 objptr_(objptr),
 descr_(descr),
@@ -44,7 +44,7 @@ DataDownload::~DataDownload()
 bool DataDownload::send(const Network::MessageHandler& msgHandler, Network::Bundle* pBundle)
 {
 	Proxy* proxy = static_cast<Proxy*>(Baseapp::getSingleton().findEntity(entityID_));
-	
+
 	if(proxy && proxy->clientEntityCall())
 	{
 		proxy->sendToClient(msgHandler, pBundle);
@@ -63,10 +63,10 @@ thread::TPTask::TPTaskState DataDownload::presentMainThread()
 {
 	if(error_)
 	{
-		ERROR_MSG(fmt::format("DataDownload::presentMainThread: proxy({}), downloadID({}), type({}), thread error.\n", 
+		ERROR_MSG(fmt::format("DataDownload::presentMainThread: proxy({}), downloadID({}), type({}), thread error.\n",
 			entityID(), id(), (int)type()));
 
-		return thread::TPTask::TPTASK_STATE_COMPLETED; 
+		return thread::TPTask::TPTASK_STATE_COMPLETED;
 	}
 
 	uint32 datasize = GAME_PACKET_MAX_SIZE_TCP - sizeof(int16) - sizeof(uint32);
@@ -89,10 +89,10 @@ thread::TPTask::TPTaskState DataDownload::presentMainThread()
 				DEBUG_MSG(fmt::format("DataDownload::presentMainThread: proxy({}), downloadID({}), type({}), thread exit.\n",
 					entityID(), id(), (int)type()));
 
-				return thread::TPTask::TPTASK_STATE_COMPLETED; 
+				return thread::TPTask::TPTASK_STATE_COMPLETED;
 			}
 
-			return thread::TPTask::TPTASK_STATE_CONTINUE_MAINTHREAD; 
+			return thread::TPTask::TPTASK_STATE_CONTINUE_MAINTHREAD;
 		}
 
 		pBundle->newMessage(ClientInterface::onStreamDataRecv);
@@ -112,7 +112,7 @@ thread::TPTask::TPTaskState DataDownload::presentMainThread()
 					entityID(), id(), (int)type()));
 
 				error_ = true;
-				return thread::TPTask::TPTASK_STATE_COMPLETED; 
+				return thread::TPTask::TPTASK_STATE_COMPLETED;
 			}
 		}
 		else
@@ -127,7 +127,7 @@ thread::TPTask::TPTaskState DataDownload::presentMainThread()
 					entityID(), id(), (int)type()));
 
 				error_ = true;
-				return thread::TPTask::TPTASK_STATE_COMPLETED; 
+				return thread::TPTask::TPTASK_STATE_COMPLETED;
 			}
 
 			totalSentBytes_ += datasize;
@@ -149,11 +149,11 @@ thread::TPTask::TPTaskState DataDownload::presentMainThread()
 		(*pBundle) << this->id();
 
 		send(ClientInterface::onStreamDataCompleted, pBundle);
-		return thread::TPTask::TPTASK_STATE_COMPLETED; 
+		return thread::TPTask::TPTASK_STATE_COMPLETED;
 	}
-	
+
 	DEBUG_MSG(fmt::format("DataDownload::presentMainThread: proxy({0}), downloadID({1}), type({6}), sentBytes={5},{2}/{3} ({4:.2f}%).\n",
-		entityID(), id(), totalSentBytes_, this->totalBytes(), 
+		entityID(), id(), totalSentBytes_, this->totalBytes(),
 		(((float)totalSentBytes_ / (float)this->totalBytes()) * 100.0f), datasize, type()));
 
 	if(currSent_ == remainSent_)
@@ -161,14 +161,14 @@ thread::TPTask::TPTaskState DataDownload::presentMainThread()
 		DEBUG_MSG(fmt::format("DataDownload::presentMainThread: proxy({}), downloadID({}), type({}), thread-continue.\n",
 			entityID(), id(), (int)type()));
 
-		return thread::TPTask::TPTASK_STATE_CONTINUE_CHILDTHREAD; 
+		return thread::TPTask::TPTASK_STATE_CONTINUE_CHILDTHREAD;
 	}
 
-	return thread::TPTask::TPTASK_STATE_CONTINUE_MAINTHREAD; 
+	return thread::TPTask::TPTASK_STATE_CONTINUE_MAINTHREAD;
 }
 
 //-------------------------------------------------------------------------------------
-StringDataDownload::StringDataDownload(PyObjectPtr objptr, 
+StringDataDownload::StringDataDownload(PyObjectPtr objptr,
 							const std::string & descr, int16 id):
 DataDownload(objptr, descr, id)
 {
@@ -177,7 +177,7 @@ DataDownload(objptr, descr, id)
 	{
 		SCRIPT_ERROR_CHECK();
 		error_ = true;
-	}	
+	}
 	else
 	{
 		totalBytes_ = (uint32)PyBytes_GET_SIZE(pyobj);
@@ -204,7 +204,7 @@ char* StringDataDownload::getOutStream()
 	remainSent_ = totalBytes_ - totalSentBytes_;
 	if(remainSent_ > 65535)
 		remainSent_ = 65535;
-	
+
 	currSent_ = 0;
 	return stream_ + totalSentBytes_;
 }
@@ -216,7 +216,7 @@ int8 StringDataDownload::type()
 }
 
 //-------------------------------------------------------------------------------------
-FileDataDownload::FileDataDownload(PyObjectPtr objptr, 
+FileDataDownload::FileDataDownload(PyObjectPtr objptr,
 							const std::string & descr, int16 id):
 DataDownload(objptr, descr, id)
 {
@@ -235,9 +235,9 @@ bool FileDataDownload::process()
 	ResourceObjectPtr fptr = Resmgr::getSingleton().openResource(path_.c_str(), "rb");
 	if(fptr == NULL || !fptr->valid())
 	{
-		ERROR_MSG(fmt::format("FileDataDownload::process(): can't open {}.\n", 
+		ERROR_MSG(fmt::format("FileDataDownload::process(): can't open {}.\n",
 			Resmgr::getSingleton().matchRes(path_).c_str()));
-		
+
 		error_ = true;
 		return false;
 	}

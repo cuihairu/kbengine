@@ -35,9 +35,6 @@ void TCPPacket::reclaimPoolObject(TCPPacket* obj)
 //-------------------------------------------------------------------------------------
 void TCPPacket::destroyObjPool()
 {
-	DEBUG_MSG(fmt::format("TCPPacket::destroyObjPool(): size {}.\n", 
-		_g_objPool.size()));
-
 	_g_objPool.destroy();
 }
 
@@ -84,7 +81,7 @@ int TCPPacket::recvFromEndPoint(EndPoint & ep, Address* pAddr)
 	{
 		wpos((int)(wpos() + len));
 
-		// 注意:必须在大于0的时候否则DEBUG_MSG将会导致WSAGetLastError返回0从而陷入死循环
+		// 脳垄脪芒:卤脴脨毛脭脷麓贸脫脷0碌脛脢卤潞貌路帽脭貌DEBUG_MSG陆芦禄谩碌录脰脗WSAGetLastError路碌禄脴0麓脫露酶脧脻脠毛脣脌脩颅禄路
 		// DEBUG_MSG(fmt::format("TCPPacket::recvFromEndPoint: datasize={}, wpos={}.\n", len, wpos()));
 	}
 

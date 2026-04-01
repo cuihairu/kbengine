@@ -121,7 +121,7 @@ bool DBInterfaceRedis::attach(const char* databaseName)
 	
 	redisReply* pRedisReply = NULL;
 	
-	// 密码验证
+	// 脙脺脗毛脩茅脰陇
 	if(!ping(c))
 	{
 		pRedisReply = (redisReply*)redisCommand(c, fmt::format("auth {}", db_password_).c_str());  
@@ -136,8 +136,8 @@ bool DBInterfaceRedis::attach(const char* databaseName)
 		}  
 	     	
 		if (!(pRedisReply->type == REDIS_REPLY_STATUS && kbe_stricmp(pRedisReply->str, "OK") == 0))
-		{  
-			if(!kbe_stricmp(pRedisReply->str, "ERR Client sent AUTH, but no password is set") == 0)
+		{
+			if (kbe_stricmp(pRedisReply->str, "ERR Client sent AUTH, but no password is set") != 0)
 			{
 				ERROR_MSG(fmt::format("DBInterfaceRedis::attach: cmd={}, errno={}, error={}\n",
 					fmt::format("auth ***").c_str(), c->err, pRedisReply->str));
@@ -152,7 +152,7 @@ bool DBInterfaceRedis::attach(const char* databaseName)
 		pRedisReply = NULL;
 	}
 	
-	// 选择数据库
+	// 脩隆脭帽脢媒戮脻驴芒
 	int db_index = atoi(db_name_);
 	if(db_index <= 0)
 	{
@@ -446,7 +446,7 @@ void DBInterfaceRedis::write_query_result_element(redisReply* pRedisReply, Memor
 {
 	if(pRedisReply->type == REDIS_REPLY_ARRAY)
 	{
-		// 不支持元素中包含数组
+		// 虏禄脰搂鲁脰脭陋脣脴脰脨掳眉潞卢脢媒脳茅
 		KBE_ASSERT(false);
 	}
 	else if(pRedisReply->type == REDIS_REPLY_INTEGER)

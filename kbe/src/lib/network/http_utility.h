@@ -5,13 +5,13 @@
 #include "common/common.h"
 #include "common/timer.h"
 
-namespace KBEngine 
+namespace KBEngine
 {
 class MemoryStream;
 namespace Network
 {
 namespace Http
-{ 
+{
 	bool initialize();
 	void finalise();
 
@@ -24,21 +24,21 @@ namespace Http
     {
         return isdigit(x) ? x-'0' : x-'A'+10;
     }
- 
+
     inline std::string URLEncode(const std::string &sIn)
     {
         std::string sOut;
-        
+
         for( size_t ix = 0; ix < sIn.size(); ix++ )
-        {      
+        {
             uint8 buf[4];
             memset( buf, 0, 4 );
-            
+
             if( isalnum( (uint8)sIn[ix] ) )
-            {      
+            {
                 buf[0] = sIn[ix];
             }
-            //else if ( isspace( (uint8)sIn[ix] ) ) //√≤À∆∞—ø’∏Ò±‡¬Î≥…%20ªÚ’ﬂ+∂ºø…“‘
+            //else if ( isspace( (uint8)sIn[ix] ) ) //Ë≤å‰ººÊääÁ©∫Ê†ºÁºñÁ†ÅÊàê%20ÊàñËÄÖ+ÈÉΩÂèØ‰ª•
             //{
             //    buf[0] = '+';
             //}
@@ -48,17 +48,17 @@ namespace Http
                 buf[1] = toHex( (uint8)sIn[ix] >> 4 );
                 buf[2] = toHex( (uint8)sIn[ix] % 16);
             }
-            
+
             sOut += (char *)buf;
         }
-        
+
         return sOut;
     };
 
     inline std::string URLDecode(const std::string &sIn)
     {
         std::string sOut;
-        
+
         for( size_t ix = 0; ix < sIn.size(); ix++ )
         {
             uint8 ch = 0;
@@ -76,10 +76,10 @@ namespace Http
             {
                 ch = sIn[ix];
             }
-            
+
             sOut += (char)ch;
         }
-        
+
         return sOut;
     }
 
@@ -94,7 +94,7 @@ namespace Http
 			INIT_ERROR = 4,
 		};
 
-		/* 
+		/*
 			success, data
 		*/
 		typedef std::function<void(bool, const Request&, const std::string&)> Callback;
@@ -116,7 +116,7 @@ namespace Http
 		Status setHeader(const std::map<std::string, std::string>& headers);
 		Status setHeader(const std::string& header);
 
-		// set cert„ÄÅca„ÄÅkey
+		// set certÈäÜ‰πßaÈäÜ‰π≤ey
 		Status setCAInfo(const std::string& cainfo);
 		Status setSSLCert(const std::string& sslCert);
 		Status setSSLKey(const std::string& sslKey);
@@ -194,7 +194,7 @@ namespace Http
 			http async-request
 		*/
 		Request::Status perform(Request* pRequest);
-		Request::Status perform(const std::string& url, const Request::Callback& resultCallback, 
+		Request::Status perform(const std::string& url, const Request::Callback& resultCallback,
 			const std::map<std::string, std::string>& headers = std::map<std::string, std::string>());
 		Request::Status perform(const std::string& url, const Request::Callback& resultCallback, const std::string& postData,
 			const std::map<std::string, std::string>& headers = std::map<std::string, std::string>());
@@ -216,7 +216,7 @@ namespace Http
 	};
 
 	Request::Status perform(Request* pRequest);
-	Request::Status perform(const std::string& url, const Request::Callback& resultCallback, 
+	Request::Status perform(const std::string& url, const Request::Callback& resultCallback,
 		const std::map<std::string, std::string>& headers = std::map<std::string, std::string>());
 	Request::Status perform(const std::string& url, const Request::Callback& resultCallback, const std::string& postData,
 		const std::map<std::string, std::string>& headers = std::map<std::string, std::string>());

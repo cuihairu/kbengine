@@ -3,7 +3,7 @@
 #ifndef KBE_REDIS_TRANSACTION_HELPER_H
 #define KBE_REDIS_TRANSACTION_HELPER_H
 
-#include "hiredis.h"
+#include <hiredis/hiredis.h>
 
 namespace KBEngine { 
 class DBInterface;
@@ -39,4 +39,3 @@ private:
 }
 }
 #endif // KBE_REDIS_TRANSACTION_HELPER_H
-

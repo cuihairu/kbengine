@@ -16,7 +16,7 @@
 #include "network/tcp_packet.h"
 #include "network/udp_packet.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 namespace Network
 {
 

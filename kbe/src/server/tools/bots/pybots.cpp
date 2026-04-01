@@ -39,7 +39,7 @@ SCRIPT_MEMBER_DECLARE_END()
 
 SCRIPT_GETSET_DECLARE_BEGIN(PyBots)
 SCRIPT_GETSET_DECLARE_END()
-SCRIPT_INIT(PyBots, 0, 0, &PyBots::mappingMethods, 0, 0)	
+SCRIPT_INIT(PyBots, 0, 0, &PyBots::mappingMethods, 0, 0)
 
 //-------------------------------------------------------------------------------------
 PyBots::PyBots():
@@ -57,7 +57,7 @@ int PyBots::mp_length(PyObject * self)
 {
 	return (int)Bots::getSingleton().clients().size();
 }
-	
+
 //-------------------------------------------------------------------------------------
 PyObject * PyBots::mp_subscript(PyObject* self, PyObject* key /*entityID*/)
 {
@@ -137,7 +137,7 @@ PyObject* PyBots::pyItems()
 	{
 		PyObject * pTuple = PyTuple_New(2);
 		PyObject* clientID = PyLong_FromLong(iter->second->appID());
-		Py_INCREF(iter->second);							// PyObject Entity* Ôö¼ÓÒ»¸öÒýÓÃ
+		Py_INCREF(iter->second);							// PyObject Entity* å¢žåŠ ä¸€ä¸ªå¼•ç”¨
 
 		PyTuple_SET_ITEM(pTuple, 0, clientID);
 		PyTuple_SET_ITEM(pTuple, 1, iter->second);

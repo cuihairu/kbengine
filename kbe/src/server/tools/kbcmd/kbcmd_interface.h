@@ -9,34 +9,34 @@
 #ifndef KBE_KBCMD_TOOL_INTERFACE_H
 #define KBE_KBCMD_TOOL_INTERFACE_H
 
-// common include	
+// common include
 #if defined(INTERFACES)
 #include "kbcmd.h"
 #endif
 #include "kbcmd_interface_macros.h"
 #include "network/interface_defs.h"
 //#define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine{
 
 /**
-	KBCMDÏûÏ¢ºê£¬  ²ÎÊıÎªÁ÷£¬ ĞèÒª×Ô¼º½â¿ª
+	KBCMDæ¶ˆæ¯å®ï¼Œ  å‚æ•°ä¸ºæµï¼Œ éœ€è¦è‡ªå·±è§£å¼€
 */
 
 /**
-	KBCMDËùÓĞÏûÏ¢½Ó¿ÚÔÚ´Ë¶¨Òå
+	KBCMDæ‰€æœ‰æ¶ˆæ¯æ¥å£åœ¨æ­¤å®šä¹‰
 */
 NETWORK_INTERFACE_DECLARE_BEGIN(KBCMDInterface)
 
-	// Ä³appÖ÷¶¯ÇëÇólook¡£
+	// æŸappä¸»åŠ¨è¯·æ±‚lookã€‚
 	KBCMD_MESSAGE_DECLARE_ARGS0(lookApp, NETWORK_FIXED_MESSAGE)
 
-	// Ä³¸öappÏò±¾app¸æÖª´¦ÓÚ»î¶¯×´Ì¬¡£
+	// æŸä¸ªappå‘æœ¬appå‘ŠçŸ¥å¤„äºæ´»åŠ¨çŠ¶æ€ã€‚
 	KBCMD_MESSAGE_DECLARE_ARGS2(onAppActiveTick, NETWORK_FIXED_MESSAGE,
 		COMPONENT_TYPE, componentType,
 		COMPONENT_ID, componentID)

@@ -12,7 +12,12 @@
 #include "db_interface/db_interface.h"
 
 #include "mysql/mysql.h"
-#if KBE_PLATFORM == PLATFORM_WIN32
+
+#ifndef SYSTEM_CHARSET_MBMAXLEN
+#define SYSTEM_CHARSET_MBMAXLEN 3
+#endif
+// Library linking is handled by CMake when using vcpkg
+#if KBE_PLATFORM == PLATFORM_WIN32 && !KBE_USE_VCPKG
 #ifdef X64
 // added for VS2015
 #if _MSC_VER >= 1900
@@ -48,7 +53,7 @@ struct MYSQL_TABLE_FIELD
 class DBException;
 
 /*
-	Êı¾İ¿â½Ó¿Ú
+	æ•°æ®åº“æ¥å£
 */
 class DBInterfaceMysql : public DBInterface
 {
@@ -59,7 +64,7 @@ public:
 	static bool initInterface(DBInterface* pdbi);
 	
 	/**
-		ÓëÄ³¸öÊı¾İ¿â¹ØÁª
+		ä¸æŸä¸ªæ•°æ®åº“å…³è”
 	*/
 	bool reattach();
 	virtual bool attach(const char* databaseName = NULL);
@@ -79,13 +84,13 @@ public:
 	void hasLostConnection( bool v )	{ hasLostConnection_ = v; }
 
 	/**
-		¼ì²é»·¾³
+		æ£€æŸ¥ç¯å¢ƒ
 	*/
 	virtual bool checkEnvironment();
 	
 	/**
-		¼ì²é´íÎó£¬ ¶Ô´íÎóµÄÄÚÈİ½øĞĞ¾ÀÕı
-		Èç¹û¾ÀÕı²»³É¹¦·µ»ØÊ§°Ü
+		æ£€æŸ¥é”™è¯¯ï¼Œ å¯¹é”™è¯¯çš„å†…å®¹è¿›è¡Œçº æ­£
+		å¦‚æœçº æ­£ä¸æˆåŠŸè¿”å›å¤±è´¥
 	*/
 	virtual bool checkErrors();
 
@@ -94,17 +99,17 @@ public:
 	bool write_query_result(MemoryStream * result);
 
 	/**
-		»ñÈ¡Êı¾İ¿âËùÓĞµÄ±íÃû
+		è·å–æ•°æ®åº“æ‰€æœ‰çš„è¡¨å
 	*/
 	virtual bool getTableNames( std::vector<std::string>& tableNames, const char * pattern);
 
 	/**
-		»ñÈ¡Êı¾İ¿âÄ³¸ö±íËùÓĞµÄ×Ö¶ÎÃû³Æ
+		è·å–æ•°æ®åº“æŸä¸ªè¡¨æ‰€æœ‰çš„å­—æ®µåç§°
 	*/
 	virtual bool getTableItemNames(const char* tableName, std::vector<std::string>& itemNames);
 
 	/** 
-		´ÓÊı¾İ¿âÉ¾³ıentity±í×Ö¶Î
+		ä»æ•°æ®åº“åˆ é™¤entityè¡¨å­—æ®µ
 	*/
 	virtual bool dropEntityTableItemFromDB(const char* tableName, const char* tableItemName);
 
@@ -132,53 +137,53 @@ public:
 	void getFields(TABLE_FIELDS& outs, const char* tableName);
 
 	/**
-		·µ»ØÕâ¸ö½Ó¿ÚµÄÃèÊö
+		è¿”å›è¿™ä¸ªæ¥å£çš„æè¿°
 	*/
 	virtual const char* c_str();
 
 	/** 
-		»ñÈ¡´íÎó
+		è·å–é”™è¯¯
 	*/
 	virtual const char* getstrerror();
 
 	/** 
-		»ñÈ¡´íÎó±àºÅ
+		è·å–é”™è¯¯ç¼–å·
 	*/
 	virtual int getlasterror();
 
 	/**
-		Èç¹ûÊı¾İ¿â²»´æÔÚÔò´´½¨Ò»¸öÊı¾İ¿â
+		å¦‚æœæ•°æ®åº“ä¸å­˜åœ¨åˆ™åˆ›å»ºä¸€ä¸ªæ•°æ®åº“
 	*/
 	virtual bool createDatabaseIfNotExist();
 	
 	/**
-		´´½¨Ò»¸öentity´æ´¢±í
+		åˆ›å»ºä¸€ä¸ªentityå­˜å‚¨è¡¨
 	*/
 	virtual EntityTable* createEntityTable(EntityTables* pEntityTables);
 
 	/** 
-		´ÓÊı¾İ¿âÉ¾³ıentity±í
+		ä»æ•°æ®åº“åˆ é™¤entityè¡¨
 	*/
 	virtual bool dropEntityTableFromDB(const char* tableName);
 
 	/**
-		Ëø×¡½Ó¿Ú²Ù×÷
+		é”ä½æ¥å£æ“ä½œ
 	*/
 	virtual bool lock();
 	virtual bool unlock();
 
 	/**
-		´¦ÀíÒì³£
+		å¤„ç†å¼‚å¸¸
 	*/
 	bool processException(std::exception & e);
 
 	/**
-		SQLÃüÁî×î³¤´óĞ¡
+		SQLå‘½ä»¤æœ€é•¿å¤§å°
 	*/
 	static size_t sql_max_allowed_packet(){ return sql_max_allowed_packet_; }
 
 	/**
-		»ñµÃ×ÔÔöÆğÊ¼id
+		è·å¾—è‡ªå¢èµ·å§‹id
 	*/
 	virtual const char* getAutoIncrementInit();
 

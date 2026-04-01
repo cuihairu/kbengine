@@ -348,7 +348,7 @@ END
 
 IDR_POPMENU MENU
 BEGIN
-    POPUP "²Ù×÷"
+    POPUP "æ“ä½œ"
     BEGIN
         MENUITEM "add server",                  ID_32771
         MENUITEM "update",                      ID_32772
@@ -434,13 +434,13 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_BUTTON32780          "Æô¶¯·þÎñÆ÷"
-    ID_BUTTON32783          "Í£Ö¹·þÎñÆ÷"
+    ID_BUTTON32780          "å¯åŠ¨æœåŠ¡å™¨"
+    ID_BUTTON32783          "åœæ­¢æœåŠ¡å™¨"
 END
 
 STRINGTABLE
 BEGIN
-    ID_BUTTON32784          "²éÕÒ·þÎñÆ÷"
+    ID_BUTTON32784          "æŸ¥æ‰¾æœåŠ¡å™¨"
 END
 
 #endif    // Chinese (Simplified, PRC) resources

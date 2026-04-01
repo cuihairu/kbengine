@@ -11,7 +11,7 @@ namespace KBEngine{ namespace script{
 	
 class ScriptVector2 : public ScriptObject
 {		
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
 	INSTANCE_SCRIPT_HREADER(ScriptVector2, ScriptObject)
 public:	
 	static PySequenceMethods seqMethods;
@@ -23,18 +23,18 @@ public:
 	virtual ~ScriptVector2();
 
 	/** 
-		»ñµÃ¶ÔÏóµÄÃèÊö 
+		è·å¾—å¯¹è±¡çš„æè¿° 
 	*/
 	PyObject* tp_repr();
 	PyObject* tp_str();
 
 	/** 
-		½Å±¾Ä£¿é¶ÔÏó´ÓpythonÖĞ´´½¨ 
+		è„šæœ¬æ¨¡å—å¯¹è±¡ä»pythonä¸­åˆ›å»º 
 	*/
 	static PyObject* tp_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
 	/** 
-		seqÏà¹Ø²Ù×÷ 
+		seqç›¸å…³æ“ä½œ 
 	*/
 	static Py_ssize_t seq_length(PyObject* self);
 	static PyObject* seq_item(PyObject* self, Py_ssize_t index);
@@ -42,7 +42,7 @@ public:
 	static int seq_ass_item(PyObject* self, Py_ssize_t index, PyObject* value);
 	
 	/** 
-		¼Ó¼õ³Ë³ıÏà¹Ø²Ù×÷ 
+		åŠ å‡ä¹˜é™¤ç›¸å…³æ“ä½œ 
 	*/
 	static PyObject* py_add(PyObject *a, PyObject *b);
 	static PyObject* py_subtract(PyObject *a, PyObject *b);
@@ -60,7 +60,7 @@ public:
 	static PyObject* py_inplace_divide(PyObject *self, PyObject *b);
 	
 	/** 
-		±©Â©Ò»Ğ©·½·¨ 
+		æš´æ¼ä¸€äº›æ–¹æ³• 
 	*/
 	static PyObject* __py_pyDistTo(PyObject* self, PyObject* args);
 	static PyObject* __py_pyDistSqrTo(PyObject* self, PyObject* args);
@@ -79,17 +79,17 @@ public:
 	DECLARE_PY_GETSET_MOTHOD(pyGetY, pySetY);
 	
 	/** 
-		Ö§³Öpickler ·½·¨ 
+		æ”¯æŒpickler æ–¹æ³• 
 	*/
 	static PyObject* __reduce_ex__(PyObject* self, PyObject* protocol);
 
 	/** 
-		unpickle·½·¨ 
+		unpickleæ–¹æ³• 
 	*/
 	static PyObject* __unpickle__(PyObject* self, PyObject* args);
 
 	/** 
-		½Å±¾±»°²×°Ê±±»µ÷ÓÃ 
+		è„šæœ¬è¢«å®‰è£…æ—¶è¢«è°ƒç”¨ 
 	*/
 	static void onInstallScript(PyObject* mod);
 	
@@ -98,12 +98,12 @@ public:
 	void setVector(const Vector2& v){ *val_ = v; }
 	
 	/** 
-		¼ì²éÄ³¸öpython¶ÔÏóÊÇ·ñ¿ÉÒÔ×ª»»Îª±¾ÀàĞÍ 
+		æ£€æŸ¥æŸä¸ªpythonå¯¹è±¡æ˜¯å¦å¯ä»¥è½¬æ¢ä¸ºæœ¬ç±»å‹ 
 	*/
 	static bool check(PyObject* value, bool isPrintErr = true);
 	
 	/** 
-		½«Ä³¸ö¾­¹ıcheck¼ì²é¹ıµÄpython¶ÔÏó×ª»»Îªvector2 
+		å°†æŸä¸ªç»è¿‡checkæ£€æŸ¥è¿‡çš„pythonå¯¹è±¡è½¬æ¢ä¸ºvector2 
 	*/
 	static bool convertPyObjectToVector2(Vector2& v, PyObject* obj);
 

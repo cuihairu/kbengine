@@ -7,12 +7,11 @@
 // #define NDEBUG
 #include "common/common.h"
 #include "common/task.h"
-#include "helper/debug_helper.h"
 
 namespace KBEngine{ namespace thread{
 
 /*
-	Ïß³Ì³ØµÄÏß³Ì»ùÀà
+	çº¿ç¨‹æ± çš„çº¿ç¨‹åŸºç±»
 */
 
 class TPTask : public Task
@@ -20,18 +19,18 @@ class TPTask : public Task
 public:
 	enum TPTaskState
 	{
-		/// Ò»¸öÈÎÎñÒÑ¾­Íê³É
+		/// ä¸€ä¸ªä»»åŠ¡å·²ç»å®Œæˆ
 		TPTASK_STATE_COMPLETED = 0,
 
-		/// ¼ÌĞøÔÚÖ÷Ïß³ÌÖ´ĞĞ
+		/// ç»§ç»­åœ¨ä¸»çº¿ç¨‹æ‰§è¡Œ
 		TPTASK_STATE_CONTINUE_MAINTHREAD = 1,
 
-		// ¼ÌĞøÔÚ×ÓÏß³ÌÖ´ĞĞ
+		// ç»§ç»­åœ¨å­çº¿ç¨‹æ‰§è¡Œ
 		TPTASK_STATE_CONTINUE_CHILDTHREAD = 2,
 	};
 
 	/**
-		·µ»ØÖµ£º thread::TPTask::TPTaskState£¬ Çë²Î¿´TPTaskState
+		è¿”å›å€¼ï¼š thread::TPTask::TPTaskStateï¼Œ è¯·å‚çœ‹TPTaskState
 	*/
 	virtual thread::TPTask::TPTaskState presentMainThread(){ 
 		return thread::TPTask::TPTASK_STATE_COMPLETED; 

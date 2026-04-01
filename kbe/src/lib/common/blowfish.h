@@ -7,20 +7,20 @@
 #include "openssl/blowfish.h"
 #include <string>
 
-namespace KBEngine { 
+namespace KBEngine {
 
 
 class KBEBlowfish
 {
 public:
-	// Ã¿¿é´óĞ¡
+	// æ¯å—å¤§å°
 	static const int BLOCK_SIZE = 64 / 8;
 
-	// keyµÄ×îĞ¡ºÍ×î´ó´óĞ¡
+	// keyçš„æœ€å°å’Œæœ€å¤§å¤§å°
 	static const int MIN_KEY_SIZE = 32 / 8;
 	static const int MAX_KEY_SIZE = 448 / 8;
 
-	// Ä¬ÈÏkeyµÄ´óĞ¡
+	// é»˜è®¤keyçš„å¤§å°
 	static const int DEFAULT_KEY_SIZE = 128 / 8;
 
 	typedef std::string Key;

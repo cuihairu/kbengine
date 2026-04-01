@@ -16,6 +16,15 @@ namespace KBEngine {
 
 KBEUnordered_map<std::string, KBEShared_ptr< ProfileHandler > > ProfileHandler::profiles;
 
+namespace
+{
+void triggerEventHistoryStats(const EventHistoryStats& eventHistory,
+	const EventHistoryStats::Stats& stats, uint32 size)
+{
+	EventProfileHandler::triggerEvent(eventHistory, stats, size);
+}
+}
+
 //-------------------------------------------------------------------------------------
 ProfileHandler::ProfileHandler(Network::NetworkInterface & networkInterface, uint32 timinglen, 
 							   std::string name, const Network::Address& addr) :
@@ -148,7 +157,7 @@ void CProfileHandler::sendStream(MemoryStream* s)
 //-------------------------------------------------------------------------------------
 bool CProfileHandler::process()
 {
-	// ÕâÀïÃ¿¸ötick¶¼¼ì²éÒ»±é£¬ ·ÀÖ¹ÖÐÍ¾ÓÐÐÂ¼ÓÈëµÄprofileValÃ»±»ÊÕ¼¯µ½
+	// Ã•Ã¢Ã€Ã¯ÃƒÂ¿Â¸Ã¶tickÂ¶Â¼Â¼Ã¬Â²Ã©Ã’Â»Â±Ã©Â£Â¬ Â·Ã€Ã–Â¹Ã–ÃÃÂ¾Ã“ÃÃÃ‚Â¼Ã“ÃˆÃ«ÂµÃ„profileValÃƒÂ»Â±Â»ÃŠÃ•Â¼Â¯ÂµÂ½
 	ProfileGroup& defaultGroup = ProfileGroup::defaultGroup();
 	ProfileGroup::PROFILEVALS::const_iterator iter = defaultGroup.profiles().begin();
 
@@ -163,7 +172,7 @@ bool CProfileHandler::process()
 
 		CProfileHandler::PROFILEVALS::iterator iter1 = profileVals_.find(name);
 		
-		// Èç¹ûÒÑ¾­³õÊ¼»¯¹ýÔòºöÂÔ
+		// ÃˆÃ§Â¹Ã»Ã’Ã‘Â¾Â­Â³ÃµÃŠÂ¼Â»Â¯Â¹Ã½Ã”Ã²ÂºÃ¶Ã‚Ã”
 		if(iter1 != profileVals_.end())
 		{
 			CProfileHandler::ProfileVal& profileVal = iter1->second;
@@ -196,6 +205,7 @@ ProfileHandler(networkInterface, timinglen, name, addr),
 profileMaps_(),
 removeHandle_(-1)
 {
+	setEventHistoryStatsTrigger(&triggerEventHistoryStats);
 	eventProfileHandlers_.push_back(this);
 	removeHandle_ = (int)(eventProfileHandlers_.size() - 1);
 }
@@ -209,6 +219,11 @@ EventProfileHandler::~EventProfileHandler()
 
 	if(eventProfileHandlers_.size() > 0)
 		eventProfileHandlers_.resize(eventProfileHandlers_.size() - 1);
+
+	if(eventProfileHandlers_.empty())
+	{
+		setEventHistoryStatsTrigger(nullptr);
+	}
 }
 
 //-------------------------------------------------------------------------------------

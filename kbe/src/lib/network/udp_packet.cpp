@@ -35,9 +35,6 @@ void UDPPacket::reclaimPoolObject(UDPPacket* obj)
 //-------------------------------------------------------------------------------------
 void UDPPacket::destroyObjPool()
 {
-	DEBUG_MSG(fmt::format("UDPPacket::destroyObjPool(): size {}.\n", 
-		_g_objPool.size()));
-
 	_g_objPool.destroy();
 }
 
@@ -78,7 +75,7 @@ int UDPPacket::recvFromEndPoint(EndPoint & ep, Address* pAddr)
 {
 	KBE_ASSERT(maxBufferSize() > wpos());
 
-	// µ±½ÓÊÕÀ´µÄ´óĞ¡´óÓÚ½ÓÊÕ»º³åÇøµÄÊ±ºò£¬recvfrom·µ»Ø-1
+	// ÂµÂ±Â½Ã“ÃŠÃ•Ã€Â´ÂµÃ„Â´Ã³ÃÂ¡Â´Ã³Ã“ÃšÂ½Ã“ÃŠÃ•Â»ÂºÂ³Ã¥Ã‡Ã¸ÂµÃ„ÃŠÂ±ÂºÃ²Â£Â¬recvfromÂ·ÂµÂ»Ã˜-1
 	int len = ep.recvfrom(data() + wpos(), size() - wpos(),
 		(u_int16_t*)&pAddr->port, (u_int32_t*)&pAddr->ip);
 

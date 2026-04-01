@@ -23,7 +23,7 @@ public:
 	void onReceiveWatcherData(KBEngine::MemoryStream& s);
 	void addHeader(std::string name);
 	void addHeaderShow(CString name);
-	
+
 	void addItemShow(KBEngine::WatcherObject* wo);
 	void addItem(KBEngine::WatcherObject* wo);
 	void changePath(std::string path);

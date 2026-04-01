@@ -100,7 +100,7 @@ void PendingLoginMgr::removeNextTick(std::string& accountName)
 	{
 		PLInfos* infos = iter->second;
 
-		// ÏÂÒ»tick´¦ÀíÊ±¾Í³¬Ê±ÁË
+		// ä¸‹ä¸€tickå¤„ç†æ—¶å°±è¶…æ—¶äº†
 		TimeStamp curr = timestamp();
 		infos->lastProcessTime = curr - OP_TIME_OUT_MAX - 1;
 	}

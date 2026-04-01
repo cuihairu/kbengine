@@ -5,12 +5,12 @@
 #include "witnessed_timeout_handler.h"
 #include "server/serverconfig.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 static const uint8 TICKSECS = 5;
 
 //-------------------------------------------------------------------------------------
-WitnessedTimeoutHandler::WitnessedTimeoutHandler() : 
+WitnessedTimeoutHandler::WitnessedTimeoutHandler() :
 witnessedEntityIDs_(), pTimerHandle_(NULL)
 {
 }
@@ -46,7 +46,7 @@ void WitnessedTimeoutHandler::handleTimeout(TimerHandle, void * arg)
 		else
 		{
 			Entity* pEntity = Cellapp::getSingleton().findEntity(iter->first);
-			
+
 			witnessedEntityIDs_.erase(iter++);
 
 			if(pEntity)
@@ -79,7 +79,7 @@ void WitnessedTimeoutHandler::addWitnessed(Entity* pEntity)
 		witnessedEntityIDs_[pEntity->id()] = witness_timeout_dec;
 	else
 		witnessedEntityIDs_.insert(std::map<ENTITY_ID, uint16>::value_type(pEntity->id(), witness_timeout_dec));
-	
+
 	if(pTimerHandle_ == NULL)
 	{
 		pTimerHandle_ = new TimerHandle();

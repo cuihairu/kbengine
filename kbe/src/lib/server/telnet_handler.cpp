@@ -22,75 +22,75 @@ char _g_state_str[][256] = {
 };
 
 /*
-	格式: echo "\033[字背景颜色;字体颜色m字符串\033[0m" 
+	赂帽脢陆: echo "\033[脳脰卤鲁戮掳脩脮脡芦;脳脰脤氓脩脮脡芦m脳脰路没麓庐\033[0m" 
 
-	例如: 
+	脌媒脠莽: 
 	echo "\033[41;36m something here \033[0m"  
 
-	其中41的位置代表底色, 36的位置是代表字的颜色 
+	脝盲脰脨41碌脛脦禄脰脙麓煤卤铆碌脳脡芦, 36碌脛脦禄脰脙脢脟麓煤卤铆脳脰碌脛脩脮脡芦 
 
 
-	那些ascii code 是对颜色调用的始末.  
-	\033[ ; m …… \033[0m  
+	脛脟脨漏ascii code 脢脟露脭脩脮脡芦碌梅脫脙碌脛脢录脛漏.  
+	\033[ ; m 隆颅隆颅 \033[0m  
 
 
 
-	字背景颜色范围:40----49 
-	40:黑 
-	41:深红 
-	42:绿 
-	43:黄色 
-	44:蓝色 
-	45:紫色 
-	46:深绿 
-	47:白色 
+	脳脰卤鲁戮掳脩脮脡芦路露脦搂:40----49 
+	40:潞脷 
+	41:脡卯潞矛 
+	42:脗脤 
+	43:禄脝脡芦 
+	44:脌露脡芦 
+	45:脳脧脡芦 
+	46:脡卯脗脤 
+	47:掳脳脡芦 
 
-	字颜色:30-----------39 
-	30:黑 
-	31:红 
-	32:绿 
-	33:黄 
-	34:蓝色 
-	35:紫色 
-	36:深绿 
-	37:白色 
+	脳脰脩脮脡芦:30-----------39 
+	30:潞脷 
+	31:潞矛 
+	32:脗脤 
+	33:禄脝 
+	34:脌露脡芦 
+	35:脳脧脡芦 
+	36:脡卯脗脤 
+	37:掳脳脡芦 
 
-	\33[0m 关闭所有属性  
-	\33[1m 设置高亮度  
-	\33[4m 下划线  
-	\33[5m 闪烁  
-	\33[7m 反显  
-	\33[8m 消隐  
-	\33[30m -- \33[37m 设置前景色  
-	\33[40m -- \33[47m 设置背景色  
-	\33[nA 光标上移n行  
-	\33[nB 光标下移n行  
-	\33[nC 光标右移n行  
-	\33[nD 光标左移n行  
-	\33[y;xH设置光标位置  
-	\33[2J 清屏  
-	\33[K 清除从光标到行尾的内容  
-	\33[s 保存光标位置  
-	\33[u 恢复光标位置  
-	\33[?25l 隐藏光标  
-	\33[?25h 显示光标  
+	\33[0m 鹿脴卤脮脣霉脫脨脢么脨脭  
+	\33[1m 脡猫脰脙赂脽脕脕露脠  
+	\33[4m 脧脗禄庐脧脽  
+	\33[5m 脡脕脣赂  
+	\33[7m 路麓脧脭  
+	\33[8m 脧没脪镁  
+	\33[30m -- \33[37m 脡猫脰脙脟掳戮掳脡芦  
+	\33[40m -- \33[47m 脡猫脰脙卤鲁戮掳脡芦  
+	\33[nA 鹿芒卤锚脡脧脪脝n脨脨  
+	\33[nB 鹿芒卤锚脧脗脪脝n脨脨  
+	\33[nC 鹿芒卤锚脫脪脪脝n脨脨  
+	\33[nD 鹿芒卤锚脳贸脪脝n脨脨  
+	\33[y;xH脡猫脰脙鹿芒卤锚脦禄脰脙  
+	\33[2J 脟氓脝脕  
+	\33[K 脟氓鲁媒麓脫鹿芒卤锚碌陆脨脨脦虏碌脛脛脷脠脻  
+	\33[s 卤拢麓忙鹿芒卤锚脦禄脰脙  
+	\33[u 禄脰赂麓鹿芒卤锚脦禄脰脙  
+	\33[?25l 脪镁虏脴鹿芒卤锚  
+	\33[?25h 脧脭脢戮鹿芒卤锚  
 
-	使用格式能更复杂： 
+	脢鹿脫脙赂帽脢陆脛脺赂眉赂麓脭脫拢潞 
 	^[[..m;..m;..m;..m
-	例如： \033[2;7;1m高亮\033[2;7;0m
+	脌媒脠莽拢潞 \033[2;7;1m赂脽脕脕\033[2;7;0m
 */
 
-#define TELNET_CMD_LEFT							"\033[D"			// 左
-#define TELNET_CMD_RIGHT						"\033[C"			// 右
-#define TELNET_CMD_UP							"\033[A"			// 上
-#define TELNET_CMD_DOWN							"\033[B"			// 下
-#define TELNET_CMD_HOME							"\033[1~"			// 移到行首
-#define TELNET_CMD_END							"\033[4~"			// 移到行尾
+#define TELNET_CMD_LEFT							"\033[D"			// 脳贸
+#define TELNET_CMD_RIGHT						"\033[C"			// 脫脪
+#define TELNET_CMD_UP							"\033[A"			// 脡脧
+#define TELNET_CMD_DOWN							"\033[B"			// 脧脗
+#define TELNET_CMD_HOME							"\033[1~"			// 脪脝碌陆脨脨脢脳
+#define TELNET_CMD_END							"\033[4~"			// 脪脝碌陆脨脨脦虏
 
-#define TELNET_CMD_DEL							"\033[K"			// 删除字符
-#define TELNET_CMD_NEWLINE						"\r\n"				// 新行
-#define TELNET_CMD_MOVE_FOCUS_LEFT_MAX			"\33[9999999999D"	// 左移光标到最前面
-#define TELNET_CMD_MOVE_FOCUS_RIGHT_MAX			"\33[9999999999C"	// 右移光标到最后面
+#define TELNET_CMD_DEL							"\033[K"			// 脡戮鲁媒脳脰路没
+#define TELNET_CMD_NEWLINE						"\r\n"				// 脨脗脨脨
+#define TELNET_CMD_MOVE_FOCUS_LEFT_MAX			"\33[9999999999D"	// 脳贸脪脝鹿芒卤锚碌陆脳卯脟掳脙忙
+#define TELNET_CMD_MOVE_FOCUS_RIGHT_MAX			"\33[9999999999C"	// 脫脪脪脝鹿芒卤锚碌陆脳卯潞贸脙忙
 
 #define IAC_TERMIAL_TYPE_ANSI					"ANSI"
 #define IAC_TERMIAL_TYPE_VT100					"VT100"
@@ -102,17 +102,17 @@ const int TERMINAL_ANSI							= 1;
 const int TERMINAL_VT100						= 2;
 const int TERMINAL_XTERM						= 3;
 
-//telnet协议
-const unsigned char IAC							= 255;					//数据字节255
-const unsigned char DONT						= 254;					//选项协商，发送方想让接收端去禁止选项
-const unsigned char DO							= 253;					//选项协商,发送方想叫接收端激活选项
-const unsigned char WONT						= 252;					//选项协商,发送方本身想禁止选项
-const unsigned char WILL						= 251;					//选项协商,发送方本身将激活选项
-const unsigned char SB							= 250;					//子选项开始
-const unsigned char SE							= 240;					//子选项结束
-const unsigned char ECHO						= 1;					//回显
-const unsigned char SUPPRESS_GO_AHEAD			= 3;					//抑制继续进行
-const unsigned char TT							= 24;					//终端类型
+//telnet脨颅脪茅
+const unsigned char IAC							= 255;					//脢媒戮脻脳脰陆脷255
+const unsigned char DONT						= 254;					//脩隆脧卯脨颅脡脤拢卢路垄脣脥路陆脧毛脠脙陆脫脢脮露脣脠楼陆没脰鹿脩隆脧卯
+const unsigned char DO							= 253;					//脩隆脧卯脨颅脡脤,路垄脣脥路陆脧毛陆脨陆脫脢脮露脣录陇禄卯脩隆脧卯
+const unsigned char WONT						= 252;					//脩隆脧卯脨颅脡脤,路垄脣脥路陆卤戮脡铆脧毛陆没脰鹿脩隆脧卯
+const unsigned char WILL						= 251;					//脩隆脧卯脨颅脡脤,路垄脣脥路陆卤戮脡铆陆芦录陇禄卯脩隆脧卯
+const unsigned char SB							= 250;					//脳脫脩隆脧卯驴陋脢录
+const unsigned char SE							= 240;					//脳脫脩隆脧卯陆谩脢酶
+const unsigned char ECHO						= 1;					//禄脴脧脭
+const unsigned char SUPPRESS_GO_AHEAD			= 3;					//脪脰脰脝录脤脨酶陆酶脨脨
+const unsigned char TT							= 24;					//脰脮露脣脌脿脨脥
 
 //-------------------------------------------------------------------------------------
 TelnetHandler::TelnetHandler(Network::EndPoint* pEndPoint, TelnetServer* pTelnetServer, Network::NetworkInterface* pNetworkInterface, TELNET_STATE defstate):
@@ -220,7 +220,7 @@ Network::Reason TelnetHandler::checkLastErrors()
 	int err;
 	Network::Reason reason;
 
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 	err = errno;
 
 	switch (err)
@@ -318,13 +318,13 @@ void TelnetHandler::onRecvInput(const char *buffer, int size)
 
 			break;
 		}
-		case 8:		// 退格
+		case 8:		// 脥脣赂帽
 		case 0x7f: // delete
 		{
 			processBackSpace();
 			break;
 		}
-		case 27:	// vt100命令码: 0x1b
+		case 27:	// vt100脙眉脕卯脗毛: 0x1b
 		{
 			std::string s = "";
 			std::string vt100cmd(s + c);
@@ -339,22 +339,22 @@ void TelnetHandler::onRecvInput(const char *buffer, int size)
 				vt100cmd.append(s + c);
 				switch (c)
 				{
-				case 'A': // 光标上移n行
-				case 'B': // 光标下移n行
-				case 'C': // 光标右移n列
-				case 'D': // 光标左移n列
-				case '~': // home、end等
+				case 'A': // 鹿芒卤锚脡脧脪脝n脨脨
+				case 'B': // 鹿芒卤锚脧脗脪脝n脨脨
+				case 'C': // 鹿芒卤锚脫脪脪脝n脕脨
+				case 'D': // 鹿芒卤锚脳贸脪脝n脕脨
+				case '~': // home隆垄end碌脠
 					shouldBeContinue = false;
 					break;
 
-				case 'm': // 颜色等属性或命令
-				case 'J': // 清屏
-				case 'K': // 清除从光标到行尾的内容
-				case 's': // 保存光标位置
-				case 'u': // 恢复光标位置
-				case 'l': // 隐藏光标
-				case 'h': // 显示光标
-				case 'H': // 设置光标位置
+				case 'm': // 脩脮脡芦碌脠脢么脨脭禄貌脙眉脕卯
+				case 'J': // 脟氓脝脕
+				case 'K': // 脟氓鲁媒麓脫鹿芒卤锚碌陆脨脨脦虏碌脛脛脷脠脻
+				case 's': // 卤拢麓忙鹿芒卤锚脦禄脰脙
+				case 'u': // 禄脰赂麓鹿芒卤锚脦禄脰脙
+				case 'l': // 脪镁虏脴鹿芒卤锚
+				case 'h': // 脧脭脢戮鹿芒卤锚
+				case 'H': // 脡猫脰脙鹿芒卤锚脦禄脰脙
 				default:
 					break;
 				}
@@ -362,8 +362,8 @@ void TelnetHandler::onRecvInput(const char *buffer, int size)
 
 			if (!checkUDLR(vt100cmd))
 			{
-				// 把不认识的命令原样输出,但会把命令符改成“^”
-				// 以避免客户端触发命令操作
+				// 掳脩虏禄脠脧脢露碌脛脙眉脕卯脭颅脩霉脢盲鲁枚,碌芦禄谩掳脩脙眉脕卯路没赂脛鲁脡隆掳^隆卤
+				// 脪脭卤脺脙芒驴脥禄搂露脣麓楼路垄脙眉脕卯虏脵脳梅
 				vt100cmd[0] = '^';
 				command_.insert(currPos_, vt100cmd);
 				currPos_ += vt100cmd.length();
@@ -381,7 +381,7 @@ void TelnetHandler::onRecvInput(const char *buffer, int size)
 			}
 			break;
 		}
-		case -1: //iac命令,telnet协议
+		case -1: //iac脙眉脕卯,telnet脨颅脪茅
 		{
 			std::string iaccmd(1, c);
 			while (idx < size)
@@ -398,7 +398,7 @@ void TelnetHandler::onRecvInput(const char *buffer, int size)
 				std::string s = "";
 				s += c;
 
-				//作回显
+				//脳梅禄脴脧脭
 				if (state_ != TELNET_STATE_PASSWD)
 				{
 					pEndPoint_->send(s.c_str(), s.size());
@@ -428,7 +428,7 @@ void TelnetHandler::checkAfterStr()
 //-------------------------------------------------------------------------------------
 bool TelnetHandler::checkUDLR(const std::string &cmd)
 {
-	if (cmd.find(TELNET_CMD_UP) != std::string::npos)		// 上 
+	if (cmd.find(TELNET_CMD_UP) != std::string::npos)		// 脡脧 
 	{
 		pEndPoint_->send(TELNET_CMD_MOVE_FOCUS_LEFT_MAX, strlen(TELNET_CMD_MOVE_FOCUS_LEFT_MAX));
 		sendDelChar();
@@ -448,7 +448,7 @@ bool TelnetHandler::checkUDLR(const std::string &cmd)
 		currPos_ = s.size();
 		return true;
 	}
-	else if (cmd.find(TELNET_CMD_DOWN) != std::string::npos)	// 下
+	else if (cmd.find(TELNET_CMD_DOWN) != std::string::npos)	// 脧脗
 	{
 		pEndPoint_->send(TELNET_CMD_MOVE_FOCUS_LEFT_MAX, strlen(TELNET_CMD_MOVE_FOCUS_LEFT_MAX));
 		sendDelChar();
@@ -468,7 +468,7 @@ bool TelnetHandler::checkUDLR(const std::string &cmd)
 		currPos_ = s.size();
 		return true;
 	}
-	else if (cmd.find(TELNET_CMD_RIGHT) != std::string::npos)	// 右
+	else if (cmd.find(TELNET_CMD_RIGHT) != std::string::npos)	// 脫脪
 	{
 		int cmdlen = strlen(TELNET_CMD_RIGHT);
 		if(currPos_ < (int)command_.size())
@@ -478,7 +478,7 @@ bool TelnetHandler::checkUDLR(const std::string &cmd)
 		}
 		return true;
 	}
-	else if (cmd.find(TELNET_CMD_LEFT) != std::string::npos)	// 左 
+	else if (cmd.find(TELNET_CMD_LEFT) != std::string::npos)	// 脳贸 
 	{
 		int cmdlen = strlen(TELNET_CMD_LEFT);
 		if(currPos_ > 0)
@@ -488,7 +488,7 @@ bool TelnetHandler::checkUDLR(const std::string &cmd)
 		}
 		return true;
 	}
-	else if (cmd.find(TELNET_CMD_HOME) != std::string::npos)	// 移动到行首
+	else if (cmd.find(TELNET_CMD_HOME) != std::string::npos)	// 脪脝露炉碌陆脨脨脢脳
 	{
 		if (currPos_ > 0)
 		{
@@ -498,7 +498,7 @@ bool TelnetHandler::checkUDLR(const std::string &cmd)
 		}
 		return true;
 	}
-	else if (cmd.find(TELNET_CMD_END) != std::string::npos)	    // 移动到行尾
+	else if (cmd.find(TELNET_CMD_END) != std::string::npos)	    // 脪脝露炉碌陆脨脨脦虏
 	{
 		if (currPos_ != (int32)command_.length())
 		{
@@ -813,7 +813,7 @@ void TelnetHandler::processPythonCommand(std::string command)
 
 	pTelnetServer_->pScript()->run_simpleString(PyBytes_AsString(pycmd1), &retbuf);
 
-	// 把返回值中的'\n'替換成'\r\n'，以解决在vt100终端中显示不正确的问题
+	// 掳脩路碌禄脴脰碌脰脨碌脛'\n'脤忙聯Q鲁脡'\r\n'拢卢脪脭陆芒戮枚脭脷vt100脰脮露脣脰脨脧脭脢戮虏禄脮媒脠路碌脛脦脢脤芒
 	std::string::size_type pos = 0;
 	while ((pos = retbuf.find('\n', pos)) != std::string::npos)
 	{
@@ -827,7 +827,7 @@ void TelnetHandler::processPythonCommand(std::string command)
 	
 	if(retbuf.size() > 0)
 	{
-		// 将结果返回给客户端
+		// 陆芦陆谩鹿没路碌禄脴赂酶驴脥禄搂露脣
 		retbuf.insert(0, "\r\n");
 		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 		(*pBundle) << retbuf;
@@ -970,7 +970,7 @@ void TelnetPyProfileHandler::sendStream(MemoryStream* s)
 	std::string datas;
 	(*s) >> datas;
 
-	// 把返回值中的'\n'替換成'\r\n'，以解决在vt100终端中显示不正确的问题
+	// 掳脩路碌禄脴脰碌脰脨碌脛'\n'脤忙聯Q鲁脡'\r\n'拢卢脪脭陆芒戮枚脭脷vt100脰脮露脣脰脨脧脭脢戮虏禄脮媒脠路碌脛脦脢脤芒
 	std::string::size_type pos = 0;
 	while ((pos = datas.find('\n', pos)) != std::string::npos)
 	{
@@ -994,7 +994,7 @@ void TelnetPyTickProfileHandler::sendStream(MemoryStream* s)
 	std::string datas;
 	(*s) >> datas;
 
-	// 把返回值中的'\n'替換成'\r\n'，以解决在vt100终端中显示不正确的问题
+	// 掳脩路碌禄脴脰碌脰脨碌脛'\n'脤忙聯Q鲁脡'\r\n'拢卢脪脭陆芒戮枚脭脷vt100脰脮露脣脰脨脧脭脢戮虏禄脮媒脠路碌脛脦脢脤芒
 	std::string::size_type pos = 0;
 	while ((pos = datas.find('\n', pos)) != std::string::npos)
 	{
@@ -1211,4 +1211,3 @@ void TelnetNetworkProfileHandler::sendStream(MemoryStream* s)
 
 //-------------------------------------------------------------------------------------
 }
-

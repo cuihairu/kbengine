@@ -53,7 +53,7 @@ void CLine::AddPoint(double x, double y)
 	m_dXValue.push_back(x);
 	m_dYValue.push_back(y);
 	LeaveCriticalSection ( & g_cs ) ;
-	
+
 }
 double CLine::GetPointX(int nIndex)
 {
@@ -137,7 +137,7 @@ void CLineChartCtrl::OnPaint()
 
 BOOL CLineChartCtrl::OnEraseBkgnd(CDC* pDC)
 {
-	
+
 	return FALSE;
 }
 void CLineChartCtrl::DrawAll(CDC* pDC)
@@ -154,18 +154,18 @@ void CLineChartCtrl::DrawBackground(CDC* pDC)
 void CLineChartCtrl::DrawAxises(CDC* pDC)
 {
 	//
-	
+
 	//Draw Y axis
 	if(m_axisY.m_bDraw)
 	{
 		CPen pen(m_axisY.m_iStyle, m_axisY.m_iThick, m_axisY.m_color);
 		CPen *oldPen = pDC->SelectObject(&pen);
 		//Draw border of plot
-		pDC->MoveTo(m_rectPlot.left,   m_rectPlot.top);  
-		pDC->LineTo(m_rectPlot.right, m_rectPlot.top);  
-		pDC->LineTo(m_rectPlot.right, m_rectPlot.bottom);  
-		pDC->LineTo(m_rectPlot.left,   m_rectPlot.bottom);  
-		pDC->LineTo(m_rectPlot.left,   m_rectPlot.top); 
+		pDC->MoveTo(m_rectPlot.left,   m_rectPlot.top);
+		pDC->LineTo(m_rectPlot.right, m_rectPlot.top);
+		pDC->LineTo(m_rectPlot.right, m_rectPlot.bottom);
+		pDC->LineTo(m_rectPlot.left,   m_rectPlot.bottom);
+		pDC->LineTo(m_rectPlot.left,   m_rectPlot.top);
 		//
 		int iGridCount = 5;
 		int iGrid =(int)floor((m_axisY.m_dMaxValue-m_axisY.m_dMinValue)/iGridCount);
@@ -174,12 +174,12 @@ void CLineChartCtrl::DrawAxises(CDC* pDC)
 			CString str;
 			int textHeight =16;
 			pDC->SetTextColor(m_axisY.m_color);
-			
-			int y0=(int)m_axisY.m_dMinValue; 
+
+			int y0=(int)m_axisY.m_dMinValue;
 			for(int i=0;i<iGridCount+1;i++)
 			{
 				int y = (int)(m_rectPlot.bottom - (y0+i*iGrid-m_axisY.m_dMinValue)/m_axisY.m_dValuePerPixel);
-				
+
 				str.Format(_T("%d"), y0+i*iGrid);
 				pDC->DrawText(str, CRect(m_rectAxisY.left, y-textHeight/2,m_rectAxisY.right-5,y+textHeight/2), DT_RIGHT|DT_BOTTOM);
 
@@ -193,10 +193,10 @@ void CLineChartCtrl::DrawAxises(CDC* pDC)
 				//TRACE("y0=%d,y=%d,iGrid=%d\n",y0,y,iGrid);
 			}
 		}
-		
+
 		pDC->SelectObject(oldPen);
 	}
-	
+
 	//Draw X axis
 	if(m_axisX.m_bDraw)
 	{
@@ -233,10 +233,10 @@ void CLineChartCtrl::DrawLines(CDC *pDC)
 		}
 		for(int k=dataPointStart;k<iPointCount;k++)
 		{
-			
+
 			int x = m_rectPlot.right-(iPointCount-k); //a pixel represents one point
 			int y = (int)(m_rectPlot.bottom - ((line.GetPointY(k)-m_axisY.m_dMinValue)/m_axisY.m_dValuePerPixel));
-	
+
 			m_ptInLine[k-dataPointStart].x = x;
 			m_ptInLine[k-dataPointStart].y = y;
 			//TRACE("x =%d,y =%d\n",x,y);
@@ -284,7 +284,7 @@ void CLineChartCtrl::CalcLayout()
 	m_rectAxisX.right = m_rectCtrl.right-m_iMarginRight;
 	m_rectAxisX.bottom = m_rectCtrl.bottom - m_iMarginBottom;
 	m_rectAxisX.top   = m_rectAxisX.bottom -20;
-	
+
 
 	//
 	m_rectPlot.left   = m_rectAxisY.right;
@@ -294,7 +294,7 @@ void CLineChartCtrl::CalcLayout()
 
 	//
 	m_axisY.m_dValuePerPixel   = (m_axisY.m_dMaxValue- m_axisY.m_dMinValue) / m_rectPlot.Height();
-	
+
 	TRACE("m_axisY.m_dValuePerPixel=%.1f\n",m_axisY.m_dValuePerPixel);
 
 }
@@ -314,7 +314,7 @@ int CLineChartCtrl::GetLineCount()
 void CLineChartCtrl::SetRate(int nRate)
 {
 	m_nRate = nRate;
-	
+
 }
 void CLineChartCtrl::SetBkColor(COLORREF clrBkColor)
 {

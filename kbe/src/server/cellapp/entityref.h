@@ -4,7 +4,7 @@
 #define KBE_ENTITY_REF_H
 
 #include "helper/debug_helper.h"
-#include "common/common.h"	
+#include "common/common.h"
 #include "common/objectpool.h"
 
 namespace KBEngine{
@@ -13,9 +13,9 @@ class Entity;
 class MemoryStream;
 
 #define ENTITYREF_FLAG_UNKONWN							0x00000000
-#define ENTITYREF_FLAG_ENTER_CLIENT_PENDING				0x00000001	// ½øÈë¿Í»§¶ËÖĞ±êÖ¾
-#define ENTITYREF_FLAG_LEAVE_CLIENT_PENDING				0x00000002	// Àë¿ª¿Í»§¶ËÖĞ±êÖ¾
-#define ENTITYREF_FLAG_NORMAL							0x00000004	// ³£¹æ×´Ì¬
+#define ENTITYREF_FLAG_ENTER_CLIENT_PENDING				0x00000001	// è¿›å…¥å®¢æˆ·ç«¯ä¸­æ ‡å¿—
+#define ENTITYREF_FLAG_LEAVE_CLIENT_PENDING				0x00000002	// ç¦»å¼€å®¢æˆ·ç«¯ä¸­æ ‡å¿—
+#define ENTITYREF_FLAG_NORMAL							0x00000004	// å¸¸è§„çŠ¶æ€
 
 class EntityRef : public PoolObject
 {
@@ -24,7 +24,7 @@ public:
 	EntityRef();
 
 	~EntityRef();
-	
+
 	typedef KBEShared_ptr< SmartPoolObject< EntityRef > > SmartPoolObjectPtr;
 	static SmartPoolObjectPtr createSmartPoolObj(const std::string& logPoint);
 
@@ -46,7 +46,7 @@ public:
 	void flags(uint32 v) { flags_ = v; }
 	void removeflags(uint32 v) { flags_ &= ~v; }
 	uint32 flags() { return flags_; }
-	
+
 	Entity* pEntity() const { return pEntity_; }
 	void pEntity(Entity* e);
 

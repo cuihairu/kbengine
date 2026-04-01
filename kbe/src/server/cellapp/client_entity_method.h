@@ -9,13 +9,13 @@
 #pragma warning (disable : 4910)
 #pragma warning (disable : 4251)
 #endif
-// common include	
+// common include
 #include "entitydef/datatype.h"
 #include "entitydef/datatypes.h"
 #include "helper/debug_helper.h"
-#include "pyscript/scriptobject.h"	
+#include "pyscript/scriptobject.h"
 //#define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
@@ -25,26 +25,26 @@ namespace KBEngine{
 
 class ClientEntityMethod : public script::ScriptObject
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
-	INSTANCE_SCRIPT_HREADER(ClientEntityMethod, script::ScriptObject)	
-public:	
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
+	INSTANCE_SCRIPT_HREADER(ClientEntityMethod, script::ScriptObject)
+public:
 	ClientEntityMethod(PropertyDescription* pComponentPropertyDescription,
 		const ScriptDefModule* pScriptModule, MethodDescription* methodDescription,
 		ENTITY_ID srcEntityID, ENTITY_ID clientEntityID);
-	
+
 	virtual ~ClientEntityMethod();
 
 	const char* getName(void) const
-	{ 
-		return methodDescription_->getName(); 
+	{
+		return methodDescription_->getName();
 	};
 
 	MethodDescription* getDescription(void) const
-	{ 
-		return methodDescription_; 
+	{
+		return methodDescription_;
 	}
 
-	static PyObject* tp_call(PyObject* self, 
+	static PyObject* tp_call(PyObject* self,
 			PyObject* args, PyObject* kwds);
 
 	PyObject* callmethod(PyObject* args, PyObject* kwds);
@@ -52,9 +52,9 @@ public:
 protected:
 	PropertyDescription*					pComponentPropertyDescription_;
 
-	const ScriptDefModule*					pScriptModule_;						// ¸ÃentityËùÊ¹ÓÃµÄ½Å±¾Ä£¿é¶ÔÏó
+	const ScriptDefModule*					pScriptModule_;						// è¯¥entityæ‰€ä½¿ç”¨çš„è„šæœ¬æ¨¡å—å¯¹è±¡
 
-	MethodDescription*						methodDescription_;					// Õâ¸ö·½·¨µÄÃèÊö
+	MethodDescription*						methodDescription_;					// è¿™ä¸ªæ–¹æ³•çš„æè¿°
 
 	ENTITY_ID								srcEntityID_;						// srcEntityID_
 

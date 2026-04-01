@@ -1,7 +1,7 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
-
 #include "debug_helper.h"
+
 #include "profile.h"
 #include "common/common.h"
 #include "common/timer.h"
@@ -42,7 +42,6 @@ namespace KBEngine{
 	
 KBE_SINGLETON_INIT(DebugHelper);
 
-DebugHelper dbghelper;
 ProfileVal g_syncLogProfile("syncLog");
 
 #ifndef NO_USE_LOG4CXX
@@ -128,29 +127,39 @@ bool g_shouldWriteToSyslog = false;
 #ifdef KBE_USE_ASSERTS
 void myassert(const char * exp, const char * func, const char * file, unsigned int line)
 {
-	DebugHelper::getSingleton().backtrace_msg();
+	if(DebugHelper::getSingletonPtr())
+	{
+		DebugHelper::getSingleton().backtrace_msg();
+	}
 	std::string s = (fmt::format("assertion failed: {}, file {}, line {}, at: {}\n", exp, file, line, func));
 	printf("%s%02d: %s", COMPONENT_NAME_EX_2(g_componentType), g_componentGroupOrder, (std::string("[ASSERT]: ") + s).c_str());
 
-	dbghelper.print_msg(s);
+	if(DebugHelper::getSingletonPtr())
+	{
+		DebugHelper::getSingleton().print_msg(s);
+	}
+	else
+	{
+		fprintf(stderr, "%s", s.c_str());
+	}
     abort();
 }
 #endif
 
 #if KBE_PLATFORM == PLATFORM_WIN32
-	#define ALERT_LOG_TO(NAME, CHANGED)							\
-	{															\
-		wchar_t exe_path[MAX_PATH];								\
-		memset(exe_path, 0, MAX_PATH * sizeof(wchar_t));		\
-		GetCurrentDirectory(MAX_PATH, exe_path);				\
-																\
-		char* ccattr = strutil::wchar2char(exe_path);			\
-		if(CHANGED)												\
-			printf("Logging(changed) to: %s/logs/" NAME "%s.*.log\n\n", ccattr, COMPONENT_NAME_EX(g_componentType));\
-		else													\
-			printf("Logging to: %s/logs/" NAME "%s.*.log\n\n", ccattr, COMPONENT_NAME_EX(g_componentType));\
-		free(ccattr);											\
-	}															\
+		#define ALERT_LOG_TO(NAME, CHANGED)							\
+		{															\
+			wchar_t exe_path[MAX_PATH];								\
+			memset(exe_path, 0, MAX_PATH * sizeof(wchar_t));		\
+			GetCurrentDirectoryW(MAX_PATH, exe_path);				\
+																	\
+			char* ccattr = strutil::wchar2char(exe_path);			\
+			if(CHANGED)												\
+				printf("Logging(changed) to: %s/logs/" NAME "%s.*.log\n\n", ccattr, COMPONENT_NAME_EX(g_componentType));\
+			else													\
+				printf("Logging to: %s/logs/" NAME "%s.*.log\n\n", ccattr, COMPONENT_NAME_EX(g_componentType));\
+			free(ccattr);											\
+		}															\
 
 #else
 #define ALERT_LOG_TO(NAME, CHANGED) {}
@@ -241,7 +250,11 @@ bufferedLogPackets_(),
 hasBufferedLogPackets_(0),
 pNetworkInterface_(NULL),
 pDispatcher_(NULL),
+#ifdef NO_USE_LOG4CXX
+scriptMsgType_(KBELOG_SCRIPT_INFO),
+#else
 scriptMsgType_(log4cxx::ScriptLevel::SCRIPT_INT),
+#endif
 noSyncLog_(false),
 canLogFile_(true),
 loseLoggerTime_(timestamp()),
@@ -260,7 +273,14 @@ memoryStreamPool_("DebugHelperMemoryStream")
 //-------------------------------------------------------------------------------------
 DebugHelper::~DebugHelper()
 {
-	finalise(true);
+	clearBufferedLog(true);
+
+	if(g_pDebugHelperSyncHandler)
+	{
+		g_pDebugHelperSyncHandler->cancel();
+		delete g_pDebugHelperSyncHandler;
+		g_pDebugHelperSyncHandler = NULL;
+	}
 }	
 
 //-------------------------------------------------------------------------------------
@@ -367,6 +387,11 @@ void DebugHelper::unlockthread()
 //-------------------------------------------------------------------------------------
 void DebugHelper::initialize(COMPONENT_TYPE componentType)
 {
+	if(!getSingletonPtr())
+	{
+		new DebugHelper();
+	}
+
 #ifndef NO_USE_LOG4CXX
 	
 	char helpConfig[MAX_PATH];
@@ -416,6 +441,11 @@ void DebugHelper::initialize(COMPONENT_TYPE componentType)
 //-------------------------------------------------------------------------------------
 void DebugHelper::finalise(bool destroy)
 {
+	if(!getSingletonPtr())
+	{
+		return;
+	}
+
 	if(!destroy)
 	{
 		while(DebugHelper::getSingleton().hasBufferedLogPackets() > 0)
@@ -437,12 +467,13 @@ void DebugHelper::finalise(bool destroy)
 		sleep(1000);
 	}
 
-	DebugHelper::getSingleton().clearBufferedLog(true);
+	DebugHelper* instance = getSingletonPtr();
+	instance->clearBufferedLog(true);
 
-	// SAFE_RELEASE(g_pDebugHelperSyncHandler);
-
-#ifndef NO_USE_LOG4CXX
-#endif
+	if(destroy)
+	{
+		delete instance;
+	}
 }
 
 //-------------------------------------------------------------------------------------
@@ -489,7 +520,10 @@ void DebugHelper::clearBufferedLog(bool destroy)
 	canLogFile_ = true;
 
 	if(!destroy)
-		g_pDebugHelperSyncHandler->cancel();
+	{
+		if(g_pDebugHelperSyncHandler)
+			g_pDebugHelperSyncHandler->cancel();
+	}
 }
 
 //-------------------------------------------------------------------------------------
@@ -503,10 +537,10 @@ void DebugHelper::sync()
 		return;
 	}
 
-	// 将子线程日志放入bufferedLogPackets_
+	// 陆芦脳脫脧脽鲁脤脠脮脰戮路脜脠毛bufferedLogPackets_
 	while (childThreadBufferedLogPackets_.size() > 0)
 	{
-		// 从主对象池取出一个对象，将子线程中对象vector内存交换进去
+		// 麓脫脰梅露脭脧贸鲁脴脠隆鲁枚脪禄赂枚露脭脧贸拢卢陆芦脳脫脧脽鲁脤脰脨露脭脧贸vector脛脷麓忙陆禄禄禄陆酶脠楼
 		MemoryStream* pMemoryStream = childThreadBufferedLogPackets_.front();
 		childThreadBufferedLogPackets_.pop();
 
@@ -517,17 +551,17 @@ void DebugHelper::sync()
 		pBundle->finiCurrPacket();
 		pBundle->newPacket();
 
-		// 将他们的内存交换进去
+		// 陆芦脣没脙脟碌脛脛脷麓忙陆禄禄禄陆酶脠楼
 		pBundle->pCurrPacket()->swap(*pMemoryStream);
 		pBundle->currMsgLength(pBundle->currMsgLength() + pBundle->pCurrPacket()->length());
 
-		// 将所有对象交还给对象池
+		// 陆芦脣霉脫脨露脭脧贸陆禄禄鹿赂酶露脭脧贸鲁脴
 		memoryStreamPool_.reclaimObject(pMemoryStream);
 	}
 
 	if (Network::Address::NONE == loggerAddr_)
 	{
-		// 如果超过300秒没有找到logger，那么强制清理内存
+		// 脠莽鹿没鲁卢鹿媒300脙毛脙禄脫脨脮脪碌陆logger拢卢脛脟脙麓脟驴脰脝脟氓脌铆脛脷麓忙
 		if (timestamp() - loseLoggerTime_ > uint64(300 * stampsPerSecond()))
 		{
 			clearBufferedLog();
@@ -579,8 +613,10 @@ void DebugHelper::sync()
 	static bool alertmsg = false;
 	if(!alertmsg)
 	{
+#ifndef NO_USE_LOG4CXX
 		KBE_LOG4CXX_WARN(g_logger, fmt::format("Forwarding logs to logger[{}]...\n", 
 			pLoggerChannel->c_str()));
+#endif
 
 		alertmsg = true;
 	}
@@ -605,7 +641,7 @@ void DebugHelper::sync()
 		--hasBufferedLogPackets_;
 	}
 
-	// 这里需要延时发送，否则在发送过程中产生错误，导致日志输出会出现死锁
+	// 脮芒脌茂脨猫脪陋脩脫脢卤路垄脣脥拢卢路帽脭貌脭脷路垄脣脥鹿媒鲁脤脰脨虏煤脡煤麓铆脦贸拢卢碌录脰脗脠脮脰戮脢盲鲁枚禄谩鲁枚脧脰脣脌脣酶
 	if(bundles.size() > 0 && !pLoggerChannel->sending())
 		pLoggerChannel->delayedSend();
 
@@ -618,7 +654,8 @@ void DebugHelper::sync()
 void DebugHelper::pDispatcher(Network::EventDispatcher* dispatcher)
 { 
 	pDispatcher_ = dispatcher; 
-	g_pDebugHelperSyncHandler->startActiveTick();
+	if(g_pDebugHelperSyncHandler)
+		g_pDebugHelperSyncHandler->startActiveTick();
 }
 
 //-------------------------------------------------------------------------------------
@@ -633,7 +670,7 @@ void DebugHelper::onMessage(uint32 logType, const char * str, uint32 length)
 	if (!canLog(logType))
 		return;
 
-#if !defined( _WIN32 )
+#if KBE_PLATFORM == PLATFORM_UNIX
 	if (g_shouldWriteToSyslog)
 	{
 		int lid = LOG_INFO;
@@ -659,11 +696,16 @@ void DebugHelper::onMessage(uint32 logType, const char * str, uint32 length)
 	}
 
 	bool isMainThread = (mainThreadID_ == pthread_self());
-#else
+#elif defined(_WIN32)
 	bool isMainThread = (mainThreadID_ == GetCurrentThreadId());
+#else
+	bool isMainThread = true;
 #endif
 
 	if(length <= 0 || noSyncLog_)
+		return;
+
+	if(pNetworkInterface_ == NULL || pDispatcher_ == NULL)
 		return;
 
 	if(g_componentType == MACHINE_TYPE || 
@@ -778,10 +820,10 @@ void DebugHelper::printBufferedLogs()
 	KBE_LOG4CXX_PRINT(g_logger, std::string("The following logs sent to logger failed:\n"));
 #endif
 
-	// 将子线程日志放入bufferedLogPackets_
+	// 陆芦脳脫脧脽鲁脤脠脮脰戮路脜脠毛bufferedLogPackets_
 	while (childThreadBufferedLogPackets_.size() > 0)
 	{
-		// 从主对象池取出一个对象，将子线程中对象vector内存交换进去
+		// 麓脫脰梅露脭脧贸鲁脴脠隆鲁枚脪禄赂枚露脭脧贸拢卢陆芦脳脫脧脽鲁脤脰脨露脭脧贸vector脛脷麓忙陆禄禄禄陆酶脠楼
 		MemoryStream* pMemoryStream = childThreadBufferedLogPackets_.front();
 		childThreadBufferedLogPackets_.pop();
 
@@ -792,11 +834,11 @@ void DebugHelper::printBufferedLogs()
 		pBundle->finiCurrPacket();
 		pBundle->newPacket();
 
-		// 将他们的内存交换进去
+		// 陆芦脣没脙脟碌脛脛脷麓忙陆禄禄禄陆酶脠楼
 		pBundle->pCurrPacket()->swap(*pMemoryStream);
 		pBundle->currMsgLength(pBundle->currMsgLength() + pBundle->pCurrPacket()->length());
 
-		// 将所有对象交还给对象池
+		// 陆芦脣霉脫脨露脭脧贸陆禄禄鹿赂酶露脭脧贸鲁脴
 		memoryStreamPool_.reclaimObject(pMemoryStream);
 	}
 
@@ -963,7 +1005,7 @@ void DebugHelper::info_msg(const std::string& s)
 int KBELOG_TYPE_MAPPING(int type)
 {
 #ifdef NO_USE_LOG4CXX
-	return KBELOG_SCRIPT_INFO;
+	return type;
 #else
 	switch(type)
 	{
@@ -996,8 +1038,8 @@ void DebugHelper::script_info_msg(const std::string& s)
 
 	onMessage(KBELOG_TYPE_MAPPING(scriptMsgType_), s.c_str(), (uint32)s.size());
 
-	// 如果是用户手动设置的也输出为错误信息
-	if(log4cxx::ScriptLevel::SCRIPT_ERR == scriptMsgType_)
+	// 脠莽鹿没脢脟脫脙禄搂脢脰露炉脡猫脰脙碌脛脪虏脢盲鲁枚脦陋麓铆脦贸脨脜脧垄
+	if(KBELOG_TYPE_MAPPING(scriptMsgType_) == KBELOG_SCRIPT_ERROR)
 	{
 		set_errorcolor();
 		printf("%s%02d: [S_ERROR]: %s", COMPONENT_NAME_EX_2(g_componentType), g_componentGroupOrder, s.c_str());
@@ -1010,7 +1052,11 @@ void DebugHelper::script_error_msg(const std::string& s)
 {
 	KBEngine::thread::ThreadGuard tg(&this->logMutex); 
 
+#ifdef NO_USE_LOG4CXX
+	setScriptMsgType(KBELOG_SCRIPT_ERROR);
+#else
 	setScriptMsgType(log4cxx::ScriptLevel::SCRIPT_ERR);
+#endif
 
 #ifdef NO_USE_LOG4CXX
 #else
@@ -1034,7 +1080,11 @@ void DebugHelper::setScriptMsgType(int msgtype)
 //-------------------------------------------------------------------------------------
 void DebugHelper::resetScriptMsgType()
 {
+#ifdef NO_USE_LOG4CXX
+	setScriptMsgType(KBELOG_SCRIPT_INFO);
+#else
 	setScriptMsgType(log4cxx::ScriptLevel::SCRIPT_INFO);
+#endif
 }
 
 //-------------------------------------------------------------------------------------

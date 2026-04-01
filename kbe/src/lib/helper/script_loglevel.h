@@ -60,5 +60,20 @@ namespace log4cxx
    };
 }
 
+#else
+namespace log4cxx
+{
+   struct ScriptLevel
+   {
+      enum
+      {
+         SCRIPT_INT = 0,
+         SCRIPT_INFO = 1,
+         SCRIPT_ERR = 2,
+         SCRIPT_DBG = 3,
+         SCRIPT_WAR = 4,
+      };
+   };
+}
 #endif
 #endif

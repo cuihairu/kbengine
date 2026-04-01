@@ -14,7 +14,7 @@
 #include "network/event_poller.h"
 #include "network/error_reporter.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 namespace Network
 {
 

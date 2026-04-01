@@ -5,8 +5,8 @@
 
 #include "controller.h"
 #include "updatable.h"
-#include "pyscript/scriptobject.h"	
-#include "math/math.h"	
+#include "pyscript/scriptobject.h"
+#include "math/math.h"
 
 
 namespace KBEngine{
@@ -42,7 +42,7 @@ protected:
 	PyObject* pyuserarg_;
 	KBEShared_ptr<Controller> pController_;
 };
- 
+
 }
 #endif // KBE_MOVETOENTITYHANDLER_H
 

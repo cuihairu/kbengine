@@ -7,7 +7,7 @@
 #include "helper/debug_helper.h"
 #include "common/common.h"
 // #define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
@@ -20,7 +20,7 @@ class Archiver
 public:
 	Archiver();
 	~Archiver();
-	
+
 	void tick();
 	void createArchiveTable();
 	void archive(Entity& entity);

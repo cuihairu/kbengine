@@ -14,7 +14,7 @@
 #include "helper/profile.h"
 #include "server/serverconfig.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 
 //-------------------------------------------------------------------------------------
 SpaceViewers::SpaceViewers():
@@ -77,7 +77,7 @@ void SpaceViewers::handleTimeout(TimerHandle handle, void * arg)
 	std::map< Network::Address, SpaceViewer>::iterator iter = spaceViews_.begin();
 	for (; iter != spaceViews_.end(); )
 	{
-		// Èç¹û¸ÃviewerµØÖ·ÕÒ²»µ½ÁËÔò½«Æä²Á³ı
+		// å¦‚æœè¯¥vieweråœ°å€æ‰¾ä¸åˆ°äº†åˆ™å°†å…¶æ“¦é™¤
 		Network::Channel* pChannel = Cellappmgr::getSingleton().networkInterface().findChannel(iter->second.addr());
 		if (pChannel == NULL)
 		{
@@ -159,7 +159,7 @@ void SpaceViewer::updateClient()
 		for (; iter2 != allSpaces.end(); ++iter2)
 		{
 			Space& space = iter2->second;
-			
+
 			if (space.id() != spaceID_)
 				continue;
 
@@ -171,15 +171,15 @@ void SpaceViewer::updateClient()
 
 			Cells& cells = space.cells();
 			std::map<CELL_ID, Cell>& allCells = cells.cells();
-			s << allCells.size();
+			s << static_cast<uint32>(allCells.size());
 
 			std::map<CELL_ID, Cell>::iterator iter3 = allCells.begin();
 			for (; iter3 != allCells.end(); ++iter3)
 			{
 				s << iter3->first;
 
-				// ÆäËûĞÅÏ¢´ı·Ö¸î¹¦ÄÜÊµÏÖºóÍê³É
-				// ÀıÈçcell´óĞ¡ĞÎ×´µÈĞÅÏ¢
+				// å…¶ä»–ä¿¡æ¯å¾…åˆ†å‰²åŠŸèƒ½å®ç°åå®Œæˆ
+				// ä¾‹å¦‚cellå¤§å°å½¢çŠ¶ç­‰ä¿¡æ¯
 			}
 		}
 	}

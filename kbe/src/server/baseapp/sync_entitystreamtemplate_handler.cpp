@@ -11,7 +11,7 @@
 
 #include "../../server/dbmgr/dbmgr_interface.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
 SyncEntityStreamTemplateHandler::SyncEntityStreamTemplateHandler(Network::NetworkInterface & networkInterface):
@@ -40,7 +40,7 @@ networkInterface_(networkInterface)
 		{
 			PropertyDescription* propertyDescription = iter->second;
 
-			// Èç¹ûÄ³¸öÊµÌåÃ»ÓÐcell²¿·Ö£¬ ¶ø×é¼þÊôÐÔÃ»ÓÐbase²¿·ÖÔòºöÂÔ
+			// å¦‚æžœæŸä¸ªå®žä½“æ²¡æœ‰celléƒ¨åˆ†ï¼Œ è€Œç»„ä»¶å±žæ€§æ²¡æœ‰baseéƒ¨åˆ†åˆ™å¿½ç•¥
 			if (!pScriptModule->hasCell())
 			{
 				if (propertyDescription->getDataType()->type() == DATA_TYPE_ENTITY_COMPONENT && !propertyDescription->hasBase())
@@ -48,7 +48,7 @@ networkInterface_(networkInterface)
 			}
 
 			accountDefMemoryStream << (ENTITY_PROPERTY_UID)0 << propertyDescription->getUType();
-			
+
 			if (propertyDescription->getDataType()->type() == DATA_TYPE_ENTITY_COMPONENT)
 				((EntityComponentDescription*)propertyDescription)->addPersistentToStreamTemplates(pScriptModule, &accountDefMemoryStream);
 			else
@@ -106,7 +106,7 @@ bool SyncEntityStreamTemplateHandler::process()
 	{
 		PropertyDescription* propertyDescription = iter->second;
 
-		// Èç¹ûÄ³¸öÊµÌåÃ»ÓÐcell²¿·Ö£¬ ¶ø×é¼þÊôÐÔÃ»ÓÐbase²¿·ÖÔòºöÂÔ
+		// å¦‚æžœæŸä¸ªå®žä½“æ²¡æœ‰celléƒ¨åˆ†ï¼Œ è€Œç»„ä»¶å±žæ€§æ²¡æœ‰baseéƒ¨åˆ†åˆ™å¿½ç•¥
 		if (!pScriptModule->hasCell())
 		{
 			if (propertyDescription->getDataType()->type() == DATA_TYPE_ENTITY_COMPONENT && !propertyDescription->hasBase())

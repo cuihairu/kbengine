@@ -5,11 +5,15 @@ on:
     branches:
       - master
       - chore/python-3.12-support
+      - chore/cmake-bootstrap
   pull_request:
+    branches:
+      - master
+      - chore/cmake-bootstrap
 
 jobs:
   linux:
-    name: Linux Build
+    name: Linux CMake
     runs-on: ubuntu-24.04
     timeout-minutes: 120
 
@@ -17,73 +21,194 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install build dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             autoconf \
+            autoconf-archive \
             automake \
-            bison \
             build-essential \
-            libbrotli-dev \
-            libbz2-dev \
-            libdb-dev \
-            libffi-dev \
-            libgdbm-dev \
-            liblzma-dev \
-            libncurses5-dev \
-            libreadline-dev \
-            libsqlite3-dev \
-            libssl-dev \
-            libtirpc-dev \
+            cmake \
             libtool \
-            libuuid1 \
-            libxml2-dev \
+            ninja-build \
             pkg-config \
-            tk-dev \
-            uuid-dev \
-            zlib1g-dev \
-            default-libmysqlclient-dev
+            zip \
+            unzip \
+            tar \
+            curl
 
-      - name: Configure embedded CPython
-        working-directory: kbe/src/lib/python
+      - name: Bootstrap vcpkg
         run: |
-          if [ ! -f Modules/Setup ]; then
-            cp Modules/Setup.stdlib.in Modules/Setup
-          fi
-          if [ ! -f Makefile ]; then
-            chmod +x configure
-            ./configure --with-build-python=python3.12
-          fi
+          git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
+          "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
 
-      - name: Ensure mysql_config exists
-        run: |
-          if command -v mysql_config >/dev/null 2>&1; then
-            mysql_config --version || true
-            exit 0
-          fi
-          if command -v mariadb_config >/dev/null 2>&1; then
-            sudo ln -sf "$(command -v mariadb_config)" /usr/local/bin/mysql_config
-            mysql_config --version || true
-            exit 0
-          fi
-          echo "mysql_config not found"
-          exit 1
-
-      - name: Build Linux targets
+      - name: Configure
         env:
-          KBE_ROOT: ${{ github.workspace }}
-          KBE_CONFIG: Hybrid64
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: cmake --preset vcpkg
+
+      - name: Build
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: >
+          cmake --build --preset vcpkg --parallel
+          --target
+          kbe_machine
+          kbe_baseappmgr
+          kbe_baseapp
+          kbe_cellappmgr
+          kbe_cellapp
+          kbe_dbmgr
+          kbe_interfaces
+          kbe_logger
+          kbe_kbcmd
+          kbe_loginapp
+          kbe_bots
+          kbe_smoke_tests
+
+      - name: Test
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: ctest --preset vcpkg --output-on-failure
+
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
         run: |
-          make -C kbe/src/server -j2
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf \
+            autoconf-archive \
+            automake \
+            build-essential \
+            cmake \
+            gcc \
+            lcov \
+            libtool \
+            ninja-build \
+            pkg-config \
+            zip \
+            unzip \
+            tar \
+            curl
+          # Verify installation
+          gcov --version
+          lcov --version
+
+      - name: Bootstrap vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
+          "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+
+      - name: Configure with Coverage
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: |
+          cmake --preset vcpkg \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DKBE_ENABLE_CODE_COVERAGE=ON
+
+      - name: Verify Coverage Flags
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: |
+          echo "=== Checking CMake configuration for coverage ==="
+          grep -i "coverage\|ftest-coverage\|fprofile-arcs" build/presets/vcpkg/CMakeCache.txt || echo "No coverage flags in CMakeCache.txt"
+
+          echo "=== Checking compilation flags in build directory ==="
+          grep -r "ftest-coverage" build/presets/vcpkg/CMakeFiles/ 2>/dev/null | head -5 || echo "No coverage flags in CMakeFiles"
+
+          echo "=== Testing executables ==="
+          find build/presets/vcpkg -name "kbe_smoke_tests" -type f -ls
+
+      - name: Build with Coverage
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: >
+          cmake --build --preset vcpkg --parallel
+          --target
+          kbe_smoke_tests
+
+      - name: Run Tests with Coverage
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+          GCOV_ERROR_STDERR: 1
+        working-directory: build/presets/vcpkg
+        run: |
+          # Run tests to generate .gcda files
+          echo "=== Running tests with coverage ==="
+          ctest --output-on-failure || true
+
+          echo "=== Checking for .gcda files after test execution ==="
+          find . -name "*.gcda" -type f -ls | head -20 || echo "No .gcda files found"
+
+          echo "=== Checking for .gcno files ==="
+          find . -name "*.gcno" -type f | wc -l
+
+      - name: Generate Coverage Report
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        working-directory: ${{ github.workspace }}
+        run: |
+          # Find where .gcda files are actually located
+          echo "=== Searching for .gcda files ==="
+          find build -name "*.gcda" -type f -ls || echo "No .gcda files found in build/"
+
+          echo "=== Searching for .gcno files ==="
+          find build -name "*.gcno" -type f | head -20 || echo "No .gcno files found in build/"
+
+          # Capture coverage from build directory where .gcda files are located
+          lcov --capture \
+            --directory build/presets/vcpkg \
+            --base-directory . \
+            --output-file coverage.info \
+            --ignore-errors empty \
+            --ignore-errors source \
+            --ignore-errors mismatch \
+            --ignore-errors gcov \
+            --ignore-errors gcov_module \
+            --ignore-errors negative
+
+          # Check if we got any coverage data
+          if [ -s coverage.info ]; then
+            echo "=== Coverage data collected successfully ==="
+
+            # Filter out test and build artifacts
+            lcov --remove coverage.info '*/tests/*' --output-file coverage.info --ignore-errors unused
+            lcov --remove coverage.info 'kbe/src/lib/dependencies/*' --output-file coverage.info --ignore-errors unused
+            lcov --remove coverage.info '*/vcpkg/*' --output-file coverage.info --ignore-errors unused
+            lcov --remove coverage.info 'build/*' --output-file coverage.info --ignore-errors unused
+            lcov --remove coverage.info '*.o' --output-file coverage.info --ignore-errors unused
+            lcov --remove coverage.info '*.a' --output-file coverage.info --ignore-errors unused
+
+            # Show coverage summary
+            echo "=== Final Coverage Summary ==="
+            lcov --list coverage.info
+          else
+            echo "WARNING: coverage.info is empty or does not exist"
+            echo "Creating empty coverage.info for debug"
+            echo "No coverage data collected" > coverage.info
+          fi
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   windows:
-    name: Windows Build
+    name: Windows CMake
     runs-on: windows-2022
     timeout-minutes: 120
 
@@ -91,54 +216,103 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+      - name: Setup Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v5
 
-      - name: Regenerate CPython generated sources
-        shell: cmd
+      - name: Bootstrap vcpkg
+        shell: pwsh
         run: |
-          cd kbe\src\lib\python\PCbuild
-          set PYTHON=%pythonLocation%\python.exe
-          call build.bat -p x64 -c Release --regen
+          git clone https://github.com/microsoft/vcpkg.git "$env:GITHUB_WORKSPACE/vcpkg"
+          & "$env:GITHUB_WORKSPACE/vcpkg/bootstrap-vcpkg.bat" -disableMetrics
 
-      - name: Generate CPython frozen sources
-        shell: cmd
-        run: |
-          if not exist kbe\src\lib\python\Python\frozen_modules mkdir kbe\src\lib\python\Python\frozen_modules
-          if not exist kbe\src\lib\python\Python\deepfreeze mkdir kbe\src\lib\python\Python\deepfreeze
-          msbuild kbe\src\lib\python\PCbuild\_freeze_module.vcxproj ^
-            /m ^
-            /p:Configuration=Release ^
-            /p:Platform=x64
+      - name: Configure
+        shell: pwsh
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
+        run: cmake --preset vcpkg
 
-      - name: Build CPython runtime artifacts
-        shell: cmd
-        run: |
-          msbuild kbe\src\lib\python\PCbuild\pythoncore.vcxproj ^
-            /m ^
-            /p:Configuration=Release ^
-            /p:Platform=x64
-          if not exist kbe\src\libs mkdir kbe\src\libs
-          if not exist kbe\bin\server mkdir kbe\bin\server
-          if not exist kbe\src\lib\dependencies\vsopenssl\include\openssl mkdir kbe\src\lib\dependencies\vsopenssl\include\openssl
-          xcopy /E /I /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\amd64\include\openssl kbe\src\lib\dependencies\vsopenssl\include\openssl
-          findstr /C:"OPENSSL_VERSION_NUMBER" kbe\src\lib\dependencies\vsopenssl\include\openssl\opensslv.h
-          copy /Y kbe\src\lib\python\PCbuild\amd64\python312.lib kbe\src\libs\python312.lib
-          copy /Y kbe\src\lib\python\PCbuild\amd64\python312.dll kbe\bin\server\python312.dll
-          copy /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\amd64\libcrypto.lib kbe\src\libs\libcrypto.lib
-          copy /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\amd64\libssl.lib kbe\src\libs\libssl.lib
-          copy /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\amd64\libcrypto-3.dll kbe\bin\server\libcrypto-3.dll
-          copy /Y kbe\src\lib\python\externals\openssl-bin-3.0.16.2\amd64\libssl-3.dll kbe\bin\server\libssl-3.dll
+      - name: Build
+        shell: pwsh
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
+        run: >
+          cmake --build --preset vcpkg --parallel
+          --target
+          kbe_machine
+          kbe_baseappmgr
+          kbe_baseapp
+          kbe_cellappmgr
+          kbe_cellapp
+          kbe_dbmgr
+          kbe_interfaces
+          kbe_logger
+          kbe_kbcmd
+          kbe_loginapp
+          kbe_bots
+          kbe_smoke_tests
 
-      - name: Build Windows solution
-        shell: cmd
+      - name: Test
+        shell: pwsh
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
+        run: ctest --preset vcpkg --output-on-failure
+
+  macos:
+    name: macOS CMake
+    runs-on: macos-14
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify toolchain
         run: |
-          msbuild kbe\src\kbengine.sln ^
-            /m ^
-            /p:Configuration=Release ^
-            /p:Platform=Win64
+          cmake --version
+          ninja --version
+          clang++ --version
+
+      - name: Install autotools dependencies
+        run: |
+          brew install \
+            autoconf \
+            autoconf-archive \
+            automake \
+            libtool
+
+      - name: Bootstrap vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
+          "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+
+      - name: Configure
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: cmake --preset vcpkg
+
+      - name: Build
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: >
+          cmake --build --preset vcpkg --parallel
+          --target
+          kbe_machine
+          kbe_baseappmgr
+          kbe_baseapp
+          kbe_cellappmgr
+          kbe_cellapp
+          kbe_dbmgr
+          kbe_interfaces
+          kbe_logger
+          kbe_kbcmd
+          kbe_loginapp
+          kbe_bots
+          kbe_smoke_tests
+
+      - name: Test
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: ctest --preset vcpkg --output-on-failure

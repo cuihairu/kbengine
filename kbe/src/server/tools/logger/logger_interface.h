@@ -9,72 +9,72 @@
 #ifndef KBE_LOGGER_INTERFACE_H
 #define KBE_LOGGER_INTERFACE_H
 
-// common include	
+// common include
 #if defined(LOGGER)
 #include "logger.h"
 #endif
 #include "logger_interface_macros.h"
 #include "network/interface_defs.h"
 //#define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine{
 
 /**
-	LoggerËùÓĞÏûÏ¢½Ó¿ÚÔÚ´Ë¶¨Òå
+	Loggeræ‰€æœ‰æ¶ˆæ¯æ¥å£åœ¨æ­¤å®šä¹‰
 */
 NETWORK_INTERFACE_DECLARE_BEGIN(LoggerInterface)
-	// Ä³app×¢²á×Ô¼ºµÄ½Ó¿ÚµØÖ·µ½±¾app
+	// æŸappæ³¨å†Œè‡ªå·±çš„æ¥å£åœ°å€åˆ°æœ¬app
 	LOGGER_MESSAGE_DECLARE_ARGS11(onRegisterNewApp,							NETWORK_VARIABLE_MESSAGE,
-									int32,									uid, 
+									int32,									uid,
 									std::string,							username,
-									COMPONENT_TYPE,							componentType, 
-									COMPONENT_ID,							componentID, 
+									COMPONENT_TYPE,							componentType,
+									COMPONENT_ID,							componentID,
 									COMPONENT_ORDER,						globalorderID,
 									COMPONENT_ORDER,						grouporderID,
-									uint32,									intaddr, 
+									uint32,									intaddr,
 									uint16,									intport,
-									uint32,									extaddr, 
+									uint32,									extaddr,
 									uint16,									extport,
 									std::string,							extAddrEx)
 
-	// Ä³appÖ÷¶¯ÇëÇólook¡£
+	// æŸappä¸»åŠ¨è¯·æ±‚lookã€‚
 	LOGGER_MESSAGE_DECLARE_ARGS0(lookApp,									NETWORK_FIXED_MESSAGE)
 
-	// Ä³¸öappÇëÇó²é¿´¸Ãapp¸ºÔØ×´Ì¬¡£
+	// æŸä¸ªappè¯·æ±‚æŸ¥çœ‹è¯¥appè´Ÿè½½çŠ¶æ€ã€‚
 	LOGGER_MESSAGE_DECLARE_ARGS0(queryLoad,									NETWORK_FIXED_MESSAGE)
 
-	// Ä³¸öappÏò±¾app¸æÖª´¦ÓÚ»î¶¯×´Ì¬¡£
+	// æŸä¸ªappå‘æœ¬appå‘ŠçŸ¥å¤„äºæ´»åŠ¨çŠ¶æ€ã€‚
 	LOGGER_MESSAGE_DECLARE_ARGS2(onAppActiveTick,							NETWORK_FIXED_MESSAGE,
-									COMPONENT_TYPE,							componentType, 
+									COMPONENT_TYPE,							componentType,
 									COMPONENT_ID,							componentID)
 
-	// Ô¶³ÌĞ´ÈÕÖ¾
+	// è¿œç¨‹å†™æ—¥å¿—
 	LOGGER_MESSAGE_DECLARE_STREAM(writeLog,									NETWORK_VARIABLE_MESSAGE)
 
-	// ×¢²álog¼àÌıÕß
+	// æ³¨å†Œlogç›‘å¬è€…
 	LOGGER_MESSAGE_DECLARE_STREAM(registerLogWatcher,						NETWORK_VARIABLE_MESSAGE)
 
-	// ×¢Ïúlog¼àÌıÕß
+	// æ³¨é”€logç›‘å¬è€…
 	LOGGER_MESSAGE_DECLARE_STREAM(deregisterLogWatcher,						NETWORK_VARIABLE_MESSAGE)
 
-	// log¼àÌıÕß¸üĞÂ×Ô¼ºµÄÉèÖÃ
+	// logç›‘å¬è€…æ›´æ–°è‡ªå·±çš„è®¾ç½®
 	LOGGER_MESSAGE_DECLARE_STREAM(updateLogWatcherSetting,					NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇó¹Ø±Õ·şÎñÆ÷
+	// è¯·æ±‚å…³é—­æœåŠ¡å™¨
 	LOGGER_MESSAGE_DECLARE_STREAM(reqCloseServer,							NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇó²éÑ¯watcherÊı¾İ
+	// è¯·æ±‚æŸ¥è¯¢watcheræ•°æ®
 	LOGGER_MESSAGE_DECLARE_STREAM(queryWatcher,								NETWORK_VARIABLE_MESSAGE)
 
-	// ¿ªÊ¼profile
+	// å¼€å§‹profile
 	LOGGER_MESSAGE_DECLARE_STREAM(startProfile,								NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇóÇ¿ÖÆÉ±ËÀµ±Ç°app
+	// è¯·æ±‚å¼ºåˆ¶æ€æ­»å½“å‰app
 	LOGGER_MESSAGE_DECLARE_STREAM(reqKillServer,							NETWORK_VARIABLE_MESSAGE)
 
 NETWORK_INTERFACE_DECLARE_END()

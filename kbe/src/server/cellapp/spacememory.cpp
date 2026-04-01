@@ -1,9 +1,9 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
 #include "cellapp.h"
-#include "spacememory.h"	
+#include "spacememory.h"
 #include "entity.h"
-#include "witness.h"	
+#include "witness.h"
 #include "navigation/navigation.h"
 #include "loadnavmesh_threadtasks.h"
 #include "entitydef/entities.h"
@@ -16,7 +16,7 @@
 #include "../../server/cellapp/cellapp_interface.h"
 #include "../../server/dbmgr/dbmgr_interface.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
 SpaceMemory::SpaceMemory(SPACE_ID spaceID, const std::string& scriptModuleName) :
@@ -35,7 +35,7 @@ destroyTime_(0)
 	{
 		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 		(*pBundle).newMessage(CellappmgrInterface::updateSpaceData);
-		
+
 		(*pBundle) << g_componentID;
 		(*pBundle) << id_;
 		(*pBundle) << scriptModuleName_;
@@ -51,12 +51,12 @@ SpaceMemory::~SpaceMemory()
 {
 	_clearGhosts();
 	entities_.clear();
-	
+
 	this->coordinateSystem_.releaseNodes();
-	
+
 	pNavHandle_.clear();
 
-	SAFE_RELEASE(pCell_);	
+	SAFE_RELEASE(pCell_);
 
 	Network::Channel* pChannel = Components::getSingleton().getCellappmgrChannel();
 	if (pChannel != NULL)
@@ -77,12 +77,12 @@ SpaceMemory::~SpaceMemory()
 //-------------------------------------------------------------------------------------
 void SpaceMemory::_clearGhosts()
 {
-	// “ÚŒ™space‘⁄destroy ±◊ˆπ˝“ª¥Œ«Â¿Ì£¨“Ú¥À’‚¿Ô¿Ì¬€…œ £œ¬µƒ «ghosts µÃÂ
+	// Âõ†‰∏∫spaceÂú®destroyÊó∂ÂÅöËøá‰∏ÄÊ¨°Ê∏ÖÁêÜÔºåÂõ†Ê≠§ËøôÈáåÁêÜËÆ∫‰∏äÂâ©‰∏ãÁöÑÊòØghostsÂÆû‰Ωì
 	if(entities_.size() == 0)
 		return;
-	
+
 	std::vector<ENTITY_ID> entitieslog;
-	
+
 	SPACE_ENTITIES::const_iterator log_iter = this->entities().begin();
 	for(; log_iter != this->entities().end(); ++log_iter)
 		entitieslog.push_back((*log_iter).get()->id());
@@ -104,8 +104,8 @@ void SpaceMemory::_clearGhosts()
 			}
 		}
 	}
-	
-	entities_.clear();	
+
+	entities_.clear();
 }
 
 //-------------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ PyObject* SpaceMemory::__py_GetSpaceGeometryMapping(PyObject* self, PyObject* ar
 	SpaceMemory* space = SpaceMemorys::findSpace(spaceID);
 	if(space == NULL)
 	{
-		PyErr_Format(PyExc_AssertionError, "KBEngine::getSpaceGeometryMapping: (spaceID=%u) not found!", 
+		PyErr_Format(PyExc_AssertionError, "KBEngine::getSpaceGeometryMapping: (spaceID=%u) not found!",
 			spaceID);
 
 		PyErr_PrintEx(0);
@@ -149,7 +149,7 @@ PyObject* SpaceMemory::__py_AddSpaceGeometryMapping(PyObject* self, PyObject* ar
 	PyObject* mapper = NULL;
 	PyObject* py_params = NULL;
 	std::map< int, std::string > params;
-	
+
 	int argCount = PyTuple_Size(args);
 	if(argCount < 3 || argCount > 5)
 	{
@@ -175,7 +175,7 @@ PyObject* SpaceMemory::__py_AddSpaceGeometryMapping(PyObject* self, PyObject* ar
 			PyErr_PrintEx(0);
 			return 0;
 		}
-		
+
 		if(py_params)
 		{
 			PyObject *key, *value;
@@ -184,22 +184,22 @@ PyObject* SpaceMemory::__py_AddSpaceGeometryMapping(PyObject* self, PyObject* ar
 			if(!PyDict_Check(py_params))
 			{
 				PyErr_Format(PyExc_AssertionError, "KBEngine::addSpaceGeometryMapping: args(params) not is PyDict!");
-				PyErr_PrintEx(0);					
+				PyErr_PrintEx(0);
 				return 0;
 			}
 
-			while(PyDict_Next(py_params, &pos, &key, &value)) 
+			while(PyDict_Next(py_params, &pos, &key, &value))
 			{
 				if(!PyLong_Check(key) || !PyUnicode_Check(value))
 				{
 					PyErr_Format(PyExc_AssertionError, "KBEngine::addSpaceGeometryMapping: args(params) error!");
-					PyErr_PrintEx(0);					
+					PyErr_PrintEx(0);
 					return 0;
 				}
-				
+
 				params[PyLong_AsLong(key)] = PyUnicode_AsUTF8AndSize(value, NULL);
 			}
-			
+
 			SCRIPT_ERROR_CHECK();
 		}
 	}
@@ -216,7 +216,7 @@ PyObject* SpaceMemory::__py_AddSpaceGeometryMapping(PyObject* self, PyObject* ar
 	SpaceMemory* space = SpaceMemorys::findSpace(spaceID);
 	if(space == NULL)
 	{
-		PyErr_Format(PyExc_AssertionError, "KBEngine::addSpaceGeometryMapping: spaceID error! spaceID=%u respath=%s", 
+		PyErr_Format(PyExc_AssertionError, "KBEngine::addSpaceGeometryMapping: spaceID error! spaceID=%u respath=%s",
 			spaceID, path);
 
 		PyErr_PrintEx(0);
@@ -236,7 +236,7 @@ PyObject* SpaceMemory::__py_AddSpaceGeometryMapping(PyObject* self, PyObject* ar
 
 	if(!space->addSpaceGeometryMapping(path, shouldLoadOnServer, params))
 	{
-		PyErr_Format(PyExc_AssertionError, "KBEngine::addSpaceGeometryMapping: (spaceID=%u respath=%s) error!", 
+		PyErr_Format(PyExc_AssertionError, "KBEngine::addSpaceGeometryMapping: (spaceID=%u respath=%s) error!",
 			spaceID, path);
 
 		PyErr_PrintEx(0);
@@ -302,10 +302,10 @@ void SpaceMemory::onLoadedSpaceGeometryMapping(NavigationHandlePtr pNavHandle)
 	INFO_MSG(fmt::format("KBEngine::onLoadedSpaceGeometryMapping: spaceID={}, respath={}!\n",
 			id(), getGeometryPath()));
 
-	// Õ®÷™Ω≈±æ
+	// ÈÄöÁü•ËÑöÊú¨
 	{
 		SCOPED_PROFILE(SCRIPTCALL_PROFILE);
-		SCRIPT_OBJECT_CALL_ARGS2(Cellapp::getSingleton().getEntryScript().get(), const_cast<char*>("onSpaceGeometryLoaded"), 
+		SCRIPT_OBJECT_CALL_ARGS2(Cellapp::getSingleton().getEntryScript().get(), const_cast<char*>("onSpaceGeometryLoaded"),
 			const_cast<char*>("Is"), this->id(), getGeometryPath().c_str(), false);
 	}
 
@@ -332,8 +332,8 @@ void SpaceMemory::onAllSpaceGeometryLoaded()
 {
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 
-	// Õ®÷™Ω≈±æ
-	SCRIPT_OBJECT_CALL_ARGS3(Cellapp::getSingleton().getEntryScript().get(), const_cast<char*>("onAllSpaceGeometryLoaded"), 
+	// ÈÄöÁü•ËÑöÊú¨
+	SCRIPT_OBJECT_CALL_ARGS3(Cellapp::getSingleton().getEntryScript().get(), const_cast<char*>("onAllSpaceGeometryLoaded"),
 		const_cast<char*>("Iis"), this->id(), true, getGeometryPath().c_str(), false);
 }
 
@@ -354,7 +354,7 @@ bool SpaceMemory::update()
 		KBE_ASSERT(entities_.size() == 0);
 		this->coordinateSystem_.releaseNodes();
 	}
-		
+
 	return true;
 }
 
@@ -387,14 +387,14 @@ void SpaceMemory::removeEntity(Entity* pEntity)
 	KBE_ASSERT(pEntity->spaceID() == id());
 
 	pEntity->spaceID(0);
-	
-	// œ»ªÒ»°µΩÀ˘‘⁄Œª÷√
+
+	// ÂÖàËé∑ÂèñÂà∞ÊâÄÂú®‰ΩçÁΩÆ
 	SPACE_ENTITIES::size_type idx = pEntity->spaceEntityIdx();
 
 	KBE_ASSERT(idx < entities_.size());
 	KBE_ASSERT(entities_[ idx ] == pEntity);
 
-	// »Áπ˚”–2∏ˆªÚ“‘…œµƒentity‘ÚΩ´◊Ó∫Û“ª∏ˆentity“∆÷¡…æ≥˝µƒ’‚∏ˆentityÀ˘‘⁄Œª÷√
+	// Â¶ÇÊûúÊúâ2‰∏™Êàñ‰ª•‰∏äÁöÑentityÂàôÂ∞ÜÊúÄÂêé‰∏Ä‰∏™entityÁßªËá≥Âà†Èô§ÁöÑËøô‰∏™entityÊâÄÂú®‰ΩçÁΩÆ
 	Entity* pBack = entities_.back().get();
 	pBack->spaceEntityIdx(idx);
 	entities_[idx] = pBack;
@@ -403,11 +403,11 @@ void SpaceMemory::removeEntity(Entity* pEntity)
 
 	onLeaveWorld(pEntity);
 
-	// ’‚æ‰±ÿ–Î‘⁄onLeaveWorld÷Æ∫Û£¨ “ÚŒ™ø…ƒ‹rangeTrigger–Ë“™≤ŒøºpEntityCoordinateNode
+	// ËøôÂè•ÂøÖÈ°ªÂú®onLeaveWorld‰πãÂêéÔºå Âõ†‰∏∫ÂèØËÉΩrangeTriggerÈúÄË¶ÅÂèÇËÄÉpEntityCoordinateNode
 	pEntity->uninstallCoordinateNodes(&coordinateSystem_);
 	pEntity->onLeaveSpace(this);
 
-	// »Áπ˚√ª”–entity¡À‘Ú–Ë“™œ˙ªŸspace, “ÚŒ™space◊Ó…Ÿ¥Ê‘⁄“ª∏ˆentity
+	// Â¶ÇÊûúÊ≤°Êúâentity‰∫ÜÂàôÈúÄË¶ÅÈîÄÊØÅspace, Âõ†‰∏∫spaceÊúÄÂ∞ëÂ≠òÂú®‰∏Ä‰∏™entity
 	if(entities_.empty() && state_ == STATE_NORMAL)
 	{
 		SpaceMemorys::destroySpace(this->id(), 0);
@@ -431,9 +431,9 @@ void SpaceMemory::_onEnterWorld(Entity* pEntity)
 void SpaceMemory::onEnterWorld(Entity* pEntity)
 {
 	KBE_ASSERT(pEntity != NULL);
-	
-	// »Áπ˚ «“ª∏ˆ”–Witness(Õ®≥£ «ÕÊº“)‘Ú–Ë“™Ω´µ±«∞≥°æ∞“—æ≠¥¥Ω®µƒ”–client≤ø∑÷µƒentityπ„≤•∏¯À˚
-	// ∑Ò‘Ú «“ª∏ˆ∆’Õ®µƒentityΩ¯»Î ¿ΩÁ£¨ ƒ«√¥–Ë“™Ω´’‚∏ˆentityπ„≤•∏¯À˘”–ø¥º˚À˚µƒ”–Witnessµƒentity°£
+
+	// Â¶ÇÊûúÊòØ‰∏Ä‰∏™ÊúâWitness(ÈÄöÂ∏∏ÊòØÁé©ÂÆ∂)ÂàôÈúÄË¶ÅÂ∞ÜÂΩìÂâçÂú∫ÊôØÂ∑≤ÁªèÂàõÂª∫ÁöÑÊúâclientÈÉ®ÂàÜÁöÑentityÂπøÊí≠Áªô‰ªñ
+	// Âê¶ÂàôÊòØ‰∏Ä‰∏™ÊôÆÈÄöÁöÑentityËøõÂÖ•‰∏ñÁïåÔºå ÈÇ£‰πàÈúÄË¶ÅÂ∞ÜËøô‰∏™entityÂπøÊí≠ÁªôÊâÄÊúâÁúãËßÅ‰ªñÁöÑÊúâWitnessÁöÑentity„ÄÇ
 	if(pEntity->hasWitness())
 	{
 		_onEnterWorld(pEntity);
@@ -452,9 +452,9 @@ void SpaceMemory::onLeaveWorld(Entity* pEntity)
 {
 	if(!pEntity->isReal() || !pEntity->pScriptModule()->hasClient())
 		return;
-	
-	// œÚ∆‰À˚»ÀøÕªß∂Àπ„≤•◊‘º∫µƒ¿Îø™
-	// œÚøÕªß∂À∑¢ÀÕonLeaveWorldœ˚œ¢
+
+	// ÂêëÂÖ∂‰ªñ‰∫∫ÂÆ¢Êà∑Á´ØÂπøÊí≠Ëá™Â∑±ÁöÑÁ¶ªÂºÄ
+	// ÂêëÂÆ¢Êà∑Á´ØÂèëÈÄÅonLeaveWorldÊ∂àÊÅØ
 	if(pEntity->hasWitness())
 	{
 		pEntity->pWitness()->onLeaveSpace(this);
@@ -468,7 +468,7 @@ Entity* SpaceMemory::findEntity(ENTITY_ID entityID)
 	for(; iter != this->entities().end(); ++iter)
 	{
 		const Entity* entity = (*iter).get();
-			
+
 		if(entity->id() == entityID)
 			return const_cast<Entity*>(entity);
 	}
@@ -484,9 +484,9 @@ bool SpaceMemory::destroy(ENTITY_ID entityID, bool ignoreGhost)
 
 	state_ = STATE_DESTROYING;
 	destroyTime_ = timestamp();
-	
+
 	std::vector<ENTITY_ID> entitieslog;
-	
+
 	{
 		SPACE_ENTITIES::const_iterator iter = this->entities().begin();
 		for(; iter != this->entities().end(); ++iter)
@@ -507,9 +507,9 @@ bool SpaceMemory::destroy(ENTITY_ID entityID, bool ignoreGhost)
 			}
 		}
 	}
-	
+
 	state_ = STATE_DESTROYED;
-	
+
 	if(this->entities().size() == 0)
 		return true;
 
@@ -539,14 +539,14 @@ bool SpaceMemory::destroy(ENTITY_ID entityID, bool ignoreGhost)
 
 //-------------------------------------------------------------------------------------
 void SpaceMemory::setGeometryPath(const std::string& path)
-{ 
-	return setSpaceData("_mapping", path); 
+{
+	return setSpaceData("_mapping", path);
 }
 
 //-------------------------------------------------------------------------------------
 const std::string& SpaceMemory::getGeometryPath()
-{ 
-	return getSpaceData("_mapping"); 
+{
+	return getSpaceData("_mapping");
 }
 
 //-------------------------------------------------------------------------------------
@@ -554,7 +554,7 @@ void SpaceMemory::setSpaceData(const std::string& key, const std::string& value)
 {
 	SPACE_DATA::iterator iter = datas_.find(key);
 	if(iter == datas_.end())
-		datas_.insert(SPACE_DATA::value_type(key, value)); 
+		datas_.insert(SPACE_DATA::value_type(key, value));
 	else
 		if(iter->second == value)
 			return;
@@ -602,17 +602,17 @@ void SpaceMemory::delSpaceData(const std::string& key)
 //-------------------------------------------------------------------------------------
 void SpaceMemory::onSpaceDataChanged(const std::string& key, const std::string& value, bool isdel)
 {
-	// Õ®÷™Ω≈±æ
+	// ÈÄöÁü•ËÑöÊú¨
 	if(!isdel)
 	{
 		SCOPED_PROFILE(SCRIPTCALL_PROFILE);
-		SCRIPT_OBJECT_CALL_ARGS3(Cellapp::getSingleton().getEntryScript().get(), const_cast<char*>("onSpaceData"), 
+		SCRIPT_OBJECT_CALL_ARGS3(Cellapp::getSingleton().getEntryScript().get(), const_cast<char*>("onSpaceData"),
 			const_cast<char*>("Iss"), this->id(), key.c_str(), value.c_str(), false);
 	}
 	else
 	{
 		SCOPED_PROFILE(SCRIPTCALL_PROFILE);
-		SCRIPT_OBJECT_CALL_ARGS3(Cellapp::getSingleton().getEntryScript().get(), const_cast<char*>("onSpaceData"), 
+		SCRIPT_OBJECT_CALL_ARGS3(Cellapp::getSingleton().getEntryScript().get(), const_cast<char*>("onSpaceData"),
 			const_cast<char*>("IsO"), this->id(), key.c_str(), Py_None, false);
 	}
 
@@ -626,7 +626,7 @@ void SpaceMemory::onSpaceDataChanged(const std::string& key, const std::string& 
 
 		Network::Bundle* pSendBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 		NETWORK_ENTITY_MESSAGE_FORWARD_CLIENT_BEGIN(pEntity->id(), (*pSendBundle));
-		
+
 		if(!isdel)
 		{
 			ENTITY_MESSAGE_FORWARD_CLIENT_BEGIN(pSendBundle, ClientInterface::setSpaceData, set);
@@ -665,7 +665,7 @@ void SpaceMemory::_addSpaceDatasToEntityClient(const Entity* pEntity)
 
 	if(!pEntity->hasWitness())
 	{
-		WARNING_MSG(fmt::format("Space::_addSpaceDatasToEntityClient: entity {} no client!\n", 
+		WARNING_MSG(fmt::format("Space::_addSpaceDatasToEntityClient: entity {} no client!\n",
 			pEntity->id()));
 
 		return;
@@ -700,7 +700,7 @@ PyObject* SpaceMemory::__py_SetSpaceData(PyObject* self, PyObject* args)
 		PyErr_PrintEx(0);
 		return 0;
 	}
-	
+
 	char* key = NULL, *value = NULL;
 	if(!PyArg_ParseTuple(args, "Iss", &spaceID, &key, &value))
 	{
@@ -708,7 +708,7 @@ PyObject* SpaceMemory::__py_SetSpaceData(PyObject* self, PyObject* args)
 		PyErr_PrintEx(0);
 		return 0;
 	}
-	
+
 	if(key == NULL || value == NULL)
 	{
 		PyErr_Format(PyExc_AssertionError, "KBEngine::setSpaceData: key or value error, not is string!");
@@ -726,16 +726,16 @@ PyObject* SpaceMemory::__py_SetSpaceData(PyObject* self, PyObject* args)
 	SpaceMemory* space = SpaceMemorys::findSpace(spaceID);
 	if(space == NULL)
 	{
-		PyErr_Format(PyExc_AssertionError, "KBEngine::setSpaceData: (spaceID=%u) not found!", 
+		PyErr_Format(PyExc_AssertionError, "KBEngine::setSpaceData: (spaceID=%u) not found!",
 			spaceID);
 
 		PyErr_PrintEx(0);
 		return 0;
 	}
-	
+
 	if(kbe_stricmp(key, "_mapping") == 0)
 	{
-		PyErr_Format(PyExc_AssertionError, "KBEngine::setSpaceData: key{_mapping} is protected!", 
+		PyErr_Format(PyExc_AssertionError, "KBEngine::setSpaceData: key{_mapping} is protected!",
 			spaceID);
 
 		PyErr_PrintEx(0);
@@ -757,7 +757,7 @@ PyObject* SpaceMemory::__py_GetSpaceData(PyObject* self, PyObject* args)
 		PyErr_PrintEx(0);
 		return 0;
 	}
-	
+
 	char* key = NULL;
 	if(!PyArg_ParseTuple(args, "Is", &spaceID, &key))
 	{
@@ -783,16 +783,16 @@ PyObject* SpaceMemory::__py_GetSpaceData(PyObject* self, PyObject* args)
 	SpaceMemory* space = SpaceMemorys::findSpace(spaceID);
 	if(space == NULL)
 	{
-		PyErr_Format(PyExc_AssertionError, "KBEngine::getSpaceData: (spaceID=%u) not found!", 
+		PyErr_Format(PyExc_AssertionError, "KBEngine::getSpaceData: (spaceID=%u) not found!",
 			spaceID);
 
 		PyErr_PrintEx(0);
 		return 0;
 	}
-	
+
 	if(!space->hasSpaceData(key))
 	{
-		PyErr_Format(PyExc_AssertionError, "KBEngine::getSpaceData: (spaceID=%u, key=%s) not found!", 
+		PyErr_Format(PyExc_AssertionError, "KBEngine::getSpaceData: (spaceID=%u, key=%s) not found!",
 			spaceID, key);
 
 		PyErr_PrintEx(0);
@@ -813,7 +813,7 @@ PyObject* SpaceMemory::__py_DelSpaceData(PyObject* self, PyObject* args)
 		PyErr_PrintEx(0);
 		return 0;
 	}
-	
+
 	char* key = NULL;
 	if(!PyArg_ParseTuple(args, "Is", &spaceID, &key))
 	{
@@ -839,7 +839,7 @@ PyObject* SpaceMemory::__py_DelSpaceData(PyObject* self, PyObject* args)
 	SpaceMemory* space = SpaceMemorys::findSpace(spaceID);
 	if(space == NULL)
 	{
-		PyErr_Format(PyExc_AssertionError, "KBEngine::delSpaceData: (spaceID=%u) not found!", 
+		PyErr_Format(PyExc_AssertionError, "KBEngine::delSpaceData: (spaceID=%u) not found!",
 			spaceID);
 
 		PyErr_PrintEx(0);
@@ -848,16 +848,16 @@ PyObject* SpaceMemory::__py_DelSpaceData(PyObject* self, PyObject* args)
 
 	if(!space->hasSpaceData(key))
 	{
-		PyErr_Format(PyExc_AssertionError, "KBEngine::delSpaceData: (spaceID=%u, key=%s) not found!", 
+		PyErr_Format(PyExc_AssertionError, "KBEngine::delSpaceData: (spaceID=%u, key=%s) not found!",
 			spaceID, key);
 
 		PyErr_PrintEx(0);
 		return 0;
 	}
-	
+
 	if(kbe_stricmp(key, "_mapping") == 0)
 	{
-		PyErr_Format(PyExc_AssertionError, "KBEngine::delSpaceData: key{_mapping} is protected!", 
+		PyErr_Format(PyExc_AssertionError, "KBEngine::delSpaceData: key{_mapping} is protected!",
 			spaceID);
 
 		PyErr_PrintEx(0);

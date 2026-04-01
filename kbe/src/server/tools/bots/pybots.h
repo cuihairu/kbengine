@@ -3,15 +3,15 @@
 
 #ifndef KBE_PYBOTS_H
 #define KBE_PYBOTS_H
-	
-// common include	
+
+// common include
 #include "profile.h"
 #include "create_and_login_handler.h"
 #include "common/timer.h"
 #include "pyscript/script.h"
 #include "network/endpoint.h"
 #include "helper/debug_helper.h"
-#include "xml/xml.h"	
+#include "xml/xml.h"
 #include "common/singleton.h"
 #include "common/smartpointer.h"
 #include "common/timer.h"
@@ -27,27 +27,27 @@ namespace KBEngine{
 
 class PyBots  : public script::ScriptObject
 {
-	/** 
-		×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà 
+	/**
+		å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±»
 	*/
-	INSTANCE_SCRIPT_HREADER(PyBots, ScriptObject)	
+	INSTANCE_SCRIPT_HREADER(PyBots, ScriptObject)
 public:
 	PyBots();
 	~PyBots();
 
-	/** 
-		±©Â¶Ò»Ğ©×Öµä·½·¨¸øpython 
+	/**
+		æš´éœ²ä¸€äº›å­—å…¸æ–¹æ³•ç»™python
 	*/
 	DECLARE_PY_MOTHOD_ARG1(pyHas_key, ENTITY_ID);
 	DECLARE_PY_MOTHOD_ARG0(pyKeys);
 	DECLARE_PY_MOTHOD_ARG0(pyValues);
 	DECLARE_PY_MOTHOD_ARG0(pyItems);
-	
-	static PyObject* __py_pyGet(PyObject * self, 
+
+	static PyObject* __py_pyGet(PyObject * self,
 		PyObject * args, PyObject* kwds);
 
-	/** 
-		map²Ù×÷º¯ÊıÏà¹Ø 
+	/**
+		mapæ“ä½œå‡½æ•°ç›¸å…³
 	*/
 	static PyObject* mp_subscript(PyObject * self, PyObject * key);
 

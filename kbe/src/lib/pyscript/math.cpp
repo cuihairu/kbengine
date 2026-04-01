@@ -7,17 +7,17 @@ namespace KBEngine{ namespace script{ namespace math {
 //-------------------------------------------------------------------------------------
 bool installModule(const char* moduleName)
 {
-	// 初始化一个数学相关的模块
+	// 鍒濆鍖栦竴涓暟瀛︾浉鍏崇殑妯″潡
 	PyObject *mathModule = PyImport_AddModule(moduleName);
 	PyObject* pyDoc = PyUnicode_FromString("This module is created by KBEngine!");
 	PyObject_SetAttrString(mathModule, "__doc__", pyDoc);
 	Py_DECREF(pyDoc);
 
-	// 初始化ScriptVector2
+	// 鍒濆鍖朣criptVector2
 	script::ScriptVector2::installScript(mathModule, "Vector2");
-	// 初始化ScriptVector3
+	// 鍒濆鍖朣criptVector3
 	script::ScriptVector3::installScript(mathModule, "Vector3");
-	// 初始化ScriptVector4
+	// 鍒濆鍖朣criptVector4
 	script::ScriptVector4::installScript(mathModule, "Vector4");
 	return true;
 }

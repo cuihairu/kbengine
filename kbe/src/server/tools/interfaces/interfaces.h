@@ -6,12 +6,12 @@
 #include "server/kbemain.h"
 #include "server/python_app.h"
 #include "server/serverconfig.h"
-#include "server/callbackmgr.h"	
+#include "server/callbackmgr.h"
 #include "common/timer.h"
 #include "network/endpoint.h"
 #include "resmgr/resmgr.h"
 #include "thread/threadpool.h"
-	
+
 namespace KBEngine{
 
 class DBInterface;
@@ -21,7 +21,7 @@ class LoginAccountTask;
 class TelnetServer;
 
 
-class Interfaces :	public PythonApp, 
+class Interfaces :	public PythonApp,
 					public Singleton<Interfaces>
 {
 public:
@@ -30,34 +30,34 @@ public:
 		TIMEOUT_TICK = TIMEOUT_PYTHONAPP_MAX + 1
 	};
 
-	Interfaces(Network::EventDispatcher& dispatcher, 
-		Network::NetworkInterface& ninterface, 
+	Interfaces(Network::EventDispatcher& dispatcher,
+		Network::NetworkInterface& ninterface,
 		COMPONENT_TYPE componentType,
 		COMPONENT_ID componentID);
 
 	~Interfaces();
-	
+
 	bool run();
-	
+
 	void handleTimeout(TimerHandle handle, void * arg);
 	void handleMainTick();
 
-	/* ³õÊ¼»¯Ïà¹Ø½Ó¿Ú */
+	/* åˆå§‹åŒ–ç›¸å…³æ¥å£ */
 	bool initializeBegin();
 	bool inInitialize();
 	bool initializeEnd();
 	void finalise();
 	void onInstallPyModules();
-	
+
 	bool initDB();
 
 	virtual void onShutdownBegin();
 	virtual void onShutdownEnd();
 
 
-	/** ÍøÂç½Ó¿Ú
-	×¢²áÒ»¸öĞÂ¼¤»îµÄbaseapp»òÕßcellapp»òÕßdbmgr
-	Í¨³£ÊÇÒ»¸öĞÂµÄapp±»Æô¶¯ÁË£¬ ËüĞèÒªÏòÄ³Ğ©×é¼ş×¢²á×Ô¼º¡£
+	/** ç½‘ç»œæ¥å£
+	æ³¨å†Œä¸€ä¸ªæ–°æ¿€æ´»çš„baseappæˆ–è€…cellappæˆ–è€…dbmgr
+	é€šå¸¸æ˜¯ä¸€ä¸ªæ–°çš„appè¢«å¯åŠ¨äº†ï¼Œ å®ƒéœ€è¦å‘æŸäº›ç»„ä»¶æ³¨å†Œè‡ªå·±ã€‚
 	*/
 	virtual void onRegisterNewApp(Network::Channel* pChannel,
 		int32 uid,
@@ -65,43 +65,43 @@ public:
 		COMPONENT_TYPE componentType, COMPONENT_ID componentID, COMPONENT_ORDER globalorderID, COMPONENT_ORDER grouporderID,
 		uint32 intaddr, uint16 intport, uint32 extaddr, uint16 extport, std::string& extaddrEx);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó´´½¨ÕËºÅ
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚åˆ›å»ºè´¦å·
 	*/
 	void reqCreateAccount(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		Ò»¸öĞÂÓÃ»§µÇÂ¼£¬ ĞèÒª¼ì²éºÏ·¨ĞÔ
+	/** ç½‘ç»œæ¥å£
+		ä¸€ä¸ªæ–°ç”¨æˆ·ç™»å½•ï¼Œ éœ€è¦æ£€æŸ¥åˆæ³•æ€§
 	*/
 	void onAccountLogin(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó²Á³ı¿Í»§¶ËÇëÇóÈÎÎñ
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚æ“¦é™¤å®¢æˆ·ç«¯è¯·æ±‚ä»»åŠ¡
 	*/
 	void eraseClientReq(Network::Channel* pChannel, std::string& logkey);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó³äÖµ
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚å……å€¼
 	*/
 	void charge(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** Python»Øµ÷½Ó¿Ú
-	    ³äÖµÏìÓ¦
+	/** Pythonå›è°ƒæ¥å£
+	    å……å€¼å“åº”
 	*/
 	void chargeResponse(std::string orderID, std::string extraDatas, KBEngine::SERVER_ERROR_CODE errorCode);
 	static PyObject* __py_chargeResponse(PyObject* self, PyObject* args);
 
-	/** Python»Øµ÷½Ó¿Ú
-	    ÇëÇóµÇÂ¼ÕËºÅµÄÏìÓ¦
+	/** Pythonå›è°ƒæ¥å£
+	    è¯·æ±‚ç™»å½•è´¦å·çš„å“åº”
 	*/
-	void accountLoginResponse(std::string commitName, std::string realAccountName, 
+	void accountLoginResponse(std::string commitName, std::string realAccountName,
 		std::string extraDatas, KBEngine::SERVER_ERROR_CODE errorCode);
 	static PyObject* __py_accountLoginResponse(PyObject* self, PyObject* args);
 
-	/** Python»Øµ÷½Ó¿Ú
-	    ÇëÇó´´½¨ÕËºÅµÄÏìÓ¦
+	/** Pythonå›è°ƒæ¥å£
+	    è¯·æ±‚åˆ›å»ºè´¦å·çš„å“åº”
 	*/
-	void createAccountResponse(std::string commitName, std::string realAccountName, 
+	void createAccountResponse(std::string commitName, std::string realAccountName,
 		std::string extraDatas, KBEngine::SERVER_ERROR_CODE errorCode);
 	static PyObject* __py_createAccountResponse(PyObject* self, PyObject* args);
 
@@ -115,9 +115,9 @@ public:
 
 	void eraseOrders(std::string ordersid);
 	bool hasOrders(std::string ordersid);
-	
+
 	/**
-		ÏòdbmgrÇëÇóÖ´ĞĞÒ»¸öÊı¾İ¿âÃüÁî
+		å‘dbmgrè¯·æ±‚æ‰§è¡Œä¸€ä¸ªæ•°æ®åº“å‘½ä»¤
 	*/
 	static PyObject* __py_executeRawDatabaseCommand(PyObject* self, PyObject* args);
 	void executeRawDatabaseCommand(const char* datas, uint32 size, PyObject* pycallback, ENTITY_ID eid, const std::string& dbInterfaceName);
@@ -128,10 +128,10 @@ public:
 protected:
 	TimerHandle																mainProcessTimer_;
 
-	// ¶©µ¥
+	// è®¢å•
 	ORDERS																	orders_;
 
-	// ËùÓĞµÄÇëÇó¼ÇÂ¼£¬ ±ÜÃâÄ³ÀàÖØ¸´ĞÔÇëÇó¡£
+	// æ‰€æœ‰çš„è¯·æ±‚è®°å½•ï¼Œ é¿å…æŸç±»é‡å¤æ€§è¯·æ±‚ã€‚
 	REQCREATE_MAP															reqCreateAccount_requests_;
 	REQLOGIN_MAP															reqAccountLogin_requests_;
 

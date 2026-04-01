@@ -5,7 +5,15 @@
 
 #include "common/common.h"
 #include "common/timer.h"
+#include <string>
+#include "network/event_dispatcher.h"
 #include "helper/debug_helper.h"
+#define KBE_ERROR_REPORTER_ERROR_MSG(msg) \
+  do { \
+    if (KBEngine::DebugHelper::isInit()) { \
+      ERROR_MSG(msg); \
+    } \
+  } while (0)
 #include "network/common.h"
 #include "network/network_exception.h"
 

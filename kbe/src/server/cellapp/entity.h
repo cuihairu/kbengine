@@ -2,7 +2,7 @@
 
 #ifndef KBE_ENTITY_H
 #define KBE_ENTITY_H
-	
+
 #include "profile.h"
 #include "common/timer.h"
 #include "common/common.h"
@@ -12,12 +12,12 @@
 #include "entitydef/entity_component.h"
 #include "pyscript/math.h"
 #include "pyscript/scriptobject.h"
-#include "entitydef/datatypes.h"	
-#include "entitydef/entitydef.h"	
+#include "entitydef/datatypes.h"
+#include "entitydef/entitydef.h"
 #include "entitydef/scriptdef_module.h"
-#include "entitydef/entity_macro.h"	
-#include "server/script_timers.h"	
-	
+#include "entitydef/entity_macro.h"
+#include "server/script_timers.h"
+
 namespace KBEngine{
 
 class Chunk;
@@ -45,73 +45,73 @@ typedef std::vector<EntityPtr> SPACE_ENTITIES;
 
 class Entity : public script::ScriptObject
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
-	BASE_SCRIPT_HREADER(Entity, ScriptObject)	
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
+	BASE_SCRIPT_HREADER(Entity, ScriptObject)
 	ENTITY_HEADER(Entity)
 
 public:
 	Entity(ENTITY_ID id, const ScriptDefModule* pScriptModule,
 		PyTypeObject* pyType = getScriptType(), bool isInitialised = true);
 	~Entity();
-	
-	/** 
-		Ïú»ÙÕâ¸öentity 
+
+	/**
+		é”€æ¯è¿™ä¸ªentity
 	*/
 	void onDestroy(bool callScript);
-	
+
 	/**
-		Ïú»Ù³¡¾°
+		é”€æ¯åœºæ™¯
 	*/
 	DECLARE_PY_MOTHOD_ARG0(pyDestroySpace);
 	void destroySpace(void);
 
-	/** 
-		µ±Ç°ÊµÌåËùÔÚµÄspace½«ÒªÏú»ÙÊ±´¥·¢  
+	/**
+		å½“å‰å®ä½“æ‰€åœ¨çš„spaceå°†è¦é”€æ¯æ—¶è§¦å‘
 	*/
 	void onSpaceGone();
-	
-	/** 
-		ÅĞ¶Ï×ÔÉíÊÇ·ñÊÇÒ»¸örealEntity 
+
+	/**
+		åˆ¤æ–­è‡ªèº«æ˜¯å¦æ˜¯ä¸€ä¸ªrealEntity
 	*/
 	INLINE bool isReal(void) const;
 
-	/** 
-		ÅĞ¶Ï×ÔÉíÊÇ·ñÓĞghostEntity 
+	/**
+		åˆ¤æ–­è‡ªèº«æ˜¯å¦æœ‰ghostEntity
 	*/
 	INLINE bool hasGhost(void) const;
 
-	/** 
-		ÅĞ¶Ï×ÔÉíÊÇ·ñÊÇÒ»¸örealEntity 
+	/**
+		åˆ¤æ–­è‡ªèº«æ˜¯å¦æ˜¯ä¸€ä¸ªrealEntity
 	*/
 	INLINE COMPONENT_ID realCell(void) const;
 	INLINE void realCell(COMPONENT_ID cellID);
 
-	/** 
-		ÅĞ¶Ï×ÔÉíÊÇ·ñÓĞghostEntity 
+	/**
+		åˆ¤æ–­è‡ªèº«æ˜¯å¦æœ‰ghostEntity
 	*/
 	INLINE COMPONENT_ID ghostCell(void) const;
 	INLINE void ghostCell(COMPONENT_ID cellID);
 
-	/** 
-		¶¨ÒåÊôĞÔÊı¾İ±»¸Ä±äÁË 
+	/**
+		å®šä¹‰å±æ€§æ•°æ®è¢«æ”¹å˜äº†
 	*/
 	void onDefDataChanged(EntityComponent* pEntityComponent, const PropertyDescription* propertyDescription,
 			PyObject* pyData);
-	
-	/** 
-		¸ÃentityÍ¨ĞÅÍ¨µÀ
+
+	/**
+		è¯¥entityé€šä¿¡é€šé“
 	*/
 	INLINE void pChannel(Network::Channel* pchannel);
 	INLINE Network::Channel* pChannel(void) const ;
 
 public:
-	/** 
+	/**
 		entityCall section
 	*/
 	INLINE EntityCall* baseEntityCall() const;
 	DECLARE_PY_GET_MOTHOD(pyGetBaseEntityCall);
 	INLINE void baseEntityCall(EntityCall* entityCall);
-	
+
 	INLINE EntityCall* clientEntityCall() const;
 	DECLARE_PY_GET_MOTHOD(pyGetClientEntityCall);
 	INLINE void clientEntityCall(EntityCall* entityCall);
@@ -131,7 +131,7 @@ public:
 	INLINE void otherClients(AllClients* clients);
 
 	/**
-		½Å±¾»ñÈ¡controlledByÊôĞÔ
+		è„šæœ¬è·å–controlledByå±æ€§
 	*/
 	INLINE bool isControlledNotSelfClient() const;
 	INLINE EntityCall* controlledBy() const;
@@ -140,65 +140,65 @@ public:
 	bool setControlledBy(EntityCall* baseEntityCall);
 	void sendControlledByStatusMessage(EntityCall* baseEntityCall, int8 isControlled);
 
-	/** 
-		½Å±¾»ñÈ¡ºÍÉèÖÃentityµÄposition 
+	/**
+		è„šæœ¬è·å–å’Œè®¾ç½®entityçš„position
 	*/
 	INLINE Position3D& position();
 	INLINE void position(const Position3D& pos);
 	DECLARE_PY_GETSET_MOTHOD(pyGetPosition, pySetPosition);
 
-	/** 
-		½Å±¾»ñÈ¡ºÍÉèÖÃentityµÄ·½Ïò 
+	/**
+		è„šæœ¬è·å–å’Œè®¾ç½®entityçš„æ–¹å‘
 	*/
 	INLINE Direction3D& direction();
 	INLINE void direction(const Direction3D& dir);
 	DECLARE_PY_GETSET_MOTHOD(pyGetDirection, pySetDirection);
 
 	/**
-		ÊÇ·ñÔÚµØÃæÉÏ
+		æ˜¯å¦åœ¨åœ°é¢ä¸Š
 	*/
 	INLINE void isOnGround(bool v);
 	INLINE bool isOnGround() const;
 	DECLARE_PY_GET_MOTHOD(pyGetIsOnGround);
 
-	/** 
-		ÉèÖÃentity·½ÏòºÍÎ»ÖÃ 
+	/**
+		è®¾ç½®entityæ–¹å‘å’Œä½ç½®
 	*/
-	void setPositionAndDirection(const Position3D& pos, 
+	void setPositionAndDirection(const Position3D& pos,
 		const Direction3D& dir);
-	
+
 	void onPositionChanged();
 	void onDirectionChanged();
-	
+
 	void onPyPositionChanged();
 	void onPyDirectionChanged();
-	
+
 	void updateLastPos();
 
 	bool checkMoveForTopSpeed(const Position3D& position);
 
-	/** ÍøÂç½Ó¿Ú
-		¿Í»§¶ËÉèÖÃĞÂÎ»ÖÃ
+	/** ç½‘ç»œæ¥å£
+		å®¢æˆ·ç«¯è®¾ç½®æ–°ä½ç½®
 	*/
 	void setPosition_XZ_int(Network::Channel* pChannel, int32 x, int32 z);
 
-	/** ÍøÂç½Ó¿Ú
-		¿Í»§¶ËÉèÖÃĞÂÎ»ÖÃ
+	/** ç½‘ç»œæ¥å£
+		å®¢æˆ·ç«¯è®¾ç½®æ–°ä½ç½®
 	*/
 	void setPosition_XYZ_int(Network::Channel* pChannel, int32 x, int32 y, int32 z);
 
-	/** ÍøÂç½Ó¿Ú
-		¿Í»§¶ËÉèÖÃÎ»ÖÃ
+	/** ç½‘ç»œæ¥å£
+		å®¢æˆ·ç«¯è®¾ç½®ä½ç½®
 	*/
 	void setPosition_XZ_float(Network::Channel* pChannel, float x, float z);
 
-	/** ÍøÂç½Ó¿Ú
-		¿Í»§¶ËÉèÖÃÎ»ÖÃ
+	/** ç½‘ç»œæ¥å£
+		å®¢æˆ·ç«¯è®¾ç½®ä½ç½®
 	*/
 	void setPosition_XYZ_float(Network::Channel* pChannel, float x, float y, float z);
 
 	/**
-		cellÉÏµÄ´«ËÍ·½·¨
+		cellä¸Šçš„ä¼ é€æ–¹æ³•
 	*/
 	DECLARE_PY_MOTHOD_ARG3(pyTeleport, PyObject_ptr, PyObject_ptr, PyObject_ptr);
 	void teleport(PyObject_ptr nearbyMBRef, Position3D& pos, Direction3D& dir);
@@ -208,42 +208,42 @@ public:
 	void onTeleportRefEntityCall(EntityCall* nearbyMBRef, Position3D& pos, Direction3D& dir);
 
 	/**
-		´«ËÍ³É¹¦ºÍÊ§°ÜÏà¹Ø»Øµ÷
+		ä¼ é€æˆåŠŸå’Œå¤±è´¥ç›¸å…³å›è°ƒ
 	*/
 	void onTeleport();
 	void onTeleportFailure();
 	void onTeleportSuccess(PyObject* nearbyEntity, SPACE_ID lastSpaceID);
-	void onReqTeleportOtherAck(Network::Channel* pChannel, ENTITY_ID nearbyMBRefID, 
+	void onReqTeleportOtherAck(Network::Channel* pChannel, ENTITY_ID nearbyMBRefID,
 		SPACE_ID destSpaceID, COMPONENT_ID componentID);
 
 	/**
-		½øÈëÀë¿ªcellµÈ»Øµ÷
+		è¿›å…¥ç¦»å¼€cellç­‰å›è°ƒ
 	*/
 	void onEnteredCell();
 	void onEnteringCell();
 	void onLeavingCell();
 	void onLeftCell();
-	
+
 	/**
-		½øÈëÀë¿ªspaceµÈ»Øµ÷
+		è¿›å…¥ç¦»å¼€spaceç­‰å›è°ƒ
 	*/
 	void onEnterSpace(SpaceMemory* pSpace);
 	void onLeaveSpace(SpaceMemory* pSpace);
 
-	/** 
-		µ±cellappÒâÍâÖÕÖ¹ºó£¬ baseappÈç¹ûÄÜÕÒµ½ºÏÊÊµÄcellappÔò½«Æä»Ö¸´ºó
-		»áµ÷ÓÃ´Ë·½·¨
+	/**
+		å½“cellappæ„å¤–ç»ˆæ­¢åï¼Œ baseappå¦‚æœèƒ½æ‰¾åˆ°åˆé€‚çš„cellappåˆ™å°†å…¶æ¢å¤å
+		ä¼šè°ƒç”¨æ­¤æ–¹æ³•
 	*/
 	void onRestore();
 
 	/**
-		½Å±¾µ÷ÊÔview
+		è„šæœ¬è°ƒè¯•view
 	*/
 	void debugView();
 	DECLARE_PY_MOTHOD_ARG0(pyDebugView);
 
-	/** 
-		µ±Ç°entityÉèÖÃ×ÔÉíµÄView°ë¾¶·¶Î§ 
+	/**
+		å½“å‰entityè®¾ç½®è‡ªèº«çš„ViewåŠå¾„èŒƒå›´
 	*/
 	int32 setViewRadius(float radius, float hyst);
 	float getViewRadius(void) const;
@@ -253,33 +253,33 @@ public:
 	DECLARE_PY_MOTHOD_ARG0(pyGetViewHystArea);
 
 	/**
-		·µ»Ø¹Û²ì¸ÃÊµÌåµÄËùÓĞ¹Û²ìÕß
+		è¿”å›è§‚å¯Ÿè¯¥å®ä½“çš„æ‰€æœ‰è§‚å¯Ÿè€…
 	*/
 	DECLARE_PY_MOTHOD_ARG0(pyGetWitnesses);
 
-	/** 
-		µ±Ç°entityÊÇ·ñÎªreal 
+	/**
+		å½“å‰entityæ˜¯å¦ä¸ºreal
 	*/
 	DECLARE_PY_MOTHOD_ARG0(pyIsReal);
-	
-	/** 
-		Ïòbaseapp·¢ËÍ±¸·İÊı¾İ
+
+	/**
+		å‘baseappå‘é€å¤‡ä»½æ•°æ®
 	*/
 	void backupCellData();
 
-	/** 
-		½«Òª±£´æµ½Êı¾İ¿âÖ®Ç°µÄÍ¨Öª 
+	/**
+		å°†è¦ä¿å­˜åˆ°æ•°æ®åº“ä¹‹å‰çš„é€šçŸ¥
 	*/
 	void onWriteToDB();
 
-	/** 
-		½Å±¾»ñÈ¡ºÍÉèÖÃentityµÄposition 
+	/**
+		è„šæœ¬è·å–å’Œè®¾ç½®entityçš„position
 	*/
 	INLINE int8 layer() const;
 	DECLARE_PY_GETSET_MOTHOD(pyGetLayer, pySetLayer);
 
-	/** 
-		entityÒÆ¶¯µ¼º½ 
+	/**
+		entityç§»åŠ¨å¯¼èˆª
 	*/
 	bool canNavigate();
 	uint32 navigate(const Position3D& destination, float velocity, float distance,
@@ -291,257 +291,257 @@ public:
 	DECLARE_PY_MOTHOD_ARG3(pyNavigatePathPoints, PyObject_ptr, float, int8);
 	DECLARE_PY_MOTHOD_ARG8(pyNavigate, PyObject_ptr, float, float, float, float, int8, int8, PyObject_ptr);
 
-	/** 
-		entity»ñµÃËæ»úµã 
+	/**
+		entityè·å¾—éšæœºç‚¹
 	*/
 	bool getRandomPoints(std::vector<Position3D>& outPoints, const Position3D& centerPos, float maxRadius, uint32 maxPoints, int8 layer);
 	DECLARE_PY_MOTHOD_ARG4(pyGetRandomPoints, PyObject_ptr, float, uint32, int8);
 
-	/** 
-		entityÒÆ¶¯µ½Ä³¸öµã 
+	/**
+		entityç§»åŠ¨åˆ°æŸä¸ªç‚¹
 	*/
 	uint32 moveToPoint(const Position3D& destination, float velocity, float distance,
 			PyObject* userData, bool faceMovement, bool moveVertically);
-	
+
 	DECLARE_PY_MOTHOD_ARG6(pyMoveToPoint, PyObject_ptr, float, float, PyObject_ptr, int32, int32);
 
-	/** 
-		entityÒÆ¶¯µ½Ä³¸öentity 
+	/**
+		entityç§»åŠ¨åˆ°æŸä¸ªentity
 	*/
 	uint32 moveToEntity(ENTITY_ID targetID, float velocity, float distance,
 			PyObject* userData, bool faceMovement, bool moveVertically, const Position3D& offsetPos);
-	
+
 	static PyObject* __py_pyMoveToEntity(PyObject* self, PyObject* args);
 
 	/**
-	entityÒÆ¶¯¼ÓËÙ
+	entityç§»åŠ¨åŠ é€Ÿ
 	*/
 	float accelerate(const char* type, float acceleration);
 	DECLARE_PY_MOTHOD_ARG2(pyAccelerate, const_charptr, float);
 
-	/** 
-		½Å±¾»ñÈ¡ºÍÉèÖÃentityµÄ×î¸ßxzÒÆ¶¯ËÙ¶È 
+	/**
+		è„šæœ¬è·å–å’Œè®¾ç½®entityçš„æœ€é«˜xzç§»åŠ¨é€Ÿåº¦
 	*/
 	float topSpeed() const{ return topSpeed_; }
 	INLINE void topSpeed(float speed);
 	DECLARE_PY_GETSET_MOTHOD(pyGetTopSpeed, pySetTopSpeed);
-	
-	/** 
-		½Å±¾»ñÈ¡ºÍÉèÖÃentityµÄ×î¸ßyÒÆ¶¯ËÙ¶È 
+
+	/**
+		è„šæœ¬è·å–å’Œè®¾ç½®entityçš„æœ€é«˜yç§»åŠ¨é€Ÿåº¦
 	*/
 	INLINE float topSpeedY() const;
 	INLINE void topSpeedY(float speed);
 	DECLARE_PY_GETSET_MOTHOD(pyGetTopSpeedY, pySetTopSpeedY);
-	
-	/** 
-		½Å±¾ÇëÇó»ñµÃÒ»¶¨·¶Î§ÄÚµÄÄ³ÖÖÀàĞÍµÄentities 
+
+	/**
+		è„šæœ¬è¯·æ±‚è·å¾—ä¸€å®šèŒƒå›´å†…çš„æŸç§ç±»å‹çš„entities
 	*/
 	static PyObject* __py_pyEntitiesInRange(PyObject* self, PyObject* args);
 
-	/** 
-		½Å±¾ÇëÇó»ñµÃView·¶Î§ÄÚµÄentities 
+	/**
+		è„šæœ¬è¯·æ±‚è·å¾—ViewèŒƒå›´å†…çš„entities
 	*/
 	static PyObject* __py_pyEntitiesInView(PyObject* self, PyObject* args);
 	PyObject* entitiesInView(bool pending);
 
 	/**
-		ÉèÖÃ»ñÈ¡ÊÇ·ñ×Ô¶¯±¸·İ
+		è®¾ç½®è·å–æ˜¯å¦è‡ªåŠ¨å¤‡ä»½
 	*/
 	INLINE int8 shouldAutoBackup() const;
 	INLINE void shouldAutoBackup(int8 v);
 	DECLARE_PY_GETSET_MOTHOD(pyGetShouldAutoBackup, pySetShouldAutoBackup);
 
-	/** ÍøÂç½Ó¿Ú
-		Ô¶³Ìºô½Ğ±¾entityµÄ·½·¨ 
+	/** ç½‘ç»œæ¥å£
+		è¿œç¨‹å‘¼å«æœ¬entityçš„æ–¹æ³•
 	*/
 	void onRemoteMethodCall(Network::Channel* pChannel, MemoryStream& s);
 	void onRemoteCallMethodFromClient(Network::Channel* pChannel, ENTITY_ID srcEntityID, MemoryStream& s);
-	void onRemoteMethodCall_(PropertyDescription* pComponentPropertyDescription, 
+	void onRemoteMethodCall_(PropertyDescription* pComponentPropertyDescription,
 		MethodDescription* pMethodDescription, ENTITY_ID srcEntityID, MemoryStream& s);
 
 	/**
-		¹Û²ìÕß
+		è§‚å¯Ÿè€…
 	*/
 	INLINE Witness* pWitness() const;
 	INLINE void pWitness(Witness* w);
 
-	/** 
-		ÊÇ·ñ±»ÈÎºÎproxy¼àÊÓµ½, Èç¹ûÕâ¸öentityÃ»ÓĞ¿Í»§¶Ë£¬ ÔòÕâ¸öÖµÓĞĞ§ 
+	/**
+		æ˜¯å¦è¢«ä»»ä½•proxyç›‘è§†åˆ°, å¦‚æœè¿™ä¸ªentityæ²¡æœ‰å®¢æˆ·ç«¯ï¼Œ åˆ™è¿™ä¸ªå€¼æœ‰æ•ˆ
 	*/
 	INLINE bool isWitnessed(void) const;
 	DECLARE_PY_GET_MOTHOD(pyIsWitnessed);
 
-	/** 
-		entityÊÇ·ñÊÇÒ»¸ö¹Û²ìÕß 
+	/**
+		entityæ˜¯å¦æ˜¯ä¸€ä¸ªè§‚å¯Ÿè€…
 	*/
 	INLINE bool hasWitness(void) const;
 	DECLARE_PY_GET_MOTHOD(pyHasWitness);
 
-	/** 
-		×ÔÉí±»Ò»¸ö¹Û²ìÕß¹Û²ìµ½ÁË 
+	/**
+		è‡ªèº«è¢«ä¸€ä¸ªè§‚å¯Ÿè€…è§‚å¯Ÿåˆ°äº†
 	*/
 	void addWitnessed(Entity* entity);
 
-	/** 
-		ÒÆ³ıÒ»¸ö¹Û²ì×ÔÉíµÄ¹Û²ìÕß 
+	/**
+		ç§»é™¤ä¸€ä¸ªè§‚å¯Ÿè‡ªèº«çš„è§‚å¯Ÿè€…
 	*/
 	void delWitnessed(Entity* entity);
 	void onDelWitnessed();
 
 	/**
-		 Ö¸¶¨µÄentityÊÇ·ñÊÇ¹Û²ì×Ô¼ºµÄÈËÖ®Ò»
+		 æŒ‡å®šçš„entityæ˜¯å¦æ˜¯è§‚å¯Ÿè‡ªå·±çš„äººä¹‹ä¸€
 	*/
 	bool entityInWitnessed(ENTITY_ID entityID);
 
 	INLINE const std::list<ENTITY_ID>&	witnesses();
 	INLINE size_t witnessesSize() const;
 
-	/** ÍøÂç½Ó¿Ú
-		entity°ó¶¨ÁËÒ»¸ö¹Û²ìÕß(¿Í»§¶Ë)
+	/** ç½‘ç»œæ¥å£
+		entityç»‘å®šäº†ä¸€ä¸ªè§‚å¯Ÿè€…(å®¢æˆ·ç«¯)
 
 	*/
 	void setWitness(Witness* pWitness);
 	void onGetWitnessFromBase(Network::Channel* pChannel);
 	void onGetWitness(bool fromBase = false);
 
-	/** ÍøÂç½Ó¿Ú
-		entity¶ªÊ§ÁËÒ»¸ö¹Û²ìÕß(¿Í»§¶Ë)
+	/** ç½‘ç»œæ¥å£
+		entityä¸¢å¤±äº†ä¸€ä¸ªè§‚å¯Ÿè€…(å®¢æˆ·ç«¯)
 
 	*/
 	void onLoseWitness(Network::Channel* pChannel);
 
-	/** 
-		client¸üĞÂÊı¾İ
+	/**
+		clientæ›´æ–°æ•°æ®
 	*/
 	void onUpdateDataFromClient(KBEngine::MemoryStream& s);
 
-	/** 
-		Ìí¼ÓÒ»¸ö·¶Î§´¥·¢Æ÷  
+	/**
+		æ·»åŠ ä¸€ä¸ªèŒƒå›´è§¦å‘å™¨
 	*/
 	uint32 addProximity(float range_xz, float range_y, int32 userarg);
 	DECLARE_PY_MOTHOD_ARG3(pyAddProximity, float, float, int32);
 
-	/** 
-		µ÷ÓÃ¿Í»§¶ËÊµÌåµÄ·½·¨  
+	/**
+		è°ƒç”¨å®¢æˆ·ç«¯å®ä½“çš„æ–¹æ³•
 	*/
 	DECLARE_PY_MOTHOD_ARG1(pyClientEntity, ENTITY_ID);
 
-	/** 
-		»Ö¸´ËùÓĞµÄ·¶Î§´¥·¢Æ÷ 
-		ÔÚteleportÊ±»á³öÏÖÕâÑùµÄÇé¿ö
+	/**
+		æ¢å¤æ‰€æœ‰çš„èŒƒå›´è§¦å‘å™¨
+		åœ¨teleportæ—¶ä¼šå‡ºç°è¿™æ ·çš„æƒ…å†µ
 	*/
 	void restoreProximitys();
 
-	/** 
-		É¾³ıÒ»¸ö¿ØÖÆÆ÷ 
+	/**
+		åˆ é™¤ä¸€ä¸ªæ§åˆ¶å™¨
 	*/
 	void cancelController(uint32 id);
 	static PyObject* __py_pyCancelController(PyObject* self, PyObject* args);
 
-	/** 
-		Ò»¸öentity½øÈëÁËÕâ¸öentityµÄÄ³¸ö·¶Î§´¥·¢Æ÷  
+	/**
+		ä¸€ä¸ªentityè¿›å…¥äº†è¿™ä¸ªentityçš„æŸä¸ªèŒƒå›´è§¦å‘å™¨
 	*/
-	void onEnterTrap(Entity* entity, float range_xz, float range_y, 
+	void onEnterTrap(Entity* entity, float range_xz, float range_y,
 							uint32 controllerID, int32 userarg);
 
-	/** 
-		Ò»¸öentityÀë¿ªÁËÕâ¸öentityµÄÄ³¸ö·¶Î§´¥·¢Æ÷  
+	/**
+		ä¸€ä¸ªentityç¦»å¼€äº†è¿™ä¸ªentityçš„æŸä¸ªèŒƒå›´è§¦å‘å™¨
 	*/
-	void onLeaveTrap(Entity* entity, float range_xz, float range_y, 
+	void onLeaveTrap(Entity* entity, float range_xz, float range_y,
 							uint32 controllerID, int32 userarg);
 
-	/** 
-		µ±entityÌøµ½Ò»¸öĞÂµÄspaceÉÏÈ¥ºó£¬Àë¿ª·¶Î§´¥·¢Æ÷ÊÂ¼ş½«´¥·¢Õâ¸ö½Ó¿Ú 
+	/**
+		å½“entityè·³åˆ°ä¸€ä¸ªæ–°çš„spaceä¸Šå»åï¼Œç¦»å¼€èŒƒå›´è§¦å‘å™¨äº‹ä»¶å°†è§¦å‘è¿™ä¸ªæ¥å£
 	*/
-	void onLeaveTrapID(ENTITY_ID entityID, 
-							float range_xz, float range_y, 
+	void onLeaveTrapID(ENTITY_ID entityID,
+							float range_xz, float range_y,
 							uint32 controllerID, int32 userarg);
 
-	/** 
-		Ò»¸öentity½øÈëÁËViewÇøÓò
+	/**
+		ä¸€ä¸ªentityè¿›å…¥äº†ViewåŒºåŸŸ
 	*/
 	void onEnteredView(Entity* entity);
 
-	/** 
-		Í£Ö¹ÈÎºÎÒÆ¶¯ĞĞÎª
+	/**
+		åœæ­¢ä»»ä½•ç§»åŠ¨è¡Œä¸º
 	*/
 	bool stopMove();
 
-	/** 
-		entityµÄÒ»´ÎÒÆ¶¯Íê³É 
+	/**
+		entityçš„ä¸€æ¬¡ç§»åŠ¨å®Œæˆ
 	*/
 	void onMove(uint32 controllerId, int layer, const Position3D& oldPos, PyObject* userarg);
 
-	/** 
-		entityµÄÒÆ¶¯Íê³É 
+	/**
+		entityçš„ç§»åŠ¨å®Œæˆ
 	*/
 	void onMoveOver(uint32 controllerId, int layer, const Position3D& oldPos, PyObject* userarg);
 
-	/** 
-		entityÒÆ¶¯Ê§°Ü
+	/**
+		entityç§»åŠ¨å¤±è´¥
 	*/
 	void onMoveFailure(uint32 controllerId, PyObject* userarg);
 
 	/**
-		entity×ª¶¯³¯Ïò
+		entityè½¬åŠ¨æœå‘
 	*/
 	uint32 addYawRotator(float yaw, float velocity,
 		PyObject* userData);
 
 	DECLARE_PY_MOTHOD_ARG3(pyAddYawRotator, float, float, PyObject_ptr);
-	
+
 	/**
-		entity×ªÏòÍê³É
+		entityè½¬å‘å®Œæˆ
 	*/
 	void onTurn(uint32 controllerId, PyObject* userarg);
-	
+
 	/**
-		»ñÈ¡×ÔÉíÔÚspaceµÄentitiesÖĞµÄÎ»ÖÃ
+		è·å–è‡ªèº«åœ¨spaceçš„entitiesä¸­çš„ä½ç½®
 	*/
 	INLINE SPACE_ENTITIES::size_type spaceEntityIdx() const;
 	INLINE void spaceEntityIdx(SPACE_ENTITIES::size_type idx);
 
 	/**
-		»ñÈ¡entityËùÔÚ½Úµã
+		è·å–entityæ‰€åœ¨èŠ‚ç‚¹
 	*/
 	INLINE EntityCoordinateNode* pEntityCoordinateNode() const;
 	INLINE void pEntityCoordinateNode(EntityCoordinateNode* pNode);
 
 	/**
-		°²×°Ğ¶ÔØ½Úµã
+		å®‰è£…å¸è½½èŠ‚ç‚¹
 	*/
 	void installCoordinateNodes(CoordinateSystem* pCoordinateSystem);
 	void uninstallCoordinateNodes(CoordinateSystem* pCoordinateSystem);
 	void onCoordinateNodesDestroy(EntityCoordinateNode* pEntityCoordinateNode);
 
 	/**
-		»ñÈ¡entityÎ»ÖÃ³¯ÏòÔÚÄ³Ê±¼äÊÇ·ñ¸Ä±ä¹ı
+		è·å–entityä½ç½®æœå‘åœ¨æŸæ—¶é—´æ˜¯å¦æ”¹å˜è¿‡
 	*/
 	INLINE GAME_TIME posChangedTime() const;
 	INLINE GAME_TIME dirChangedTime() const;
 
-	/** 
-		realÇëÇó¸üĞÂÊôĞÔµ½ghost
+	/**
+		realè¯·æ±‚æ›´æ–°å±æ€§åˆ°ghost
 	*/
 	void onUpdateGhostPropertys(KBEngine::MemoryStream& s);
-	
-	/** 
-		ghostÇëÇóµ÷ÓÃdef·½·¨real
+
+	/**
+		ghostè¯·æ±‚è°ƒç”¨defæ–¹æ³•real
 	*/
 	void onRemoteRealMethodCall(KBEngine::MemoryStream& s);
 
-	/** 
-		realÇëÇó¸üĞÂÊôĞÔµ½ghost
+	/**
+		realè¯·æ±‚æ›´æ–°å±æ€§åˆ°ghost
 	*/
 	void onUpdateGhostVolatileData(KBEngine::MemoryStream& s);
 
-	/** 
-		×ª±äÎªghost, ×ÔÉí±ØĞëÎªreal
+	/**
+		è½¬å˜ä¸ºghost, è‡ªèº«å¿…é¡»ä¸ºreal
 	*/
 	void changeToGhost(COMPONENT_ID realCell, KBEngine::MemoryStream& s);
 
-	/** 
-		×ª±äÎªreal, ×ÔÉí±ØĞëÎªghost
+	/**
+		è½¬å˜ä¸ºreal, è‡ªèº«å¿…é¡»ä¸ºghost
 	*/
 	void changeToReal(COMPONENT_ID ghostCell, KBEngine::MemoryStream& s);
 
@@ -559,21 +559,21 @@ public:
 
 	void addMovementHandlerToStream(KBEngine::MemoryStream& s);
 	void createMovementHandlerFromStream(KBEngine::MemoryStream& s);
-	
+
 	void addEventsToStream(KBEngine::MemoryStream& s);
 	void createEventsFromStream(KBEngine::MemoryStream& s);
 
-	/** 
-		»ñµÃÊµÌå¿ØÖÆÆ÷¹ÜÀíÆ÷
+	/**
+		è·å¾—å®ä½“æ§åˆ¶å™¨ç®¡ç†å™¨
 	*/
 	INLINE Controllers*	pControllers() const;
 
-	/** 
-		ÉèÖÃÊµÌå³Ö¾Ã»¯Êı¾İÊÇ·ñÒÑÔà£¬ÔàÁË»á×Ô¶¯´æµµ 
+	/**
+		è®¾ç½®å®ä½“æŒä¹…åŒ–æ•°æ®æ˜¯å¦å·²è„ï¼Œè„äº†ä¼šè‡ªåŠ¨å­˜æ¡£
 	*/
 	INLINE void setDirty(uint32* digest = NULL);
 	INLINE bool isDirty() const;
-	
+
 	/**
 		VolatileInfo section
 	*/
@@ -581,16 +581,16 @@ public:
 	DECLARE_PY_GETSET_MOTHOD(pyGetVolatileinfo, pySetVolatileinfo);
 
 	/**
-		µ÷ÓÃÊµÌåµÄ»Øµ÷º¯Êı£¬ÓĞ¿ÉÄÜ±»»º´æ
+		è°ƒç”¨å®ä½“çš„å›è°ƒå‡½æ•°ï¼Œæœ‰å¯èƒ½è¢«ç¼“å­˜
 	*/
 	bool bufferOrExeCallback(const char * funcName, PyObject * funcArgs, bool notFoundIsOK = true);
 	static void bufferCallback(bool enable);
 
 private:
-	/** 
-		·¢ËÍteleport½á¹ûµ½base¶Ë
+	/**
+		å‘é€teleportç»“æœåˆ°baseç«¯
 	*/
-	void _sendBaseTeleportResult(ENTITY_ID sourceEntityID, COMPONENT_ID sourceBaseAppID, 
+	void _sendBaseTeleportResult(ENTITY_ID sourceEntityID, COMPONENT_ID sourceBaseAppID,
 		SPACE_ID spaceID, SPACE_ID lastSpaceID, bool fromCellTeleport);
 
 private:
@@ -598,7 +598,7 @@ private:
 	{
 		EntityPtr		entityPtr;
 		PyObject *		pyCallable;
-		// ¿ÉÒÔÎªNULL£¬ NULLËµÃ÷Ã»ÓĞ²ÎÊı
+		// å¯ä»¥ä¸ºNULLï¼Œ NULLè¯´æ˜æ²¡æœ‰å‚æ•°
 		PyObject *		pyFuncArgs;
 		const char*		funcName;
 	};
@@ -609,80 +609,80 @@ private:
 	static int32											_scriptCallbacksBufferCount;
 
 protected:
-	// Õâ¸öentityµÄ¿Í»§¶Ë²¿·ÖµÄentityCall
+	// è¿™ä¸ªentityçš„å®¢æˆ·ç«¯éƒ¨åˆ†çš„entityCall
 	EntityCall*												clientEntityCall_;
 
-	// Õâ¸öentityµÄbaseapp²¿·ÖµÄentityCall
+	// è¿™ä¸ªentityçš„baseappéƒ¨åˆ†çš„entityCall
 	EntityCall*												baseEntityCall_;
 
-	/** Õâ¸öentityµÄ×ø±êºÍ³¯Ïòµ±Ç°ÊÜË­µÄ¿Í»§¶Ë¿ØÖÆ
-	    null±íÊ¾Ã»ÓĞ¿Í»§¶ËÔÚ¿ØÖÆ£¨¼´ÏµÍ³¿ØÖÆ£©£¬
-	    ·ñÔòÖ¸Ïò¿ØÖÆÕâ¸öentityµÄ¶ÔÏóµÄbaseEntityCall_£¬
-		Íæ¼Ò×Ô¼º¿ØÖÆ×Ô¼ºÔòEntity.controlledBy = self.base
+	/** è¿™ä¸ªentityçš„åæ ‡å’Œæœå‘å½“å‰å—è°çš„å®¢æˆ·ç«¯æ§åˆ¶
+	    nullè¡¨ç¤ºæ²¡æœ‰å®¢æˆ·ç«¯åœ¨æ§åˆ¶ï¼ˆå³ç³»ç»Ÿæ§åˆ¶ï¼‰ï¼Œ
+	    å¦åˆ™æŒ‡å‘æ§åˆ¶è¿™ä¸ªentityçš„å¯¹è±¡çš„baseEntityCall_ï¼Œ
+		ç©å®¶è‡ªå·±æ§åˆ¶è‡ªå·±åˆ™Entity.controlledBy = self.base
 	*/
 	EntityCall *											controlledBy_;
 
-	// Èç¹ûÒ»¸öentityÎªghost£¬ÄÇÃ´entity»á´æÔÚÒ»¸öÔ´cellµÄÖ¸Ïò
+	// å¦‚æœä¸€ä¸ªentityä¸ºghostï¼Œé‚£ä¹ˆentityä¼šå­˜åœ¨ä¸€ä¸ªæºcellçš„æŒ‡å‘
 	COMPONENT_ID											realCell_;
 
-	// Èç¹ûÒ»¸öentityÎªreal£¬ÄÇÃ´entity¿ÉÄÜ»á´æÔÚÒ»¸öghostµÄÖ¸Ïò
-	COMPONENT_ID											ghostCell_;	
+	// å¦‚æœä¸€ä¸ªentityä¸ºrealï¼Œé‚£ä¹ˆentityå¯èƒ½ä¼šå­˜åœ¨ä¸€ä¸ªghostçš„æŒ‡å‘
+	COMPONENT_ID											ghostCell_;
 
-	// entityµÄµ±Ç°Î»ÖÃ
+	// entityçš„å½“å‰ä½ç½®
 	Position3D												lastpos_;
 	Position3D												position_;
 	script::ScriptVector3*									pPyPosition_;
 
-	// entityµÄµ±Ç°·½Ïò
-	Direction3D												direction_;	
+	// entityçš„å½“å‰æ–¹å‘
+	Direction3D												direction_;
 	script::ScriptVector3*									pPyDirection_;
 
-	// entityÎ»ÖÃ³¯ÏòÔÚÄ³Ê±¼äÊÇ·ñ¸Ä±ä¹ı
-	// ´ËÊôĞÔ¿ÉÓÃÓÚÈç:¾ö¶¨ÔÚÄ³ÆÚ¼äÊÇ·ñÒª¸ß¶ÈÍ¬²½¸Ãentity
+	// entityä½ç½®æœå‘åœ¨æŸæ—¶é—´æ˜¯å¦æ”¹å˜è¿‡
+	// æ­¤å±æ€§å¯ç”¨äºå¦‚:å†³å®šåœ¨æŸæœŸé—´æ˜¯å¦è¦é«˜åº¦åŒæ­¥è¯¥entity
 	GAME_TIME												posChangedTime_;
 	GAME_TIME												dirChangedTime_;
 
-	// ÊÇ·ñÔÚµØÃæÉÏ
+	// æ˜¯å¦åœ¨åœ°é¢ä¸Š
 	bool													isOnGround_;
 
-	// entity x,zÖá×î¸ßÒÆ¶¯ËÙ¶È
+	// entity x,zè½´æœ€é«˜ç§»åŠ¨é€Ÿåº¦
 	float													topSpeed_;
 
-	// entity yÖá×î¸ßÒÆ¶¯ËÙ¶È
+	// entity yè½´æœ€é«˜ç§»åŠ¨é€Ÿåº¦
 	float													topSpeedY_;
 
-	// ×ÔÉíÔÚspaceµÄentitiesÖĞµÄÎ»ÖÃ
+	// è‡ªèº«åœ¨spaceçš„entitiesä¸­çš„ä½ç½®
 	SPACE_ENTITIES::size_type								spaceEntityIdx_;
 
-	// ÊÇ·ñ±»ÈÎºÎ¹Û²ìÕß¼àÊÓµ½
+	// æ˜¯å¦è¢«ä»»ä½•è§‚å¯Ÿè€…ç›‘è§†åˆ°
 	std::list<ENTITY_ID>									witnesses_;
 	size_t													witnesses_count_;
 
-	// ¹Û²ìÕß¶ÔÏó
+	// è§‚å¯Ÿè€…å¯¹è±¡
 	Witness*												pWitness_;
 
 	AllClients*												allClients_;
 	AllClients*												otherClients_;
 
-	// entity½Úµã
-	EntityCoordinateNode*									pEntityCoordinateNode_;	
+	// entityèŠ‚ç‚¹
+	EntityCoordinateNode*									pEntityCoordinateNode_;
 
-	// ¿ØÖÆÆ÷¹ÜÀíÆ÷
+	// æ§åˆ¶å™¨ç®¡ç†å™¨
 	Controllers*											pControllers_;
 	KBEShared_ptr<Controller>								pMoveController_;
 	KBEShared_ptr<Controller>								pTurnController_;
-	
+
 	script::ScriptVector3::PYVector3ChangedCallback			pyPositionChangedCallback_;
 	script::ScriptVector3::PYVector3ChangedCallback			pyDirectionChangedCallback_;
-	
-	// entity²ã£¬¿ÉÒÔ×öÈÎÒâ±íÊ¾£¬»ùÓÚtileµÄÓÎÏ·¿ÉÒÔ±íÊ¾Îªº£Â½¿ÕµÈ²ã£¬´¿3dÒ²¿ÉÒÔ±íÊ¾¸÷ÖÖ²ã
-	// ÔÚ½Å±¾²ã×öËÑË÷µÄÊ±ºò¿ÉÒÔ°´²ãËÑË÷.
+
+	// entityå±‚ï¼Œå¯ä»¥åšä»»æ„è¡¨ç¤ºï¼ŒåŸºäºtileçš„æ¸¸æˆå¯ä»¥è¡¨ç¤ºä¸ºæµ·é™†ç©ºç­‰å±‚ï¼Œçº¯3dä¹Ÿå¯ä»¥è¡¨ç¤ºå„ç§å±‚
+	// åœ¨è„šæœ¬å±‚åšæœç´¢çš„æ—¶å€™å¯ä»¥æŒ‰å±‚æœç´¢.
 	int8													layer_;
-	
-	// ĞèÒª³Ö¾Ã»¯µÄÊı¾İÊÇ·ñ±äÔà£¨ÄÚ´æsha1£©£¬Èç¹ûÃ»ÓĞ±äÔà²»ĞèÒª³Ö¾Ã»¯
+
+	// éœ€è¦æŒä¹…åŒ–çš„æ•°æ®æ˜¯å¦å˜è„ï¼ˆå†…å­˜sha1ï¼‰ï¼Œå¦‚æœæ²¡æœ‰å˜è„ä¸éœ€è¦æŒä¹…åŒ–
 	uint32													persistentDigest_[5];
 
-	// Èç¹ûÓÃ»§ÓĞÉèÖÃ¹ıVolatileinfo£¬Ôò´Ë´¦´´½¨Volatileinfo£¬·ñÔòÎªNULLÊ¹ÓÃScriptDefModuleµÄVolatileinfo
+	// å¦‚æœç”¨æˆ·æœ‰è®¾ç½®è¿‡Volatileinfoï¼Œåˆ™æ­¤å¤„åˆ›å»ºVolatileinfoï¼Œå¦åˆ™ä¸ºNULLä½¿ç”¨ScriptDefModuleçš„Volatileinfo
 	VolatileInfo*											pCustomVolatileinfo_;
 };
 

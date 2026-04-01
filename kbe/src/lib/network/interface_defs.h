@@ -2,7 +2,7 @@
 
 #ifndef KBE_INTERFACE_DEFS_H
 #define KBE_INTERFACE_DEFS_H
-	
+
 // common include
 #include "common/common.h"
 #include "common/smartpointer.h"
@@ -50,7 +50,7 @@ namespace Network
 	#undef NETWORK_MESSAGE_HANDLER
 	#undef NETWORK_MESSAGE_EXPOSED
 	#undef NETWORK_INTERFACE_DECLARE_END
-	
+
 	#undef MESSAGE_STREAM
 	#undef MESSAGE_ARGS0
 	#undef MESSAGE_ARGS1
@@ -83,12 +83,12 @@ namespace Network
 
 #ifdef DEFINE_IN_INTERFACE
 	//#undef DEFINE_IN_INTERFACE
-	
+
 	#define NETWORK_MESSAGE_HANDLER(DOMAIN, NAME, HANDLER_TYPE, MSG_LENGTH, ARG_N)						\
 		HANDLER_TYPE* p##NAME = static_cast<HANDLER_TYPE*>(messageHandlers.add(#DOMAIN"::"#NAME,		\
 						 new NAME##Args##ARG_N, MSG_LENGTH, new HANDLER_TYPE));							\
 		const HANDLER_TYPE& NAME = *p##NAME;															\
-			
+
 	#define NETWORK_MESSAGE_EXPOSED(DOMAIN, NAME);														\
 		bool p##DOMAIN##NAME##_exposed = messageHandlers.pushExposedMessage(#DOMAIN"::"#NAME);			\
 
@@ -97,28 +97,28 @@ namespace Network
 		extern const HANDLER_TYPE& NAME;																\
 
 	#define NETWORK_MESSAGE_EXPOSED(DOMAIN, NAME)														\
-	
+
 #endif
 
-// ∂®“ÂΩ”ø⁄”Ú√˚≥∆
+// ÂÆö‰πâÊé•Âè£ÂüüÂêçÁß∞
 #ifndef DEFINE_IN_INTERFACE
 #define NETWORK_INTERFACE_DECLARE_BEGIN(INAME) 						\
 	namespace INAME													\
 {																	\
 		extern Network::MessageHandlers messageHandlers;			\
-			
+
 #else
 #define NETWORK_INTERFACE_DECLARE_BEGIN(INAME) 						\
 	namespace INAME													\
 {																	\
 		Network::MessageHandlers messageHandlers(#INAME);			\
-			
+
 #endif
 
 #define NETWORK_INTERFACE_DECLARE_END() }
 
 /**---------------------------------------------------------------------
-/		¡˜œ˚œ¢ Ω” ’œ˚œ¢µƒΩ”ø⁄≤Œ ˝Œ™memorystream, ◊‘º∫¥¶¿Ì
+/		ÊµÅÊ∂àÊÅØ Êé•Êî∂Ê∂àÊÅØÁöÑÊé•Âè£ÂèÇÊï∞‰∏∫memorystream, Ëá™Â∑±Â§ÑÁêÜ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_STREAM(NAME)
@@ -145,7 +145,7 @@ namespace Network
 		{															\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_STREAM(DOMAIN, NAME, MSGHANDLER,	\
@@ -155,7 +155,7 @@ namespace Network
 	MESSAGE_STREAM(NAME)											\
 
 /**---------------------------------------------------------------------
-/		¡„∏ˆ≤Œ ˝µƒœ˚œ¢
+/		Èõ∂‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS0(NAME)
@@ -184,7 +184,7 @@ namespace Network
 		{															\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS0(DOMAIN, NAME, MSGHANDLER,		\
@@ -193,7 +193,7 @@ namespace Network
 	MESSAGE_ARGS0(NAME)												\
 
 /**---------------------------------------------------------------------
-/		“ª∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰∏Ä‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS1(NAME, ARG_TYPE1, ARG_NAME1)
@@ -235,7 +235,7 @@ namespace Network
 			s >> ARG_NAME1;											\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS1(DOMAIN, NAME, MSGHANDLER,		\
@@ -245,12 +245,12 @@ namespace Network
 	MESSAGE_ARGS1(NAME, ARG_TYPE1, ARG_NAME1)						\
 
 /**---------------------------------------------------------------------
-/		∂˛∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰∫å‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS2(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2)					\
-	
+
 #else
 #define MESSAGE_ARGS2(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2)					\
@@ -306,7 +306,7 @@ namespace Network
 			s >> ARG_NAME2;											\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS2(DOMAIN, NAME, MSGHANDLER,		\
@@ -318,13 +318,13 @@ namespace Network
 						ARG_TYPE2, ARG_NAME2)						\
 
 /**---------------------------------------------------------------------
-/		»˝∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰∏â‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS3(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
 							ARG_TYPE3, ARG_NAME3)					\
-	
+
 #else
 #define MESSAGE_ARGS3(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -393,7 +393,7 @@ namespace Network
 			s >> ARG_NAME3;											\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS3(DOMAIN, NAME, MSGHANDLER,		\
@@ -406,16 +406,16 @@ namespace Network
 						ARG_TYPE2, ARG_NAME2,						\
 						ARG_TYPE3, ARG_NAME3)						\
 
-	
+
 /**---------------------------------------------------------------------
-/		Àƒ∏ˆ≤Œ ˝µƒœ˚œ¢
+/		Âõõ‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS4(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
 							ARG_TYPE3, ARG_NAME3,					\
 							ARG_TYPE4, ARG_NAME4)					\
-	
+
 #else
 #define MESSAGE_ARGS4(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -497,7 +497,7 @@ namespace Network
 			s >> ARG_NAME4;											\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS4(DOMAIN, NAME, MSGHANDLER,		\
@@ -514,7 +514,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		ŒÈ∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰ºç‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS5(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -522,7 +522,7 @@ namespace Network
 							ARG_TYPE3, ARG_NAME3,					\
 							ARG_TYPE4, ARG_NAME4,					\
 							ARG_TYPE5, ARG_NAME5)					\
-	
+
 #else
 #define MESSAGE_ARGS5(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -617,7 +617,7 @@ namespace Network
 			s >> ARG_NAME5;											\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS5(DOMAIN, NAME, MSGHANDLER,		\
@@ -635,7 +635,7 @@ namespace Network
 						ARG_TYPE5, ARG_NAME5)						\
 
 /**---------------------------------------------------------------------
-/		¡˘∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂÖ≠‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS6(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -644,7 +644,7 @@ namespace Network
 							ARG_TYPE4, ARG_NAME4,					\
 							ARG_TYPE5, ARG_NAME5,					\
 							ARG_TYPE6, ARG_NAME6)					\
-	
+
 #else
 #define MESSAGE_ARGS6(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -752,7 +752,7 @@ namespace Network
 			s >> ARG_NAME6;											\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS6(DOMAIN, NAME, MSGHANDLER,		\
@@ -772,7 +772,7 @@ namespace Network
 							ARG_TYPE6, ARG_NAME6)					\
 
 /**---------------------------------------------------------------------
-/		∆ﬂ∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰∏É‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS7(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -782,7 +782,7 @@ namespace Network
 							ARG_TYPE5, ARG_NAME5,					\
 							ARG_TYPE6, ARG_NAME6,					\
 							ARG_TYPE7, ARG_NAME7)					\
-	
+
 #else
 #define MESSAGE_ARGS7(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -903,7 +903,7 @@ namespace Network
 			s >> ARG_NAME7;											\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS7(DOMAIN, NAME, MSGHANDLER,		\
@@ -923,9 +923,9 @@ namespace Network
 							ARG_TYPE5, ARG_NAME5,					\
 							ARG_TYPE6, ARG_NAME6,					\
 							ARG_TYPE7, ARG_NAME7)					\
-	
+
 /**---------------------------------------------------------------------
-/		∞À∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂÖ´‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS8(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -936,7 +936,7 @@ namespace Network
 							ARG_TYPE6, ARG_NAME6,					\
 							ARG_TYPE7, ARG_NAME7,					\
 							ARG_TYPE8, ARG_NAME8)					\
-	
+
 #else
 #define MESSAGE_ARGS8(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -1070,7 +1070,7 @@ namespace Network
 			s >> ARG_NAME8;											\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS8(DOMAIN, NAME, MSGHANDLER,		\
@@ -1093,9 +1093,9 @@ namespace Network
 							ARG_TYPE6, ARG_NAME6,					\
 							ARG_TYPE7, ARG_NAME7,					\
 							ARG_TYPE8, ARG_NAME8)					\
-	
+
 /**---------------------------------------------------------------------
-/		æ≈∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰πù‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS9(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -1107,7 +1107,7 @@ namespace Network
 							ARG_TYPE7, ARG_NAME7,					\
 							ARG_TYPE8, ARG_NAME8,					\
 							ARG_TYPE9, ARG_NAME9)					\
-	
+
 #else
 #define MESSAGE_ARGS9(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -1254,7 +1254,7 @@ namespace Network
 			s >> ARG_NAME9;											\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS9(DOMAIN, NAME, MSGHANDLER,		\
@@ -1279,9 +1279,9 @@ namespace Network
 							ARG_TYPE7, ARG_NAME7,					\
 							ARG_TYPE8, ARG_NAME8,					\
 							ARG_TYPE9, ARG_NAME9)					\
-	
+
 /**---------------------------------------------------------------------
-/		 Æ∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂçÅ‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS10(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -1294,7 +1294,7 @@ namespace Network
 							ARG_TYPE8, ARG_NAME8,					\
 							ARG_TYPE9, ARG_NAME9,					\
 							ARG_TYPE10, ARG_NAME10)					\
-	
+
 #else
 #define MESSAGE_ARGS10(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -1454,7 +1454,7 @@ namespace Network
 			s >> ARG_NAME10;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS10(DOMAIN, NAME, MSGHANDLER,	\
@@ -1481,11 +1481,11 @@ namespace Network
 							ARG_TYPE8, ARG_NAME8,					\
 							ARG_TYPE9, ARG_NAME9,					\
 							ARG_TYPE10, ARG_NAME10)					\
-	
 
-	
+
+
 /**---------------------------------------------------------------------
-/		 Æ“ª∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂçÅ‰∏Ä‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS11(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -1499,7 +1499,7 @@ namespace Network
 							ARG_TYPE9, ARG_NAME9,					\
 							ARG_TYPE10, ARG_NAME10,					\
 							ARG_TYPE11, ARG_NAME11)					\
-	
+
 #else
 #define MESSAGE_ARGS11(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -1672,7 +1672,7 @@ namespace Network
 			s >> ARG_NAME11;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS11(DOMAIN, NAME, MSGHANDLER,	\
@@ -1705,7 +1705,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		 Æ∂˛∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂçÅ‰∫å‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS12(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -1720,7 +1720,7 @@ namespace Network
 							ARG_TYPE10, ARG_NAME10,					\
 							ARG_TYPE11, ARG_NAME11,					\
 							ARG_TYPE12, ARG_NAME12)					\
-	
+
 #else
 #define MESSAGE_ARGS12(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -1906,7 +1906,7 @@ namespace Network
 			s >> ARG_NAME12;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS12(DOMAIN, NAME, MSGHANDLER,	\
@@ -1940,7 +1940,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		 Æ»˝∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂçÅ‰∏â‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS13(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -1956,7 +1956,7 @@ namespace Network
 							ARG_TYPE11, ARG_NAME11,					\
 							ARG_TYPE12, ARG_NAME12,					\
 							ARG_TYPE13, ARG_NAME13)					\
-	
+
 #else
 #define MESSAGE_ARGS13(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -2157,7 +2157,7 @@ namespace Network
 			s >> ARG_NAME13;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS13(DOMAIN, NAME, MSGHANDLER,	\
@@ -2193,7 +2193,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		 ÆÀƒ∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂçÅÂõõ‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS14(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -2210,7 +2210,7 @@ namespace Network
 							ARG_TYPE12, ARG_NAME12,					\
 							ARG_TYPE13, ARG_NAME13,					\
 							ARG_TYPE14, ARG_NAME14)					\
-	
+
 #else
 #define MESSAGE_ARGS14(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -2422,7 +2422,7 @@ namespace Network
 			s >> ARG_NAME14;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS14(DOMAIN, NAME, MSGHANDLER,	\
@@ -2459,7 +2459,7 @@ namespace Network
 							ARG_TYPE14, ARG_NAME14)					\
 
 /**---------------------------------------------------------------------
-/		 ÆŒÂ∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂçÅ‰∫î‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS15(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -2477,7 +2477,7 @@ namespace Network
 							ARG_TYPE13, ARG_NAME13,					\
 							ARG_TYPE14, ARG_NAME14,					\
 							ARG_TYPE15, ARG_NAME15)					\
-	
+
 #else
 #define MESSAGE_ARGS15(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -2702,7 +2702,7 @@ namespace Network
 			s >> ARG_NAME15;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS15(DOMAIN, NAME, MSGHANDLER,	\
@@ -2742,7 +2742,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		 Æ¡˘∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂçÅÂÖ≠‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS16(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -2761,7 +2761,7 @@ namespace Network
 							ARG_TYPE14, ARG_NAME14,					\
 							ARG_TYPE15, ARG_NAME15,					\
 							ARG_TYPE16, ARG_NAME16)					\
-	
+
 #else
 #define MESSAGE_ARGS16(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -2999,7 +2999,7 @@ namespace Network
 			s >> ARG_NAME16;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS16(DOMAIN, NAME, MSGHANDLER,	\
@@ -3041,7 +3041,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		 Æ∆ﬂ∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂçÅ‰∏É‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS17(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -3061,7 +3061,7 @@ namespace Network
 							ARG_TYPE15, ARG_NAME15,					\
 							ARG_TYPE16, ARG_NAME16,					\
 							ARG_TYPE17, ARG_NAME17)					\
-	
+
 #else
 #define MESSAGE_ARGS17(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -3312,7 +3312,7 @@ namespace Network
 			s >> ARG_NAME17;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS17(DOMAIN, NAME, MSGHANDLER,	\
@@ -3356,7 +3356,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		 Æ∞À∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂçÅÂÖ´‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS18(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -3377,7 +3377,7 @@ namespace Network
 							ARG_TYPE16, ARG_NAME16,					\
 							ARG_TYPE17, ARG_NAME17,					\
 							ARG_TYPE18, ARG_NAME18)					\
-	
+
 #else
 #define MESSAGE_ARGS18(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -3641,7 +3641,7 @@ namespace Network
 			s >> ARG_NAME18;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS18(DOMAIN, NAME, MSGHANDLER,	\
@@ -3687,7 +3687,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		 Ææ≈∏ˆ≤Œ ˝µƒœ˚œ¢
+/		ÂçÅ‰πù‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS19(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -3709,7 +3709,7 @@ namespace Network
 							ARG_TYPE17, ARG_NAME17,					\
 							ARG_TYPE18, ARG_NAME18,					\
 							ARG_TYPE19, ARG_NAME19)					\
-	
+
 #else
 #define MESSAGE_ARGS19(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -3986,7 +3986,7 @@ namespace Network
 			s >> ARG_NAME19;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS19(DOMAIN, NAME, MSGHANDLER,	\
@@ -4034,7 +4034,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		∂˛ Æ∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰∫åÂçÅ‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS20(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -4057,7 +4057,7 @@ namespace Network
 							ARG_TYPE18, ARG_NAME18,					\
 							ARG_TYPE19, ARG_NAME19,					\
 							ARG_TYPE20, ARG_NAME20)					\
-	
+
 #else
 #define MESSAGE_ARGS20(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -4347,7 +4347,7 @@ namespace Network
 			s >> ARG_NAME20;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS20(DOMAIN, NAME, MSGHANDLER,	\
@@ -4398,7 +4398,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		∂˛ Æ“ª∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰∫åÂçÅ‰∏Ä‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS21(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -4422,7 +4422,7 @@ namespace Network
 							ARG_TYPE19, ARG_NAME19,					\
 							ARG_TYPE20, ARG_NAME20,					\
 							ARG_TYPE21, ARG_NAME21)					\
-	
+
 #else
 #define MESSAGE_ARGS21(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -4725,7 +4725,7 @@ namespace Network
 			s >> ARG_NAME21;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS21(DOMAIN, NAME, MSGHANDLER,	\
@@ -4778,7 +4778,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		∂˛ Æ∂˛∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰∫åÂçÅ‰∫å‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS22(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -4803,7 +4803,7 @@ namespace Network
 							ARG_TYPE20, ARG_NAME20,					\
 							ARG_TYPE21, ARG_NAME21,					\
 							ARG_TYPE22, ARG_NAME22)					\
-	
+
 #else
 #define MESSAGE_ARGS22(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -5119,7 +5119,7 @@ namespace Network
 			s >> ARG_NAME22;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS22(DOMAIN, NAME, MSGHANDLER,	\
@@ -5174,7 +5174,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		∂˛ Æ»˝∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰∫åÂçÅ‰∏â‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS23(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -5200,7 +5200,7 @@ namespace Network
 							ARG_TYPE21, ARG_NAME21,					\
 							ARG_TYPE22, ARG_NAME22,					\
 							ARG_TYPE23, ARG_NAME23)					\
-	
+
 #else
 #define MESSAGE_ARGS23(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -5529,7 +5529,7 @@ namespace Network
 			s >> ARG_NAME23;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS23(DOMAIN, NAME, MSGHANDLER,	\
@@ -5585,7 +5585,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		∂˛ ÆÀƒ∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰∫åÂçÅÂõõ‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS24(NAME, ARG_TYPE1, ARG_NAME1, 					\
@@ -5612,7 +5612,7 @@ namespace Network
 							ARG_TYPE22, ARG_NAME22,					\
 							ARG_TYPE23, ARG_NAME23,					\
 							ARG_TYPE24, ARG_NAME24)					\
-	
+
 #else
 #define MESSAGE_ARGS24(NAME, ARG_TYPE1, ARG_NAME1, 					\
 							ARG_TYPE2, ARG_NAME2,					\
@@ -5954,7 +5954,7 @@ namespace Network
 			s >> ARG_NAME24;										\
 		}															\
 	};																\
-				
+
 #endif
 
 #define NETWORK_MESSAGE_DECLARE_ARGS24(DOMAIN, NAME, MSGHANDLER,	\
@@ -6012,7 +6012,7 @@ namespace Network
 
 
 /**---------------------------------------------------------------------
-/		∂˛ ÆŒÂ∏ˆ≤Œ ˝µƒœ˚œ¢
+/		‰∫åÂçÅ‰∫î‰∏™ÂèÇÊï∞ÁöÑÊ∂àÊÅØ
 -----------------------------------------------------------------------*/
 #ifdef DEFINE_IN_INTERFACE
 #define MESSAGE_ARGS25(NAME, ARG_TYPE1, ARG_NAME1, 					\

@@ -5,54 +5,54 @@
 
 #include "common/common.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 
 /**
-	·þÎñÆ÷´íÎó£¬ Ö÷ÒªÊÇ·þÎñÆ÷·µ»Ø¸ø¿Í»§¶ËÓÃµÄ¡£
+	æœåŠ¡å™¨é”™è¯¯ï¼Œ ä¸»è¦æ˜¯æœåŠ¡å™¨è¿”å›žç»™å®¢æˆ·ç«¯ç”¨çš„ã€‚
 */
-	
-typedef uint16 SERVER_ERROR_CODE;										// ´íÎóÂëÀà±ð
+
+typedef uint16 SERVER_ERROR_CODE;										// é”™è¯¯ç ç±»åˆ«
 
 
-#define SERVER_SUCCESS										0			// ³É¹¦¡£
-#define SERVER_ERR_SRV_NO_READY								1			// ·þÎñÆ÷Ã»ÓÐ×¼±¸ºÃ¡£
-#define SERVER_ERR_SRV_OVERLOAD								2			// ·þÎñÆ÷¸ºÔØ¹ýÖØ¡£
-#define SERVER_ERR_ILLEGAL_LOGIN							3			// ·Ç·¨µÇÂ¼¡£
-#define SERVER_ERR_NAME_PASSWORD							4			// ÓÃ»§Ãû»òÕßÃÜÂë²»ÕýÈ·¡£
-#define SERVER_ERR_NAME										5			// ÓÃ»§Ãû²»ÕýÈ·¡£
-#define SERVER_ERR_PASSWORD									6			// ÃÜÂë²»ÕýÈ·¡£
-#define SERVER_ERR_ACCOUNT_CREATE_FAILED					7			// ´´½¨ÕËºÅÊ§°Ü¡£
-#define SERVER_ERR_BUSY										8			// ²Ù×÷¹ýÓÚ·±Ã¦(ÀýÈç£ºÔÚ·þÎñÆ÷Ç°Ò»´ÎÇëÇóÎ´Ö´ÐÐÍê±ÏµÄÇé¿öÏÂÁ¬ÐøN´Î´´½¨ÕËºÅ)¡£
-#define SERVER_ERR_ACCOUNT_LOGIN_ANOTHER					9			// µ±Ç°ÕËºÅÔÚÁíÒ»´¦µÇÂ¼ÁË¡£
-#define SERVER_ERR_ACCOUNT_IS_ONLINE						10			// ÄãÒÑ¾­µÇÂ¼ÁË£¬·þÎñÆ÷¾Ü¾øÔÙ´ÎµÇÂ¼¡£
-#define SERVER_ERR_PROXY_DESTROYED							11			// Óë¿Í»§¶Ë¹ØÁªµÄproxyÔÚ·þÎñÆ÷ÉÏÒÑ¾­Ïú»Ù¡£
-#define SERVER_ERR_ENTITYDEFS_NOT_MATCH						12			// entityDefs²»Æ¥Åä¡£
-#define SERVER_ERR_IN_SHUTTINGDOWN							13			// ·þÎñÆ÷ÕýÔÚ¹Ø±ÕÖÐ
-#define SERVER_ERR_NAME_MAIL								14			// emailµØÖ·´íÎó¡£
-#define SERVER_ERR_ACCOUNT_LOCK								15			// ÕËºÅ±»¶³½á¡£
-#define SERVER_ERR_ACCOUNT_DEADLINE							16			// ÕËºÅÒÑ¹ýÆÚ¡£
-#define SERVER_ERR_ACCOUNT_NOT_ACTIVATED					17			// ÕËºÅÎ´¼¤»î¡£
-#define SERVER_ERR_VERSION_NOT_MATCH						18			// Óë·þÎñ¶ËµÄ°æ±¾²»Æ¥Åä¡£
-#define SERVER_ERR_OP_FAILED								19			// ²Ù×÷Ê§°Ü¡£
-#define SERVER_ERR_SRV_STARTING								20			// ·þÎñÆ÷ÕýÔÚÆô¶¯ÖÐ¡£
-#define SERVER_ERR_ACCOUNT_REGISTER_NOT_AVAILABLE			21			// Î´¿ª·ÅÕËºÅ×¢²á¹¦ÄÜ¡£
-#define SERVER_ERR_CANNOT_USE_MAIL							22			// ²»ÄÜÊ¹ÓÃemailµØÖ·¡£
-#define SERVER_ERR_NOT_FOUND_ACCOUNT						23			// ÕÒ²»µ½´ËÕËºÅ¡£
-#define SERVER_ERR_DB										24			// Êý¾Ý¿â´íÎó(Çë¼ì²édbmgrÈÕÖ¾ºÍDB)¡£
-#define SERVER_ERR_USER1									25			// ÓÃ»§×Ô¶¨Òå´íÎóÂë1
-#define SERVER_ERR_USER2									26			// ÓÃ»§×Ô¶¨Òå´íÎóÂë2
-#define SERVER_ERR_USER3									27			// ÓÃ»§×Ô¶¨Òå´íÎóÂë3
-#define SERVER_ERR_USER4									28			// ÓÃ»§×Ô¶¨Òå´íÎóÂë4
-#define SERVER_ERR_USER5									29			// ÓÃ»§×Ô¶¨Òå´íÎóÂë5
-#define SERVER_ERR_USER6									30			// ÓÃ»§×Ô¶¨Òå´íÎóÂë6
-#define SERVER_ERR_USER7									31			// ÓÃ»§×Ô¶¨Òå´íÎóÂë7
-#define SERVER_ERR_USER8									32			// ÓÃ»§×Ô¶¨Òå´íÎóÂë8
-#define SERVER_ERR_USER9									33			// ÓÃ»§×Ô¶¨Òå´íÎóÂë9
-#define SERVER_ERR_USER10									34			// ÓÃ»§×Ô¶¨Òå´íÎóÂë10
-#define SERVER_ERR_LOCAL_PROCESSING							35			// ±¾µØ´¦Àí£¬Í¨³£ÎªÄ³¼þÊÂÇé²»ÓÉµÚÈý·½´¦Àí¶øÊÇÓÉKBE·þÎñÆ÷´¦Àí
-#define SERVER_ERR_ACCOUNT_RESET_PASSWORD_NOT_AVAILABLE		36			// Î´¿ª·ÅÕËºÅÖØÖÃÃÜÂë¹¦ÄÜ¡£
-#define SERVER_ERR_ACCOUNT_LOGIN_ANOTHER_SERVER				37			// µ±Ç°ÕËºÅÔÚÆäËû·þÎñÆ÷µÇÂ½ÁË
-#define SERVER_ERR_MAX										38          // Çë°ÑÕâÌõ·ÅÔÚËùÓÐ´íÎóµÄ×îºóÃæ£¬Õâ±¾Éí²»ÊÇÒ»¸ö´íÎó±êÊ¶£¬½ö±íÊ¾Ò»¹²ÓÐ¶àÉÙÌõ´íÎó¶¨Òå
+#define SERVER_SUCCESS										0			// æˆåŠŸã€‚
+#define SERVER_ERR_SRV_NO_READY								1			// æœåŠ¡å™¨æ²¡æœ‰å‡†å¤‡å¥½ã€‚
+#define SERVER_ERR_SRV_OVERLOAD								2			// æœåŠ¡å™¨è´Ÿè½½è¿‡é‡ã€‚
+#define SERVER_ERR_ILLEGAL_LOGIN							3			// éžæ³•ç™»å½•ã€‚
+#define SERVER_ERR_NAME_PASSWORD							4			// ç”¨æˆ·åæˆ–è€…å¯†ç ä¸æ­£ç¡®ã€‚
+#define SERVER_ERR_NAME										5			// ç”¨æˆ·åä¸æ­£ç¡®ã€‚
+#define SERVER_ERR_PASSWORD									6			// å¯†ç ä¸æ­£ç¡®ã€‚
+#define SERVER_ERR_ACCOUNT_CREATE_FAILED					7			// åˆ›å»ºè´¦å·å¤±è´¥ã€‚
+#define SERVER_ERR_BUSY										8			// æ“ä½œè¿‡äºŽç¹å¿™(ä¾‹å¦‚ï¼šåœ¨æœåŠ¡å™¨å‰ä¸€æ¬¡è¯·æ±‚æœªæ‰§è¡Œå®Œæ¯•çš„æƒ…å†µä¸‹è¿žç»­Næ¬¡åˆ›å»ºè´¦å·)ã€‚
+#define SERVER_ERR_ACCOUNT_LOGIN_ANOTHER					9			// å½“å‰è´¦å·åœ¨å¦ä¸€å¤„ç™»å½•äº†ã€‚
+#define SERVER_ERR_ACCOUNT_IS_ONLINE						10			// ä½ å·²ç»ç™»å½•äº†ï¼ŒæœåŠ¡å™¨æ‹’ç»å†æ¬¡ç™»å½•ã€‚
+#define SERVER_ERR_PROXY_DESTROYED							11			// ä¸Žå®¢æˆ·ç«¯å…³è”çš„proxyåœ¨æœåŠ¡å™¨ä¸Šå·²ç»é”€æ¯ã€‚
+#define SERVER_ERR_ENTITYDEFS_NOT_MATCH						12			// entityDefsä¸åŒ¹é…ã€‚
+#define SERVER_ERR_IN_SHUTTINGDOWN							13			// æœåŠ¡å™¨æ­£åœ¨å…³é—­ä¸­
+#define SERVER_ERR_NAME_MAIL								14			// emailåœ°å€é”™è¯¯ã€‚
+#define SERVER_ERR_ACCOUNT_LOCK								15			// è´¦å·è¢«å†»ç»“ã€‚
+#define SERVER_ERR_ACCOUNT_DEADLINE							16			// è´¦å·å·²è¿‡æœŸã€‚
+#define SERVER_ERR_ACCOUNT_NOT_ACTIVATED					17			// è´¦å·æœªæ¿€æ´»ã€‚
+#define SERVER_ERR_VERSION_NOT_MATCH						18			// ä¸ŽæœåŠ¡ç«¯çš„ç‰ˆæœ¬ä¸åŒ¹é…ã€‚
+#define SERVER_ERR_OP_FAILED								19			// æ“ä½œå¤±è´¥ã€‚
+#define SERVER_ERR_SRV_STARTING								20			// æœåŠ¡å™¨æ­£åœ¨å¯åŠ¨ä¸­ã€‚
+#define SERVER_ERR_ACCOUNT_REGISTER_NOT_AVAILABLE			21			// æœªå¼€æ”¾è´¦å·æ³¨å†ŒåŠŸèƒ½ã€‚
+#define SERVER_ERR_CANNOT_USE_MAIL							22			// ä¸èƒ½ä½¿ç”¨emailåœ°å€ã€‚
+#define SERVER_ERR_NOT_FOUND_ACCOUNT						23			// æ‰¾ä¸åˆ°æ­¤è´¦å·ã€‚
+#define SERVER_ERR_DB										24			// æ•°æ®åº“é”™è¯¯(è¯·æ£€æŸ¥dbmgræ—¥å¿—å’ŒDB)ã€‚
+#define SERVER_ERR_USER1									25			// ç”¨æˆ·è‡ªå®šä¹‰é”™è¯¯ç 1
+#define SERVER_ERR_USER2									26			// ç”¨æˆ·è‡ªå®šä¹‰é”™è¯¯ç 2
+#define SERVER_ERR_USER3									27			// ç”¨æˆ·è‡ªå®šä¹‰é”™è¯¯ç 3
+#define SERVER_ERR_USER4									28			// ç”¨æˆ·è‡ªå®šä¹‰é”™è¯¯ç 4
+#define SERVER_ERR_USER5									29			// ç”¨æˆ·è‡ªå®šä¹‰é”™è¯¯ç 5
+#define SERVER_ERR_USER6									30			// ç”¨æˆ·è‡ªå®šä¹‰é”™è¯¯ç 6
+#define SERVER_ERR_USER7									31			// ç”¨æˆ·è‡ªå®šä¹‰é”™è¯¯ç 7
+#define SERVER_ERR_USER8									32			// ç”¨æˆ·è‡ªå®šä¹‰é”™è¯¯ç 8
+#define SERVER_ERR_USER9									33			// ç”¨æˆ·è‡ªå®šä¹‰é”™è¯¯ç 9
+#define SERVER_ERR_USER10									34			// ç”¨æˆ·è‡ªå®šä¹‰é”™è¯¯ç 10
+#define SERVER_ERR_LOCAL_PROCESSING							35			// æœ¬åœ°å¤„ç†ï¼Œé€šå¸¸ä¸ºæŸä»¶äº‹æƒ…ä¸ç”±ç¬¬ä¸‰æ–¹å¤„ç†è€Œæ˜¯ç”±KBEæœåŠ¡å™¨å¤„ç†
+#define SERVER_ERR_ACCOUNT_RESET_PASSWORD_NOT_AVAILABLE		36			// æœªå¼€æ”¾è´¦å·é‡ç½®å¯†ç åŠŸèƒ½ã€‚
+#define SERVER_ERR_ACCOUNT_LOGIN_ANOTHER_SERVER				37			// å½“å‰è´¦å·åœ¨å…¶ä»–æœåŠ¡å™¨ç™»é™†äº†
+#define SERVER_ERR_MAX										38          // è¯·æŠŠè¿™æ¡æ”¾åœ¨æ‰€æœ‰é”™è¯¯çš„æœ€åŽé¢ï¼Œè¿™æœ¬èº«ä¸æ˜¯ä¸€ä¸ªé”™è¯¯æ ‡è¯†ï¼Œä»…è¡¨ç¤ºä¸€å…±æœ‰å¤šå°‘æ¡é”™è¯¯å®šä¹‰
 
 const char SERVER_ERR_STR[][256] = {
 	"SERVER_SUCCESS",

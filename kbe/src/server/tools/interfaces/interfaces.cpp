@@ -18,17 +18,17 @@
 #include "baseappmgr/baseappmgr_interface.h"
 #include "cellappmgr/cellappmgr_interface.h"
 #include "loginapp/loginapp_interface.h"
-#include "dbmgr/dbmgr_interface.h"	
+#include "dbmgr/dbmgr_interface.h"
 
 namespace KBEngine{
-	
+
 ServerConfig g_serverConfig;
 KBE_SINGLETON_INIT(Interfaces);
 
 
 //-------------------------------------------------------------------------------------
-Interfaces::Interfaces(Network::EventDispatcher& dispatcher, 
-			 Network::NetworkInterface& ninterface, 
+Interfaces::Interfaces(Network::EventDispatcher& dispatcher,
+			 Network::NetworkInterface& ninterface,
 			 COMPONENT_TYPE componentType,
 			 COMPONENT_ID componentID):
 	PythonApp(dispatcher, ninterface, componentType, componentID),
@@ -47,12 +47,12 @@ Interfaces::~Interfaces()
 	mainProcessTimer_.cancel();
 
 	if(reqCreateAccount_requests_.size() > 0)
-	{	
+	{
 		int i = 0;
 		REQCREATE_MAP::iterator iter = reqCreateAccount_requests_.begin();
 		for(; iter != reqCreateAccount_requests_.end(); ++iter)
 		{
-			WARNING_MSG(fmt::format("Interfaces::~Interfaces(): Discarding {0}/{1} reqCreateAccount[{2:p}] tasks.\n", 
+			WARNING_MSG(fmt::format("Interfaces::~Interfaces(): Discarding {0}/{1} reqCreateAccount[{2:p}] tasks.\n",
 				++i, reqCreateAccount_requests_.size(), (void*)iter->second));
 		}
 	}
@@ -63,23 +63,23 @@ Interfaces::~Interfaces()
 		REQLOGIN_MAP::iterator iter = reqAccountLogin_requests_.begin();
 		for(; iter != reqAccountLogin_requests_.end(); ++iter)
 		{
-			WARNING_MSG(fmt::format("Interfaces::~Interfaces(): Discarding {0}/{1} reqAccountLogin[{2:p}] tasks.\n", 
+			WARNING_MSG(fmt::format("Interfaces::~Interfaces(): Discarding {0}/{1} reqAccountLogin[{2:p}] tasks.\n",
 				++i, reqAccountLogin_requests_.size(), (void*)iter->second));
 		}
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Interfaces::onShutdownBegin()
 {
 	PythonApp::onShutdownBegin();
 
-	// Õ®÷™Ω≈±æ
+	// ÈÄöÁü•ËÑöÊú¨
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 	SCRIPT_OBJECT_CALL_ARGS0(getEntryScript().get(), const_cast<char*>("onInterfaceAppShutDown"), false);
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Interfaces::onShutdownEnd()
 {
 	PythonApp::onShutdownEnd();
@@ -112,7 +112,7 @@ void Interfaces::handleMainTick()
 	// time_t t = ::time(NULL);
 	// static int kbeTime = 0;
 	// DEBUG_MSG(fmt::format("Interfaces::handleGameTick[{}]:{}\n", t, ++kbeTime));
-	
+
 	threadPool_.onMainThreadTick();
 	networkInterface().processChannels(&InterfacesInterface::messageHandlers);
 }
@@ -128,7 +128,7 @@ bool Interfaces::inInitialize()
 {
 	PythonApp::inInitialize();
 
-	// π„≤•◊‘º∫µƒµÿ÷∑∏¯Õ¯…œ…œµƒÀ˘”–kbemachine
+	// ÂπøÊí≠Ëá™Â∑±ÁöÑÂú∞ÂùÄÁªôÁΩë‰∏ä‰∏äÁöÑÊâÄÊúâkbemachine
 	Components::getSingleton().pHandler(this);
 	return true;
 }
@@ -141,7 +141,7 @@ bool Interfaces::initializeEnd()
 	mainProcessTimer_ = this->dispatcher().addTimer(1000000 / g_kbeSrvConfig.gameUpdateHertz(), this,
 							reinterpret_cast<void *>(TIMEOUT_TICK));
 
-	// ≤ª◊ˆ∆µµ¿≥¨ ±ºÏ≤È
+	// ‰∏çÂÅöÈ¢ëÈÅìË∂ÖÊó∂Ê£ÄÊü•
 	CLOSE_CHANNEL_INACTIVITIY_DETECTION();
 
 	if (!initDB())
@@ -149,9 +149,9 @@ bool Interfaces::initializeEnd()
 
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 
-	// À˘”–Ω≈±æ∂ºº”‘ÿÕÍ±œ
-	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(), 
-										const_cast<char*>("onInterfaceAppReady"), 
+	// ÊâÄÊúâËÑöÊú¨ÈÉΩÂä†ËΩΩÂÆåÊØï
+	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
+										const_cast<char*>("onInterfaceAppReady"),
 										const_cast<char*>(""));
 
 	if(pyResult != NULL)
@@ -170,7 +170,7 @@ bool Interfaces::initializeEnd()
 	return ret;
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 void Interfaces::onInstallPyModules()
 {
 	PyObject * module = getScript().getModule();
@@ -189,7 +189,7 @@ void Interfaces::onInstallPyModules()
 	APPEND_SCRIPT_MODULE_METHOD(module,		executeRawDatabaseCommand,		__py_executeRawDatabaseCommand,							METH_VARARGS,	0);
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 bool Interfaces::initDB()
 {
 	return true;
@@ -429,7 +429,7 @@ void Interfaces::onExecuteRawDatabaseCommandCB(Network::Channel* pChannel, KBEng
 
 	s.done();
 
-	//DEBUG_MSG(fmt::format("Cellapp::onExecuteRawDatabaseCommandCB: nrows={}, nfields={}, err={}.\n", 
+	//DEBUG_MSG(fmt::format("Cellapp::onExecuteRawDatabaseCommandCB: nrows={}, nfields={}, err={}.\n",
 	//	nrows, nfields, err.c_str()));
 
 	if (callbackID > 0)
@@ -477,10 +477,10 @@ void Interfaces::eraseOrders(std::string ordersid)
 bool Interfaces::hasOrders(std::string ordersid)
 {
 	bool ret = false;
-	
+
 	ORDERS::iterator iter = orders_.find(ordersid);
 	ret = (iter != orders_.end());
-	
+
 	return ret;
 }
 
@@ -493,7 +493,7 @@ void Interfaces::reqCreateAccount(Network::Channel* pChannel, KBEngine::MemorySt
 
 	s >> cid >> registerName >> password >> accountType;
 	s.readBlob(datas);
-	
+
 	if(accountType == (uint8)ACCOUNT_TYPE_MAIL)
 	{
 	}
@@ -518,14 +518,14 @@ void Interfaces::reqCreateAccount(Network::Channel* pChannel, KBEngine::MemorySt
 
 	reqCreateAccount_requests_[pinfo->commitName] = pinfo;
 
-	// ∞—«Î«ÛΩª”…Ω≈±æ¥¶¿Ì
+	// ÊääËØ∑Ê±Ç‰∫§Áî±ËÑöÊú¨Â§ÑÁêÜ
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 	SCOPED_PROFILE(SCRIPTCALL_CREATEACCOUNT_PROFILE);
 
-	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(), 
-										const_cast<char*>("onRequestCreateAccount"), 
-										const_cast<char*>("ssy#"), 
-										registerName.c_str(), 
+	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
+										const_cast<char*>("onRequestCreateAccount"),
+										const_cast<char*>("ssy#"),
+										registerName.c_str(),
 										password.c_str(),
 										datas.c_str(), datas.length());
 
@@ -536,18 +536,18 @@ void Interfaces::reqCreateAccount(Network::Channel* pChannel, KBEngine::MemorySt
 }
 
 //-------------------------------------------------------------------------------------
-void Interfaces::createAccountResponse(std::string commitName, std::string realAccountName, 
+void Interfaces::createAccountResponse(std::string commitName, std::string realAccountName,
 	std::string extraDatas, KBEngine::SERVER_ERROR_CODE errorCode)
 {
 	REQCREATE_MAP::iterator iter = reqCreateAccount_requests_.find(commitName);
 	if (iter == reqCreateAccount_requests_.end())
 	{
-		// ¿Ì¬€…œ≤ªø…ƒ‹’“≤ªµΩ£¨µ´»Áπ˚’Ê’“≤ªµΩ£¨’‚ «∏ˆ∫‹ø÷≤¿µƒ ¬«È£¨±ÿ–Î–¥»’÷æº«¬ºœ¬¿¥
+		// ÁêÜËÆ∫‰∏ä‰∏çÂèØËÉΩÊâæ‰∏çÂà∞Ôºå‰ΩÜÂ¶ÇÊûúÁúüÊâæ‰∏çÂà∞ÔºåËøôÊòØ‰∏™ÂæàÊÅêÊÄñÁöÑ‰∫ãÊÉÖÔºåÂøÖÈ°ªÂÜôÊó•ÂøóËÆ∞ÂΩï‰∏ãÊù•
 		ERROR_MSG(fmt::format("Interfaces::createAccountResponse: accountName '{}' not found!" \
-			"realAccountName = '{}', extra datas = '{}', error code = '{}'\n", 
-			commitName, 
-			realAccountName, 
-			extraDatas, 
+			"realAccountName = '{}', extra datas = '{}', error code = '{}'\n",
+			commitName,
+			realAccountName,
+			extraDatas,
 			errorCode));
 
 		return;
@@ -575,7 +575,7 @@ void Interfaces::createAccountResponse(std::string commitName, std::string realA
 		Network::Bundle::reclaimPoolObject(pBundle);
 	}
 
-	// «Â¿Ì
+	// Ê∏ÖÁêÜ
 	reqCreateAccount_requests_.erase(iter);
 	delete task;
 }
@@ -602,7 +602,7 @@ PyObject* Interfaces::__py_createAccountResponse(PyObject* self, PyObject* args)
 }
 
 //-------------------------------------------------------------------------------------
-void Interfaces::onAccountLogin(Network::Channel* pChannel, KBEngine::MemoryStream& s) 
+void Interfaces::onAccountLogin(Network::Channel* pChannel, KBEngine::MemoryStream& s)
 {
 	std::string loginName, accountName, password, datas;
 	COMPONENT_ID cid;
@@ -630,15 +630,15 @@ void Interfaces::onAccountLogin(Network::Channel* pChannel, KBEngine::MemoryStre
 
 	reqAccountLogin_requests_[pinfo->commitName] = pinfo;
 
-	// ∞—«Î«ÛΩª”…Ω≈±æ¥¶¿Ì
+	// ÊääËØ∑Ê±Ç‰∫§Áî±ËÑöÊú¨Â§ÑÁêÜ
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 	SCOPED_PROFILE(SCRIPTCALL_ACCOUNTLOGIN_PROFILE);
 
-	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(), 
-										const_cast<char*>("onRequestAccountLogin"), 
-										const_cast<char*>("ssy#"), 
-										loginName.c_str(), 
-										password.c_str(), 
+	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
+										const_cast<char*>("onRequestAccountLogin"),
+										const_cast<char*>("ssy#"),
+										loginName.c_str(),
+										password.c_str(),
 										datas.c_str(), datas.length());
 
 	if(pyResult != NULL)
@@ -648,18 +648,18 @@ void Interfaces::onAccountLogin(Network::Channel* pChannel, KBEngine::MemoryStre
 }
 
 //-------------------------------------------------------------------------------------
-void Interfaces::accountLoginResponse(std::string commitName, std::string realAccountName, 
+void Interfaces::accountLoginResponse(std::string commitName, std::string realAccountName,
 	std::string extraDatas, KBEngine::SERVER_ERROR_CODE errorCode)
 {
 	REQLOGIN_MAP::iterator iter = reqAccountLogin_requests_.find(commitName);
 	if (iter == reqAccountLogin_requests_.end())
 	{
-		// ¿Ì¬€…œ≤ªø…ƒ‹’“≤ªµΩ£¨µ´»Áπ˚’Ê’“≤ªµΩ£¨’‚ «∏ˆ∫‹ø÷≤¿µƒ ¬«È£¨±ÿ–Î–¥»’÷æº«¬ºœ¬¿¥
+		// ÁêÜËÆ∫‰∏ä‰∏çÂèØËÉΩÊâæ‰∏çÂà∞Ôºå‰ΩÜÂ¶ÇÊûúÁúüÊâæ‰∏çÂà∞ÔºåËøôÊòØ‰∏™ÂæàÊÅêÊÄñÁöÑ‰∫ãÊÉÖÔºåÂøÖÈ°ªÂÜôÊó•ÂøóËÆ∞ÂΩï‰∏ãÊù•
 		ERROR_MSG(fmt::format("Interfaces::accountLoginResponse: commitName '{}' not found! " \
-			"realAccountName = '{}', extra datas = '{}', error code = '{}'\n", 
-			commitName, 
-			realAccountName, 
-			extraDatas, 
+			"realAccountName = '{}', extra datas = '{}', error code = '{}'\n",
+			commitName,
+			realAccountName,
+			extraDatas,
 			errorCode));
 
 		return;
@@ -668,7 +668,7 @@ void Interfaces::accountLoginResponse(std::string commitName, std::string realAc
 	LoginAccountTask *task = iter->second;
 
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
-	
+
 	(*pBundle).newMessage(DbmgrInterface::onLoginAccountCBBFromInterfaces);
 	(*pBundle) << task->baseappID << commitName << realAccountName << task->password << errorCode;
 
@@ -687,7 +687,7 @@ void Interfaces::accountLoginResponse(std::string commitName, std::string realAc
 		Network::Bundle::reclaimPoolObject(pBundle);
 	}
 
-	// «Â¿Ì
+	// Ê∏ÖÁêÜ
 	reqAccountLogin_requests_.erase(iter);
 	delete task;
 }
@@ -744,16 +744,16 @@ void Interfaces::charge(Network::Channel* pChannel, KBEngine::MemoryStream& s)
 	pinfo->orders = *pOrdersCharge;
 	pinfo->pOrders = pOrdersCharge;
 	orders_[pOrdersCharge->ordersID].reset(pOrdersCharge);
-	
-	// ∞—«Î«ÛΩª”…Ω≈±æ¥¶¿Ì
+
+	// ÊääËØ∑Ê±Ç‰∫§Áî±ËÑöÊú¨Â§ÑÁêÜ
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 	SCOPED_PROFILE(SCRIPTCALL_CHARGE_PROFILE);
 
-	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(), 
-										const_cast<char*>("onRequestCharge"), 
-										const_cast<char*>("sKy#"), 
+	PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
+										const_cast<char*>("onRequestCharge"),
+										const_cast<char*>("sKy#"),
 										pOrdersCharge->ordersID.c_str(),
-										pOrdersCharge->dbid, 
+										pOrdersCharge->dbid,
 										pOrdersCharge->postDatas.c_str(), pOrdersCharge->postDatas.length());
 
 	if(pyResult != NULL)
@@ -768,14 +768,14 @@ void Interfaces::chargeResponse(std::string orderID, std::string extraDatas, KBE
 	ORDERS::iterator iter = orders_.find(orderID);
 	if (iter == orders_.end())
 	{
-		ERROR_MSG(fmt::format("Interfaces::chargeResponse: order id '{}' not found! extra datas = '{}', error code = '{}'\n", 
-			orderID, 
-			extraDatas, 
+		ERROR_MSG(fmt::format("Interfaces::chargeResponse: order id '{}' not found! extra datas = '{}', error code = '{}'\n",
+			orderID,
+			extraDatas,
 			errorCode));
-		
-		// ’‚÷÷«Èøˆ“≤–Ë“™baseapp¥¶¿ÌonLoseChargeCB
-		// ¿˝»Áƒ≥–© ±∫ÚøÕªß∂À≥ˆŒ Ã‚Œ¥œÚ∑˛ŒÒ∆˜◊¢≤·’‚∏ˆ∂©µ•∫≈£¨µ´ «º∆∑—∆ΩÃ®”–∑µªÿµƒ«Èøˆ
-		// Ω´∂©µ•∑¢ÀÕ∏¯◊¢≤·µƒÀ˘”–µƒdbmgr
+
+		// ËøôÁßçÊÉÖÂÜµ‰πüÈúÄË¶ÅbaseappÂ§ÑÁêÜonLoseChargeCB
+		// ‰æãÂ¶ÇÊüê‰∫õÊó∂ÂÄôÂÆ¢Êà∑Á´ØÂá∫ÈóÆÈ¢òÊú™ÂêëÊúçÂä°Âô®Ê≥®ÂÜåËøô‰∏™ËÆ¢ÂçïÂè∑Ôºå‰ΩÜÊòØËÆ°Ë¥πÂπ≥Âè∞ÊúâËøîÂõûÁöÑÊÉÖÂÜµ
+		// Â∞ÜËÆ¢ÂçïÂèëÈÄÅÁªôÊ≥®ÂÜåÁöÑÊâÄÊúâÁöÑdbmgr
 		const Network::NetworkInterface::ChannelMap& channels = Interfaces::getSingleton().networkInterface().channels();
 		if(channels.size() > 0)
 		{
@@ -802,7 +802,7 @@ void Interfaces::chargeResponse(std::string orderID, std::string extraDatas, KBE
 		}
 		else
 		{
-			ERROR_MSG(fmt::format("Interfaces::chargeResponse: not found channels. orders={}, datas={}\n", 
+			ERROR_MSG(fmt::format("Interfaces::chargeResponse: not found channels. orders={}, datas={}\n",
 				orderID, extraDatas));
 		}
 
@@ -828,7 +828,7 @@ void Interfaces::chargeResponse(std::string orderID, std::string extraDatas, KBE
 	}
 	else
 	{
-		ERROR_MSG(fmt::format("Interfaces::chargeResponse: not found channels. orders={}, datas={}\n", 
+		ERROR_MSG(fmt::format("Interfaces::chargeResponse: not found channels. orders={}, datas={}\n",
 			orderID, extraDatas));
 
 		Network::Bundle::reclaimPoolObject(pBundle);

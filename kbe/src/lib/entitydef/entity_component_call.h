@@ -28,7 +28,7 @@ class PropertyDescription;
 
 class EntityComponentCall : public EntityCallAbstract
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
 	INSTANCE_SCRIPT_HREADER(EntityComponentCall, EntityCallAbstract)
 public:
 	typedef std::function<RemoteEntityMethod* (MethodDescription* pMethodDescription, EntityComponentCall* pEntityCall)> EntityCallCallHookFunc;
@@ -43,12 +43,12 @@ public:
 	}
 
 	/** 
-		½Å±¾ÇëÇó»ñÈ¡ÊôĞÔ»òÕß·½·¨ 
+		è„šæœ¬è¯·æ±‚è·å–å±æ€§æˆ–è€…æ–¹æ³• 
 	*/
 	PyObject* onScriptGetAttribute(PyObject* attr);						
 
 	/** 
-		»ñµÃ¶ÔÏóµÄÃèÊö 
+		è·å¾—å¯¹è±¡çš„æè¿° 
 	*/
 	PyObject* tp_repr();
 	PyObject* tp_str();
@@ -56,14 +56,14 @@ public:
 	void c_str(char* s, size_t size);
 
 	/** 
-		½Å±¾±»°²×°Ê±±»µ÷ÓÃ 
+		è„šæœ¬è¢«å®‰è£…æ—¶è¢«è°ƒç”¨ 
 	*/
 	static void onInstallScript(PyObject* mod);
 
 	virtual RemoteEntityMethod* createRemoteMethod(MethodDescription* pMethodDescription);
 
 	/**
-		unpickle·½·¨
+		unpickleæ–¹æ³•
 	*/
 	static PyObject* __unpickle__(PyObject* self, PyObject* args);
 

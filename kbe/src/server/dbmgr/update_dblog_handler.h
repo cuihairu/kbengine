@@ -10,8 +10,8 @@
 namespace KBEngine{
 
 class UpdateDBServerLogHandler : public TimerHandler
-{	
-public:	
+{
+public:
 	UpdateDBServerLogHandler();
 
 	~UpdateDBServerLogHandler();
@@ -22,9 +22,9 @@ private:
 	virtual void onRelease( TimerHandle handle, void * /*pUser*/ ){};
 
 	void cancel();
-	
+
 	TimerHandle* pTimerHandle_;
-};	
+};
 
 
 }

@@ -6,7 +6,7 @@
 #include "helper/memory_helper.h"
 
 #include "serverapp.h"
-#include "Python.h"
+#include "pyscript/python_wrapper.h"
 #include "common/common.h"
 #include "common/kbekey.h"
 #include "common/stringconv.h"
@@ -28,7 +28,7 @@ namespace KBEngine{
 inline void START_MSG(const char * name, uint64 appuid)
 {
 	MachineInfos machineInfo;
-	
+
 	std::string s = (fmt::format("---- {} "
 			"Version: {}. "
 			"ScriptVersion: {}. "
@@ -45,7 +45,7 @@ inline void START_MSG(const char * name, uint64 appuid)
 		appuid, getUserUID(), getProcessPID()));
 
 	INFO_MSG(s);
-	
+
 #if KBE_PLATFORM == PLATFORM_WIN32
 	printf("%s", s.c_str());
 #endif
@@ -85,7 +85,7 @@ inline void setEvns()
 		int32 icomponentGroupOrder = g_componentGroupOrder;
 		scomponentGroupOrder = KBEngine::StringConv::val2str(icomponentGroupOrder);
 	}
-	
+
 	if(g_componentGlobalOrder > 0)
 	{
 		int32 icomponentGlobalOrder = g_componentGlobalOrder;
@@ -111,7 +111,7 @@ inline bool checkComponentID(COMPONENT_TYPE componentType)
 	if ((componentType == MACHINE_TYPE || componentType == LOGGER_TYPE) && g_componentID == (COMPONENT_ID)-1)
 	{
 		int macMD5 = getMacMD5();
-		
+
 		COMPONENT_ID cid1 = (COMPONENT_ID)uid * COMPONENT_ID_MULTIPLE;
 		COMPONENT_ID cid2 = (COMPONENT_ID)macMD5 * 10000;
 		COMPONENT_ID cid3 = (COMPONENT_ID)componentType * 100;
@@ -139,8 +139,8 @@ inline bool checkComponentID(COMPONENT_TYPE componentType)
 }
 
 template <class SERVER_APP>
-int kbeMainT(int argc, char * argv[], COMPONENT_TYPE componentType, 
-	int32 extlisteningTcpPort_min = -1, int32 extlisteningTcpPort_max = -1, 
+int kbeMainT(int argc, char * argv[], COMPONENT_TYPE componentType,
+	int32 extlisteningTcpPort_min = -1, int32 extlisteningTcpPort_max = -1,
 	int32 extlisteningUdpPort_min = -1, int32 extlisteningUdpPort_max = -1, const char * extlisteningInterface = "",
 	int32 intlisteningPort_min = 0, int32 intlisteningPort_max = 0, const char * intlisteningInterface = "")
 {
@@ -167,7 +167,7 @@ int kbeMainT(int argc, char * argv[], COMPONENT_TYPE componentType,
 		publicKeyPath = Resmgr::getSingleton().matchPath("key/") + "kbengine_public.key";
 		privateKeyPath = Resmgr::getSingleton().matchPath("key/") + "kbengine_private.key";
 	}
-	
+
 	KBEKey kbekey(publicKeyPath, privateKeyPath);
 
 	Resmgr::getSingleton().print();
@@ -179,24 +179,24 @@ int kbeMainT(int argc, char * argv[], COMPONENT_TYPE componentType,
 
 	Network::g_SOMAXCONN = g_kbeSrvConfig.tcp_SOMAXCONN(g_componentType);
 
-	Network::NetworkInterface networkInterface(&dispatcher, 
+	Network::NetworkInterface networkInterface(&dispatcher,
 		extlisteningTcpPort_min, extlisteningTcpPort_max, extlisteningUdpPort_min, extlisteningUdpPort_max, extlisteningInterface,
 		channelCommon.extReadBufferSize, channelCommon.extWriteBufferSize,
 		intlisteningPort_min, intlisteningPort_max, intlisteningInterface,
 		channelCommon.intReadBufferSize, channelCommon.intWriteBufferSize);
-	
+
 	DebugHelper::getSingleton().pNetworkInterface(&networkInterface);
 
-	g_kbeSrvConfig.updateInfos(true, componentType, g_componentID, 
+	g_kbeSrvConfig.updateInfos(true, componentType, g_componentID,
 			networkInterface.intTcpAddr(), networkInterface.extTcpAddr(), networkInterface.extUdpAddr());
-	
+
 	if (getuid <= 0)
 	{
 		WARNING_MSG(fmt::format("invalid UID({}) <= 0, please check UID for environment! automatically set to {}.\n", getuid, getUserUID()));
 	}
 
 	Components::getSingleton().initialize(&networkInterface, componentType, g_componentID);
-	
+
 	SERVER_APP app(dispatcher, networkInterface, componentType, g_componentID);
 	Components::getSingleton().findLogger();
 	START_MSG(COMPONENT_NAME_EX(componentType), g_componentID);
@@ -208,29 +208,29 @@ int kbeMainT(int argc, char * argv[], COMPONENT_TYPE componentType,
 		Components::getSingleton().finalise();
 		app.finalise();
 
-		// 如果还有日志未同步完成， 这里会继续同步完成才结束
+		// 濡傛灉杩樻湁鏃ュ織鏈悓姝ュ畬鎴愶紝 杩欓噷浼氱户缁悓姝ュ畬鎴愭墠缁撴潫
 		DebugHelper::getSingleton().finalise();
 
 #if KBE_PLATFORM == PLATFORM_WIN32
-		// 等待几秒，让用户能够在窗口上看到信息
+		// 绛夊緟鍑犵锛岃鐢ㄦ埛鑳藉鍦ㄧ獥鍙ｄ笂鐪嬪埌淇℃伅
 		Beep(587, 500);
 		KBEngine::sleep(5000);
 #endif
 		return -1;
 	}
-	
+
 	INFO_MSG(fmt::format("---- {} is running ----\n", COMPONENT_NAME_EX(componentType)));
 
 #if KBE_PLATFORM == PLATFORM_WIN32
 	printf("[INFO]: %s", (fmt::format("---- {} is running ----\n", COMPONENT_NAME_EX(componentType))).c_str());
 #endif
 	int ret = app.run();
-	
+
 	Components::getSingleton().finalise();
 	app.finalise();
 	INFO_MSG(fmt::format("{}({}) has shut down.\n", COMPONENT_NAME_EX(componentType), g_componentID));
 
-	// 如果还有日志未同步完成， 这里会继续同步完成才结束
+	// 濡傛灉杩樻湁鏃ュ織鏈悓姝ュ畬鎴愶紝 杩欓噷浼氱户缁悓姝ュ畬鎴愭墠缁撴潫
 	DebugHelper::getSingleton().finalise();
 	return ret;
 }
@@ -246,7 +246,7 @@ inline void parseMainCommandArgs(int argc, char* argv[])
 	for(int argIdx=1; argIdx<argc; ++argIdx)
 	{
 		std::string cmd = argv[argIdx];
-		
+
 		std::string findcmd = "--cid=";
 		std::string::size_type fi1 = cmd.find(findcmd);
 		if(fi1 != std::string::npos)

@@ -19,11 +19,11 @@ SCRIPT_MEMBER_DECLARE_END()
 
 SCRIPT_GETSET_DECLARE_BEGIN(RealEntityMethod)
 SCRIPT_GETSET_DECLARE_END()
-SCRIPT_INIT(RealEntityMethod, tp_call, 0, 0, 0, 0)	
+SCRIPT_INIT(RealEntityMethod, tp_call, 0, 0, 0, 0)
 
 //-------------------------------------------------------------------------------------
 RealEntityMethod::RealEntityMethod(PropertyDescription* pComponentPropertyDescription,
-	MethodDescription* methodDescription, 
+	MethodDescription* methodDescription,
 	Entity* ghostEntity):
 script::ScriptObject(getScriptType(), false),
 pComponentPropertyDescription_(pComponentPropertyDescription),
@@ -40,8 +40,8 @@ RealEntityMethod::~RealEntityMethod()
 }
 
 //-------------------------------------------------------------------------------------
-PyObject* RealEntityMethod::tp_call(PyObject* self, PyObject* args, 
-	PyObject* kwds)	
+PyObject* RealEntityMethod::tp_call(PyObject* self, PyObject* args,
+	PyObject* kwds)
 {
 	RealEntityMethod* rmethod = static_cast<RealEntityMethod*>(self);
 	return rmethod->callmethod(args, kwds);
@@ -61,7 +61,7 @@ PyObject* RealEntityMethod::callmethod(PyObject* args, PyObject* kwds)
 	{
 		MemoryStream* mstream = MemoryStream::createPoolObject(OBJECTPOOL_POINT);
 
-		// »Áπ˚ «∏¯◊Èº˛µƒœ˚œ¢
+		// Â¶ÇÊûúÊòØÁªôÁªÑ‰ª∂ÁöÑÊ∂àÊÅØ
 		if (pComponentPropertyDescription_)
 		{
 			(*mstream) << pComponentPropertyDescription_->getUType();
@@ -102,10 +102,10 @@ PyObject* RealEntityMethod::callmethod(PyObject* args, PyObject* kwds)
 
 			switch(Network::g_trace_packet)
 			{
-			case 1:	
+			case 1:
 				mstream->hexlike();
 				break;
-			case 2:	
+			case 2:
 				mstream->textlike();
 				break;
 			default:
@@ -117,10 +117,10 @@ PyObject* RealEntityMethod::callmethod(PyObject* args, PyObject* kwds)
 				DebugHelper::getSingleton().changeLogger(COMPONENT_NAME_EX(g_componentType));
 		}
 
-		// º«¬º’‚∏ˆ ¬º˛≤˙…˙µƒ ˝æ›¡ø¥Û–°
-		g_publicCellEventHistoryStats.trackEvent(scriptName_, 
-			methodDescription->getName(), 
-			pForwardBundle->currMsgLength(), 
+		// ËÆ∞ÂΩïËøô‰∏™‰∫ã‰ª∂‰∫ßÁîüÁöÑÊï∞ÊçÆÈáèÂ§ßÂ∞è
+		g_publicCellEventHistoryStats.trackEvent(scriptName_,
+			methodDescription->getName(),
+			pForwardBundle->currMsgLength(),
 			"::");
 
 		MemoryStream::reclaimPoolObject(mstream);

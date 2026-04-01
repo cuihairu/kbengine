@@ -4,7 +4,8 @@
 
 #include "common/common.h"
 #include "common/timestamp.h"
-#include "helper/debug_helper.h"
+
+#include <cassert>
 
 namespace KBEngine
 {
@@ -35,8 +36,8 @@ inline bool operator==( TimerHandle h1, TimerHandle h2 )
 
 
 /**
- *	必须继承这个接口
- *	来接收timer->handleTimeout事件
+ *	蹇呴』缁ф壙杩欎釜鎺ュ彛
+ *	鏉ユ帴鏀秚imer->handleTimeout浜嬩欢
  */
 class TimerHandler
 {
@@ -44,7 +45,7 @@ public:
 	TimerHandler() : numTimesRegistered_( 0 ) {}
 	virtual ~TimerHandler()
 	{
-		KBE_ASSERT( numTimesRegistered_ == 0 );
+		assert( numTimesRegistered_ == 0 );
 	};
 
 	virtual void handleTimeout(TimerHandle handle, void * pUser) = 0;
@@ -71,9 +72,9 @@ private:
 class TimeBase
 {
 public:
-	TimeBase(TimersBase &owner, TimerHandler* pHandler, 
+	TimeBase(TimersBase &owner, TimerHandler* pHandler,
 		void* pUserData);
-	
+
 	virtual ~TimeBase(){}
 
 	void cancel();
@@ -111,25 +112,25 @@ public:
 
 	TimersT();
 	virtual ~TimersT();
-	
+
 	inline uint32 size() const	{ return timeQueue_.size(); }
 	inline bool empty() const	{ return timeQueue_.empty(); }
-	
+
 	int	process(TimeStamp now);
 	bool legal( TimerHandle handle ) const;
 	TIME_STAMP nextExp( TimeStamp now ) const;
 	void clear( bool shouldCallCancel = true );
-	
-	bool getTimerInfo( TimerHandle handle, 
-					TimeStamp& time, 
+
+	bool getTimerInfo( TimerHandle handle,
+					TimeStamp& time,
 					TimeStamp&	interval,
 					void *&	pUser ) const;
-	
+
 	TimerHandle	add(TimeStamp startTime, TimeStamp interval,
 						TimerHandler* pHandler, void * pUser);
-	
+
 private:
-	
+
 	typedef std::vector<KBEngine::TimeBase *> Container;
 	Container container_;
 
@@ -163,7 +164,7 @@ private:
 			return a->time() > b->time();
 		}
 	};
-	
+
 	class PriorityQueue
 	{
 	public:
@@ -197,7 +198,8 @@ private:
 			return pTime;
 		}
 
-		Container & container()		{ return container_; }
+		Container & container()				{ return container_; }
+	const Container & container() const	{ return container_; }
 
 		void make_heap()
 		{
@@ -208,7 +210,7 @@ private:
 	private:
 		Container container_;
 	};
-	
+
 	PriorityQueue	timeQueue_;
 	Time * 			pProcessingNode_;
 	TimeStamp 		lastProcessTime_;

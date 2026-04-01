@@ -9,13 +9,13 @@
 #pragma warning (disable : 4996)
 #endif
 
-#include <stdarg.h> 
+#include <stdarg.h>
 #include "helper/debug_helper.h"
 #include "helper/watcher.h"
 #include "helper/profile.h"
 #include "helper/profiler.h"
 #include "helper/profile_handler.h"
-#include "xml/xml.h"	
+#include "xml/xml.h"
 #include "server/common.h"
 #include "server/components.h"
 #include "server/serverconfig.h"
@@ -29,7 +29,7 @@
 #include "network/network_interface.h"
 #include "thread/threadpool.h"
 
-	
+
 namespace KBEngine{
 
 namespace Network
@@ -41,9 +41,9 @@ class Channel;
 class Shutdowner;
 class ComponentActiveReportHandler;
 
-class ServerApp : 
-	public SignalHandler, 
-	public TimerHandler, 
+class ServerApp :
+	public SignalHandler,
+	public TimerHandler,
 	public ShutdownHandler,
 	public Network::ChannelTimeOutHandler,
 	public Network::ChannelDeregisterHandler,
@@ -56,8 +56,8 @@ public:
 	};
 
 public:
-	ServerApp(Network::EventDispatcher& dispatcher, 
-			Network::NetworkInterface& ninterface, 
+	ServerApp(Network::EventDispatcher& dispatcher,
+			Network::NetworkInterface& ninterface,
 			COMPONENT_TYPE componentType,
 			COMPONENT_ID componentID);
 
@@ -69,7 +69,7 @@ public:
 	virtual bool initializeEnd() {return true; }
 	virtual void finalise();
 	virtual bool run();
-	
+
 	virtual bool initThreadPool();
 
 	virtual bool installSignals();
@@ -78,7 +78,7 @@ public:
 
 	virtual bool loadConfig();
 	const char* name(){return COMPONENT_NAME_EX(componentType_);}
-	
+
 	virtual void handleTimeout(TimerHandle, void * pUser);
 
 	GAME_TIME time() const { return g_kbetime; }
@@ -93,7 +93,7 @@ public:
 
 	COMPONENT_ID componentID() const	{ return componentID_; }
 	COMPONENT_TYPE componentType() const	{ return componentType_; }
-		
+
 	virtual void onSignalled(int sigNum);
 	virtual void onChannelTimeOut(Network::Channel * pChannel);
 	virtual void onChannelDeregister(Network::Channel * pChannel);
@@ -105,8 +105,8 @@ public:
 	virtual void onShutdown(bool first);
 	virtual void onShutdownEnd();
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó²é¿´watcher
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚æŸ¥çœ‹watcher
 	*/
 	void queryWatcher(Network::Channel* pChannel, MemoryStream& s);
 
@@ -115,87 +115,87 @@ public:
 	COMPONENT_ORDER globalOrder() const { return startGlobalOrder_; }
 	COMPONENT_ORDER groupOrder() const { return startGroupOrder_; }
 
-	/** ÍøÂç½Ó¿Ú
-		×¢²áÒ»¸öĞÂ¼¤»îµÄbaseapp»òÕßcellapp»òÕßdbmgr
-		Í¨³£ÊÇÒ»¸öĞÂµÄapp±»Æô¶¯ÁË£¬ ËüĞèÒªÏòÄ³Ğ©×é¼ş×¢²á×Ô¼º¡£
+	/** ç½‘ç»œæ¥å£
+		æ³¨å†Œä¸€ä¸ªæ–°æ¿€æ´»çš„baseappæˆ–è€…cellappæˆ–è€…dbmgr
+		é€šå¸¸æ˜¯ä¸€ä¸ªæ–°çš„appè¢«å¯åŠ¨äº†ï¼Œ å®ƒéœ€è¦å‘æŸäº›ç»„ä»¶æ³¨å†Œè‡ªå·±ã€‚
 	*/
-	virtual void onRegisterNewApp(Network::Channel* pChannel, 
-							int32 uid, 
-							std::string& username, 
+	virtual void onRegisterNewApp(Network::Channel* pChannel,
+							int32 uid,
+							std::string& username,
 							COMPONENT_TYPE componentType, COMPONENT_ID componentID, COMPONENT_ORDER globalorderID, COMPONENT_ORDER grouporderID,
 							uint32 intaddr, uint16 intport, uint32 extaddr, uint16 extport, std::string& extaddrEx);
 
-	/** ÍøÂç½Ó¿Ú
-		Ä³¸öappÏò±¾app¸æÖª´¦ÓÚ»î¶¯×´Ì¬¡£
+	/** ç½‘ç»œæ¥å£
+		æŸä¸ªappå‘æœ¬appå‘ŠçŸ¥å¤„äºæ´»åŠ¨çŠ¶æ€ã€‚
 	*/
 	void onAppActiveTick(Network::Channel* pChannel, COMPONENT_TYPE componentType, COMPONENT_ID componentID);
-	
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó¶Ï¿ª·şÎñÆ÷µÄÁ¬½Ó
+
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚æ–­å¼€æœåŠ¡å™¨çš„è¿æ¥
 	*/
 	virtual void reqClose(Network::Channel* pChannel);
 
-	/** ÍøÂç½Ó¿Ú
-		Ä³¸öappÇëÇó²é¿´¸Ãapp
+	/** ç½‘ç»œæ¥å£
+		æŸä¸ªappè¯·æ±‚æŸ¥çœ‹è¯¥app
 	*/
 	virtual void lookApp(Network::Channel* pChannel);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó¹Ø±Õ·şÎñÆ÷
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚å…³é—­æœåŠ¡å™¨
 	*/
 	virtual void reqCloseServer(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		Ä³¸öappÇëÇó²é¿´¸Ãapp¸ºÔØ×´Ì¬£¬ Í¨³£ÊÇconsoleÇëÇó²é¿´
+	/** ç½‘ç»œæ¥å£
+		æŸä¸ªappè¯·æ±‚æŸ¥çœ‹è¯¥appè´Ÿè½½çŠ¶æ€ï¼Œ é€šå¸¸æ˜¯consoleè¯·æ±‚æŸ¥çœ‹
 	*/
 	virtual void queryLoad(Network::Channel* pChannel);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó¹Ø±Õ·şÎñÆ÷
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚å…³é—­æœåŠ¡å™¨
 	*/
 	void reqKillServer(Network::Channel* pChannel, MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		¿Í»§¶ËÓë·şÎñ¶ËµÚÒ»´Î½¨Á¢½»»¥, ¿Í»§¶Ë·¢ËÍ×Ô¼ºµÄ°æ±¾ºÅÓëÍ¨Ñ¶ÃÜÔ¿µÈĞÅÏ¢
-		¸ø·şÎñ¶Ë£¬ ·şÎñ¶Ë·µ»ØÊÇ·ñÎÕÊÖ³É¹¦
+	/** ç½‘ç»œæ¥å£
+		å®¢æˆ·ç«¯ä¸æœåŠ¡ç«¯ç¬¬ä¸€æ¬¡å»ºç«‹äº¤äº’, å®¢æˆ·ç«¯å‘é€è‡ªå·±çš„ç‰ˆæœ¬å·ä¸é€šè®¯å¯†é’¥ç­‰ä¿¡æ¯
+		ç»™æœåŠ¡ç«¯ï¼Œ æœåŠ¡ç«¯è¿”å›æ˜¯å¦æ¡æ‰‹æˆåŠŸ
 	*/
 	virtual void hello(Network::Channel* pChannel, MemoryStream& s);
-	virtual void onHello(Network::Channel* pChannel, 
-		const std::string& verInfo, 
-		const std::string& scriptVerInfo, 
+	virtual void onHello(Network::Channel* pChannel,
+		const std::string& verInfo,
+		const std::string& scriptVerInfo,
 		const std::string& encryptedKey);
 
-	// ÒıÇæ°æ±¾²»Æ¥Åä
+	// å¼•æ“ç‰ˆæœ¬ä¸åŒ¹é…
 	virtual void onVersionNotMatch(Network::Channel* pChannel);
 
-	// ÒıÇæ½Å±¾²ã°æ±¾²»Æ¥Åä
+	// å¼•æ“è„šæœ¬å±‚ç‰ˆæœ¬ä¸åŒ¹é…
 	virtual void onScriptVersionNotMatch(Network::Channel* pChannel);
 
-	/** ÍøÂç½Ó¿Ú
-		consoleÇëÇó¿ªÊ¼profile
+	/** ç½‘ç»œæ¥å£
+		consoleè¯·æ±‚å¼€å§‹profile
 	*/
 	void startProfile(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 	virtual void startProfile_(Network::Channel* pChannel, std::string profileName, int8 profileType, uint32 timelen);
-		
+
 protected:
 	COMPONENT_TYPE											componentType_;
-	COMPONENT_ID											componentID_;									// ±¾×é¼şµÄID
+	COMPONENT_ID											componentID_;									// æœ¬ç»„ä»¶çš„ID
 
-	Network::EventDispatcher& 								dispatcher_;	
+	Network::EventDispatcher& 								dispatcher_;
 	Network::NetworkInterface&								networkInterface_;
-	
+
 	Timers													timers_;
 
-	// appÆô¶¯Ë³Ğò£¬ globalÎªÈ«¾Ö(Èçdbmgr£¬cellappµÄË³Ğò)Æô¶¯Ë³Ğò£¬ 
-	// groupÎª×éÆô¶¯Ë³Ğò(Èç:ËùÓĞbaseappÎªÒ»×é)
+	// appå¯åŠ¨é¡ºåºï¼Œ globalä¸ºå…¨å±€(å¦‚dbmgrï¼Œcellappçš„é¡ºåº)å¯åŠ¨é¡ºåºï¼Œ
+	// groupä¸ºç»„å¯åŠ¨é¡ºåº(å¦‚:æ‰€æœ‰baseappä¸ºä¸€ç»„)
 	COMPONENT_ORDER											startGlobalOrder_;
 	COMPONENT_ORDER											startGroupOrder_;
 
 	Shutdowner*												pShutdowner_;
 	ComponentActiveReportHandler*							pActiveTimerHandle_;
 
-	// Ïß³Ì³Ø
-	thread::ThreadPool										threadPool_;	
+	// çº¿ç¨‹æ± 
+	thread::ThreadPool										threadPool_;
 };
 
 }

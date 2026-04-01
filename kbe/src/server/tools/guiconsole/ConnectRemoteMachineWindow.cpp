@@ -47,7 +47,7 @@ END_MESSAGE_MAP()
 BOOL CConnectRemoteMachineWindow::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	m_port.SetWindowTextW(L"20099");
 
 	loadHistory();
@@ -92,10 +92,10 @@ void CConnectRemoteMachineWindow::OnBnClickedOk()
 		AfxMessageBox(L"address error!");
 		return;
 	}
-	
+
 	char strip[256];
 	sprintf_s(strip, 256, "%d.%d.%d.%d", ips[0],ips[1],ips[2],ips[3]);
-	
+
 	KBEngine::u_int16_t port = 0;
 	CString sport;
 	m_port.GetWindowTextW(sport);
@@ -154,7 +154,7 @@ void CConnectRemoteMachineWindow::OnBnClickedOk()
 		KBEngine::Network::Bundle bhandler;
 		bhandler.newMessage(KBEngine::MachineInterface::onFindInterfaceAddr);
 
-		KBEngine::MachineInterface::onFindInterfaceAddrArgs7::staticAddToBundle(bhandler, KBEngine::getUserUID(), KBEngine::getUsername(), 
+		KBEngine::MachineInterface::onFindInterfaceAddrArgs7::staticAddToBundle(bhandler, KBEngine::getUserUID(), KBEngine::getUsername(),
 			CONSOLE_TYPE, g_componentID, (COMPONENT_TYPE)findComponentType, 0, 0);
 
 		endpoint->send(&bhandler);
@@ -169,7 +169,7 @@ void CConnectRemoteMachineWindow::OnBnClickedOk()
 		while(packet.length() > 0)
 		{
 			MachineInterface::onBroadcastInterfaceArgs25 args;
-			
+
 			try
 			{
 				args.createFromStream(packet);
@@ -181,9 +181,9 @@ void CConnectRemoteMachineWindow::OnBnClickedOk()
 			INFO_MSG(fmt::format("CConnectRemoteMachineWindow::OnBnClickedOk: found {}, addr:{}:{}\n",
 				COMPONENT_NAME_EX((COMPONENT_TYPE)args.componentType), inet_ntoa((struct in_addr&)args.intaddr), ntohs(args.intport)));
 
-			Components::getSingleton().addComponent(args.uid, args.username.c_str(), 
+			Components::getSingleton().addComponent(args.uid, args.username.c_str(),
 				(KBEngine::COMPONENT_TYPE)args.componentType, args.componentID, args.globalorderid, args.grouporderid, args.gus,
-				args.intaddr, args.intport, args.extaddr, args.extport, args.extaddrEx, args.pid, args.cpu, args.mem, args.usedmem, 
+				args.intaddr, args.intport, args.extaddr, args.extport, args.extaddrEx, args.pid, args.cpu, args.mem, args.usedmem,
 				args.extradata, args.extradata1, args.extradata2, args.extradata3);
 
 		}
@@ -203,7 +203,7 @@ END:
 			break;
 		}
 	}
-	
+
 	if(!found)
 	{
 		m_historyCommand.push_front(wcommand);
@@ -216,12 +216,12 @@ END:
 	saveIpMapping();
 	free(wcommand);
 
-	OnOK(); 
+	OnOK();
 }
 
 void CConnectRemoteMachineWindow::saveHistory()
 {
-    //´´½¨Ò»¸öXMLµÄÎÄµµ¶ÔÏó¡£
+    //åˆ›å»ºä¸€ä¸ªXMLçš„æ–‡æ¡£å¯¹è±¡ã€‚
     TiXmlDocument *pDocument = new TiXmlDocument();
 
 	int i = 0;
@@ -275,7 +275,7 @@ void CConnectRemoteMachineWindow::saveIpMapping()
 	{
 		for (std::multimap<CString, CString>::iterator iter = m_ipMapping.begin(); iter != m_ipMapping.end();)
 		{
-			// Èç¹ûÒÑ¾­´æÔÚÕâ¸öhostµÄ¼ÇÂ¼ÔòÇå¿Õ
+			// å¦‚æžœå·²ç»å­˜åœ¨è¿™ä¸ªhostçš„è®°å½•åˆ™æ¸…ç©º
 			if (iter->first == host)
 				iter = m_ipMapping.erase(iter);
 			else
@@ -318,7 +318,7 @@ void CConnectRemoteMachineWindow::saveIpMapping()
 			lanipElement->LinkEndChild(content);
 		}
 	}
-	
+
 	CString appPath = GetAppPath();
 	CString fullPath = appPath + L"\\histroycommands2.xml";
 
@@ -352,18 +352,18 @@ void CConnectRemoteMachineWindow::loadHistory()
 	TiXmlNode* node = rootElement->FirstChild();
 	if(node)
 	{
-		do																				
-		{																				
+		do
+		{
 			std::string c = node->FirstChild()->Value();
 			wchar_t* strCommand = strutil::char2wchar(c.c_str());
 			m_historyCommand.push_back(strCommand);
 			free(strCommand);
-		}while((node = node->NextSibling()));												
+		}while((node = node->NextSibling()));
 	}
 
 	pDocument->Clear();
 	delete pDocument;
-}	
+}
 
 void CConnectRemoteMachineWindow::loadIpMapping()
 {
@@ -384,7 +384,7 @@ void CConnectRemoteMachineWindow::loadIpMapping()
 	for (TiXmlElement* elem = rootElement->FirstChildElement(); elem != NULL; elem = elem->NextSiblingElement())
 	{
 		CString host(elem->Attribute("value"));
-		
+
 		for (TiXmlElement *childElem = elem->FirstChildElement(); childElem != NULL; childElem = childElem->NextSiblingElement())
 		{
 			const char *lan_ip = childElem->Attribute("value");
@@ -433,7 +433,7 @@ void CConnectRemoteMachineWindow::OnLbnDblclkList1()
 	// TODO: Add your control notification handler code here
 	CString str;
 	m_log.GetText(m_log.GetCurSel(), str);
-	
+
 	CString output = L"";
 	CString output1 = L"";
 	AfxExtractSubString(output, str, 0, _T(':'));
@@ -523,7 +523,7 @@ void CConnectRemoteMachineWindow::OnBnClickedDelIpmapping()
 	CString output1 = L"";
 	AfxExtractSubString(output, str, 0, _T('>'));
 	AfxExtractSubString(output1, str, 1, _T('>'));
-	
+
 	dlg->m_ipMappings.erase(output);
 	updateMappingListCtrl();
 }

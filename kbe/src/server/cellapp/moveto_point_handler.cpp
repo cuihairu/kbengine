@@ -2,15 +2,15 @@
 
 #include "cellapp.h"
 #include "entity.h"
-#include "moveto_point_handler.h"	
-#include "move_controller.h"	
+#include "moveto_point_handler.h"
+#include "move_controller.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------
-MoveToPointHandler::MoveToPointHandler(KBEShared_ptr<Controller>& pController, int layer, const Position3D& destPos, 
-											 float velocity, float distance, bool faceMovement, 
+MoveToPointHandler::MoveToPointHandler(KBEShared_ptr<Controller>& pController, int layer, const Position3D& destPos,
+											 float velocity, float distance, bool faceMovement,
 											bool moveVertically, PyObject* userarg):
 destPos_(destPos),
 velocity_(velocity),
@@ -89,7 +89,7 @@ bool MoveToPointHandler::requestMoveOver(const Position3D& oldPos)
 		if(pController_->pEntity())
 			pController_->pEntity()->onMoveOver(pController_->id(), layer_, oldPos, pyuserarg_);
 
-		// Èç¹ûÔÚonMoveOverÖĞµ÷ÓÃcancelController£¨id£©»áµ¼ÖÂMoveControllerÎö¹¹µ¼ÖÂpController_ÎªNULL
+		// å¦‚æœåœ¨onMoveOverä¸­è°ƒç”¨cancelControllerï¼ˆidï¼‰ä¼šå¯¼è‡´MoveControllerææ„å¯¼è‡´pController_ä¸ºNULL
 		pController_->destroy();
 	}
 
@@ -104,7 +104,7 @@ bool MoveToPointHandler::update()
 		delete this;
 		return false;
 	}
-	
+
 	Entity* pEntity = pController_->pEntity();
 	Py_INCREF(pEntity);
 
@@ -115,7 +115,7 @@ bool MoveToPointHandler::update()
 
 	Vector3 movement = dstPos - currpos;
 	if (!moveVertically_) movement.y = 0.f;
-	
+
 	bool ret = true;
 	float dist_len = KBEVec3Length(&movement);
 
@@ -125,9 +125,9 @@ bool MoveToPointHandler::update()
 
 		if (distance_ > 0.0f)
 		{
-			// µ¥Î»»¯ÏòÁ¿
-			KBEVec3Normalize(&movement, &movement); 
-				
+			// å•ä½åŒ–å‘é‡
+			KBEVec3Normalize(&movement, &movement);
+
 			if(dist_len > distance_)
 			{
 				movement *= distance_;
@@ -146,15 +146,15 @@ bool MoveToPointHandler::update()
 	}
 	else
 	{
-		// µ¥Î»»¯ÏòÁ¿
-		KBEVec3Normalize(&movement, &movement); 
+		// å•ä½åŒ–å‘é‡
+		KBEVec3Normalize(&movement, &movement);
 
-		// ÒÆ¶¯Î»ÖÃ
+		// ç§»åŠ¨ä½ç½®
 		movement *= velocity_;
 		currpos += movement;
 	}
-	
-	// ÊÇ·ñĞèÒª¸Ä±äÃæÏò
+
+	// æ˜¯å¦éœ€è¦æ”¹å˜é¢å‘
 	if (faceMovement_)
 	{
 		if (movement.x != 0.f || movement.z != 0.f)
@@ -163,21 +163,21 @@ bool MoveToPointHandler::update()
 		if (movement.y != 0.f)
 			direction.pitch(movement.pitch());
 	}
-	
-	// ÉèÖÃentityµÄĞÂÎ»ÖÃºÍÃæÏò
+
+	// è®¾ç½®entityçš„æ–°ä½ç½®å’Œé¢å‘
 	if(!isDestroyed_)
 		pEntity->setPositionAndDirection(currpos, direction);
 
-	// ·Çnavigate¶¼²»ÄÜÈ·¶¨ÆäÔÚµØÃæÉÏ
+	// énavigateéƒ½ä¸èƒ½ç¡®å®šå…¶åœ¨åœ°é¢ä¸Š
 	if(!isDestroyed_)
 		pEntity->isOnGround(isOnGround());
 
-	// Í¨Öª½Å±¾
+	// é€šçŸ¥è„šæœ¬
 	if(!isDestroyed_)
 		pEntity->onMove(pController_->id(), layer_, currpos_backup, pyuserarg_);
 
-	// Èç¹ûÔÚonMove¹ı³ÌÖĞ±»Í£Ö¹£¬ÓÖ»òÕß´ïµ½Ä¿µÄµØÁË£¬ÔòÖ±½ÓÏú»Ù²¢·µ»Øfalse
-	if (isDestroyed_ || 
+	// å¦‚æœåœ¨onMoveè¿‡ç¨‹ä¸­è¢«åœæ­¢ï¼Œåˆæˆ–è€…è¾¾åˆ°ç›®çš„åœ°äº†ï¼Œåˆ™ç›´æ¥é”€æ¯å¹¶è¿”å›false
+	if (isDestroyed_ ||
 		(!ret && requestMoveOver(currpos_backup)))
 	{
 		Py_DECREF(pEntity);

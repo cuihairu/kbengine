@@ -23,6 +23,7 @@
 #include "network/message_handler.h"
 #include "network/network_stats.h"
 #include "helper/profile.h"
+#include "helper/debug_helper.h"
 #include "common/ssl.h"
 
 namespace KBEngine { 
@@ -51,8 +52,11 @@ void Channel::reclaimPoolObject(Channel* obj)
 //-------------------------------------------------------------------------------------
 void Channel::destroyObjPool()
 {
-	DEBUG_MSG(fmt::format("Channel::destroyObjPool(): size {}.\n", 
-		_g_objPool.size()));
+	if (DebugHelper::isInit())
+	{
+		DEBUG_MSG(fmt::format("Channel::destroyObjPool(): size {}.\n",
+			_g_objPool.size()));
+	}
 
 	_g_objPool.destroy();
 }
@@ -211,10 +215,10 @@ bool Channel::initialize(NetworkInterface & networkInterface,
 
 		KBE_ASSERT(pPacketReceiver_->type() == PacketReceiver::TCP_PACKET_RECEIVER);
 
-		// UDP不需要注册描述符
+		// UDP虏禄脨猫脪陋脳垄虏谩脙猫脢枚路没
 		pNetworkInterface_->dispatcher().registerReadFileDescriptor(*pEndPoint_, pPacketReceiver_);
 
-		// 需要发送数据时再注册
+		// 脨猫脪陋路垄脣脥脢媒戮脻脢卤脭脵脳垄虏谩
 		// pPacketSender_ = new TCPPacketSender(*pEndPoint_, *pNetworkInterface_);
 		// pNetworkInterface_->dispatcher().registerWriteFileDescriptor(*pEndPoint_, pPacketSender_);
 
@@ -304,7 +308,7 @@ bool Channel::finalise()
 uint32 Channel::getRTT()
 {
 	if (protocolSubtype_ == SUB_PROTOCOL_KCP && pKCP_)
-		return (uint32)(pKCP_->rx_srtt/* BSD标准，毫秒 */) * 1000;
+		return (uint32)(pKCP_->rx_srtt/* BSD卤锚脳录拢卢潞脕脙毛 */) * 1000;
 
 	if (!pEndPoint())
 		return 0;
@@ -335,7 +339,7 @@ bool Channel::init_kcp()
 {
 	static IUINT32 convID = 1;
 
-	// 防止溢出，理论上正常使用不会用完
+	// 路脌脰鹿脪莽鲁枚拢卢脌铆脗脹脡脧脮媒鲁拢脢鹿脫脙虏禄禄谩脫脙脥锚
 	KBE_ASSERT(convID != 0);
 
 	if(id_ == 0)
@@ -344,15 +348,15 @@ bool Channel::init_kcp()
 	pKCP_ = ikcp_create((IUINT32)id_, (void*)this);
 	pKCP_->output = &Channel::kcp_output;
 
-	// 配置窗口大小：平均延迟200ms，每20ms发送一个包，
-	// 而考虑到丢包重发，设置最大收发窗口为128
+	// 脜盲脰脙麓掳驴脷麓贸脨隆拢潞脝陆戮霉脩脫鲁脵200ms拢卢脙驴20ms路垄脣脥脪禄赂枚掳眉拢卢
+	// 露酶驴录脗脟碌陆露陋掳眉脰脴路垄拢卢脡猫脰脙脳卯麓贸脢脮路垄麓掳驴脷脦陋128
 	int sndwnd = this->isExternal() ? Network::g_rudp_extWritePacketsQueueSize : Network::g_rudp_intWritePacketsQueueSize;
 	int rcvwnd = this->isExternal() ? Network::g_rudp_extReadPacketsQueueSize : Network::g_rudp_intReadPacketsQueueSize;
 
-	// nodelay-启用以后若干常规加速将启动
-	// interval为内部处理时钟，默认设置为 10ms
-	// resend为快速重传指标，设置为2
-	// nc为是否禁用常规流控，这里禁止
+	// nodelay-脝么脫脙脪脭潞贸脠么赂脡鲁拢鹿忙录脫脣脵陆芦脝么露炉
+	// interval脦陋脛脷虏驴麓娄脌铆脢卤脰脫拢卢脛卢脠脧脡猫脰脙脦陋 10ms
+	// resend脦陋驴矛脣脵脰脴麓芦脰赂卤锚拢卢脡猫脰脙脦陋2
+	// nc脦陋脢脟路帽陆没脫脙鲁拢鹿忙脕梅驴脴拢卢脮芒脌茂陆没脰鹿
 	int nodelay = Network::g_rudp_nodelay ? 1 : 0;
 	int interval = Network::g_rudp_tickInterval;
 	int resend = Network::g_rudp_missAcksResend;
@@ -427,7 +431,7 @@ void Channel::addKcpUpdate(int64 microseconds)
 
 	if (microseconds <= 1)
 	{
-		// 避免send等操作导致多次添加和取消timer
+		// 卤脺脙芒send碌脠虏脵脳梅碌录脰脗露脿麓脦脤铆录脫潞脥脠隆脧没timer
 		if (!hasSetNextKcpUpdate_)
 			hasSetNextKcpUpdate_ = true;
 		else
@@ -486,7 +490,7 @@ void Channel::startInactivityDetection( float period, float checkPeriod )
 {
 	stopInactivityDetection();
 
-	// 如果周期为负数则不检查
+	// 脠莽鹿没脰脺脝脷脦陋赂潞脢媒脭貌虏禄录矛虏茅
 	if (period > 0.1f)
 	{
 		checkPeriod = std::max(1.f, checkPeriod);
@@ -568,7 +572,7 @@ void Channel::clearState( bool warnOnDiscard /*=false*/ )
 		}
 	}
 
-	// 这里只清空状态，不释放
+	// 脮芒脌茂脰禄脟氓驴脮脳麓脤卢拢卢虏禄脢脥路脜
 	//SAFE_RELEASE(pPacketReader_);
 	//SAFE_RELEASE(pPacketSender_);
 
@@ -585,7 +589,7 @@ void Channel::clearState( bool warnOnDiscard /*=false*/ )
 
 	stopInactivityDetection();
 
-	// 由于pEndPoint通常由外部给入，必须释放，频道重新激活时会重新赋值
+	// 脫脡脫脷pEndPoint脥篓鲁拢脫脡脥芒虏驴赂酶脠毛拢卢卤脴脨毛脢脥路脜拢卢脝碌碌脌脰脴脨脗录陇禄卯脢卤禄谩脰脴脨脗赂鲁脰碌
 	if(pEndPoint_)
 	{
 		pEndPoint_->destroySSL();
@@ -806,7 +810,7 @@ void Channel::send(Bundle* pBundle)
 
 		pPacketSender_->processSend(this, 0);
 
-		// 如果不能立即发送到系统缓冲区，那么交给poller处理
+		// 脠莽鹿没虏禄脛脺脕垄录麓路垄脣脥碌陆脧碌脥鲁禄潞鲁氓脟酶拢卢脛脟脙麓陆禄赂酶poller麓娄脌铆
 		if (bundles_.size() > 0 && condemn() == 0 && !isDestroyed())
 		{
 			flags_ |= FLAG_SENDING;
@@ -1048,7 +1052,7 @@ bool Channel::handshake(Packet* pPacket)
 			int sslVersion = KB_SSL::isSSLProtocal(pPacket);
 			if (sslVersion != -1)
 			{
-				// 无论成功和失败都返回true，让外部回收数据包并继续等待握手
+				// 脦脼脗脹鲁脡鹿娄潞脥脢搂掳脺露录路碌禄脴true拢卢脠脙脥芒虏驴禄脴脢脮脢媒戮脻掳眉虏垄录脤脨酶碌脠麓媒脦脮脢脰
 				pEndPoint_->setupSSL(sslVersion, pPacket);
 
 				if (pPacket->length() == 0)
@@ -1057,14 +1061,14 @@ bool Channel::handshake(Packet* pPacket)
 		}
 		else
 		{
-			// 如果开启了ssl通讯，因目前只支持wss，所以必须等待websocket握手成功才算通过
+			// 脠莽鹿没驴陋脝么脕脣ssl脥篓脩露拢卢脪貌脛驴脟掳脰禄脰搂鲁脰wss拢卢脣霉脪脭卤脴脨毛碌脠麓媒websocket脦脮脢脰鲁脡鹿娄虏脜脣茫脥篓鹿媒
 			if (!websocket::WebSocketProtocol::isWebSocketProtocol(pPacket))
 				return true;
 		}
 
 		flags_ |= FLAG_HANDSHAKE;
 
-		// 此处判定是否为websocket或者其他协议的握手
+		// 麓脣麓娄脜脨露篓脢脟路帽脦陋websocket禄貌脮脽脝盲脣没脨颅脪茅碌脛脦脮脢脰
 		if (websocket::WebSocketProtocol::isWebSocketProtocol(pPacket))
 		{
 			channelType_ = CHANNEL_WEB;
@@ -1079,7 +1083,7 @@ bool Channel::handshake(Packet* pPacket)
 				pFilter_ = new WebSocketPacketFilter(this);
 				DEBUG_MSG(fmt::format("Channel::handshake: websocket({}) successfully!\n", this->c_str()));
 
-				// 无论如何都返回true，直到握手成功
+				// 脦脼脗脹脠莽潞脦露录路碌禄脴true拢卢脰卤碌陆脦脮脢脰鲁脡鹿娄
 				return true;
 			}
 			else
@@ -1098,7 +1102,7 @@ bool Channel::handshake(Packet* pPacket)
 
 			if (hello != UDP_HELLO)
 			{
-				// 这里不做处理，防止客户端在断线感应期间可能会发送一些包， 导致新的连接被握手失败从而再也无法通讯
+				// 脮芒脌茂虏禄脳枚麓娄脌铆拢卢路脌脰鹿驴脥禄搂露脣脭脷露脧脧脽赂脨脫娄脝脷录盲驴脡脛脺禄谩路垄脣脥脪禄脨漏掳眉拢卢 碌录脰脗脨脗碌脛脕卢陆脫卤禄脦脮脢脰脢搂掳脺麓脫露酶脭脵脪虏脦脼路篓脥篓脩露
 				//DEBUG_MSG(fmt::format("Channel::handshake: kcp({}) error!\n", this->c_str()));
 				//this->condemn();
 			}
@@ -1119,7 +1123,7 @@ bool Channel::handshake(Packet* pPacket)
 				flags_ |= FLAG_HANDSHAKE;
 			}
 
-			// 无论如何都返回true，直到握手成功
+			// 脦脼脗脹脠莽潞脦露录路碌禄脴true拢卢脰卤碌陆脦脮脢脰鲁脡鹿娄
 			return true;
 		}
 	}
@@ -1217,12 +1221,12 @@ Bundle* Channel::createSendBundle()
 		Bundle* pBundle = bundles_.back();
 		Bundle::Packets& packets = pBundle->packets();
 
-		// pBundle和packets[0]都必须是没有被对象池回收的对象
-		// 必须是未经过加密的包，如果已经加密了就不要再重复拿出来用了，否则外部容易向其中添加未加密数据 
+		// pBundle潞脥packets[0]露录卤脴脨毛脢脟脙禄脫脨卤禄露脭脧贸鲁脴禄脴脢脮碌脛露脭脧贸
+		// 卤脴脨毛脢脟脦麓戮颅鹿媒录脫脙脺碌脛掳眉拢卢脠莽鹿没脪脩戮颅录脫脙脺脕脣戮脥虏禄脪陋脭脵脰脴赂麓脛脙鲁枚脌麓脫脙脕脣拢卢路帽脭貌脥芒虏驴脠脻脪脳脧貌脝盲脰脨脤铆录脫脦麓录脫脙脺脢媒戮脻 
 		if (pBundle->packetHaveSpace() &&
 			!packets[0]->encrypted())
 		{
-			// 先从队列删除
+			// 脧脠麓脫露脫脕脨脡戮鲁媒
 			bundles_.pop_back();
 			pBundle->pChannel(this);
 			pBundle->pCurrMsgHandler(NULL);

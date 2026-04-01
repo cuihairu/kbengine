@@ -2,10 +2,10 @@
 
 #include "trap_trigger.h"
 #include "entity.h"
-#include "proximity_controller.h"	
+#include "proximity_controller.h"
 #include "entity_coordinate_node.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------
@@ -15,7 +15,7 @@ pTrapTrigger_(NULL),
 xz_(xz),
 y_(y)
 {
-	pTrapTrigger_ = new TrapTrigger(static_cast<EntityCoordinateNode*>(pEntity->pEntityCoordinateNode()), 
+	pTrapTrigger_ = new TrapTrigger(static_cast<EntityCoordinateNode*>(pEntity->pEntityCoordinateNode()),
 								this, xz, y);
 
 	pTrapTrigger_->install();
@@ -54,11 +54,11 @@ void ProximityController::createFromStream(KBEngine::MemoryStream& s)
 //-------------------------------------------------------------------------------------
 bool ProximityController::reinstall(CoordinateNode* pCoordinateNode)
 {
-	// ¿çcellapp³¡¾°Ìø×ªÊ±¿ÉÄÜ³öÏÖÕâÖÖÇé¿ö
-	// ÒòÎªÊ¹ÓÃProximityController::ProximityController(Entity* pEntity)¹¹Ôì
+	// è·¨cellappåœºæ™¯è·³è½¬æ—¶å¯èƒ½å‡ºç°è¿™ç§æƒ…å†µ
+	// å› ä¸ºä½¿ç”¨ProximityController::ProximityController(Entity* pEntity)æ„é€ 
 	if(pTrapTrigger_ == NULL)
 	{
-		pTrapTrigger_ = new TrapTrigger(static_cast<EntityCoordinateNode*>(pCoordinateNode), 
+		pTrapTrigger_ = new TrapTrigger(static_cast<EntityCoordinateNode*>(pCoordinateNode),
 								this, xz_, y_);
 	}
 

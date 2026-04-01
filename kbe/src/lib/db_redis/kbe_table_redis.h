@@ -13,7 +13,7 @@
 namespace KBEngine { 
 
 /*
-	kbeÏµÍ³±í
+	kbeç³»ç»Ÿè¡¨
 */
 class KBEEntityLogTableRedis : public KBEEntityLogTable
 {
@@ -22,7 +22,7 @@ public:
 	virtual ~KBEEntityLogTableRedis(){}
 	
 	/**
-		Í¬²½±íµ½Êı¾İ¿âÖĞ
+		åŒæ­¥è¡¨åˆ°æ•°æ®åº“ä¸­
 	*/
 	virtual bool syncToDB(DBInterface* pdbi);
 	virtual bool syncIndexToDB(DBInterface* pdbi){ return true; }
@@ -46,7 +46,7 @@ public:
 	virtual ~KBEServerLogTableRedis(){}
 	
 	/**
-		Í¬²½±íµ½Êı¾İ¿âÖĞ
+		åŒæ­¥è¡¨åˆ°æ•°æ®åº“ä¸­
 	*/
 	virtual bool syncToDB(DBInterface* pdbi);
 	virtual bool syncIndexToDB(DBInterface* pdbi){ return true; }
@@ -71,7 +71,7 @@ public:
 	virtual ~KBEAccountTableRedis(){}
 	
 	/**
-		Í¬²½±íµ½Êı¾İ¿âÖĞ
+		åŒæ­¥è¡¨åˆ°æ•°æ®åº“ä¸­
 	*/
 	virtual bool syncToDB(DBInterface* pdbi);
 	virtual bool syncIndexToDB(DBInterface* pdbi){ return true; }
@@ -93,7 +93,7 @@ public:
 	virtual ~KBEEmailVerificationTableRedis();
 
 	/**
-		Í¬²½±íµ½Êı¾İ¿âÖĞ
+		åŒæ­¥è¡¨åˆ°æ•°æ®åº“ä¸­
 	*/
 	virtual bool syncToDB(DBInterface* pdbi);
 	virtual bool syncIndexToDB(DBInterface* pdbi){ return true; }

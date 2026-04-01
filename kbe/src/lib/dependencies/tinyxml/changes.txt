@@ -279,7 +279,7 @@ Changes in version 2.1.5
 - olivier barthelemy also reported a problem with double truncation, also related to the %lf issue.
 - zaelsius came up with a great (and simple) suggestion to fix QueryValueAttribute truncating strings.
 - added some null pointer checks suggested by hansenk
-- Sami V‰is‰nen found a (rare) buffer overrun that could occur in parsing.
+- Sami V√§is√§nen found a (rare) buffer overrun that could occur in parsing.
 - vi tri filed a bug that led to a refactoring of the attribute setting mess (as well as adding a missing SetDoubleAttribute() )
 - removed TIXML_ERROR_OUT_OF_MEMORY. TinyXML does not systematically address OOO, and the notion it does is misleading.
 - vanneto, keithmarshall, others all reported the warning from IsWhiteSpace() usage. Cleaned this up - many thanks to everyone who reported this one.

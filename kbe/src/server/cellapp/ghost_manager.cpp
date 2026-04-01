@@ -6,7 +6,7 @@
 #include "network/bundle.h"
 #include "network/channel.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
 GhostManager::GhostManager():
@@ -44,7 +44,7 @@ Network::Bundle* GhostManager::createSendBundle(COMPONENT_ID componentID)
 			Network::Bundle* pBundle = iter->second.back();
 			if (pBundle->packetHaveSpace())
 			{
-				// 先从队列删除
+				// 鍏堜粠闃熷垪鍒犻櫎
 				iter->second.pop_back();
 				pBundle->pChannel(NULL);
 				pBundle->pCurrMsgHandler(NULL);
@@ -101,7 +101,7 @@ void GhostManager::pushRouteMessage(ENTITY_ID entityID, COMPONENT_ID componentID
 void GhostManager::addRoute(ENTITY_ID entityID, COMPONENT_ID componentID)
 {
 	ROUTE_INFO& info = ghost_route_[entityID];
-	
+
 	info.componentID = componentID;
 	info.lastTime = timestamp();
 
@@ -147,7 +147,7 @@ void GhostManager::syncMessages()
 		if(cinfos == NULL || cinfos->pChannel == NULL)
 		{
 			ERROR_MSG(fmt::format("GhostManager::syncMessages: not found cellapp({})!\n", iter->first));
-			
+
 			for(; iter1 != iter->second.end(); ++iter1)
 				Network::Bundle::reclaimPoolObject((*iter1));
 
@@ -157,10 +157,10 @@ void GhostManager::syncMessages()
 
 		for(; iter1 != iter->second.end(); ++iter1)
 		{
-			// 将消息同步到ghost
+			// 灏嗘秷鎭悓姝ュ埌ghost
 			cinfos->pChannel->send((*iter1));
 		}
-			
+
 		iter->second.clear();
 	}
 
@@ -176,7 +176,7 @@ void GhostManager::syncGhosts()
 		COMPONENT_ID ghostCell = iter->second->ghostCell();
 		if(ghostCell > 0)
 		{
-			// 将位置等信息同步到ghost
+			// 灏嗕綅缃瓑淇℃伅鍚屾鍒癵host
 			Components::ComponentInfos* cinfos = Components::getSingleton().findComponent(ghostCell);
 			if(cinfos == NULL || cinfos->pChannel == NULL)
 			{
@@ -199,8 +199,8 @@ void GhostManager::handleTimeout(TimerHandle, void * arg)
 {
 	if(timestamp() - checkTime_ > uint64( stampsPerSecond() * 0.1 ))
 	{
-		if(messages_.size() == 0 && 
-			ghost_route_.size() == 0 && 
+		if(messages_.size() == 0 &&
+			ghost_route_.size() == 0 &&
 			realEntities_.size() == 0)
 		{
 			cancel();

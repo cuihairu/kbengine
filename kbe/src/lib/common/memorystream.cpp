@@ -25,7 +25,7 @@ void MemoryStream::reclaimPoolObject(MemoryStream* obj)
 //-------------------------------------------------------------------------------------
 void MemoryStream::destroyObjPool()
 {
-	DEBUG_MSG(fmt::format("MemoryStream::destroyObjPool(): size {}.\n", 
+	KBE_MEMORYSTREAM_DEBUG(fmt::format("MemoryStream::destroyObjPool(): size {}.\n", 
 		_g_objPool.size()));
 
 	_g_objPool.destroy();

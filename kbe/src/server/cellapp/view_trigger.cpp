@@ -8,7 +8,7 @@
 #include "view_trigger.inl"
 #endif
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------

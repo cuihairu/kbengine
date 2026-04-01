@@ -10,7 +10,7 @@
 #include "network/address.h"
 #include "network/endpoint.h"
 
-namespace KBEngine{ 
+namespace KBEngine{
 
 class Orders
 {
@@ -20,10 +20,10 @@ public:
 		STATE_FAILED = 0,
 		STATE_SUCCESS = 1
 	};
-	
+
 	Orders();
 	virtual ~Orders();
-	
+
 	Network::Address address;
 	std::string ordersID;
 	CALLBACK_ID cbid;
@@ -31,7 +31,7 @@ public:
 	COMPONENT_ID baseappID;
 	COMPONENT_ID dbmgrID;
 	State state;
-	
+
 	std::string postDatas;
 	std::string getDatas;
 

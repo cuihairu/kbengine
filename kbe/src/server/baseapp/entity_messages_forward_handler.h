@@ -14,7 +14,7 @@ class EntityMessagesForwardCellappHandler : public Task
 public:
 	EntityMessagesForwardCellappHandler(Entity* pEntity);
 	~EntityMessagesForwardCellappHandler();
-	
+
 	bool process();
 
 	void pushMessages(Network::Bundle* pBundle);
@@ -37,7 +37,7 @@ class BaseMessagesForwardClientHandler : public Task
 public:
 	BaseMessagesForwardClientHandler(Entity* pEntity, COMPONENT_ID cellappID);
 	~BaseMessagesForwardClientHandler();
-	
+
 	bool process();
 
 	void pushMessages(Network::Bundle* pBundle);
@@ -46,7 +46,7 @@ public:
 	void stopForward(){ startForward_ = false; }
 
 	bool isStop() const{ return !startForward_; }
-	
+
 	COMPONENT_ID cellappID() const {
 		return cellappID_;
 	}

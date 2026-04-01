@@ -77,9 +77,6 @@ void EndPoint::reclaimPoolObject(EndPoint* obj)
 //-------------------------------------------------------------------------------------
 void EndPoint::destroyObjPool()
 {
-	DEBUG_MSG(fmt::format("EndPoint::destroyObjPool(): size {}.\n", 
-		_g_objPool.size()));
-
 	_g_objPool.destroy();
 }
 
@@ -314,8 +311,8 @@ int EndPoint::getInterfaceAddressByName(const char * name, u_int32_t & address)
         delete pIpAdapterInfo;
     }
 
-#else
-	
+#elif KBE_PLATFORM == PLATFORM_UNIX
+
 	int fd;
 	int interfaceNum = 0;
 	struct ifreq buf[16];
@@ -420,7 +417,7 @@ int EndPoint::getInterfaceAddressByMAC(const char * mac, u_int32_t & address)
 		delete pIpAdapterInfo;
 	}
 
-#else
+#elif KBE_PLATFORM == PLATFORM_UNIX
 
 	int fd;
 	int interfaceNum = 0;
@@ -462,6 +459,11 @@ int EndPoint::getInterfaceAddressByMAC(const char * mac, u_int32_t & address)
 
 	::close(fd);
 
+#elif KBE_PLATFORM == PLATFORM_APPLE
+	(void)macAddress;
+	(void)address;
+	ret = -1;
+
 #endif
 
 	return ret;
@@ -470,7 +472,7 @@ int EndPoint::getInterfaceAddressByMAC(const char * mac, u_int32_t & address)
 //-------------------------------------------------------------------------------------
 int EndPoint::findDefaultInterface(char * name, int buffsize)
 {
-#if KBE_PLATFORM != PLATFORM_UNIX
+#if KBE_PLATFORM != PLATFORM_UNIX && KBE_PLATFORM != PLATFORM_APPLE
 	strcpy(name, "eth0");
 	return 0;
 #else
@@ -750,7 +752,13 @@ bool EndPoint::setupSSL(int sslVersion, Packet* pPacket)
 
 	SSL_CTX_set_options(sslContext_, SSL_OP_SINGLE_DH_USE | SSL_OP_SINGLE_ECDH_USE);
 
-	std::string pem = Resmgr::getSingleton().matchRes(g_sslCertificate.c_str());
+	std::string pem = Resmgr::getSingletonPtr() ? Resmgr::getSingleton().matchRes(g_sslCertificate.c_str()) : "";
+	if (pem.empty())
+	{
+		ERROR_MSG("EndPoint::setupSSL: empty sslCertificate resource path.\n");
+		destroySSL();
+		return false;
+	}
 	int use_cert = SSL_CTX_use_certificate_file(sslContext_, pem.c_str(), SSL_FILETYPE_PEM);
 	if (0 >= use_cert)
 	{
@@ -761,7 +769,13 @@ bool EndPoint::setupSSL(int sslVersion, Packet* pPacket)
 		return false;
 	}
 
-	pem = Resmgr::getSingleton().matchRes(g_sslPrivateKey.c_str());
+	pem = Resmgr::getSingletonPtr() ? Resmgr::getSingleton().matchRes(g_sslPrivateKey.c_str()) : "";
+	if (pem.empty())
+	{
+		ERROR_MSG("EndPoint::setupSSL: empty sslPrivateKey resource path.\n");
+		destroySSL();
+		return false;
+	}
 	int use_prv = SSL_CTX_use_PrivateKey_file(sslContext_, pem.c_str(), SSL_FILETYPE_PEM);
 	if (0 >= use_prv)
 	{

@@ -184,7 +184,7 @@ void ErrorReporter::addReport(const Address & address, const std::string & error
 
 		if (millisSinceLastReport >= ERROR_REPORT_MIN_PERIOD_MS)
 		{
-			ERROR_MSG(fmt::format("{}\n", addressErrorToString(address, errorString,
+			KBE_ERROR_REPORTER_ERROR_MSG(fmt::format("{}\n", addressErrorToString(address, errorString,
 					reportAndCount, now).c_str()));
 
 			reportAndCount.count = 0;
@@ -194,7 +194,7 @@ void ErrorReporter::addReport(const Address & address, const std::string & error
 	}
 	else
 	{
-		ERROR_MSG(fmt::format("{}\n", addressErrorToString(address, errorString).c_str()));
+		KBE_ERROR_REPORTER_ERROR_MSG(fmt::format("{}\n", addressErrorToString(address, errorString).c_str()));
 
 		ErrorReportAndCount reportAndCount = { now, now, 0, };
 		errorsAndCounts_[ addressError ] = reportAndCount;
@@ -230,7 +230,7 @@ void ErrorReporter::reportPendingExceptions(bool reportBelowThreshold)
 		{
 			if (reportAndCount.count)
 			{
-				ERROR_MSG(fmt::format("{}\n",
+				KBE_ERROR_REPORTER_ERROR_MSG(fmt::format("{}\n",
 					addressErrorToString(
 						addressError.first, addressError.second,
 						reportAndCount, now).c_str()
@@ -259,6 +259,7 @@ void ErrorReporter::reportPendingExceptions(bool reportBelowThreshold)
 void ErrorReporter::handleTimeout(TimerHandle handle, void * arg)
 {
 	KBE_ASSERT(handle == reportLimitTimerHandle_);
+	(void)arg;
 	this->reportPendingExceptions();
 }
 

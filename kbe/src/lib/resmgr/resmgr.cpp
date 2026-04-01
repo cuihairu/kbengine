@@ -99,7 +99,7 @@ void Resmgr::updatePaths()
 	char splitFlag = ';';
 	strutil::kbe_split<char>(tbuf, splitFlag, respaths_);
 
-	// windowsÓÃ»§²»ÄÜ·Ö¸îÃ°ºÅ£¬ ¿ÉÄÜ»á°ÑÅÌ·û¸ø·Ö¸îÁË
+	// windowsç”¨æˆ·ä¸èƒ½åˆ†å‰²å†’å·ï¼Œ å¯èƒ½ä¼šæŠŠç›˜ç¬¦ç»™åˆ†å‰²äº†
 #if KBE_PLATFORM != PLATFORM_WIN32
 	if(respaths_.size() < 2)
 	{
@@ -136,7 +136,7 @@ bool Resmgr::initialize()
 	//if(isInit())
 	//	return true;
 
-	// »ñÈ¡ÒıÇæ»·¾³ÅäÖÃ
+	// è·å–å¼•æ“ç¯å¢ƒé…ç½®
 	kb_env_.root_path		= getenv("KBE_ROOT") == NULL ? "" : getenv("KBE_ROOT");
 	kb_env_.res_path		= getenv("KBE_RES_PATH") == NULL ? "" : getenv("KBE_RES_PATH"); 
 	kb_env_.bin_path		= getenv("KBE_BIN_PATH") == NULL ? "" : getenv("KBE_BIN_PATH"); 
@@ -158,7 +158,7 @@ bool Resmgr::initialize()
 			printf("[ERROR] Resmgr::initialize: not set environment, (KBE_ROOT=%s, KBE_RES_PATH=%s, KBE_BIN_PATH=%s) invalid!\n",
 				kb_env_.root_path.c_str(), kb_env_.res_path.c_str(), kb_env_.bin_path.c_str());
 #if KBE_PLATFORM == PLATFORM_WIN32
-			::MessageBox(0, L"Resmgr::initialize: not set environment, (KBE_ROOT, KBE_RES_PATH, KBE_BIN_PATH) invalid!\n", L"ERROR", MB_ICONERROR);
+			::MessageBoxW(0, L"Resmgr::initialize: not set environment, (KBE_ROOT, KBE_RES_PATH, KBE_BIN_PATH) invalid!\n", L"ERROR", MB_ICONERROR);
 #endif
 		}
 	}
@@ -338,11 +338,11 @@ bool Resmgr::listPathRes(std::wstring path, const std::wstring& extendName, std:
 
 #else
 	wchar_t szFind[MAX_PATH];
-	WIN32_FIND_DATA FindFileData;
+	WIN32_FIND_DATAW FindFileData;
 	wcscpy(szFind, path.c_str());
 	wcscat(szFind, L"*");
 	
-	HANDLE hFind = FindFirstFile(szFind, &FindFileData);
+	HANDLE hFind = FindFirstFileW(szFind, &FindFileData);
 	if(INVALID_HANDLE_VALUE == hFind)
 	{
 		char* cstr = strutil::wchar2char(path.c_str());
@@ -391,7 +391,7 @@ bool Resmgr::listPathRes(std::wstring path, const std::wstring& extendName, std:
 			}
 		}
 
-		if(!FindNextFile(hFind, &FindFileData))
+		if(!FindNextFileW(hFind, &FindFileData))
 			break;
 	}
 

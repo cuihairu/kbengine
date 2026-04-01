@@ -35,10 +35,15 @@ const char* getTimingMethodName()
 	}
 }
 
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+static uint64 calcStampsPerSecond_gettime()
+{
+	return 1000000000ULL;
+}
 
 #ifdef KBE_USE_RDTSC
 static uint64 calcStampsPerSecond_rdtsc()
@@ -66,11 +71,6 @@ static uint64 calcStampsPerSecond_rdtsc()
 	uint64 stampDelta = stampAfter - stampBefore;
 
 	return (stampDelta * 1000000ULL) / microDelta;
-}
-#else
-static uint64 calcStampsPerSecond_gettime()
-{
-	return 1000000000ULL;
 }
 #endif
 
@@ -208,7 +208,7 @@ static uint64 calcStampsPerSecond()
 
 
 /**
- Ã¿ÃëcpuËùºÄÊ±¼ä
+ ÃƒÂ¿ÃƒÃ«cpuÃ‹Ã¹ÂºÃ„ÃŠÂ±Â¼Ã¤
 */
 uint64 stampsPerSecond()
 {
@@ -217,7 +217,7 @@ uint64 stampsPerSecond()
 }
 
 /**
- Ã¿ÃëcpuËùºÄÊ±¼ä double°æ±¾
+ ÃƒÂ¿ÃƒÃ«cpuÃ‹Ã¹ÂºÃ„ÃŠÂ±Â¼Ã¤ doubleÂ°Ã¦Â±Â¾
 */
 double stampsPerSecondD()
 {
@@ -226,5 +226,3 @@ double stampsPerSecondD()
 }
 
 }
-
-

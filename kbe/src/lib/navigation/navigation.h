@@ -12,7 +12,7 @@
 namespace KBEngine
 {
 /*
-	µ¼º½Àà
+	å¯¼èˆªç±»
 */
 class Navigation : public Singleton<Navigation>
 {

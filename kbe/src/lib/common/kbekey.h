@@ -11,12 +11,12 @@ namespace KBEngine
 
 
 /**
- *	引擎的key管理
+ *	寮曟搸鐨刱ey绠＄悊
  */
 class KBEKey : public KBE_RSA, public Singleton<KBEKey>
 {
 public:
-	KBEKey(const std::string& pubkeyname, 
+	KBEKey(const std::string& pubkeyname,
 		const std::string& prikeyname);
 
 	KBEKey();

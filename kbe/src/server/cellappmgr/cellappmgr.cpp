@@ -16,7 +16,7 @@
 #include "../../server/dbmgr/dbmgr_interface.h"
 
 namespace KBEngine{
-	
+
 ServerConfig g_serverConfig;
 KBE_SINGLETON_INIT(Cellappmgr);
 
@@ -25,7 +25,7 @@ class AppForwardItem : public ForwardItem
 public:
 	virtual bool isOK()
 	{
-		// ±ØĞë´æÔÚÒ»¸ö×¼±¸ºÃµÄ½ø³Ì
+		// å¿…é¡»å­˜åœ¨ä¸€ä¸ªå‡†å¤‡å¥½çš„è¿›ç¨‹
 		Components::COMPONENTS& cts = Components::getSingleton().getComponents(CELLAPP_TYPE);
 		Components::COMPONENTS::iterator ctiter = cts.begin();
 		for (; ctiter != cts.end(); ++ctiter)
@@ -55,8 +55,8 @@ public:
 };
 
 //-------------------------------------------------------------------------------------
-Cellappmgr::Cellappmgr(Network::EventDispatcher& dispatcher, 
-			 Network::NetworkInterface& ninterface, 
+Cellappmgr::Cellappmgr(Network::EventDispatcher& dispatcher,
+			 Network::NetworkInterface& ninterface,
 			 COMPONENT_TYPE componentType,
 			 COMPONENT_ID componentID):
 	ServerApp(dispatcher, ninterface, componentType, componentID),
@@ -98,7 +98,7 @@ void Cellappmgr::removeCellapp(COMPONENT_ID cid)
 			cid, (cellapps_.size() - 1)));
 
 		cellapps_.erase(iter);
-		
+
 		std::vector<COMPONENT_ID>::iterator viter = cellapp_cids_.begin();
 		for (; viter != cellapp_cids_.end(); ++viter)
 		{
@@ -122,7 +122,7 @@ Cellapp& Cellappmgr::getCellapp(COMPONENT_ID cid)
 		return iter->second;
 	}
 
-	// Ìí¼ÓÁËÒ»¸öĞÂµÄcellapp
+	// æ·»åŠ äº†ä¸€ä¸ªæ–°çš„cellapp
 	Cellapp& cellapp = cellapps_[cid];
 
 	INFO_MSG(fmt::format("Cellappmgr::getCellapp: added new cellapp({0}).\n",
@@ -149,7 +149,7 @@ void Cellappmgr::handleTimeout(TimerHandle handle, void * arg)
 //-------------------------------------------------------------------------------------
 void Cellappmgr::onChannelDeregister(Network::Channel * pChannel)
 {
-	// Èç¹ûÊÇappËÀÍöÁË
+	// å¦‚æœæ˜¯appæ­»äº¡äº†
 	if(pChannel->isInternal())
 	{
 		Components::ComponentInfos* cinfo = Components::getSingleton().findComponent(pChannel);
@@ -174,7 +174,7 @@ void Cellappmgr::handleGameTick()
 {
 	//time_t t = ::time(NULL);
 	//DEBUG_MSG(fmt::format("Cellappmgr::handleGameTick[{}]:{}\n", t, g_kbetime));
-	
+
 	++g_kbetime;
 	threadPool_.onMainThreadTick();
 	networkInterface().processChannels(&CellappmgrInterface::messageHandlers);
@@ -207,7 +207,7 @@ void Cellappmgr::finalise()
 	gameTimer_.cancel();
 	forward_anywhere_cellapp_messagebuffer_.clear();
 	forward_cellapp_messagebuffer_.clear();
-	
+
 	ServerApp::finalise();
 }
 
@@ -239,16 +239,16 @@ COMPONENT_ID Cellappmgr::findFreeCellapp(void)
 	{
 		if ((iter->second.flags() & APP_FLAGS_NOT_PARTCIPATING_LOAD_BALANCING) > 0)
 			continue;
-		
-		// Ê×ÏÈ½ø³Ì±ØĞë»î×ÅÇÒ³õÊ¼»¯Íê±Ï
+
+		// é¦–å…ˆè¿›ç¨‹å¿…é¡»æ´»ç€ä¸”åˆå§‹åŒ–å®Œæ¯•
 		if(!iter->second.isDestroyed() && iter->second.initProgress() > 1.f)
 		{
-			// Èç¹ûÃ»ÓĞÈÎºÎÊµÌåÔòÎŞÌõ¼ş·ÖÅä
+			// å¦‚æœæ²¡æœ‰ä»»ä½•å®ä½“åˆ™æ— æ¡ä»¶åˆ†é…
 			if(iter->second.numEntities() == 0)
 				return iter->first;
 
-			// ±È½Ï²¢¼ÇÂ¼¸ºÔØ×îĞ¡µÄ½ø³Ì×îÖÕ±»·ÖÅä
-			if(minload > iter->second.load() || 
+			// æ¯”è¾ƒå¹¶è®°å½•è´Ÿè½½æœ€å°çš„è¿›ç¨‹æœ€ç»ˆè¢«åˆ†é…
+			if(minload > iter->second.load() ||
 				(minload == iter->second.load() && numEntities > iter->second.numEntities()))
 			{
 				cid = iter->first;
@@ -307,16 +307,16 @@ uint32 Cellappmgr::numLoadBalancingApp()
 }
 
 //-------------------------------------------------------------------------------------
-void Cellappmgr::reqCreateCellEntityInNewSpace(Network::Channel* pChannel, MemoryStream& s) 
+void Cellappmgr::reqCreateCellEntityInNewSpace(Network::Channel* pChannel, MemoryStream& s)
 {
 	std::string entityType;
 	ENTITY_ID id;
 	COMPONENT_ID componentID;
 	bool hasClient;
 
-	// Èç¹ûcellappIndexÎª0£¬Ôò´ú±í²»Ç¿ÖÆÖ¸¶¨cellapp
-	// ·Ç0µÄÇé¿öÏÂ£¬Ñ¡ÔñµÄcellapp¿ÉÒÔÓÃ1,2,3,4À´´úÌæ
-	// ¼ÙÈçÔ¤ÆÚÓĞ4¸öcellapp£¬ ¼ÙÈç²»¹»4¸ö£¬ Ö»ÓĞ3¸ö£¬ ÄÇÃ´4´ú±í1
+	// å¦‚æœcellappIndexä¸º0ï¼Œåˆ™ä»£è¡¨ä¸å¼ºåˆ¶æŒ‡å®šcellapp
+	// é0çš„æƒ…å†µä¸‹ï¼Œé€‰æ‹©çš„cellappå¯ä»¥ç”¨1,2,3,4æ¥ä»£æ›¿
+	// å‡å¦‚é¢„æœŸæœ‰4ä¸ªcellappï¼Œ å‡å¦‚ä¸å¤Ÿ4ä¸ªï¼Œ åªæœ‰3ä¸ªï¼Œ é‚£ä¹ˆ4ä»£è¡¨1
 	uint32 cellappIndex = 0;
 
 	s >> entityType;
@@ -344,7 +344,7 @@ void Cellappmgr::reqCreateCellEntityInNewSpace(Network::Channel* pChannel, Memor
 	{
 		updateBestCellapp();
 
-		// Ñ¡ÔñÌØ¶¨µÄcellapp´´½¨space
+		// é€‰æ‹©ç‰¹å®šçš„cellappåˆ›å»ºspace
 		if (cellappIndex > 0)
 		{
 			uint32 index = (cellappIndex - 1) % cellappSize;
@@ -383,7 +383,7 @@ void Cellappmgr::reqCreateCellEntityInNewSpace(Network::Channel* pChannel, Memor
 
 	std::map< COMPONENT_ID, Cellapp >::iterator cellapp_iter = cellapps_.find(bestCellappID_);
 
-	// Ô¤ÏÈ½«ÊµÌåÊıÁ¿Ôö¼Ó
+	// é¢„å…ˆå°†å®ä½“æ•°é‡å¢åŠ 
 	if (cellapp_iter != cellapps_.end())
 	{
 		DEBUG_MSG(fmt::format("Cellappmgr::reqCreateCellEntityInNewSpace: entityType={}, entityID={}, componentID={}, cellapp(cid={}, load={}, numEntities={}).\n",
@@ -399,7 +399,7 @@ void Cellappmgr::reqCreateCellEntityInNewSpace(Network::Channel* pChannel, Memor
 }
 
 //-------------------------------------------------------------------------------------
-void Cellappmgr::reqRestoreSpaceInCell(Network::Channel* pChannel, MemoryStream& s) 
+void Cellappmgr::reqRestoreSpaceInCell(Network::Channel* pChannel, MemoryStream& s)
 {
 	std::string entityType;
 	ENTITY_ID id;
@@ -442,7 +442,7 @@ void Cellappmgr::reqRestoreSpaceInCell(Network::Channel* pChannel, MemoryStream&
 		cinfos->pChannel->send(pBundle);
 	}
 
-	// Ô¤ÏÈ½«ÊµÌåÊıÁ¿Ôö¼Ó
+	// é¢„å…ˆå°†å®ä½“æ•°é‡å¢åŠ 
 	std::map< COMPONENT_ID, Cellapp >::iterator cellapp_iter = cellapps_.find(bestCellappID_);
 	if (cellapp_iter != cellapps_.end())
 	{
@@ -451,11 +451,11 @@ void Cellappmgr::reqRestoreSpaceInCell(Network::Channel* pChannel, MemoryStream&
 }
 
 //-------------------------------------------------------------------------------------
-void Cellappmgr::updateCellapp(Network::Channel* pChannel, COMPONENT_ID componentID, 
+void Cellappmgr::updateCellapp(Network::Channel* pChannel, COMPONENT_ID componentID,
 	ENTITY_ID numEntities, float load, uint32 flags)
 {
 	Cellapp& cellapp = getCellapp(componentID);
-	
+
 	cellapp.load(load);
 	cellapp.numEntities(numEntities);
 	cellapp.flags(flags);
@@ -463,12 +463,12 @@ void Cellappmgr::updateCellapp(Network::Channel* pChannel, COMPONENT_ID componen
 	Components::ComponentInfos* cinfos = Components::getSingleton().findComponent(componentID);
 	if (cinfos)
 		cinfos->appFlags = flags;
-	
+
 	updateBestCellapp();
 }
 
 //-------------------------------------------------------------------------------------
-void Cellappmgr::onCellappInitProgress(Network::Channel* pChannel, COMPONENT_ID cid, float progress, 
+void Cellappmgr::onCellappInitProgress(Network::Channel* pChannel, COMPONENT_ID cid, float progress,
 	COMPONENT_ORDER componentGlobalOrder, COMPONENT_ORDER componentGroupOrder)
 {
 	if(progress > 1.f)
@@ -510,11 +510,11 @@ void Cellappmgr::addCellappComponentID(COMPONENT_ID cid)
 		}
 		++iter;
 	}
-	
+
 	if (!isInserted)
 		cellapp_cids_.push_back(cid);
 
-	// Êä³öÈÕÖ¾£¬Èç¹ûÒªĞ£Ñécellapp²åÈëµÄË³ĞòÊÇ·ñÕıÈ·£¬¿ÉÒÔ´ò¿ªÏÂÃæµÄ×¢ÊÍ½øĞĞ²âÊÔ
+	// è¾“å‡ºæ—¥å¿—ï¼Œå¦‚æœè¦æ ¡éªŒcellappæ’å…¥çš„é¡ºåºæ˜¯å¦æ­£ç¡®ï¼Œå¯ä»¥æ‰“å¼€ä¸‹é¢çš„æ³¨é‡Šè¿›è¡Œæµ‹è¯•
 	/*
 	{
 		std::string sCID = "";
@@ -572,9 +572,9 @@ void Cellappmgr::querySpaces(Network::Channel* pChannel, MemoryStream& s)
 		Spaces& spaces = cellappref.spaces();
 
 		(*pBundle) << iter1->first;
-		
-		// Èç¹û²»Ç¿ÖÆ£¬ÔòÔÚwin64ÏÂ£¬ËüÊÇ8×Ö½Ú£¬¶øwin32ÏÂÊÇ4×Ö½Ú
-		(*pBundle) << (uint32)spaces.size(); 
+
+		// å¦‚æœä¸å¼ºåˆ¶ï¼Œåˆ™åœ¨win64ä¸‹ï¼Œå®ƒæ˜¯8å­—èŠ‚ï¼Œè€Œwin32ä¸‹æ˜¯4å­—èŠ‚
+		(*pBundle) << (uint32)spaces.size();
 
 		std::map<SPACE_ID, Space>& allSpaces = spaces.spaces();
 		std::map<SPACE_ID, Space>::iterator iter2 = allSpaces.begin();
@@ -587,15 +587,15 @@ void Cellappmgr::querySpaces(Network::Channel* pChannel, MemoryStream& s)
 
 			Cells& cells = space.cells();
 			std::map<CELL_ID, Cell>& allCells = cells.cells();
-			(*pBundle) << (uint32)allCells.size(); 
+			(*pBundle) << (uint32)allCells.size();
 
 			std::map<CELL_ID, Cell>::iterator iter3 = allCells.begin();
 			for (; iter3 != allCells.end(); ++iter3)
 			{
 				(*pBundle) << iter3->first;
 
-				// ÆäËûĞÅÏ¢´ı·Ö¸î¹¦ÄÜÊµÏÖºóÍê³É
-				// ÀıÈçcell´óĞ¡ĞÎ×´µÈĞÅÏ¢
+				// å…¶ä»–ä¿¡æ¯å¾…åˆ†å‰²åŠŸèƒ½å®ç°åå®Œæˆ
+				// ä¾‹å¦‚cellå¤§å°å½¢çŠ¶ç­‰ä¿¡æ¯
 			}
 		}
 	}

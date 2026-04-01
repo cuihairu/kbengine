@@ -14,7 +14,7 @@
 #include "server/serverconfig.h"
 #include "server/globaldata_client.h"
 #include "server/globaldata_server.h"
-#include "server/callbackmgr.h"	
+#include "server/callbackmgr.h"
 #include "common/timer.h"
 #include "network/endpoint.h"
 #include "resmgr/resmgr.h"
@@ -29,7 +29,7 @@ class InterfacesHandler;
 class SyncAppDatasHandler;
 class UpdateDBServerLogHandler;
 
-class Dbmgr :	public PythonApp, 
+class Dbmgr :	public PythonApp,
 				public Singleton<Dbmgr>
 {
 public:
@@ -38,21 +38,21 @@ public:
 		TIMEOUT_TICK = TIMEOUT_PYTHONAPP_MAX + 1,
 		TIMEOUT_CHECK_STATUS
 	};
-	
-	Dbmgr(Network::EventDispatcher& dispatcher, 
-		Network::NetworkInterface& ninterface, 
+
+	Dbmgr(Network::EventDispatcher& dispatcher,
+		Network::NetworkInterface& ninterface,
 		COMPONENT_TYPE componentType,
 		COMPONENT_ID componentID);
 
 	~Dbmgr();
-	
+
 	bool run();
-	
+
 	void handleTimeout(TimerHandle handle, void * arg);
 	void handleMainTick();
 	void handleCheckStatusTick();
 
-	/* ³õÊ¼»¯Ïà¹Ø½Ó¿Ú */
+	/* åˆå§‹åŒ–ç›¸å…³æ¥å£ */
 	bool initializeBegin();
 	bool inInitialize();
 	bool initializeEnd();
@@ -61,7 +61,7 @@ public:
 	bool installPyModules();
 	bool uninstallPyModules();
 	void onInstallPyModules();
-	
+
 	bool initInterfacesHandler();
 
 	bool initDB();
@@ -71,144 +71,144 @@ public:
 	virtual void onShutdownBegin();
 	virtual void onShutdownEnd();
 
-	/** »ñÈ¡ID·şÎñÆ÷Ö¸Õë */
+	/** è·å–IDæœåŠ¡å™¨æŒ‡é’ˆ */
 	IDServer<ENTITY_ID>& idServer(void){ return idServer_; }
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó·ÖÅäÒ»¸öENTITY_ID¶Î
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚åˆ†é…ä¸€ä¸ªENTITY_IDæ®µ
 	*/
 	void onReqAllocEntityID(Network::Channel* pChannel, COMPONENT_ORDER componentType, COMPONENT_ID componentID);
 
-	/* ÍøÂç½Ó¿Ú
-		×¢²áÒ»¸öĞÂ¼¤»îµÄbaseapp»òÕßcellapp»òÕßdbmgr
-		Í¨³£ÊÇÒ»¸öĞÂµÄapp±»Æô¶¯ÁË£¬ ËüĞèÒªÏòÄ³Ğ©×é¼ş×¢²á×Ô¼º¡£
+	/* ç½‘ç»œæ¥å£
+		æ³¨å†Œä¸€ä¸ªæ–°æ¿€æ´»çš„baseappæˆ–è€…cellappæˆ–è€…dbmgr
+		é€šå¸¸æ˜¯ä¸€ä¸ªæ–°çš„appè¢«å¯åŠ¨äº†ï¼Œ å®ƒéœ€è¦å‘æŸäº›ç»„ä»¶æ³¨å†Œè‡ªå·±ã€‚
 	*/
-	virtual void onRegisterNewApp(Network::Channel* pChannel, 
-							int32 uid, 
-							std::string& username, 
+	virtual void onRegisterNewApp(Network::Channel* pChannel,
+							int32 uid,
+							std::string& username,
 							COMPONENT_TYPE componentType, COMPONENT_ID componentID, COMPONENT_ORDER globalorderID, COMPONENT_ORDER grouporderID,
 							uint32 intaddr, uint16 intport, uint32 extaddr, uint16 extport, std::string& extaddrEx);
 
 
-	/** ÍøÂç½Ó¿Ú
-		dbmgr¹ã²¥globalÊı¾İµÄ¸Ä±ä
+	/** ç½‘ç»œæ¥å£
+		dbmgrå¹¿æ’­globalæ•°æ®çš„æ”¹å˜
 	*/
 	void onGlobalDataClientLogon(Network::Channel* pChannel, COMPONENT_TYPE componentType);
 	void onBroadcastGlobalDataChanged(Network::Channel* pChannel, KBEngine::MemoryStream& s);
-	
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó´´½¨ÕËºÅ
+
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚åˆ›å»ºè´¦å·
 	*/
 	void reqCreateAccount(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 	void onCreateAccountCBFromInterfaces(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó²Á³ı¿Í»§¶ËÇëÇóÈÎÎñ
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚æ“¦é™¤å®¢æˆ·ç«¯è¯·æ±‚ä»»åŠ¡
 	*/
 	void eraseClientReq(Network::Channel* pChannel, std::string& logkey);
 
-	/** ÍøÂç½Ó¿Ú
-		Ò»¸öĞÂÓÃ»§µÇÂ¼£¬ ĞèÒª¼ì²éºÏ·¨ĞÔ
+	/** ç½‘ç»œæ¥å£
+		ä¸€ä¸ªæ–°ç”¨æˆ·ç™»å½•ï¼Œ éœ€è¦æ£€æŸ¥åˆæ³•æ€§
 	*/
 	void onAccountLogin(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 	void onLoginAccountCBBFromInterfaces(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		baseappÇëÇó²éÑ¯accountĞÅÏ¢
+	/** ç½‘ç»œæ¥å£
+		baseappè¯·æ±‚æŸ¥è¯¢accountä¿¡æ¯
 	*/
 	void queryAccount(Network::Channel* pChannel, std::string& accountName, std::string& password, bool needCheckPassword,
 		COMPONENT_ID componentID, ENTITY_ID entityID, DBID entityDBID, uint32 ip, uint16 port);
 
-	/** ÍøÂç½Ó¿Ú
-		ÊµÌå×Ô¶¯¼ÓÔØ¹¦ÄÜ
+	/** ç½‘ç»œæ¥å£
+		å®ä½“è‡ªåŠ¨åŠ è½½åŠŸèƒ½
 	*/
 	void entityAutoLoad(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		ÕËºÅ´ÓbaseappÉÏÏßÁË
+	/** ç½‘ç»œæ¥å£
+		è´¦å·ä»baseappä¸Šçº¿äº†
 	*/
-	void onAccountOnline(Network::Channel* pChannel, std::string& accountName, 
+	void onAccountOnline(Network::Channel* pChannel, std::string& accountName,
 		COMPONENT_ID componentID, ENTITY_ID entityID);
 
-	/** ÍøÂç½Ó¿Ú
-		entity-baseappÏÂÏßÁË
+	/** ç½‘ç»œæ¥å£
+		entity-baseappä¸‹çº¿äº†
 	*/
 	void onEntityOffline(Network::Channel* pChannel, DBID dbid, ENTITY_SCRIPT_UID sid, uint16 dbInterfaceIndex);
 
-	/** ÍøÂç½Ó¿Ú
-		Ö´ĞĞÊı¾İ¿â²éÑ¯
+	/** ç½‘ç»œæ¥å£
+		æ‰§è¡Œæ•°æ®åº“æŸ¥è¯¢
 	*/
 	void executeRawDatabaseCommand(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		Ä³¸öentity´æµµ
+	/** ç½‘ç»œæ¥å£
+		æŸä¸ªentityå­˜æ¡£
 	*/
 	void writeEntity(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		É¾³ıÄ³¸öentityµÄ´æµµÊı¾İ
+	/** ç½‘ç»œæ¥å£
+		åˆ é™¤æŸä¸ªentityçš„å­˜æ¡£æ•°æ®
 	*/
 	void removeEntity(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		Í¨¹ıdbid´ÓÊı¾İ¿âÖĞÉ¾³ıÒ»¸öÊµÌåµÄ»Øµ÷
+	/** ç½‘ç»œæ¥å£
+		é€šè¿‡dbidä»æ•°æ®åº“ä¸­åˆ é™¤ä¸€ä¸ªå®ä½“çš„å›è°ƒ
 	*/
 	void deleteEntityByDBID(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		Í¨¹ıdbid²éÑ¯Ò»¸öÊµÌåÊÇ·ñ´ÓÊı¾İ¿â¼ì³ö
+	/** ç½‘ç»œæ¥å£
+		é€šè¿‡dbidæŸ¥è¯¢ä¸€ä¸ªå®ä½“æ˜¯å¦ä»æ•°æ®åº“æ£€å‡º
 	*/
 	void lookUpEntityByDBID(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó´Ódb»ñÈ¡entityµÄËùÓĞÊı¾İ
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚ä»dbè·å–entityçš„æ‰€æœ‰æ•°æ®
 	*/
-	void queryEntity(Network::Channel* pChannel, uint16 dbInterfaceIndex, COMPONENT_ID componentID, int8	queryMode, DBID dbid, 
+	void queryEntity(Network::Channel* pChannel, uint16 dbInterfaceIndex, COMPONENT_ID componentID, int8	queryMode, DBID dbid,
 		std::string& entityType, CALLBACK_ID callbackID, ENTITY_ID entityID);
 
-	/** ÍøÂç½Ó¿Ú
-		Í¬²½entityÁ÷Ä£°å
+	/** ç½‘ç»œæ¥å£
+		åŒæ­¥entityæµæ¨¡æ¿
 	*/
 	void syncEntityStreamTemplate(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
 	virtual bool initializeWatcher();
 
-	/** ÍøÂç½Ó¿Ú
-		ÇëÇó³äÖµ
+	/** ç½‘ç»œæ¥å£
+		è¯·æ±‚å……å€¼
 	*/
 	void charge(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
-	/** ÍøÂç½Ó¿Ú
-		³äÖµ»Øµ÷
+	/** ç½‘ç»œæ¥å£
+		å……å€¼å›è°ƒ
 	*/
 	void onChargeCB(Network::Channel* pChannel, KBEngine::MemoryStream& s);
 
 
-	/** ÍøÂç½Ó¿Ú
-		¼¤»î»Øµ÷
+	/** ç½‘ç»œæ¥å£
+		æ¿€æ´»å›è°ƒ
 	*/
 	void accountActivate(Network::Channel* pChannel, std::string& scode);
 
-	/** ÍøÂç½Ó¿Ú
-		ÕËºÅÖØÖÃÃÜÂë
+	/** ç½‘ç»œæ¥å£
+		è´¦å·é‡ç½®å¯†ç 
 	*/
 	void accountReqResetPassword(Network::Channel* pChannel, std::string& accountName);
-	void accountResetPassword(Network::Channel* pChannel, std::string& accountName, 
+	void accountResetPassword(Network::Channel* pChannel, std::string& accountName,
 		std::string& newpassword, std::string& code);
 
-	/** ÍøÂç½Ó¿Ú
-		ÕËºÅ°ó¶¨ÓÊÏä
+	/** ç½‘ç»œæ¥å£
+		è´¦å·ç»‘å®šé‚®ç®±
 	*/
-	void accountReqBindMail(Network::Channel* pChannel, ENTITY_ID entityID, std::string& accountName, 
+	void accountReqBindMail(Network::Channel* pChannel, ENTITY_ID entityID, std::string& accountName,
 		std::string& password, std::string& email);
 	void accountBindMail(Network::Channel* pChannel, std::string& username, std::string& scode);
 
-	/** ÍøÂç½Ó¿Ú
-		ÕËºÅĞŞ¸ÄÃÜÂë
+	/** ç½‘ç»œæ¥å£
+		è´¦å·ä¿®æ”¹å¯†ç 
 	*/
-	void accountNewPassword(Network::Channel* pChannel, ENTITY_ID entityID, std::string& accountName, 
+	void accountNewPassword(Network::Channel* pChannel, ENTITY_ID entityID, std::string& accountName,
 		std::string& password, std::string& newpassword);
-	
+
 	SyncAppDatasHandler* pSyncAppDatasHandler() const { return pSyncAppDatasHandler_; }
 	void pSyncAppDatasHandler(SyncAppDatasHandler* p){ pSyncAppDatasHandler_ = p; }
 
@@ -228,7 +228,7 @@ public:
 	InterfacesHandler* findBestInterfacesHandler();
 
 	/**
-		ÏòdbmgrÇëÇóÖ´ĞĞÒ»¸öÊı¾İ¿âÃüÁî
+		å‘dbmgrè¯·æ±‚æ‰§è¡Œä¸€ä¸ªæ•°æ®åº“å‘½ä»¤
 	*/
 	static PyObject* __py_executeRawDatabaseCommand(PyObject* self, PyObject* args);
 	void executeRawDatabaseCommand(const char* datas, uint32 size, PyObject* pycallback, ENTITY_ID eid, const std::string& dbInterfaceName);
@@ -240,7 +240,7 @@ protected:
 	TimerHandle											loopCheckTimerHandle_;
 	TimerHandle											mainProcessTimer_;
 
-	// entityID·ÖÅä·şÎñ¶Ë
+	// entityIDåˆ†é…æœåŠ¡ç«¯
 	IDServer<ENTITY_ID>									idServer_;
 
 	// globalData
@@ -266,7 +266,7 @@ protected:
 
 	SyncAppDatasHandler*								pSyncAppDatasHandler_;
 	UpdateDBServerLogHandler*							pUpdateDBServerLogHandler_;
-	
+
 	TelnetServer*										pTelnetServer_;
 
 	std::map<COMPONENT_ID, uint64>						loseBaseappts_;

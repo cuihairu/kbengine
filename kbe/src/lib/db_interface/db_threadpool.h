@@ -15,7 +15,7 @@
 namespace KBEngine{ 
 
 /*
-	数据库线程任务buffer
+	鏁版嵁搴撶嚎绋嬩换鍔uffer
 */
 class TPThread;
 

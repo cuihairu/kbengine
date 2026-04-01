@@ -123,7 +123,7 @@ Reason WebSocketPacketFilter::recv(Channel * pChannel, PacketReceiver & receiver
 
 				reset();
 
-				// Èç¹ûÃ»ÓĞ´´½¨¹ı»º´æ£¬ÏÈ³¢ÊÔÖ±½Ó½âÎö°üÍ·£¬Èç¹ûĞÅÏ¢×ã¹»³É¹¦½âÎöÔò¼ÌĞøµ½ÏÂÒ»²½
+				// å¦‚æœæ²¡æœ‰åˆ›å»ºè¿‡ç¼“å­˜ï¼Œå…ˆå°è¯•ç›´æ¥è§£æåŒ…å¤´ï¼Œå¦‚æœä¿¡æ¯è¶³å¤ŸæˆåŠŸè§£æåˆ™ç»§ç»­åˆ°ä¸‹ä¸€æ­¥
 				pFragmentDatasRemain_ = websocket::WebSocketProtocol::getFrame(pPacket, msg_opcode_, msg_fin_, msg_masked_,
 					msg_mask_, msg_length_field_, msg_payload_length_, msg_frameType_);
 
@@ -144,8 +144,8 @@ Reason WebSocketPacketFilter::recv(Channel * pChannel, PacketReceiver & receiver
 			{
 				KBE_ASSERT(pTCPPacket_ != NULL);
 
-				// ³¤¶ÈÈç¹û´óÓÚÊ£Óà¶ÁÈ¡³¤¶È£¬ÄÇÃ´¿ÉÒÔ¿ªÊ¼½âÎöÁË
-				// ·ñÔò½«°üÄÚ´æ¼ÌĞø»º´æ
+				// é•¿åº¦å¦‚æœå¤§äºå‰©ä½™è¯»å–é•¿åº¦ï¼Œé‚£ä¹ˆå¯ä»¥å¼€å§‹è§£æäº†
+				// å¦åˆ™å°†åŒ…å†…å­˜ç»§ç»­ç¼“å­˜
 				if ((int32)pPacket->length() >= pFragmentDatasRemain_)
 				{
 					size_t wpos = pPacket->wpos();
@@ -153,36 +153,36 @@ Reason WebSocketPacketFilter::recv(Channel * pChannel, PacketReceiver & receiver
 
 					pPacket->wpos(rpos + pFragmentDatasRemain_);
 
-					// Ê×ÏÈ½«ĞèÒªµÄÊı¾İÌí¼Óµ½pTCPPacket_
+					// é¦–å…ˆå°†éœ€è¦çš„æ•°æ®æ·»åŠ åˆ°pTCPPacket_
 					pTCPPacket_->append(*(static_cast<MemoryStream*>(pPacket)));
 
-					// ½«Ğ´Î»ÖÃ»¹Ô­»ØÈ¥
+					// å°†å†™ä½ç½®è¿˜åŸå›å»
 					pPacket->wpos(wpos);
 
-					// ¶ªÆúÒÑ¾­¶ÁÈ¡µÄÊı¾İ
+					// ä¸¢å¼ƒå·²ç»è¯»å–çš„æ•°æ®
 					pPacket->read_skip(pFragmentDatasRemain_);
 
 					size_t buffer_rpos = pTCPPacket_->rpos();
 					pFragmentDatasRemain_ = websocket::WebSocketProtocol::getFrame(pTCPPacket_, msg_opcode_, msg_fin_, msg_masked_,
 						msg_mask_, msg_length_field_, msg_payload_length_, msg_frameType_);
 
-					// Èç¹ûÈÔÈ»´óÓÚ0£¬ ËµÃ÷ĞèÒª¼ÌĞøÊÕ°ü
+					// å¦‚æœä»ç„¶å¤§äº0ï¼Œ è¯´æ˜éœ€è¦ç»§ç»­æ”¶åŒ…
 					if (pFragmentDatasRemain_ > 0)
 					{
-						// ÓÉÓÚÒ»´ÎÃ»ÓĞ½âÎöÍê£¬ ÎÒÃÇ»Ø³·Êı¾İÏÂÒ»´ÎÔÙ³¢ÊÔ½âÎö
+						// ç”±äºä¸€æ¬¡æ²¡æœ‰è§£æå®Œï¼Œ æˆ‘ä»¬å›æ’¤æ•°æ®ä¸‹ä¸€æ¬¡å†å°è¯•è§£æ
 						pTCPPacket_->rpos(buffer_rpos);
 
-						// µ±Ç°°üÈç¹û»¹ÓĞÊı¾İ²¢ÇÒ´óÓÚµÈÓÚÎÒÃÇĞèÒªµÄÊı¾İ£¬Ôò¼ÌĞøÏÂÒ»Ñ­»·Á¢¼´½âÎö
+						// å½“å‰åŒ…å¦‚æœè¿˜æœ‰æ•°æ®å¹¶ä¸”å¤§äºç­‰äºæˆ‘ä»¬éœ€è¦çš„æ•°æ®ï¼Œåˆ™ç»§ç»­ä¸‹ä¸€å¾ªç¯ç«‹å³è§£æ
 						if ((int32)pPacket->length() >= pFragmentDatasRemain_)
 							continue;
 					}
 					else
 					{
-						// frame½âÎöÍê±Ï£¬½«¶ÔÏó»ØÊÕ
+						// frameè§£æå®Œæ¯•ï¼Œå°†å¯¹è±¡å›æ”¶
 						TCPPacket::reclaimPoolObject(pTCPPacket_);
 						pTCPPacket_ = NULL;
 
-						// ÊÇ·ñÓĞÊı¾İĞ¯´ø£¿Èç¹ûÃ»ÓĞÔò²»½øÈëdata½âÎö
+						// æ˜¯å¦æœ‰æ•°æ®æºå¸¦ï¼Ÿå¦‚æœæ²¡æœ‰åˆ™ä¸è¿›å…¥dataè§£æ
 						if (msg_payload_length_ > 0)
 						{
 							fragmentDatasFlag_ = FRAGMENT_MESSAGE_DATAS;
@@ -233,7 +233,7 @@ Reason WebSocketPacketFilter::recv(Channel * pChannel, PacketReceiver & receiver
 			}
 			else if (msg_frameType_ == websocket::WebSocketProtocol::INCOMPLETE_FRAME)
 			{
-				// ¼ÌĞøµÈ´ıºóĞøÄÚÈİµ½´ï
+				// ç»§ç»­ç­‰å¾…åç»­å†…å®¹åˆ°è¾¾
 			}
 			else if (msg_frameType_ == websocket::WebSocketProtocol::PING_FRAME)
 			{
@@ -286,7 +286,7 @@ Reason WebSocketPacketFilter::recv(Channel * pChannel, PacketReceiver & receiver
 
 			if (msg_frameType_ == websocket::WebSocketProtocol::PING_FRAME)
 			{
-				// ¼ÌĞøµÈÊ£ÓàµÄÄÚÈİµ½À´ÎªÖ¹
+				// ç»§ç»­ç­‰å‰©ä½™çš„å†…å®¹åˆ°æ¥ä¸ºæ­¢
 				if (pFragmentDatasRemain_ > 0)
 					continue;
 
@@ -321,7 +321,7 @@ Reason WebSocketPacketFilter::recv(Channel * pChannel, PacketReceiver & receiver
 				reason = PacketFilter::recv(pChannel, receiver, pTCPPacket_);
 				KBE_ASSERT(reason == REASON_SUCCESS);
 
-				// pTCPPacket_²»ĞèÒªÔÚÕâÀï»ØÊÕÁË
+				// pTCPPacket_ä¸éœ€è¦åœ¨è¿™é‡Œå›æ”¶äº†
 				pTCPPacket_ = NULL;
 			}
 

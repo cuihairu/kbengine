@@ -13,7 +13,7 @@ KBEngine is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
- 
+
 You should have received a copy of the GNU Lesser General Public License
 along with KBEngine.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -37,7 +37,7 @@ SCRIPT_MEMBER_DECLARE_END()
 SCRIPT_GETSET_DECLARE_BEGIN(Space)
 SCRIPT_GETSET_DECLARE_END()
 BASE_SCRIPT_INIT(Space, 0, 0, 0, 0, 0)
-	
+
 //-------------------------------------------------------------------------------------
 Space::Space(ENTITY_ID id, const ScriptDefModule* pScriptModule):
 Entity(id, pScriptModule, getScriptType(), true)

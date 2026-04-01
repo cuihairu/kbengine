@@ -6,13 +6,14 @@
 #include "network/http_utility.h"
 #include "network/channel.h"
 #include "network/bundle.h"
-#include "network/tcp_packet.h"
-#include "network/udp_packet.h"
 #include "network/message_handler.h"
 #include "network/tcp_packet_receiver.h"
 #include "network/udp_packet_receiver.h"
-#include "network/address.h"
 #include "helper/watcher.h"
+#include "network/tcp_packet.h"
+#include "network/udp_packet.h"
+#include "network/address.h"
+#include "network/endpoint.h"
 
 namespace KBEngine { 
 namespace Network
@@ -25,7 +26,7 @@ int8 g_channelExternalEncryptType = 0;
 
 uint32 g_SOMAXCONN = 5;
 
-// UDP参数
+// UDP tuning values
 uint32						g_rudp_intWritePacketsQueueSize = 65535;
 uint32						g_rudp_intReadPacketsQueueSize = 65535;
 uint32						g_rudp_extWritePacketsQueueSize = 65535;
@@ -60,7 +61,7 @@ uint32						g_extSendWindowBytesOverflow = 65535;
 uint32						g_intSentWindowBytesOverflow = 0;
 uint32						g_extSentWindowBytesOverflow = 0;
 
-// 通道发送超时重试
+// Channel resend timeouts and retry counts
 uint32						g_intReSendInterval = 10;
 uint32						g_intReSendRetries = 0;
 uint32						g_extReSendInterval = 10;

@@ -1,0 +1,3754 @@
+path,line,encoding,original_comment,english_comment
+kbe/src/server/baseapp/archiver.cpp,34,gb18030,// 算法如下:,
+kbe/src/server/baseapp/archiver.cpp,35,gb18030,// baseEntity的数量 * idx / tick周期 = 每次在vector中移动的一个区段,
+kbe/src/server/baseapp/archiver.cpp,36,gb18030,"// 这个区段在每个gametick进行处理, 刚好平滑的在periodInTicks中处理完任务",
+kbe/src/server/baseapp/archiver.cpp,37,gb18030,// 如果archiveIndex_ >= periodInTicks则重新产生一次随机序列,
+kbe/src/server/baseapp/archiver.cpp,83,gb18030,// 随机一下序列,
+kbe/src/server/baseapp/backuper.cpp,31,gb18030,// 这里对备份的entity做一下分批操作,
+kbe/src/server/baseapp/backuper.cpp,32,gb18030,// 大概算法是配置上填写的备份周期换算成tick数量， 每个tick备份一部分entity,
+kbe/src/server/baseapp/backuper.cpp,35,gb18030,// 本次备份的数量,
+kbe/src/server/baseapp/backuper.cpp,38,gb18030,// 计算出精度导致的损失数量,
+kbe/src/server/baseapp/backuper.cpp,41,gb18030,// 如果备份表中没有内容了则重新产生一份新的,
+kbe/src/server/baseapp/backuper.cpp,68,gb18030,// 这里开始将需要备份的数据写入流,
+kbe/src/server/baseapp/backuper.cpp,92,gb18030,// 随机一下序列,
+kbe/src/server/baseapp/backuper.h,31,gb18030,// 在此列表中的entity将进行备份操作,
+kbe/src/server/baseapp/baseapp.cpp,45,gb18030,"// 创建一个用于生成实体的字典，包含了实体所有的持久化属性和数据
+",
+kbe/src/server/baseapp/baseapp.cpp,59,gb18030,"// 先将celldata中的存储属性取出
+",
+kbe/src/server/baseapp/baseapp.cpp,73,gb18030,"// 如果某个实体没有cell部分， 而组件属性没有base部分则忽略
+",
+kbe/src/server/baseapp/baseapp.cpp,82,gb18030,"// 和dbmgr判断保持一致，如果没有持久化属性dbmgr将不会传输数据过来
+",
+kbe/src/server/baseapp/baseapp.cpp,251,gb18030,"// 不需要主动释放
+",
+kbe/src/server/baseapp/baseapp.cpp,277,gb18030,"// 所有脚本都加载完毕
+",
+kbe/src/server/baseapp/baseapp.cpp,325,gb18030,"// 通知脚本
+",
+kbe/src/server/baseapp/baseapp.cpp,340,gb18030,"// 通知脚本
+",
+kbe/src/server/baseapp/baseapp.cpp,387,gb18030,"// 通知脚本
+",
+kbe/src/server/baseapp/baseapp.cpp,418,gb18030,"// 将app标记注册到脚本
+",
+kbe/src/server/baseapp/baseapp.cpp,429,gb18030,"// 注册创建entity的方法到py
+",
+kbe/src/server/baseapp/baseapp.cpp,459,gb18030,"// 添加globalData, globalBases支持
+",
+kbe/src/server/baseapp/baseapp.cpp,562,gb18030,"// 一定要在最前面
+",
+kbe/src/server/baseapp/baseapp.cpp,613,gb18030,"// 添加一个timer， 每秒检查一些状态
+",
+kbe/src/server/baseapp/baseapp.cpp,631,gb18030,"// 如果需要pyprofile则在此处安装
+",
+kbe/src/server/baseapp/baseapp.cpp,632,gb18030,"// 结束时卸载并输出结果
+",
+kbe/src/server/baseapp/baseapp.cpp,801,gb18030,"// 如果是cellapp死亡了
+",
+kbe/src/server/baseapp/baseapp.cpp,816,gb18030,"// 有关联entity的客户端退出则需要设置entity的client
+",
+kbe/src/server/baseapp/baseapp.cpp,1309,gb18030,"// 如果createEntityFromDBID类接口返回实体已经检出且在当前进程上，但是当前进程上无法找到实体时应该给出错误
+",
+kbe/src/server/baseapp/baseapp.cpp,1310,gb18030,"// 这种情况通常是异步的环境中从db查询到已经检出，但等回调时可能实体已经销毁了而造成的
+",
+kbe/src/server/baseapp/baseapp.cpp,1392,gb18030,"// 不需要通知脚本
+",
+kbe/src/server/baseapp/baseapp.cpp,1596,gb18030,"// 如果为0说明没有可用的，那么就用自己来创建好了
+",
+kbe/src/server/baseapp/baseapp.cpp,1688,gb18030,"// 如果createEntityFromDBID类接口返回实体已经检出且在当前进程上，但是当前进程上无法找到实体时应该给出错误
+",
+kbe/src/server/baseapp/baseapp.cpp,1689,gb18030,"// 这种情况通常是异步的环境中从db查询到已经检出，但等回调时可能实体已经销毁了而造成的
+",
+kbe/src/server/baseapp/baseapp.cpp,1767,gb18030,"// 通知baseappmgr在其他baseapp上创建entity
+",
+kbe/src/server/baseapp/baseapp.cpp,1838,gb18030,"// 不需要通知脚本
+",
+kbe/src/server/baseapp/baseapp.cpp,1845,gb18030,"// 是否本地组件就是发起源， 如果是直接在本地调用回调
+",
+kbe/src/server/baseapp/baseapp.cpp,1852,gb18030,"// 通知baseapp, 创建好了
+",
+kbe/src/server/baseapp/baseapp.cpp,2171,gb18030,"// 如果createEntityFromDBID类接口返回实体已经检出且在当前进程上，但是当前进程上无法找到实体时应该给出错误
+",
+kbe/src/server/baseapp/baseapp.cpp,2172,gb18030,"// 这种情况通常是异步的环境中从db查询到已经检出，但等回调时可能实体已经销毁了而造成的
+",
+kbe/src/server/baseapp/baseapp.cpp,2250,gb18030,"// 通知baseappmgr在其他baseapp上创建entity
+",
+kbe/src/server/baseapp/baseapp.cpp,2321,gb18030,"// 不需要通知脚本
+",
+kbe/src/server/baseapp/baseapp.cpp,2328,gb18030,"// 是否本地组件就是发起源， 如果是直接在本地调用回调
+",
+kbe/src/server/baseapp/baseapp.cpp,2335,gb18030,"// 通知baseapp, 创建好了
+",
+kbe/src/server/baseapp/baseapp.cpp,2434,gb18030,"// 如果cellappIndex为0，则代表不强制指定cellapp
+",
+kbe/src/server/baseapp/baseapp.cpp,2435,gb18030,"// 非0的情况下，选择的cellapp可以用1,2,3,4来代替
+",
+kbe/src/server/baseapp/baseapp.cpp,2436,gb18030,"// 假如预期有4个cellapp， 假如不够4个， 只有3个， 那么4代表1
+",
+kbe/src/server/baseapp/baseapp.cpp,2636,gb18030,"// 如果不是在发起创建entity的baseapp上创建则需要转发回调到发起方
+",
+kbe/src/server/baseapp/baseapp.cpp,2659,gb18030,"// 需要baseappmgr转发给目的baseapp
+",
+kbe/src/server/baseapp/baseapp.cpp,2699,gb18030,"// 没有设定回调
+",
+kbe/src/server/baseapp/baseapp.cpp,2721,gb18030,"// 如果entity属于另一个baseapp创建则设置它的entityCall
+",
+kbe/src/server/baseapp/baseapp.cpp,2799,gb18030,"// 创建到这个组件上
+",
+kbe/src/server/baseapp/baseapp.cpp,2870,gb18030,"// 如果不是在发起创建entity的baseapp上创建则需要转发回调到发起方
+",
+kbe/src/server/baseapp/baseapp.cpp,2893,gb18030,"// 需要baseappmgr转发给目的baseapp
+",
+kbe/src/server/baseapp/baseapp.cpp,2933,gb18030,"// 没有设定回调
+",
+kbe/src/server/baseapp/baseapp.cpp,2955,gb18030,"// 如果entity属于另一个baseapp创建则设置它的entityCall
+",
+kbe/src/server/baseapp/baseapp.cpp,3039,gb18030,"// 在这个entityCall所在的cellspace上创建
+",
+kbe/src/server/baseapp/baseapp.cpp,3087,gb18030,"// 可能客户端在期间掉线了
+",
+kbe/src/server/baseapp/baseapp.cpp,3108,gb18030,"// 可能客户端在期间掉线了
+",
+kbe/src/server/baseapp/baseapp.cpp,3123,gb18030,"// 如果是有客户端的entity则需要告知客户端， 自身entity已经进入世界了。
+",
+kbe/src/server/baseapp/baseapp.cpp,3146,gb18030,"// 将通道代理的关系与该entity绑定， 在后面通信中可提供身份合法性识别
+",
+kbe/src/server/baseapp/baseapp.cpp,3151,gb18030,"// 重新生成一个ID
+",
+kbe/src/server/baseapp/baseapp.cpp,3155,gb18030,"// 一些数据必须在实体创建后立即访问
+",
+kbe/src/server/baseapp/baseapp.cpp,3158,gb18030,"// 让客户端知道已经创建了proxices, 并初始化一部分属性
+",
+kbe/src/server/baseapp/baseapp.cpp,3167,gb18030,"// 本应该由客户端告知已经创建好entity后调用这个接口。
+",
+kbe/src/server/baseapp/baseapp.cpp,3592,gb18030,"// 再次同步自己的新信息(startGlobalOrder, startGroupOrder等)到machine
+",
+kbe/src/server/baseapp/baseapp.cpp,3595,gb18030,"// 这里需要更新一下python的环境变量
+",
+kbe/src/server/baseapp/baseapp.cpp,3648,gb18030,"// 通知脚本
+",
+kbe/src/server/baseapp/baseapp.cpp,3667,gb18030,"// 通知脚本
+",
+kbe/src/server/baseapp/baseapp.cpp,3848,gb18030,"// 如果entityID大于0则说明此entity是存活状态登录
+",
+kbe/src/server/baseapp/baseapp.cpp,3863,gb18030,"// 防止在onLogOnAttempt中销毁了
+",
+kbe/src/server/baseapp/baseapp.cpp,3866,gb18030,"// 通知脚本异常登录请求有脚本决定是否允许这个通道强制登录
+",
+kbe/src/server/baseapp/baseapp.cpp,3883,gb18030,"// 通告在别处登录
+",
+kbe/src/server/baseapp/baseapp.cpp,3906,gb18030,"// 创建entity的客户端entityCall
+",
+kbe/src/server/baseapp/baseapp.cpp,3915,gb18030,"// 将通道代理的关系与该entity绑定， 在后面通信中可提供身份合法性识别
+",
+kbe/src/server/baseapp/baseapp.cpp,3945,gb18030,"// 记录客户端地址
+",
+kbe/src/server/baseapp/baseapp.cpp,4011,gb18030,"// 不再调用onClientDeath，可能脚本会在此时立即销毁了实体导致后面无法继续流程
+",
+kbe/src/server/baseapp/baseapp.cpp,4020,gb18030,"// 创建entity的客户端entityCall
+",
+kbe/src/server/baseapp/baseapp.cpp,4027,gb18030,"// 将通道代理的关系与该entity绑定， 在后面通信中可提供身份合法性识别
+",
+kbe/src/server/baseapp/baseapp.cpp,4032,gb18030,"// 客户端重连也需要将完整的数据重发给客户端， 相当于登录之后获得的数据。
+",
+kbe/src/server/baseapp/baseapp.cpp,4033,gb18030,"// 因为断线期间不能确保包括场景等数据已发生变化
+",
+kbe/src/server/baseapp/baseapp.cpp,4034,gb18030,"// 客户端需要重建所有数据
+",
+kbe/src/server/baseapp/baseapp.cpp,4155,gb18030,"// 创建entity的客户端entityCall
+",
+kbe/src/server/baseapp/baseapp.cpp,4450,gb18030,"// 在本地区尝试查找该收件人信息， 看收件人是否属于本区域
+",
+kbe/src/server/baseapp/baseapp.cpp,4461,gb18030,"// 本组件是baseapp，那么确认邮件的目的地是这里， 那么执行最终操作
+",
+kbe/src/server/baseapp/baseapp.cpp,4807,gb18030,"// 此消息不允许加密，所以设定已加密忽略再次加密，当第一次send消息不是立即发生而是交由epoll通知时会出现这种情况（一般用于测试，正规环境不会出现）
+",
+kbe/src/server/baseapp/baseapp.cpp,4808,gb18030,"// web协议必须要加密，所以不能设置为true
+",
+kbe/src/server/baseapp/baseapp.cpp,4818,gb18030,"// 替换为一个加密的过滤器
+",
+kbe/src/server/baseapp/baseapp.h,60,gb18030,"/** 
+		相关处理接口 
+	*/",
+kbe/src/server/baseapp/baseapp.h,69,gb18030,"/** 
+		初始化相关接口 
+	*/",
+kbe/src/server/baseapp/baseapp.h,90,gb18030,"/**
+		一个cellapp死亡
+	*/",
+kbe/src/server/baseapp/baseapp.h,95,gb18030,"/** 网络接口
+		dbmgr告知已经启动的其他baseapp或者cellapp的地址
+		当前app需要主动的去与他们建立连接
+	*/",
+kbe/src/server/baseapp/baseapp.h,105,gb18030,"/** 网络接口
+		某个client向本app告知处于活动状态。
+	*/",
+kbe/src/server/baseapp/baseapp.h,110,gb18030,"/** 网络接口
+		数据库中查询的自动entity加载信息返回
+	*/",
+kbe/src/server/baseapp/baseapp.h,115,gb18030,"/** 网络接口
+		请求设置flags
+	*/",
+kbe/src/server/baseapp/baseapp.h,120,gb18030,"/** 
+		创建了一个entity回调
+	*/",
+kbe/src/server/baseapp/baseapp.h,125,gb18030,"/** 
+		创建一个entity 
+	*/",
+kbe/src/server/baseapp/baseapp.h,135,gb18030,"/**
+		创建一个新的space 
+	*/",
+kbe/src/server/baseapp/baseapp.h,140,gb18030,"/**
+		恢复一个space 
+	*/",
+kbe/src/server/baseapp/baseapp.h,145,gb18030,"/** 
+		在一个负载较低的baseapp上创建一个baseEntity 
+	*/",
+kbe/src/server/baseapp/baseapp.h,150,gb18030,"/** 收到baseappmgr决定将某个baseapp要求createEntityAnywhere的请求在本baseapp上执行 
+		@param entityType	: entity的类别， entities.xml中的定义的。
+		@param strInitData	: 这个entity被创建后应该给他初始化的一些数据， 需要使用pickle.loads解包.
+		@param componentID	: 请求创建entity的baseapp的组件ID
+	*/",
+kbe/src/server/baseapp/baseapp.h,157,gb18030,"/**
+	baseapp 的createEntityAnywhere的回调
+	*/",
+kbe/src/server/baseapp/baseapp.h,164,gb18030,"/**
+	在一个负载较低的baseapp上创建一个baseEntity
+	*/",
+kbe/src/server/baseapp/baseapp.h,169,gb18030,"/** 收到baseappmgr决定将某个baseapp要求createEntityAnywhere的请求在本baseapp上执行
+	@param entityType	: entity的类别， entities.xml中的定义的。
+	@param strInitData	: 这个entity被创建后应该给他初始化的一些数据， 需要使用pickle.loads解包.
+	@param componentID	: 请求创建entity的baseapp的组件ID
+	*/",
+kbe/src/server/baseapp/baseapp.h,176,gb18030,"/**
+	baseapp 的createEntityAnywhere的回调
+	*/",
+kbe/src/server/baseapp/baseapp.h,183,gb18030,"/** 
+		从db获取信息创建一个entity
+	*/",
+kbe/src/server/baseapp/baseapp.h,188,gb18030,"/** 网络接口
+		createEntityFromDBID的回调。
+	*/",
+kbe/src/server/baseapp/baseapp.h,193,gb18030,"/** 
+		从db获取信息创建一个entity
+	*/",
+kbe/src/server/baseapp/baseapp.h,198,gb18030,"/** 网络接口
+		createEntityAnywhereFromDBID的回调。
+	*/",
+kbe/src/server/baseapp/baseapp.h,201,gb18030,// 从baseappmgr查询用于创建实体的组件id回调,
+kbe/src/server/baseapp/baseapp.h,204,gb18030,"/** 网络接口
+		createEntityAnywhereFromDBID的回调。
+	*/",
+kbe/src/server/baseapp/baseapp.h,207,gb18030,// 从数据库来的回调,
+kbe/src/server/baseapp/baseapp.h,210,gb18030,// 请求在这个进程上创建这个entity,
+kbe/src/server/baseapp/baseapp.h,213,gb18030,// 创建完毕后的回调,
+kbe/src/server/baseapp/baseapp.h,217,gb18030,"/**
+	从db获取信息创建一个entity
+	*/",
+kbe/src/server/baseapp/baseapp.h,223,gb18030,"/** 网络接口
+	createEntityRemotelyFromDBID的回调。
+	*/",
+kbe/src/server/baseapp/baseapp.h,226,gb18030,// 从数据库来的回调,
+kbe/src/server/baseapp/baseapp.h,229,gb18030,// 请求在这个进程上创建这个entity,
+kbe/src/server/baseapp/baseapp.h,232,gb18030,// 创建完毕后的回调,
+kbe/src/server/baseapp/baseapp.h,236,gb18030,"/** 
+		为一个baseEntity在指定的cell上创建一个cellEntity 
+	*/",
+kbe/src/server/baseapp/baseapp.h,241,gb18030,"/** 网络接口
+		createCellEntity失败的回调。
+	*/",
+kbe/src/server/baseapp/baseapp.h,246,gb18030,"/** 网络接口
+		createCellEntity的cell实体创建成功回调。
+	*/",
+kbe/src/server/baseapp/baseapp.h,251,gb18030,"/** 
+		通知客户端创建一个proxy对应的实体 
+	*/",
+kbe/src/server/baseapp/baseapp.h,256,gb18030,"/** 
+		向dbmgr请求执行一个数据库命令
+	*/",
+kbe/src/server/baseapp/baseapp.h,263,gb18030,"/** 网络接口
+		dbmgr发送初始信息
+		startID: 初始分配ENTITY_ID 段起始位置
+		endID: 初始分配ENTITY_ID 段结束位置
+		startGlobalOrder: 全局启动顺序 包括各种不同组件
+		startGroupOrder: 组内启动顺序， 比如在所有baseapp中第几个启动。
+		machineGroupOrder: 在machine中真实的组顺序, 提供底层在某些时候判断是否为第一个baseapp时使用
+	*/",
+kbe/src/server/baseapp/baseapp.h,275,gb18030,"/** 网络接口
+		dbmgr广播global数据的改变
+	*/",
+kbe/src/server/baseapp/baseapp.h,280,gb18030,"/** 网络接口
+		注册将要登录的账号, 注册后则允许登录到此网关
+	*/",
+kbe/src/server/baseapp/baseapp.h,285,gb18030,"/** 网络接口
+		新用户请求登录到网关上
+	*/",
+kbe/src/server/baseapp/baseapp.h,290,gb18030,"/** 网络接口
+		到网关上登出，仅仅断开连接并触发实体的onClientDead，实体销毁由用户决定
+	*/",
+kbe/src/server/baseapp/baseapp.h,295,gb18030,"/**
+		踢出一个Channel
+	*/",
+kbe/src/server/baseapp/baseapp.h,300,gb18030,"/** 网络接口
+		重新登录 快速与网关建立交互关系(前提是之前已经登录了， 
+		之后断开在服务器判定该前端的Entity未超时销毁的前提下可以快速与服务器建立连接并达到操控该entity的目的)
+	*/",
+kbe/src/server/baseapp/baseapp.h,307,gb18030,"/**
+	   登录失败
+	   @failedcode: 失败返回码 NETWORK_ERR_SRV_NO_READY:服务器没有准备好, 
+									NETWORK_ERR_ILLEGAL_LOGIN:非法登录, 
+									NETWORK_ERR_NAME_PASSWORD:用户名或者密码不正确
+	*/",
+kbe/src/server/baseapp/baseapp.h,316,gb18030,"/** 网络接口
+		从dbmgr获取到账号Entity信息
+	*/",
+kbe/src/server/baseapp/baseapp.h,321,gb18030,"/**
+		客户端自身进入世界了
+	*/",
+kbe/src/server/baseapp/baseapp.h,326,gb18030,"/** 网络接口
+		entity收到远程call请求, 由某个app上的entityCall发起(只限与服务器内部使用， 客户端的entitycall调用方法走
+		onRemoteCellMethodCallFromClient)
+	*/",
+kbe/src/server/baseapp/baseapp.h,332,gb18030,"/** 网络接口
+		client访问entity的cell方法
+	*/",
+kbe/src/server/baseapp/baseapp.h,337,gb18030,"/** 网络接口
+		client更新数据
+	*/",
+kbe/src/server/baseapp/baseapp.h,344,gb18030,"/** 网络接口
+		cellapp备份entity的cell数据
+	*/",
+kbe/src/server/baseapp/baseapp.h,349,gb18030,"/** 网络接口
+		cellapp writeToDB完成
+	*/",
+kbe/src/server/baseapp/baseapp.h,354,gb18030,"/** 网络接口
+		cellapp转发entity消息给client
+	*/",
+kbe/src/server/baseapp/baseapp.h,359,gb18030,"/** 网络接口
+		cellapp转发entity消息给某个baseEntity的cellEntity
+	*/",
+kbe/src/server/baseapp/baseapp.h,364,gb18030,"/**
+		获取游戏时间
+	*/",
+kbe/src/server/baseapp/baseapp.h,369,gb18030,"/** 网络接口
+		写entity到db回调
+	*/",
+kbe/src/server/baseapp/baseapp.h,375,gb18030,"/**
+		增加proxices计数
+	*/",
+kbe/src/server/baseapp/baseapp.h,380,gb18030,"/**
+		减少proxices计数
+	*/",
+kbe/src/server/baseapp/baseapp.h,385,gb18030,"/**
+		获得proxices计数
+	*/",
+kbe/src/server/baseapp/baseapp.h,390,gb18030,"/**
+		获得numClients计数
+	*/",
+kbe/src/server/baseapp/baseapp.h,395,gb18030,"/** 
+		请求充值
+	*/",
+kbe/src/server/baseapp/baseapp.h,412,gb18030,// 引擎版本不匹配,
+kbe/src/server/baseapp/baseapp.h,415,gb18030,// 引擎脚本层版本不匹配,
+kbe/src/server/baseapp/baseapp.h,418,gb18030,"/** 网络接口
+		请求在其他APP灾难恢复返回结果
+	*/",
+kbe/src/server/baseapp/baseapp.h,423,gb18030,"/**
+		一个cell的entity都恢复完毕
+	*/",
+kbe/src/server/baseapp/baseapp.h,428,gb18030,"/** 网络接口
+		某个baseapp上的space恢复了cell， 判断当前baseapp是否有相关entity需要恢复cell
+	*/",
+kbe/src/server/baseapp/baseapp.h,433,gb18030,"/** 网络接口
+		某个app请求查看该app
+	*/",
+kbe/src/server/baseapp/baseapp.h,438,gb18030,"/** 网络接口
+		客户端协议导出
+	*/",
+kbe/src/server/baseapp/baseapp.h,443,gb18030,"/** 网络接口
+		客户端entitydef导出
+	*/",
+kbe/src/server/baseapp/baseapp.h,448,gb18030,"/**
+		重新导入所有的脚本
+	*/",
+kbe/src/server/baseapp/baseapp.h,455,gb18030,"/**
+		获取进程是否正在关闭中
+	*/",
+kbe/src/server/baseapp/baseapp.h,460,gb18030,"/**
+		获取进程内部网络地址
+	*/",
+kbe/src/server/baseapp/baseapp.h,465,gb18030,"/**
+		通过dbid从数据库中删除一个实体
+
+		从数据库删除实体， 如果实体不在线则可以直接删除回调返回true， 如果在线则回调返回的是entity的entityCall， 其他任何原因都返回false.
+	*/",
+kbe/src/server/baseapp/baseapp.h,472,gb18030,"/** 网络接口
+		通过dbid从数据库中删除一个实体的回调
+	*/",
+kbe/src/server/baseapp/baseapp.h,477,gb18030,"/**
+		通过dbid查询一个实体是否从数据库检出
+
+		如果实体在线回调返回baseentitycall，如果实体不在线则回调返回true，其他任何原因都返回false.
+	*/",
+kbe/src/server/baseapp/baseapp.h,484,gb18030,"/** 网络接口
+		如果实体在线回调返回baseentitycall，如果实体不在线则回调返回true，其他任何原因都返回false.
+	*/",
+kbe/src/server/baseapp/baseapp.h,489,gb18030,"/** 网络接口
+		请求绑定email
+	*/",
+kbe/src/server/baseapp/baseapp.h,494,gb18030,"/** 网络接口
+		请求绑定email, dbmgr返回结果
+	*/",
+kbe/src/server/baseapp/baseapp.h,500,gb18030,"/** 网络接口
+		请求绑定email, baseappmgr返回需要找到loginapp的地址
+	*/",
+kbe/src/server/baseapp/baseapp.h,506,gb18030,"/** 网络接口
+		请求绑定email
+	*/",
+kbe/src/server/baseapp/baseapp.h,525,gb18030,// 记录登录到服务器但还未处理完毕的账号,
+kbe/src/server/baseapp/baseapp.h,530,gb18030,// 备份存档相关,
+kbe/src/server/baseapp/baseapp.h,544,gb18030,// APP的标志,
+kbe/src/server/baseapp/baseapp.h,547,gb18030,// 用于客户端动态导入entitydef协议,
+kbe/src/server/baseapp/baseapp_interface.h,30,gb18030,"/**
+	BASEAPP所有消息接口在此定义
+*/",
+kbe/src/server/baseapp/baseapp_interface.h,34,gb18030,// 客户端请求导入协议。,
+kbe/src/server/baseapp/baseapp_interface.h,38,gb18030,// 客户端entitydef导出。,
+kbe/src/server/baseapp/baseapp_interface.h,42,gb18030,// 某app主动请求断线。,
+kbe/src/server/baseapp/baseapp_interface.h,45,gb18030,// 某app主动请求look。,
+kbe/src/server/baseapp/baseapp_interface.h,48,gb18030,// 某个app请求查看该app负载状态。,
+kbe/src/server/baseapp/baseapp_interface.h,51,gb18030,// console远程执行python语句。,
+kbe/src/server/baseapp/baseapp_interface.h,54,gb18030,// 某app注册自己的接口地址到本app,
+kbe/src/server/baseapp/baseapp_interface.h,68,gb18030,// dbmgr告知已经启动的其他baseapp或者cellapp的地址,
+kbe/src/server/baseapp/baseapp_interface.h,69,gb18030,// 当前app需要主动的去与他们建立连接,
+kbe/src/server/baseapp/baseapp_interface.h,83,gb18030,// 某app请求获取一个entityID段的回调,
+kbe/src/server/baseapp/baseapp_interface.h,89,gb18030,// 某app请求获取一个entityID段的回调,
+kbe/src/server/baseapp/baseapp_interface.h,98,gb18030,// hello握手。,
+kbe/src/server/baseapp/baseapp_interface.h,102,gb18030,// global数据改变,
+kbe/src/server/baseapp/baseapp_interface.h,106,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/baseapp/baseapp_interface.h,111,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/baseapp/baseapp_interface.h,115,gb18030,// 收到baseappmgr决定将某个baseapp要求createEntityAnywhere的请求在本baseapp上执行 ,
+kbe/src/server/baseapp/baseapp_interface.h,118,gb18030,// createEntityAnywhere成功之后回调消息到发起层createEntityAnywhere的baseapp的entity。,
+kbe/src/server/baseapp/baseapp_interface.h,121,gb18030,// createEntityRemotely成功之后回调消息到发起层createEntityRemotely的baseapp的entity。,
+kbe/src/server/baseapp/baseapp_interface.h,124,gb18030,// createEntityRemotely成功之后回调消息到发起层createEntityRemotely的baseapp的entity。,
+kbe/src/server/baseapp/baseapp_interface.h,127,gb18030,// createCellEntity的cell实体创建成功回调。,
+kbe/src/server/baseapp/baseapp_interface.h,133,gb18030,// createCellEntity的cell实体创建成功回调。,
+kbe/src/server/baseapp/baseapp_interface.h,137,gb18030,"// loginapp向自己注册一个将要登录的账号, 由baseappmgr转发。",
+kbe/src/server/baseapp/baseapp_interface.h,140,gb18030,// 数据库中查询的自动entity加载信息返回 ,
+kbe/src/server/baseapp/baseapp_interface.h,143,gb18030,// 前端请求登录到网关上。,
+kbe/src/server/baseapp/baseapp_interface.h,149,gb18030,// 前端请求从网关登出。,
+kbe/src/server/baseapp/baseapp_interface.h,155,gb18030,// 前端请求重新登录到网关上。,
+kbe/src/server/baseapp/baseapp_interface.h,163,gb18030,// 从dbmgr获取到账号Entity信息,
+kbe/src/server/baseapp/baseapp_interface.h,166,gb18030,"// entity收到远程call请求, 由某个app上的entitycall发起",
+kbe/src/server/baseapp/baseapp_interface.h,169,gb18030,// client访问entity的cell方法,
+kbe/src/server/baseapp/baseapp_interface.h,173,gb18030,// client更新数据,
+kbe/src/server/baseapp/baseapp_interface.h,179,gb18030,// executeRawDatabaseCommand从dbmgr的回调,
+kbe/src/server/baseapp/baseapp_interface.h,182,gb18030,// cellapp备份entity的cell数据,
+kbe/src/server/baseapp/baseapp_interface.h,185,gb18030,// cellapp writeToDB完成,
+kbe/src/server/baseapp/baseapp_interface.h,188,gb18030,// cellapp转发entity消息给client,
+kbe/src/server/baseapp/baseapp_interface.h,191,gb18030,// cellapp转发entity消息给某个baseEntity的cellEntity,
+kbe/src/server/baseapp/baseapp_interface.h,194,gb18030,// 请求关闭服务器,
+kbe/src/server/baseapp/baseapp_interface.h,197,gb18030,// 请求设置flags,
+kbe/src/server/baseapp/baseapp_interface.h,200,gb18030,// 写entity到db回调。,
+kbe/src/server/baseapp/baseapp_interface.h,208,gb18030,// createEntityFromDBID的回调,
+kbe/src/server/baseapp/baseapp_interface.h,211,gb18030,// createEntityAnywhereFromDBID的回调,
+kbe/src/server/baseapp/baseapp_interface.h,214,gb18030,// createEntityAnywhereFromDBID的回调,
+kbe/src/server/baseapp/baseapp_interface.h,217,gb18030,// createEntityAnywhereFromDBID的回调,
+kbe/src/server/baseapp/baseapp_interface.h,220,gb18030,// createEntityAnywhereFromDBID的回调,
+kbe/src/server/baseapp/baseapp_interface.h,228,gb18030,// createEntityRemotelyFromDBID的回调,
+kbe/src/server/baseapp/baseapp_interface.h,231,gb18030,// createEntityRemotelyFromDBID的回调,
+kbe/src/server/baseapp/baseapp_interface.h,234,gb18030,// createEntityRemotelyFromDBID的回调,
+kbe/src/server/baseapp/baseapp_interface.h,242,gb18030,// 请求查询watcher数据,
+kbe/src/server/baseapp/baseapp_interface.h,245,gb18030,// 充值回调,
+kbe/src/server/baseapp/baseapp_interface.h,248,gb18030,// 开始profile,
+kbe/src/server/baseapp/baseapp_interface.h,251,gb18030,// 请求从数据库删除实体,
+kbe/src/server/baseapp/baseapp_interface.h,254,gb18030,// lookUpEntityByDBID的回调,
+kbe/src/server/baseapp/baseapp_interface.h,257,gb18030,// 某个baseapp上的space恢复了cell， 判断当前baseapp是否有相关entity需要恢复cell,
+kbe/src/server/baseapp/baseapp_interface.h,260,gb18030,// 请求在其他APP灾难恢复返回结果。,
+kbe/src/server/baseapp/baseapp_interface.h,263,gb18030,// 请求绑定email,
+kbe/src/server/baseapp/baseapp_interface.h,270,gb18030,// 请求绑定email申请的回调,
+kbe/src/server/baseapp/baseapp_interface.h,278,gb18030,// baseapp请求绑定email（返回时需要找到loginapp的地址）,
+kbe/src/server/baseapp/baseapp_interface.h,288,gb18030,// 请求修改密码,
+kbe/src/server/baseapp/baseapp_interface.h,295,gb18030,// 请求修改密码的回调,
+kbe/src/server/baseapp/baseapp_interface.h,301,gb18030,// 请求强制杀死当前app,
+kbe/src/server/baseapp/baseapp_interface.h,305,gb18030,// 远程呼叫entity方法,
+kbe/src/server/baseapp/baseapp_interface.h,309,gb18030,// cellapp通报该entity的cell部分销毁或者丢失,
+kbe/src/server/baseapp/baseapp_interface.h,312,gb18030,// 客户端直接发送消息给cell实体,
+kbe/src/server/baseapp/baseapp_interface.h,316,gb18030,// 某个entity请求teleport后的回调结果,
+kbe/src/server/baseapp/baseapp_interface.h,321,gb18030,// 某个entity请求teleport后的回调结果,
+kbe/src/server/baseapp/baseapp_interface.h,325,gb18030,// entity请求迁移到另一个cellapp上的space过程开始,
+kbe/src/server/baseapp/baseapp_interface.h,330,gb18030,// entity请求迁移到另一个cellapp上的space过程结束,
+kbe/src/server/baseapp/baseapp_interface.h,336,gb18030,"/**
+		远程呼叫entity方法
+	*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,22,gb18030,"/**
+	Baseapp消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,77,gb18030,"/**
+	Baseapp消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,118,gb18030,"/**
+	Baseapp消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,161,gb18030,"/**
+	Baseapp消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,213,gb18030,"/**
+	Baseapp消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,274,gb18030,"/**
+	Baseapp消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,342,gb18030,"/**
+	Baseapp消息宏，  只有五个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,419,gb18030,"/**
+	Baseapp消息宏，  只有六个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,503,gb18030,"/**
+	Baseapp消息宏，  只有七个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,597,gb18030,"/**
+	Baseapp消息宏，  只有八个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,699,gb18030,"/**
+	Baseapp消息宏，  只有九个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,809,gb18030,"/**
+	Baseapp消息宏，  只有十个参数的消息
+*/",
+kbe/src/server/baseapp/baseapp_interface_macros.h,928,gb18030,"/**
+	Baseapp消息宏，  只有十一个参数的消息
+*/",
+kbe/src/server/baseapp/data_download.h,54,gb18030,// 总共发送的字节数,
+kbe/src/server/baseapp/entity.cpp,70,gb18030,// 创建并初始化cellData,
+kbe/src/server/baseapp/entity.cpp,131,gb18030,// 创建一个需要广播的模板流,
+kbe/src/server/baseapp/entity.cpp,157,gb18030,// 按照当前的设计来说，有clientEntityCall_必定是proxy,
+kbe/src/server/baseapp/entity.cpp,158,gb18030,// 至于为何跑到baseEntity里来和python本身是C语言实现有关,
+kbe/src/server/baseapp/entity.cpp,179,gb18030,// 按照当前的设计来说，有clientEntityCall_必定是proxy,
+kbe/src/server/baseapp/entity.cpp,180,gb18030,// 至于为何跑到baseEntity里来和python本身是C语言实现有关,
+kbe/src/server/baseapp/entity.cpp,188,gb18030,// 这里没有使用hasDB()来进行判断,
+kbe/src/server/baseapp/entity.cpp,189,gb18030,"// 用户可能destroy( writeToDB = False ), 这个操作会导致hasDB为false， 因此这里",
+kbe/src/server/baseapp/entity.cpp,190,gb18030,// 需要判断dbid是否大于0， 如果大于0则应该要去擦除在线等记录情况.,
+kbe/src/server/baseapp/entity.cpp,296,gb18030,// 初始化cellEntity的位置和方向变量,
+kbe/src/server/baseapp/entity.cpp,341,gb18030,// 由于存在一种情况， 组件def中没有内容， 但有cell脚本，此时baseapp上无法判断他是否有cell属性，所以写celldata时没有数据写入,
+kbe/src/server/baseapp/entity.cpp,402,gb18030,// 再将base中存储属性取出,
+kbe/src/server/baseapp/entity.cpp,405,gb18030,// 先将celldata中的存储属性取出,
+kbe/src/server/baseapp/entity.cpp,430,gb18030,/* 如果是组件类型，应该先从实体自身找到这个组件属性 */,
+kbe/src/server/baseapp/entity.cpp,476,gb18030,// 一些实体没有cell部分， 因此cell属性忽略,
+kbe/src/server/baseapp/entity.cpp,479,gb18030,// 一些组件可能没有cell属性,
+kbe/src/server/baseapp/entity.cpp,562,gb18030,// cellDataDict_ 继续保留， 以供备份时使用， 这里仅仅让脚步层无法访问到即可,
+kbe/src/server/baseapp/entity.cpp,678,gb18030,// 有可能已经请求了writeToDB但还未返回写入的dbid,
+kbe/src/server/baseapp/entity.cpp,679,gb18030,// 这种情况需要返回给用户一个错误， 用户可以继续尝试这个操作,
+kbe/src/server/baseapp/entity.cpp,730,gb18030,// 这个行为默认会处理,
+kbe/src/server/baseapp/entity.cpp,943,gb18030,// 如果是外部通道调用则判断来源性,
+kbe/src/server/baseapp/entity.cpp,1023,gb18030,// 删除cellData属性,
+kbe/src/server/baseapp/entity.cpp,1026,gb18030,// 回调给脚本，获得了cell,
+kbe/src/server/baseapp/entity.cpp,1146,gb18030,// data 是有可能会NULL的， 比如定时存档是不需要回调函数的,
+kbe/src/server/baseapp/entity.cpp,1184,gb18030,// __py_pyWriteToDB没有增加引用,
+kbe/src/server/baseapp/entity.cpp,1198,gb18030,// __py_pyWriteToDB没有增加引用,
+kbe/src/server/baseapp/entity.cpp,1214,gb18030,// creatingCell_ 此时可能正在创建cell,
+kbe/src/server/baseapp/entity.cpp,1215,gb18030,// 不过我们在此假设在cell未创建完成的时候base这个接口被调用,
+kbe/src/server/baseapp/entity.cpp,1216,gb18030,// 写入数据库的是该entity的初始值， 并不影响,
+kbe/src/server/baseapp/entity.cpp,1301,gb18030,// 如果在数据库中已经存在该entity则允许应用层多次调用写库进行数据及时覆盖需求,
+kbe/src/server/baseapp/entity.cpp,1346,gb18030,// 检查数据是否有变化，有变化则将数据备份并且记录数据hash，没变化什么也不做,
+kbe/src/server/baseapp/entity.cpp,1368,gb18030,// 记录登录地址,
+kbe/src/server/baseapp/entity.cpp,1520,gb18030,// 将这个消息再打包转寄给cellapp， cellapp会对这个包中的每个消息进行判断,
+kbe/src/server/baseapp/entity.cpp,1521,gb18030,// 检查是否是entity消息， 否则不合法.,
+kbe/src/server/baseapp/entity.cpp,1597,gb18030,// 某些极端情况下可能onMigrationCellappStart会慢于onMigrationCellappEnd触发，此时必须设置标记,
+kbe/src/server/baseapp/entity.cpp,1598,gb18030,// 等待onMigrationCellappEnd触发后做清理,
+kbe/src/server/baseapp/entity.cpp,1627,gb18030,// 改变cell的指向到新的cellapp,
+kbe/src/server/baseapp/entity.h,35,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/baseapp/entity.h,43,gb18030,"/** 
+		是否存储数据库 
+	*/",
+kbe/src/server/baseapp/entity.h,49,gb18030,"/** 
+		数据库关联ID
+	*/",
+kbe/src/server/baseapp/entity.h,56,gb18030,"/**
+	数据库关联名称
+	*/",
+kbe/src/server/baseapp/entity.h,62,gb18030,"/** 
+		销毁cell部分的实体 
+	*/",
+kbe/src/server/baseapp/entity.h,69,gb18030,"/** 
+		脚本获取entityCall 
+	*/",
+kbe/src/server/baseapp/entity.h,78,gb18030,"/** 
+		脚本获取entityCall 
+	*/",
+kbe/src/server/baseapp/entity.h,87,gb18030,"/**
+		是否创建过space
+	*/",
+kbe/src/server/baseapp/entity.h,92,gb18030,"/** 
+		cellData部分 
+	*/",
+kbe/src/server/baseapp/entity.h,109,gb18030,"/**
+		请求cell部分将entity的celldata更新一份过来
+	*/",
+kbe/src/server/baseapp/entity.h,114,gb18030,"/** 
+		写备份信息到流
+	*/",
+kbe/src/server/baseapp/entity.h,120,gb18030,"/** 
+		写存档信息到流
+	*/",
+kbe/src/server/baseapp/entity.h,125,gb18030,"/** 
+		将要保存到数据库之前的通知 
+	*/",
+kbe/src/server/baseapp/entity.h,133,gb18030,"/** 网络接口
+		entity第一次写数据库由dbmgr返回的dbid
+	*/",
+kbe/src/server/baseapp/entity.h,138,gb18030,"/** 
+		创建cell失败回调 
+	*/",
+kbe/src/server/baseapp/entity.h,143,gb18030,"/** 
+		创建cell成功回调 
+	*/",
+kbe/src/server/baseapp/entity.h,148,gb18030,"/** 
+		丢失cell了的通知 
+	*/",
+kbe/src/server/baseapp/entity.h,153,gb18030,"/** 
+		当cellapp意外终止后， baseapp如果能找到合适的cellapp则将其恢复后
+		会调用此方法
+	*/",
+kbe/src/server/baseapp/entity.h,159,gb18030,"/** 
+		备份cell数据
+	*/",
+kbe/src/server/baseapp/entity.h,164,gb18030,"/** 
+		客户端丢失 
+	*/",
+kbe/src/server/baseapp/entity.h,169,gb18030,"/** 网络接口
+		远程呼叫本entity的方法 
+	*/",
+kbe/src/server/baseapp/entity.h,174,gb18030,"/** 
+		销毁这个entity 
+	*/",
+kbe/src/server/baseapp/entity.h,179,gb18030,"/**
+		销毁base内部通知
+	*/",
+kbe/src/server/baseapp/entity.h,184,gb18030,"/** 
+		为一个baseEntity在指定的cell上创建一个cellEntity 
+	*/",
+kbe/src/server/baseapp/entity.h,189,gb18030,"/** 
+		为一个baseEntity在指定的cell上还原一个cellEntity 
+	*/",
+kbe/src/server/baseapp/entity.h,195,gb18030,"/** 
+		创建一个cellEntity在一个新的space上 
+	*/",
+kbe/src/server/baseapp/entity.h,200,gb18030,"/** 网络接口
+		客户端直接发送消息给cell实体
+	*/",
+kbe/src/server/baseapp/entity.h,205,gb18030,"/**
+		发送消息到cellapp上
+	*/",
+kbe/src/server/baseapp/entity.h,211,gb18030,"/**
+		传送回调
+	*/",
+kbe/src/server/baseapp/entity.h,218,gb18030,"/** 网络接口
+		entity请求迁移到另一个cellapp上的过程开始和结束。
+	*/",
+kbe/src/server/baseapp/entity.h,225,gb18030,"/**
+		设置获取是否自动存档
+	*/",
+kbe/src/server/baseapp/entity.h,232,gb18030,"/**
+		设置获取是否自动备份
+	*/",
+kbe/src/server/baseapp/entity.h,239,gb18030,"/**
+		cellapp宕了
+	*/",
+kbe/src/server/baseapp/entity.h,244,gb18030,"/** 
+		转发消息完成 
+	*/",
+kbe/src/server/baseapp/entity.h,252,gb18030,"/** 
+		设置实体持久化数据是否已脏，脏了会自动存档 
+	*/",
+kbe/src/server/baseapp/entity.h,259,gb18030,"/** 
+		定义属性数据被改变了 
+	*/",
+kbe/src/server/baseapp/entity.h,265,gb18030,"/**
+		从db擦除在线log
+	*/",
+kbe/src/server/baseapp/entity.h,271,gb18030,// 这个entity的客户端entityCall cellapp entityCall,
+kbe/src/server/baseapp/entity.h,275,gb18030,// entity创建后，在cell部分未创建时，将一些cell属性数据保存在这里,
+kbe/src/server/baseapp/entity.h,278,gb18030,// 是否是存储到数据库中的entity,
+kbe/src/server/baseapp/entity.h,282,gb18030,// 是否正在获取celldata中,
+kbe/src/server/baseapp/entity.h,285,gb18030,// 是否正在存档中,
+kbe/src/server/baseapp/entity.h,288,gb18030,"// 是否进行自动存档 <= 0为false, 1为true, KBE_NEXT_ONLY为执行一次后自动为false",
+kbe/src/server/baseapp/entity.h,291,gb18030,"// 是否进行自动备份 <= 0为false, 1为true, KBE_NEXT_ONLY为执行一次后自动为false",
+kbe/src/server/baseapp/entity.h,294,gb18030,// 是否正在创建cell中,
+kbe/src/server/baseapp/entity.h,297,gb18030,// 是否已经创建了一个space,
+kbe/src/server/baseapp/entity.h,300,gb18030,// 是否正在恢复,
+kbe/src/server/baseapp/entity.h,303,gb18030,"// 如果此时实体还没有被设置为ENTITY_FLAGS_TELEPORT_START,  说明onMigrationCellappArrived包优先于",
+kbe/src/server/baseapp/entity.h,304,gb18030,// onMigrationCellappStart到达(某些压力所致的情况下会导致实体跨进程跳转时（由cell1跳转到cell2），,
+kbe/src/server/baseapp/entity.h,305,gb18030,// 跳转前所产生的包会比cell2的enterSpace包慢到达)，因此发生这种情况时需要将cell2的包先缓存,
+kbe/src/server/baseapp/entity.h,306,gb18030,// 等cell1的包到达后执行完毕再执行cell2的包,
+kbe/src/server/baseapp/entity.h,309,gb18030,// 需要持久化的数据是否变脏（内存sha1），如果没有变脏不需要持久化,
+kbe/src/server/baseapp/entity.h,312,gb18030,// 如果这个实体已经写到数据库，那么这个属性就是对应的数据库接口的索引,
+kbe/src/server/baseapp/entity_autoloader.h,22,gb18030,"/** 网络接口
+		数据库中查询的自动entity加载信息返回
+	*/",
+kbe/src/server/baseapp/entity_autoloader.h,33,gb18030,// 每次取查询结果集的区段,
+kbe/src/server/baseapp/entity_interface_macros.h,22,gb18030,"/**
+	BASE消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/baseapp/entity_interface_macros.h,97,gb18030,"/**
+	Entity消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/baseapp/entity_interface_macros.h,172,gb18030,"/**
+	Entity消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/baseapp/entity_interface_macros.h,249,gb18030,"/**
+	Entity消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/baseapp/entity_interface_macros.h,335,gb18030,"/**
+	Entity消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/baseapp/entity_interface_macros.h,426,gb18030,"/**
+	Entity消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/baseapp/entity_remotemethod.cpp,44,gb18030,/* 需要先经过cell */,
+kbe/src/server/baseapp/entity_remotemethod.cpp,58,gb18030,// 如果是调用客户端方法， 我们记录事件并且记录带宽,
+kbe/src/server/baseapp/entity_remotemethod.cpp,82,gb18030,// 记录这个事件产生的数据量大小,
+kbe/src/server/baseapp/entity_remotemethod.h,15,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/baseapp/initprogress_handler.cpp,156,gb18030,"// 只有第一个baseapp上会创建EntityAutoLoader来自动加载数据库实体
+",
+kbe/src/server/baseapp/initprogress_handler.cpp,167,gb18030,"// 必须等待EntityAutoLoader执行完毕
+",
+kbe/src/server/baseapp/initprogress_handler.cpp,168,gb18030,"// EntityAutoLoader执行完毕会设置autoLoadState_ = 1
+",
+kbe/src/server/baseapp/initprogress_handler.cpp,184,gb18030,"// 所有脚本都加载完毕
+",
+kbe/src/server/baseapp/initprogress_handler.cpp,205,gb18030,"// 回调获得是否能够登录
+",
+kbe/src/server/baseapp/initprogress_handler.h,23,gb18030,"/** 网络接口
+		数据库中查询的自动entity加载信息返回
+	*/",
+kbe/src/server/baseapp/proxy.cpp,84,gb18030,"// 如果被销毁频道仍然存活则将其关闭
+",
+kbe/src/server/baseapp/proxy.cpp,152,gb18030,"// celldata获取客户端感兴趣的数据初始化客户端 如:ALL_CLIENTS
+",
+kbe/src/server/baseapp/proxy.cpp,243,gb18030,"// 回调给脚本，获得了cell
+",
+kbe/src/server/baseapp/proxy.cpp,294,gb18030,"// 如果为None 则设置为NULL
+",
+kbe/src/server/baseapp/proxy.cpp,379,gb18030,"// 当前这个entity如果有cell，说明已经绑定了witness， 那么既然我们将控制权
+",
+kbe/src/server/baseapp/proxy.cpp,380,gb18030,"// 交换给了另一个entity， 这个entity需要解绑定witness。
+",
+kbe/src/server/baseapp/proxy.cpp,381,gb18030,"// 通知cell丢失witness
+",
+kbe/src/server/baseapp/proxy.cpp,388,gb18030,"// 既然客户端失去对其的控制, 那么通知client销毁这个entity
+",
+kbe/src/server/baseapp/proxy.cpp,394,gb18030,"// 将控制权交换
+",
+kbe/src/server/baseapp/proxy.cpp,417,gb18030,"// 如果有cell, 需要通知其获得witness， 因为这个客户端刚刚绑定到这个proxy
+",
+kbe/src/server/baseapp/proxy.cpp,418,gb18030,"// 此时这个entity即使有cell正常情况必须是没有witness的。
+",
+kbe/src/server/baseapp/proxy.cpp,427,gb18030,"// 通知cell获得客户端
+",
+kbe/src/server/baseapp/proxy.cpp,770,gb18030,"// 如果数据大量阻塞发不出去将会报警
+",
+kbe/src/server/baseapp/proxy.cpp,820,gb18030,"// 如果数据大量阻塞发不出去将会报警
+",
+kbe/src/server/baseapp/proxy.h,30,gb18030,/** 子类化将一些py操作填充进派生类 */,
+kbe/src/server/baseapp/proxy.h,43,gb18030,"/**
+		向witness客户端推送一条消息
+	*/",
+kbe/src/server/baseapp/proxy.h,50,gb18030,"/** 
+		脚本请求获取连接的rtt值
+	*/",
+kbe/src/server/baseapp/proxy.h,62,gb18030,"/** 
+		脚本请求获取是否有client绑定到proxy上
+	*/",
+kbe/src/server/baseapp/proxy.h,68,gb18030,"/** 
+		脚本请求获取client地址
+	*/",
+kbe/src/server/baseapp/proxy.h,73,gb18030,"/** 
+		实体是否可用
+	*/",
+kbe/src/server/baseapp/proxy.h,79,gb18030,"/**
+		这个entity被激活了, 在客户端初始化好对应的entity后， 这个方法被调用
+	*/",
+kbe/src/server/baseapp/proxy.h,84,gb18030,"/**
+		一个数据下载任务完成
+	*/",
+kbe/src/server/baseapp/proxy.h,89,gb18030,"/**
+		登陆尝试， 当正常的登陆失败之后， 调用这个接口再进行尝试 
+	*/",
+kbe/src/server/baseapp/proxy.h,94,gb18030,"/**
+		初始化客户端proxy的属性
+	*/",
+kbe/src/server/baseapp/proxy.h,100,gb18030,"/** 
+		当察觉这个entity对应的客户端socket断开时被调用 
+	*/",
+kbe/src/server/baseapp/proxy.h,105,gb18030,"/** 网络接口
+		当客户端所关联的这个entity的cell被创建时，被调用 
+	*/",
+kbe/src/server/baseapp/proxy.h,110,gb18030,"/**
+		获取前端类别
+	*/",
+kbe/src/server/baseapp/proxy.h,117,gb18030,"/**
+		断开客户端连接
+	*/",
+kbe/src/server/baseapp/proxy.h,122,gb18030,"/**
+		获取前端附带数据
+	*/",
+kbe/src/server/baseapp/proxy.h,133,gb18030,"/**
+		每个proxy创建之后都会由系统产生一个uuid， 提供前端重登陆时用作身份识别
+	*/",
+kbe/src/server/baseapp/proxy.h,139,gb18030,"/** 
+		将其自身所关联的客户端转给另一个proxy去关联 
+	*/",
+kbe/src/server/baseapp/proxy.h,147,gb18030,"/**
+		文件流数据下载
+	*/",
+kbe/src/server/baseapp/proxy.h,154,gb18030,"/**
+		字符串流数据下载
+	*/",
+kbe/src/server/baseapp/proxy.h,161,gb18030,"/**
+		绑定了witness
+	*/",
+kbe/src/server/baseapp/proxy.h,166,gb18030,"/**
+		将客户端从服务器踢出
+	*/",
+kbe/src/server/baseapp/proxy.h,171,gb18030,"/**
+		获得这个proxy的客户端连接对象
+	*/",
+kbe/src/server/baseapp/proxy.h,183,gb18030,// 限制客户端每秒所能使用的带宽,
+kbe/src/server/baseapp/proxy.h,186,gb18030,// 通信加密key 默认blowfish,
+kbe/src/server/baseapp/proxy.h,193,gb18030,// 登陆时附带的datas数据（不存档）,
+kbe/src/server/baseapp/proxy.h,196,gb18030,// 注册时附带的datas数据（永久存档）,
+kbe/src/server/baseapp/proxy_interface_macros.h,22,gb18030,"/**
+	PROXY消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/baseapp/proxy_interface_macros.h,77,gb18030,"/**
+	Proxy消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/baseapp/proxy_interface_macros.h,132,gb18030,"/**
+	Proxy消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/baseapp/restore_entity_handler.cpp,127,gb18030,// 首先需要找到这个cell上的space,
+kbe/src/server/baseapp/restore_entity_handler.cpp,129,gb18030,// 如果spaceEntity不在这个baseapp上创建则继续等待,
+kbe/src/server/baseapp/restore_entity_handler.cpp,130,gb18030,// 当spaceEntity的cell创建好了之后会广播给所有的baseapp， 每个baseapp,
+kbe/src/server/baseapp/restore_entity_handler.cpp,131,gb18030,// 去判断是否有需要恢复的entity,
+kbe/src/server/baseapp/restore_entity_handler.cpp,143,gb18030,// 必须等待space恢复,
+kbe/src/server/baseapp/restore_entity_handler.cpp,187,gb18030,// 通知其他baseapp， space恢复了cell,
+kbe/src/server/baseapp/restore_entity_handler.cpp,247,gb18030,// 恢复其他entity,
+kbe/src/server/baseapp/restore_entity_handler.h,33,gb18030,"/** 
+		某个baseapp上的space恢复了cell， 判断当前baseapp是否有相关entity需要恢复cell
+	*/",
+kbe/src/server/baseapp/restore_entity_handler.h,39,gb18030,"/** 
+		是否允许进行恢复
+	*/",
+kbe/src/server/baseapp/restore_entity_handler.h,54,gb18030,// space创建好cell后广播给其他baseapp,
+kbe/src/server/baseapp/space.h,33,gb18030,/** 子类化将一些py操作填充进派生类 */,
+kbe/src/server/baseapp/sync_entitystreamtemplate_handler.cpp,43,gb18030,// 如果某个实体没有cell部分， 而组件属性没有base部分则忽略,
+kbe/src/server/baseapp/sync_entitystreamtemplate_handler.cpp,109,gb18030,// 如果某个实体没有cell部分， 而组件属性没有base部分则忽略,
+kbe/src/server/baseappmgr/baseappmgr.cpp,31,gb18030,// 必须存在一个准备好的进程,
+kbe/src/server/baseappmgr/baseappmgr.cpp,124,gb18030,// 如果是app死亡了,
+kbe/src/server/baseappmgr/baseappmgr.cpp,292,gb18030,// 首先进程必须活着且初始化完毕,
+kbe/src/server/baseappmgr/baseappmgr.cpp,295,gb18030,// 如果没有任何实体则无条件分配,
+kbe/src/server/baseappmgr/baseappmgr.cpp,299,gb18030,// 比较并记录负载最小的进程最终被分配,
+kbe/src/server/baseappmgr/baseappmgr.cpp,326,gb18030,// 此时肯定是在运行状态中，但有可能在等待创建space,
+kbe/src/server/baseappmgr/baseappmgr.cpp,327,gb18030,"// 所以初始化进度没有完成, 在只有一个baseapp的情况下如果这",
+kbe/src/server/baseappmgr/baseappmgr.cpp,328,gb18030,// 里不进行设置将是一个相互等待的状态,
+kbe/src/server/baseappmgr/baseappmgr.cpp,372,gb18030,// 预先将实体数量增加,
+kbe/src/server/baseappmgr/baseappmgr.cpp,386,gb18030,// 此时肯定是在运行状态中，但有可能在等待创建space,
+kbe/src/server/baseappmgr/baseappmgr.cpp,387,gb18030,"// 所以初始化进度没有完成, 在只有一个baseapp的情况下如果这",
+kbe/src/server/baseappmgr/baseappmgr.cpp,388,gb18030,// 里不进行设置将是一个相互等待的状态,
+kbe/src/server/baseappmgr/baseappmgr.cpp,427,gb18030,// 预先将实体数量增加,
+kbe/src/server/baseappmgr/baseappmgr.cpp,441,gb18030,// 此时肯定是在运行状态中，但有可能在等待创建space,
+kbe/src/server/baseappmgr/baseappmgr.cpp,442,gb18030,"// 所以初始化进度没有完成, 在只有一个baseapp的情况下如果这",
+kbe/src/server/baseappmgr/baseappmgr.cpp,443,gb18030,// 里不进行设置将是一个相互等待的状态,
+kbe/src/server/baseappmgr/baseappmgr.cpp,474,gb18030,// 此时肯定是在运行状态中，但有可能在等待创建space,
+kbe/src/server/baseappmgr/baseappmgr.cpp,475,gb18030,"// 所以初始化进度没有完成, 在只有一个baseapp的情况下如果这",
+kbe/src/server/baseappmgr/baseappmgr.cpp,476,gb18030,// 里不进行设置将是一个相互等待的状态,
+kbe/src/server/baseappmgr/baseappmgr.cpp,515,gb18030,// 预先将实体数量增加,
+kbe/src/server/baseappmgr/baseappmgr.cpp,529,gb18030,// 此时肯定是在运行状态中，但有可能在等待创建space,
+kbe/src/server/baseappmgr/baseappmgr.cpp,530,gb18030,"// 所以初始化进度没有完成, 在只有一个baseapp的情况下如果这",
+kbe/src/server/baseappmgr/baseappmgr.cpp,531,gb18030,// 里不进行设置将是一个相互等待的状态,
+kbe/src/server/baseappmgr/baseappmgr.cpp,570,gb18030,// 预先将实体数量增加,
+kbe/src/server/baseappmgr/baseappmgr.cpp,656,gb18030,// 预先将实体数量增加,
+kbe/src/server/baseappmgr/baseappmgr.h,42,gb18030,/* 初始化相关接口 */,
+kbe/src/server/baseappmgr/baseappmgr.h,51,gb18030,"/** 网络接口
+		baseapp::createEntityAnywhere查询当前最好的组件ID
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,56,gb18030,"/** 网络接口
+		收到baseapp::createEntityAnywhere请求在某个空闲的baseapp上创建一个baseEntity
+		@param sp: 这个数据包中存储的是 entityType	: entity的类别， entities.xml中的定义的。
+										strInitData	: 这个entity被创建后应该给他初始化的一些数据， 
+													  需要使用pickle.loads解包.
+										componentID	: 请求创建entity的baseapp的组件ID
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,65,gb18030,"/** 网络接口
+	收到baseapp::createEntityRemotely请求在某个空闲的baseapp上创建一个baseEntity
+	@param sp: 这个数据包中存储的是 entityType	: entity的类别， entities.xml中的定义的。
+	strInitData	: 这个entity被创建后应该给他初始化的一些数据，
+	需要使用pickle.loads解包.
+	componentID	: 请求创建entity的baseapp的组件ID
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,74,gb18030,"/** 网络接口
+		收到baseapp::createEntityAnywhereFromDBID请求在某个空闲的baseapp上创建一个baseEntity
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,79,gb18030,"/** 网络接口
+		收到baseapp::createEntityRemotelyFromDBID请求在某个空闲的baseapp上创建一个baseEntity
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,84,gb18030,"/** 网络接口
+		消息转发， 由某个app想通过本app将消息转发给某个app。
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,89,gb18030,"/** 网络接口
+		一个新登录的账号获得合法登入baseapp的权利， 现在需要将账号注册给baseapp
+		使其允许在此baseapp上登录。
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,95,gb18030,"/** 网络接口
+		一个新登录的账号获得合法登入baseapp的权利， 现在需要将账号注册给指定的baseapp
+		使其允许在此baseapp上登录。
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,101,gb18030,"/** 网络接口
+		baseapp将自己的地址发送给loginapp并转发给客户端。
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,108,gb18030,"/** 网络接口
+		更新baseapp情况。
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,114,gb18030,"/** 网络接口
+		baseapp同步自己的初始化信息
+		startGlobalOrder: 全局启动顺序 包括各种不同组件
+		startGroupOrder: 组内启动顺序， 比如在所有baseapp中第几个启动。
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,121,gb18030,"/** 
+		将分配的baseapp地址发送给loginapp并转发给客户端。
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,135,gb18030,"/** 网络接口
+		查询所有相关进程负载信息
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,140,gb18030,"/** 网络接口
+		baseapp请求绑定email（返回时需要找到loginapp的地址）
+	*/",
+kbe/src/server/baseappmgr/baseappmgr.h,146,gb18030,"/** 网络接口
+		请求绑定email, loginapp返回需要找到loginapp的地址
+	*/",
+kbe/src/server/baseappmgr/baseappmgr_interface.h,28,gb18030,"/**
+	BASEAPPMGR所有消息接口在此定义
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface.h,32,gb18030,// 某app注册自己的接口地址到本app,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,46,gb18030,// 某app主动请求look。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,49,gb18030,// 某个app请求查看该app负载状态。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,52,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,57,gb18030,// baseEntity请求创建在一个新的space中。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,60,gb18030,// baseEntity请求创建在一个新的space中。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,63,gb18030,// baseEntity请求创建在一个新的space中，查询当前最好的组件ID,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,66,gb18030,// baseEntity请求创建在一个新的space中。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,69,gb18030,// baseEntity请求创建在一个新的space中。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,72,gb18030,// 消息转发， 由某个app想通过本app将消息转发给某个app。	,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,75,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,78,gb18030,// 获取到baseapp的地址。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,86,gb18030,// 一个新登录的账号获得合法登入baseapp的权利， 现在需要将账号注册给指定的baseapp,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,87,gb18030,// 使其允许在此baseapp上登录。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,90,gb18030,// 请求关闭服务器,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,93,gb18030,// 更新baseapp信息。,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,101,gb18030,// 请求查询watcher数据,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,104,gb18030,// baseapp同步自己的初始化信息,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,109,gb18030,// 开始profile,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,112,gb18030,// 请求强制杀死当前app,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,115,gb18030,// 查询所有相关进程负载信息,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,118,gb18030,// baseapp请求绑定email（返回时需要找到loginapp的地址）,
+kbe/src/server/baseappmgr/baseappmgr_interface.h,127,gb18030,// baseapp请求绑定email（返回时需要找到loginapp的地址）,
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,22,gb18030,"/**
+	Baseappmgr消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,63,gb18030,"/**
+	Baseappmgr消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,104,gb18030,"/**
+	Baseappmgr消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,147,gb18030,"/**
+	Baseappmgr消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,199,gb18030,"/**
+	Baseappmgr消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,259,gb18030,"/**
+	Baseappmgr消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,327,gb18030,"/**
+	Baseappmgr消息宏，  只有五个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,404,gb18030,"/**
+	Baseappmgr消息宏，  只有六个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,489,gb18030,"/**
+	Baseappmgr消息宏，  只有七个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,583,gb18030,"/**
+	Baseappmgr消息宏，  只有八个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,684,gb18030,"/**
+	Baseappmgr消息宏，  只有九个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,793,gb18030,"/**
+	Baseappmgr消息宏，  只有十个参数的消息
+*/",
+kbe/src/server/baseappmgr/baseappmgr_interface_macros.h,912,gb18030,"/**
+	Baseappmgr消息宏，  只有十一个参数的消息
+*/",
+kbe/src/server/cellapp/all_clients.cpp,175,gb18030,"// 是否是组件方法调用
+",
+kbe/src/server/cellapp/all_clients.h,41,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/cellapp/all_clients.h,48,gb18030,"/**
+	脚本请求获取属性或者方法
+	*/",
+kbe/src/server/cellapp/all_clients.h,53,gb18030,"/**
+	获得对象的描述
+	*/",
+kbe/src/server/cellapp/all_clients.h,70,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/cellapp/all_clients.h,79,gb18030,"/** 
+		脚本请求获取属性或者方法 
+	*/",
+kbe/src/server/cellapp/all_clients.h,84,gb18030,"/** 
+		获得对象的描述 
+	*/",
+kbe/src/server/cellapp/all_clients.h,92,gb18030,"/** 
+		获取entityID 
+	*/",
+kbe/src/server/cellapp/all_clients.h,108,gb18030,// 该entity所使用的脚本模块对象,
+kbe/src/server/cellapp/all_clients.h,112,gb18030,// 是否只是其他客户端， 不包括自己,
+kbe/src/server/cellapp/cellapp.cpp,132,gb18030,"// 如果count等于perSecsDestroyEntitySize说明上面已经没有可处理的东西了
+",
+kbe/src/server/cellapp/cellapp.cpp,133,gb18030,"// 剩下的应该都是space，可以开始销毁了
+",
+kbe/src/server/cellapp/cellapp.cpp,160,gb18030,"// 将app标记注册到脚本
+",
+kbe/src/server/cellapp/cellapp.cpp,171,gb18030,"// 注册创建entity的方法到py
+",
+kbe/src/server/cellapp/cellapp.cpp,197,gb18030,"// 添加globalData, cellAppData支持
+",
+kbe/src/server/cellapp/cellapp.cpp,255,gb18030,"// 一定要在最前面
+",
+kbe/src/server/cellapp/cellapp.cpp,273,gb18030,"// 如果需要pyprofile则在此处安装
+",
+kbe/src/server/cellapp/cellapp.cpp,274,gb18030,"// 结束时卸载并输出结果
+",
+kbe/src/server/cellapp/cellapp.cpp,282,gb18030,"// 是否管理Y轴
+",
+kbe/src/server/cellapp/cellapp.cpp,508,gb18030,"// 创建entity
+",
+kbe/src/server/cellapp/cellapp.cpp,520,gb18030,"// 添加到space
+",
+kbe/src/server/cellapp/cellapp.cpp,523,gb18030,"// 有可能在addEntityAndEnterWorld中被销毁了
+",
+kbe/src/server/cellapp/cellapp.cpp,524,gb18030,"// 这里需要让实体返回给脚本，只不过实体为isDestroyed = true状态
+",
+kbe/src/server/cellapp/cellapp.cpp,802,gb18030,"// 再次同步自己的新信息(startGlobalOrder, startGroupOrder等)到machine
+",
+kbe/src/server/cellapp/cellapp.cpp,805,gb18030,"// 这里需要更新一下python的环境变量
+",
+kbe/src/server/cellapp/cellapp.cpp,843,gb18030,"// 通知脚本
+",
+kbe/src/server/cellapp/cellapp.cpp,863,gb18030,"// 通知脚本
+",
+kbe/src/server/cellapp/cellapp.cpp,895,gb18030,"// 创建entity
+",
+kbe/src/server/cellapp/cellapp.cpp,904,gb18030,"/* 目前来说除非内存或者系统问题，否则不会出现这个错误
+			Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
+			pBundle->newMessage(BaseappInterface::onCreateCellFailure);
+			BaseappInterface::onCreateCellFailureArgs1::staticAddToBundle(*pBundle, entitycallEntityID);
+			cinfos->pChannel->send(pBundle);
+			*/",
+kbe/src/server/cellapp/cellapp.cpp,915,gb18030,"// 设置entity的baseEntityCall
+",
+kbe/src/server/cellapp/cellapp.cpp,926,gb18030,"// Py_INCREF(clientEntityCall); 这里不需要增加引用， 因为每次都会产生一个新的对象
+",
+kbe/src/server/cellapp/cellapp.cpp,928,gb18030,"// 为了能够让entity.__init__中能够修改属性立刻能广播到客户端我们需要提前设置这些
+",
+kbe/src/server/cellapp/cellapp.cpp,933,gb18030,"// 此处baseapp可能还有没初始化过来， 所以有一定概率是为None的
+",
+kbe/src/server/cellapp/cellapp.cpp,963,gb18030,"// 添加到space
+",
+kbe/src/server/cellapp/cellapp.cpp,1008,gb18030,"// 创建entity
+",
+kbe/src/server/cellapp/cellapp.cpp,1019,gb18030,"// 设置entity的baseEntityCall
+",
+kbe/src/server/cellapp/cellapp.cpp,1030,gb18030,"// Py_INCREF(clientEntityCall); 这里不需要增加引用， 因为每次都会产生一个新的对象
+",
+kbe/src/server/cellapp/cellapp.cpp,1032,gb18030,"// 为了能够让entity.__init__中能够修改属性立刻能广播到客户端我们需要提前设置这些
+",
+kbe/src/server/cellapp/cellapp.cpp,1037,gb18030,"// 此处baseapp可能还有没初始化过来， 所以有一定概率是为None的
+",
+kbe/src/server/cellapp/cellapp.cpp,1066,gb18030,"// 添加到space
+",
+kbe/src/server/cellapp/cellapp.cpp,1117,gb18030,"// 此处baseapp可能还有没初始化过来， 所以有一定概率是为None的
+",
+kbe/src/server/cellapp/cellapp.cpp,1150,gb18030,"// 注意：此处理论不会找不到组件， 因为onCreateCellEntityFromBaseapp中已经进行过一次消息缓存判断
+",
+kbe/src/server/cellapp/cellapp.cpp,1156,gb18030,"// 可能spaceEntity已经销毁了， 但还未来得及通知到baseapp时
+",
+kbe/src/server/cellapp/cellapp.cpp,1157,gb18030,"// base部分在向这个space创建entity
+",
+kbe/src/server/cellapp/cellapp.cpp,1177,gb18030,"// 告知baseapp， entity的cell创建了
+",
+kbe/src/server/cellapp/cellapp.cpp,1183,gb18030,"// 解包cellData信息.
+",
+kbe/src/server/cellapp/cellapp.cpp,1186,gb18030,"// 创建entity
+",
+kbe/src/server/cellapp/cellapp.cpp,1195,gb18030,"// 设置entity的baseEntityCall
+",
+kbe/src/server/cellapp/cellapp.cpp,1216,gb18030,"// Py_INCREF(clientEntityCall); 这里不需要增加引用， 因为每次都会产生一个新的对象
+",
+kbe/src/server/cellapp/cellapp.cpp,1218,gb18030,"// 为了能够让entity.__init__中能够修改属性立刻能广播到客户端我们需要提前设置这些
+",
+kbe/src/server/cellapp/cellapp.cpp,1236,gb18030,"// 这里增加一个引用， 因为可能在进入时被销毁
+",
+kbe/src/server/cellapp/cellapp.cpp,1246,gb18030,"// 如果是有client的entity则设置它的cliententitycall, baseapp部分的onEntityGetCell会告知客户端enterworld.
+",
+kbe/src/server/cellapp/cellapp.cpp,1279,gb18030,"// 需要做中转
+",
+kbe/src/server/cellapp/cellapp.cpp,1310,gb18030,"// 在本地区尝试查找该收件人信息， 看收件人是否属于本区域
+",
+kbe/src/server/cellapp/cellapp.cpp,1337,gb18030,"// 本组件是cellapp，那么确认邮件的目的地是这里， 那么执行最终操作
+",
+kbe/src/server/cellapp/cellapp.cpp,1433,gb18030,"// 这个方法呼叫如果不是这个proxy自己的方法则必须呼叫的entity和proxy的cellEntity在一个space中。
+",
+kbe/src/server/cellapp/cellapp.cpp,1438,gb18030,"// 需要做中转
+",
+kbe/src/server/cellapp/cellapp.cpp,1486,gb18030,"// 如果是被系统控制了，又或被别人控制了，则忽略来自自己客户端的更新消息
+",
+kbe/src/server/cellapp/cellapp.cpp,1489,gb18030,"// phw: 经测试发现，由于controlledBy改变时通知客户端存在一定的时间差，
+",
+kbe/src/server/cellapp/cellapp.cpp,1490,gb18030,"//      所以客户端收到消息前仍然发送位移消息，这使得下面的错误日志变得有点多，
+",
+kbe/src/server/cellapp/cellapp.cpp,1491,gb18030,"//      因此注释掉这个日志，以减少不必要的日志输出。
+",
+kbe/src/server/cellapp/cellapp.cpp,1534,gb18030,"// phw: 经测试发现，由于controlledBy改变时通知客户端存在一定的时间差，
+",
+kbe/src/server/cellapp/cellapp.cpp,1535,gb18030,"//      所以客户端收到消息前仍然发送位移消息，这使得下面的错误日志变得有点多，
+",
+kbe/src/server/cellapp/cellapp.cpp,1536,gb18030,"//      因此注释掉这个日志，以减少不必要的日志输出。
+",
+kbe/src/server/cellapp/cellapp.cpp,1687,gb18030,"// 需要做中转
+",
+kbe/src/server/cellapp/cellapp.cpp,1701,gb18030,"// 检查是否是entity消息， 否则不合法.
+",
+kbe/src/server/cellapp/cellapp.cpp,1743,gb18030,"// 临时设置有效读取位， 防止接口中溢出操作
+",
+kbe/src/server/cellapp/cellapp.cpp,1761,gb18030,"// 防止handle中没有将数据导出获取非法操作
+",
+kbe/src/server/cellapp/cellapp.cpp,1938,gb18030,"// 创建entity
+",
+kbe/src/server/cellapp/cellapp.cpp,1960,gb18030,"// 有可能序列化过来的ghost内容包含移动控制器，之所以序列化过来是为了
+",
+kbe/src/server/cellapp/cellapp.cpp,1961,gb18030,"// 在传送失败时可以用于恢复现场, 那么传送成功了我们应该停止以前的移动行为
+",
+kbe/src/server/cellapp/cellapp.cpp,1964,gb18030,"// 对于传送操作来说，实体传送过来就不会有ghost部分了
+",
+kbe/src/server/cellapp/cellapp.cpp,1965,gb18030,"// 当前实体做出的任何改变不需要同步到原有cell，这可能会产生网络消息死循环
+",
+kbe/src/server/cellapp/cellapp.cpp,1976,gb18030,"// 如果是有base的实体，需要将baseappID填入，以便在reqTeleportToCellAppCB中回调给baseapp传输结束状态
+",
+kbe/src/server/cellapp/cellapp.cpp,1979,gb18030,"// 向baseapp发送传送到达通知
+",
+kbe/src/server/cellapp/cellapp.cpp,1987,gb18030,"// 进入新space之前必须通知客户端leaveSpace
+",
+kbe/src/server/cellapp/cellapp.cpp,1998,gb18030,"// 进入新的space中
+",
+kbe/src/server/cellapp/cellapp.cpp,2027,gb18030,"// 正常情况下， 应该传送结果返回时传送前的实体应该在当前cell上， 如果到其他cellapp上了， 说明在此期间被迁移走了
+",
+kbe/src/server/cellapp/cellapp.cpp,2028,gb18030,"// 此时被迁移很可能会有问题
+",
+kbe/src/server/cellapp/cellapp.cpp,2035,gb18030,"// 传送成功，我们销毁这个entity
+",
+kbe/src/server/cellapp/cellapp.cpp,2042,gb18030,"// 实体可能没有base部分，那么不需要通知baseapp
+",
+kbe/src/server/cellapp/cellapp.cpp,2061,gb18030,"// 某些情况下实体可能此时找不到了，例如：副本销毁了
+",
+kbe/src/server/cellapp/cellapp.cpp,2072,gb18030,"// 传送失败了，我们需要重恢复entity
+",
+kbe/src/server/cellapp/cellapp.cpp,2101,gb18030,"// 某些情况下实体可能此时找不到了，例如：副本销毁了
+",
+kbe/src/server/cellapp/cellapp.cpp,2267,gb18030,"// 如果为0，则查看所有cell
+",
+kbe/src/server/cellapp/cellapp.h,45,gb18030,"/**  
+		相关处理接口 
+	*/",
+kbe/src/server/cellapp/cellapp.h,51,gb18030,"/**  
+		初始化相关接口 
+	*/",
+kbe/src/server/cellapp/cellapp.h,66,gb18030,"/**  网络接口
+		dbmgr告知已经启动的其他baseapp或者cellapp的地址
+		当前app需要主动的去与他们建立连接
+	*/",
+kbe/src/server/cellapp/cellapp.h,76,gb18030,"/**
+		创建了一个entity回调
+	*/",
+kbe/src/server/cellapp/cellapp.h,81,gb18030,"/**  
+		创建一个entity 
+	*/",
+kbe/src/server/cellapp/cellapp.h,86,gb18030,"/** 
+		向dbmgr请求执行一个数据库命令
+	*/",
+kbe/src/server/cellapp/cellapp.h,93,gb18030,"/** 网络接口
+		dbmgr发送初始信息
+		startID: 初始分配ENTITY_ID 段起始位置
+		endID: 初始分配ENTITY_ID 段结束位置
+		startGlobalOrder: 全局启动顺序 包括各种不同组件
+		startGroupOrder: 组内启动顺序， 比如在所有baseapp中第几个启动。
+		machineGroupOrder: 在machine中真实的组顺序, 提供底层在某些时候判断是否为第一个cellapp时使用
+	*/",
+kbe/src/server/cellapp/cellapp.h,105,gb18030,"/** 网络接口
+		dbmgr广播global数据的改变
+	*/",
+kbe/src/server/cellapp/cellapp.h,110,gb18030,"/** 网络接口
+		baseEntity请求创建在一个新的space中
+	*/",
+kbe/src/server/cellapp/cellapp.h,115,gb18030,"/** 网络接口
+		baseEntity请求创建在一个新的space中
+	*/",
+kbe/src/server/cellapp/cellapp.h,120,gb18030,"/** 网络接口
+	工具请求改变space查看器（含添加和删除功能）
+	如果是请求更新并且服务器上不存在该地址的查看器则自动创建，如果是删除则明确给出删除要求
+	*/",
+kbe/src/server/cellapp/cellapp.h,126,gb18030,"/** 网络接口
+		其他APP请求在此灾难恢复
+	*/",
+kbe/src/server/cellapp/cellapp.h,131,gb18030,"/** 网络接口
+		baseapp请求在这个cellapp上创建一个entity
+	*/",
+kbe/src/server/cellapp/cellapp.h,138,gb18030,"/** 网络接口
+		销毁某个cellEntity
+	*/",
+kbe/src/server/cellapp/cellapp.h,143,gb18030,"/** 网络接口
+		entity收到远程call请求, 由某个app上的entitycall发起
+	*/",
+kbe/src/server/cellapp/cellapp.h,148,gb18030,"/** 网络接口
+		client访问entity的cell方法由baseapp转发
+	*/",
+kbe/src/server/cellapp/cellapp.h,153,gb18030,"/** 网络接口
+		client更新数据
+	*/",
+kbe/src/server/cellapp/cellapp.h,159,gb18030,"/** 网络接口
+		real请求更新属性到ghost
+	*/",
+kbe/src/server/cellapp/cellapp.h,164,gb18030,"/** 网络接口
+		ghost请求调用def方法real
+	*/",
+kbe/src/server/cellapp/cellapp.h,169,gb18030,"/** 网络接口
+		real请求更新属性到ghost
+	*/",
+kbe/src/server/cellapp/cellapp.h,174,gb18030,"/** 网络接口
+		base请求获取celldata
+	*/",
+kbe/src/server/cellapp/cellapp.h,179,gb18030,"/** 网络接口
+		base请求获取WriteToDB
+	*/",
+kbe/src/server/cellapp/cellapp.h,184,gb18030,"/** 网络接口
+		客户端直接发送消息给cell实体
+	*/",
+kbe/src/server/cellapp/cellapp.h,189,gb18030,"/** 网络接口
+		请求设置flags
+	*/",
+kbe/src/server/cellapp/cellapp.h,194,gb18030,"/**
+		获取游戏时间
+	*/",
+kbe/src/server/cellapp/cellapp.h,199,gb18030,"/**
+		添加与删除一个Updatable对象
+	*/",
+kbe/src/server/cellapp/cellapp.h,210,gb18030,"/** 网络接口
+		某个app请求查看该app
+	*/",
+kbe/src/server/cellapp/cellapp.h,215,gb18030,"/**
+		重新导入所有的脚本
+	*/",
+kbe/src/server/cellapp/cellapp.h,222,gb18030,"/**
+		获取进程是否正在关闭中
+	*/",
+kbe/src/server/cellapp/cellapp.h,227,gb18030,"/**
+		获取进程内部网络地址
+	*/",
+kbe/src/server/cellapp/cellapp.h,234,gb18030,"/**
+		网络接口
+		另一个cellapp的entity要teleport到本cellapp上的space中
+	*/",
+kbe/src/server/cellapp/cellapp.h,242,gb18030,"/**
+		获取和设置ghost管理器
+	*/",
+kbe/src/server/cellapp/cellapp.h,250,gb18030,"/** 
+		射线 
+	*/",
+kbe/src/server/cellapp/cellapp.h,269,gb18030,"// 所有的cell
+",
+kbe/src/server/cellapp/cellapp.h,278,gb18030,"// APP的标志
+",
+kbe/src/server/cellapp/cellapp.h,281,gb18030,"// 通过工具查看space
+",
+kbe/src/server/cellapp/cellapp_interface.h,28,gb18030,"/**
+	cellapp所有消息接口在此定义
+*/",
+kbe/src/server/cellapp/cellapp_interface.h,32,gb18030,// 某app注册自己的接口地址到本app,
+kbe/src/server/cellapp/cellapp_interface.h,46,gb18030,// 某app主动请求look。,
+kbe/src/server/cellapp/cellapp_interface.h,49,gb18030,// 某个app请求查看该app负载状态。,
+kbe/src/server/cellapp/cellapp_interface.h,52,gb18030,// console远程执行python语句。,
+kbe/src/server/cellapp/cellapp_interface.h,55,gb18030,// dbmgr告知已经启动的其他baseapp或者cellapp的地址,
+kbe/src/server/cellapp/cellapp_interface.h,56,gb18030,// 当前app需要主动的去与他们建立连接,
+kbe/src/server/cellapp/cellapp_interface.h,70,gb18030,// 某app请求获取一个entityID段的回调,
+kbe/src/server/cellapp/cellapp_interface.h,75,gb18030,// 某app请求获取一个entityID段的回调,
+kbe/src/server/cellapp/cellapp_interface.h,84,gb18030,// global数据改变,
+kbe/src/server/cellapp/cellapp_interface.h,88,gb18030,// baseEntity请求创建在一个新的space中。,
+kbe/src/server/cellapp/cellapp_interface.h,91,gb18030,// baseEntity请求恢复在一个新的space中。,
+kbe/src/server/cellapp/cellapp_interface.h,94,gb18030,// 其他APP请求在此灾难恢复。,
+kbe/src/server/cellapp/cellapp_interface.h,97,gb18030,// baseapp请求在这个cellapp上创建一个entity。,
+kbe/src/server/cellapp/cellapp_interface.h,100,gb18030,// 销毁某个cellEntity。,
+kbe/src/server/cellapp/cellapp_interface.h,104,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/cellapp/cellapp_interface.h,109,gb18030,"// entity收到远程call请求, 由某个app上的entitycall发起",
+kbe/src/server/cellapp/cellapp_interface.h,112,gb18030,// client访问entity的cell方法,
+kbe/src/server/cellapp/cellapp_interface.h,115,gb18030,// client更新数据,
+kbe/src/server/cellapp/cellapp_interface.h,119,gb18030,// executeRawDatabaseCommand从dbmgr的回调,
+kbe/src/server/cellapp/cellapp_interface.h,122,gb18030,// base请求获取celldata,
+kbe/src/server/cellapp/cellapp_interface.h,125,gb18030,// base请求获取WriteToDB,
+kbe/src/server/cellapp/cellapp_interface.h,128,gb18030,// 客户端直接发送消息给cell实体,
+kbe/src/server/cellapp/cellapp_interface.h,131,gb18030,// 请求关闭服务器,
+kbe/src/server/cellapp/cellapp_interface.h,134,gb18030,// 请求查询watcher数据,
+kbe/src/server/cellapp/cellapp_interface.h,137,gb18030,// 开始profile,
+kbe/src/server/cellapp/cellapp_interface.h,140,gb18030,// 请求teleport到当前cellapp上,
+kbe/src/server/cellapp/cellapp_interface.h,143,gb18030,// entity传送到目的cellapp上的space之后， 返回给之前cellapp的回调,
+kbe/src/server/cellapp/cellapp_interface.h,146,gb18030,// 当跨cellapp传送后需要baseapp设置完成状态再清除cellapp记录的标记，此后cellapp才可以继续teleport,
+kbe/src/server/cellapp/cellapp_interface.h,149,gb18030,// real请求更新属性到ghost,
+kbe/src/server/cellapp/cellapp_interface.h,152,gb18030,// ghost请求调用def方法real,
+kbe/src/server/cellapp/cellapp_interface.h,155,gb18030,// real请求更新易变数据到ghost,
+kbe/src/server/cellapp/cellapp_interface.h,158,gb18030,// 请求强制杀死当前app,
+kbe/src/server/cellapp/cellapp_interface.h,161,gb18030,// 请求设置flags,
+kbe/src/server/cellapp/cellapp_interface.h,164,gb18030,// 工具请求改变space查看器（含添加和删除功能）,
+kbe/src/server/cellapp/cellapp_interface.h,168,gb18030,//远程呼叫entity方法,
+kbe/src/server/cellapp/cellapp_interface.h,171,gb18030,//客户端设置新位置,
+kbe/src/server/cellapp/cellapp_interface.h,176,gb18030,//客户端设置新位置,
+kbe/src/server/cellapp/cellapp_interface.h,182,gb18030,//客户端设置新位置,
+kbe/src/server/cellapp/cellapp_interface.h,187,gb18030,//客户端设置新位置,
+kbe/src/server/cellapp/cellapp_interface.h,193,gb18030,//entity绑定了一个观察者(客户端),
+kbe/src/server/cellapp/cellapp_interface.h,196,gb18030,//entity丢失了一个观察者(客户端),
+kbe/src/server/cellapp/cellapp_interface_macros.h,60,gb18030,"/**
+	Cellapp消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,101,gb18030,"/**
+	Cellapp消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,144,gb18030,"/**
+	Cellapp消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,196,gb18030,"/**
+	Cellapp消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,256,gb18030,"/**
+	Cellapp消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,324,gb18030,"/**
+	Cellapp消息宏，  只有五个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,401,gb18030,"/**
+	Cellapp消息宏，  只有六个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,486,gb18030,"/**
+	Cellapp消息宏，只有七个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,581,gb18030,"/**
+	Cellapp消息宏，  只有八个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,683,gb18030,"/**
+	Cellapp消息宏，  只有九个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,793,gb18030,"/**
+	Cellapp消息宏，  只有十个参数的消息
+*/",
+kbe/src/server/cellapp/cellapp_interface_macros.h,912,gb18030,"/**
+	Cellapp消息宏，  只有十一个参数的消息
+*/",
+kbe/src/server/cellapp/client_entity.cpp,206,gb18030,"// 是否是组件方法调用
+",
+kbe/src/server/cellapp/client_entity.h,43,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/cellapp/client_entity.h,52,gb18030,"/**
+		脚本请求获取属性或者方法
+	*/",
+kbe/src/server/cellapp/client_entity.h,57,gb18030,"/**
+		获得对象的描述
+	*/",
+kbe/src/server/cellapp/client_entity.h,73,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/cellapp/client_entity.h,80,gb18030,"/** 
+		脚本请求获取属性或者方法 
+	*/",
+kbe/src/server/cellapp/client_entity.h,85,gb18030,"/** 
+		获得对象的描述 
+	*/",
+kbe/src/server/cellapp/client_entity_method.cpp,117,gb18030,// 如果是广播给组件的消息,
+kbe/src/server/cellapp/client_entity_method.cpp,198,gb18030,// 记录这个事件产生的数据量大小,
+kbe/src/server/cellapp/client_entity_method.h,28,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/cellapp/client_entity_method.h,55,gb18030,// 该entity所使用的脚本模块对象,
+kbe/src/server/cellapp/client_entity_method.h,57,gb18030,// 这个方法的描述,
+kbe/src/server/cellapp/clients_remote_entity_method.cpp,57,gb18030,// 获取entityView范围内其他entity,
+kbe/src/server/cellapp/clients_remote_entity_method.cpp,58,gb18030,// 向这些entity的client推送这个方法的调用,
+kbe/src/server/cellapp/clients_remote_entity_method.cpp,79,gb18030,// 先发给自己,
+kbe/src/server/cellapp/clients_remote_entity_method.cpp,84,gb18030,// 如果是广播给组件的消息,
+kbe/src/server/cellapp/clients_remote_entity_method.cpp,153,gb18030,// 记录这个事件产生的数据量大小,
+kbe/src/server/cellapp/clients_remote_entity_method.cpp,163,gb18030,// 广播给其他人,
+kbe/src/server/cellapp/clients_remote_entity_method.cpp,179,gb18030,// 这个可能性是存在的，例如数据来源于createWitnessFromStream(),
+kbe/src/server/cellapp/clients_remote_entity_method.cpp,180,gb18030,// 又如自己的entity还未在目标客户端上创建,
+kbe/src/server/cellapp/clients_remote_entity_method.cpp,235,gb18030,// 记录这个事件产生的数据量大小,
+kbe/src/server/cellapp/clients_remote_entity_method.h,28,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/cellapp/clients_remote_entity_method.h,57,gb18030,// 该entity所使用的脚本模块对象,
+kbe/src/server/cellapp/clients_remote_entity_method.h,58,gb18030,// 这个方法的描述,
+kbe/src/server/cellapp/clients_remote_entity_method.h,60,gb18030,// 是否只是其他客户端， 不包括自己,
+kbe/src/server/cellapp/controller.h,17,gb18030,"/*
+	控制器， 管理trap、Vision等。
+*/",
+kbe/src/server/cellapp/controller.h,25,gb18030,// 常规类型,
+kbe/src/server/cellapp/controller.h,26,gb18030,// 范围触发器类型,
+kbe/src/server/cellapp/controller.h,27,gb18030,// 移动控制器类型,
+kbe/src/server/cellapp/controller.h,28,gb18030,// 旋转控制器类型,
+kbe/src/server/cellapp/controllers.cpp,47,gb18030,// 刷新id计数器,
+kbe/src/server/cellapp/controllers.cpp,77,gb18030,// 做个引用，防止在Controller析构中导致某些情况下在erase未结束的情况下又进入这里执行erase而产生问题,
+kbe/src/server/cellapp/coordinate_node.h,12,gb18030,// 一个Entity节点,
+kbe/src/server/cellapp/coordinate_node.h,13,gb18030,// 一个触发器节点,
+kbe/src/server/cellapp/coordinate_node.h,14,gb18030,// 隐藏节点(其他节点不可见),
+kbe/src/server/cellapp/coordinate_node.h,15,gb18030,// 删除中的节点,
+kbe/src/server/cellapp/coordinate_node.h,16,gb18030,// 删除节点,
+kbe/src/server/cellapp/coordinate_node.h,17,gb18030,// 这类节点处于update操作中。,
+kbe/src/server/cellapp/coordinate_node.h,18,gb18030,// entity节点正在执行update操作,
+kbe/src/server/cellapp/coordinate_node.h,19,gb18030,// 节点正在安装操作,
+kbe/src/server/cellapp/coordinate_node.h,20,gb18030,// 节点是触发器的正边界,
+kbe/src/server/cellapp/coordinate_node.h,21,gb18030,// 节点是触发器的负边界,
+kbe/src/server/cellapp/coordinate_node.h,38,gb18030,"/**
+		(节点本身的坐标)
+		x && z由不同的应用实现(从不同处获取)
+	*/",
+kbe/src/server/cellapp/coordinate_node.h,50,gb18030,"/**
+		(扩展坐标)
+		x && z由不同的应用实现(从不同处获取)
+	*/",
+kbe/src/server/cellapp/coordinate_node.h,91,gb18030,"/**
+		获取链表的前后端指针
+	*/",
+kbe/src/server/cellapp/coordinate_node.h,101,gb18030,"/**
+		设置链表的前后端指针
+	*/",
+kbe/src/server/cellapp/coordinate_node.h,111,gb18030,"/**
+		某个节点变动经过了本节点
+		@isfront: 向前移动还是向后移动
+	*/",
+kbe/src/server/cellapp/coordinate_node.h,121,gb18030,"/**
+		父节点删除
+	*/",
+kbe/src/server/cellapp/coordinate_node.h,127,gb18030,"/**
+		当节点有变动时，需要更新它在list中的
+		相关位置等信息
+	*/",
+kbe/src/server/cellapp/coordinate_node.h,142,gb18030,// 链表的前端和后端,
+kbe/src/server/cellapp/coordinate_system.cpp,56,gb18030,// 上面已经销毁过了,
+kbe/src/server/cellapp/coordinate_system.cpp,68,gb18030,"// 如果链表是空的, 初始第一个和最后一个xz节点为该节点",
+kbe/src/server/cellapp/coordinate_system.cpp,91,gb18030,// 只有一个节点不需要更新,
+kbe/src/server/cellapp/coordinate_system.cpp,135,gb18030,// 由于在update过程中可能会因为多级update的进行导致COORDINATE_NODE_FLAG_PENDING标志被取消，因此此处并不能很好的判断,
+kbe/src/server/cellapp/coordinate_system.cpp,136,gb18030,// 除非实现了标记的计数器，这里强制所有的行为都放入dels_， 由releaseNodes在space中进行调用统一释放,
+kbe/src/server/cellapp/coordinate_system.cpp,192,gb18030,// 如果是第一个节点,
+kbe/src/server/cellapp/coordinate_system.cpp,212,gb18030,// 如果是第一个节点,
+kbe/src/server/cellapp/coordinate_system.cpp,231,gb18030,// 如果是第一个节点,
+kbe/src/server/cellapp/coordinate_system.cpp,548,gb18030,// 没有计数器支持，这个标记很可能中途被update子分支取消，因此没有意义,
+kbe/src/server/cellapp/coordinate_system.h,21,gb18030,"/**
+		向list中插入节点
+	*/",
+kbe/src/server/cellapp/coordinate_system.h,26,gb18030,"/**
+		将节点从list中移除
+	*/",
+kbe/src/server/cellapp/coordinate_system.h,34,gb18030,"/**
+		当某个节点有变动时，需要更新它在list中的
+		相关位置等信息
+	*/",
+kbe/src/server/cellapp/coordinate_system.h,40,gb18030,"/**
+		移动节点
+	*/",
+kbe/src/server/cellapp/coordinate_system.h,63,gb18030,// 链表的首尾指针,
+kbe/src/server/cellapp/entity.cpp,211,gb18030,// 如果不通知脚本， 那么也不会产生这个回调,
+kbe/src/server/cellapp/entity.cpp,212,gb18030,// 通常销毁一个entity不通知脚本可能是迁移或者传送造成的,
+kbe/src/server/cellapp/entity.cpp,226,gb18030,// 解除控制者的引用,
+kbe/src/server/cellapp/entity.cpp,236,gb18030,// 将entity从场景中剔除,
+kbe/src/server/cellapp/entity.cpp,248,gb18030,// 在进程强制关闭时这里可能不为0,
+kbe/src/server/cellapp/entity.cpp,251,gb18030,// 此时不应该还有witnesses，否则为View BUG,
+kbe/src/server/cellapp/entity.cpp,442,gb18030,// 如果看不见我，就不要控制我,
+kbe/src/server/cellapp/entity.cpp,469,gb18030,//  如果新旧的entityCall是同一个人，则不做任何更改,
+kbe/src/server/cellapp/entity.cpp,479,gb18030,// 如果旧的控制者是我自己的客户端，,
+kbe/src/server/cellapp/entity.cpp,480,gb18030,// 那就需要通知自己的客户端：你不能再控制你自己了，也就是你被其它人控制了,
+kbe/src/server/cellapp/entity.cpp,484,gb18030,// 如果旧的控制者也是我的观察者之一，那就表示它的客户端能看到我，,
+kbe/src/server/cellapp/entity.cpp,485,gb18030,// 所以，需要通知旧的客户端：你不能再控制某人的位移了,
+kbe/src/server/cellapp/entity.cpp,493,gb18030,// 如果是恢复自我控制，那么需要通知我的客户端：没有人控制你了,
+kbe/src/server/cellapp/entity.cpp,500,gb18030,// 如果是别人接手了控制，那么只需要通知接手者即可，,
+kbe/src/server/cellapp/entity.cpp,501,gb18030,//     ——因为之前自己还是被别人控制着的，所以不需要另行通知，,
+kbe/src/server/cellapp/entity.cpp,502,gb18030,// 所以，通知接手的控制者：你控制了谁,
+kbe/src/server/cellapp/entity.cpp,509,gb18030,// NULL表示交由系统控制，所以不需要通知其他人,
+kbe/src/server/cellapp/entity.cpp,518,gb18030,// 既然有新的控制者了，系统的移动行为也就必须停止了,
+kbe/src/server/cellapp/entity.cpp,521,gb18030,// 如果是恢复自我控制，那么需要通知我的客户端：没有人控制你了,
+kbe/src/server/cellapp/entity.cpp,528,gb18030,// 如果是别人接手了控制，那么只需要通知接手者即可，,
+kbe/src/server/cellapp/entity.cpp,529,gb18030,//     ——因为之前自己还是被别人控制着的，所以不需要另行通知，,
+kbe/src/server/cellapp/entity.cpp,530,gb18030,// 所以，通知接手的控制者：你控制了谁,
+kbe/src/server/cellapp/entity.cpp,639,gb18030,// 如果是ghost调用def方法则需要rpc调用。,
+kbe/src/server/cellapp/entity.cpp,660,gb18030,// 如果不是一个realEntity或者在初始化则不理会,
+kbe/src/server/cellapp/entity.cpp,678,gb18030,// 首先创建一个需要广播的模板流,
+kbe/src/server/cellapp/entity.cpp,684,gb18030,"// 判断是否需要广播给其他的cellapp, 这还需一个前提是entity必须拥有ghost实体",
+kbe/src/server/cellapp/entity.cpp,685,gb18030,"// 只有在cell边界一定范围内的entity才拥有ghost实体, 或者在跳转space时也会短暂的置为ghost状态",
+kbe/src/server/cellapp/entity.cpp,697,gb18030,// 如果是组件属性，则需要将组件内部的服务器相关可广播属性打包,
+kbe/src/server/cellapp/entity.cpp,711,gb18030,// 记录这个事件产生的数据量大小,
+kbe/src/server/cellapp/entity.cpp,740,gb18030,// 这个可能性是存在的，例如数据来源于createWitnessFromStream(),
+kbe/src/server/cellapp/entity.cpp,741,gb18030,// 又如自己的entity还未在目标客户端上创建,
+kbe/src/server/cellapp/entity.cpp,783,gb18030,// 记录这个事件产生的数据量大小,
+kbe/src/server/cellapp/entity.cpp,795,gb18030,"/*
+	// 判断这个属性是否还需要广播给其他客户端
+	if((flags & ENTITY_BROADCAST_OTHER_CLIENT_FLAGS) > 0)
+	{
+		int8 detailLevel = propertyDescription->getDetailLevel();
+		for(int8 i=DETAIL_LEVEL_NEAR; i<=detailLevel; ++i)
+		{
+			std::map<ENTITY_ID, Entity*>::iterator iter = witnessEntities_[i].begin();
+			for(; iter != witnessEntities_[i].end(); ++iter)
+			{
+				Entity* entity = iter->second;
+				EntityCall* clientEntityCall = entity->clientEntityCall();
+				if(clientEntityCall != NULL)
+				{
+					Packet* sp = clientEntityCall->newCall(ENTITYCALL_TYPE_UPDATE_PROPERTY);
+					(*sp) << id_;
+					sp->append(mstream->contents(), mstream->size());
+					clientEntityCall->post(sp);
+				}
+			}
+		}
+
+		// 这个属性已经更新过， 将这些信息添加到曾经进入过这个级别的entity， 但现在可能走远了一点， 在他回来重新进入这个detaillevel
+		// 时如果重新将所有的属性都更新到他的客户端可能不合适， 我们记录这个属性的改变， 下次他重新进入我们只需要将所有期间有过改变的
+		// 数据发送到他的客户端更新
+		for(int8 i=detailLevel; i<=DETAIL_LEVEL_FAR; ++i)
+		{
+			std::map<ENTITY_ID, Entity*>::iterator iter = witnessEntities_[i].begin();
+			for(; iter != witnessEntities_[i].end(); ++iter)
+			{
+				Entity* entity = iter->second;
+				EntityCall* clientEntityCall = entity->clientEntityCall();
+				if(clientEntityCall != NULL)
+				{
+					WitnessInfo* witnessInfo = witnessEntityDetailLevelMap_.find(iter->first)->second;
+					if(witnessInfo->detailLevelLog[detailLevel])
+					{
+						std::vector<uint32>& cddlog = witnessInfo->changeDefDataLogs[detailLevel];
+						std::vector<uint32>::iterator fiter = std::find(cddlog.begin(), cddlog.end(), utype);
+						if(fiter == cddlog.end())
+							witnessInfo->changeDefDataLogs[detailLevel].push_back(utype);
+					}
+				}
+
+				// 记录这个事件产生的数据量大小
+				std::string event_name = this->scriptName();
+				event_name += ""."";
+				event_name += propertyDescription->getName();
+				
+				g_publicClientEventHistoryStats.add(scriptName(), propertyDescription->getName(), pSendBundle->currMsgLength());
+			}
+		}
+	}
+	*/",
+kbe/src/server/cellapp/entity.cpp,850,gb18030,// 判断这个属性是否还需要广播给自己的客户端,
+kbe/src/server/cellapp/entity.cpp,879,gb18030,// 记录这个事件产生的数据量大小,
+kbe/src/server/cellapp/entity.cpp,1079,gb18030,// 由于存在一种情况， 组件def中没有内容， 但有cell脚本，此时baseapp上无法判断他是否有cell属性，所以写celldata时没有数据写入,
+kbe/src/server/cellapp/entity.cpp,1158,gb18030,// 检查数据是否有变化，有变化则将数据备份并且记录数据hash,
+kbe/src/server/cellapp/entity.cpp,1168,gb18030,// 将当前的cell部分数据打包一起发送给base部分备份,
+kbe/src/server/cellapp/entity.cpp,1310,gb18030,// 通知所有组件,
+kbe/src/server/cellapp/entity.cpp,1371,gb18030,// 既然将要取消缓存了，那么执行所有callback，但需要注意在执行过程中可能又产生了callback缓存,
+kbe/src/server/cellapp/entity.cpp,1372,gb18030,// 那么需要加入到队列后面,
+kbe/src/server/cellapp/entity.cpp,1390,gb18030,// 通知所有组件,
+kbe/src/server/cellapp/entity.cpp,1439,gb18030,// 最后再执行减操作，防止执行callback期间又请求缓存callback,
+kbe/src/server/cellapp/entity.cpp,1514,gb18030,// 延时执行,
+kbe/src/server/cellapp/entity.cpp,1595,gb18030,// 在space中投放一个陷阱,
+kbe/src/server/cellapp/entity.cpp,1737,gb18030,// 只要是属于移动控制器的范畴，就应该走stopMove()，以避免多种方式的存在引发调用上的歧议,
+kbe/src/server/cellapp/entity.cpp,2075,gb18030,// 需要做中转,
+kbe/src/server/cellapp/entity.cpp,2098,gb18030,// proxy的giveClientTo功能或者reloginBaseapp， 如果一个entity已经创建了cell， 并将控制权绑定,
+kbe/src/server/cellapp/entity.cpp,2099,gb18030,// 到该entity时是一定没有clientEntityCall的。,
+kbe/src/server/cellapp/entity.cpp,2106,gb18030,// Py_INCREF(clientEntityCall); 这里不需要增加引用， 因为每次都会产生一个新的对象,
+kbe/src/server/cellapp/entity.cpp,2110,gb18030,// 如果一个实体已经有cell的情况下giveToClient，那么需要将最新的客户端属性值更新到客户端,
+kbe/src/server/cellapp/entity.cpp,2149,gb18030,"/*
+				重新绑定，通常是客户端重登陆或者重连或者一个账号挤掉
+				另一个客户端登陆的客户端, 而Entity还在内存中并且已经
+				绑定了witness(这种情况也可能是服务端还未侦查到客户端断线)
+
+				这种情况我们仍然需要做一些事情保证客户端的正确性， 例如发送enterworld
+			*/",
+kbe/src/server/cellapp/entity.cpp,2158,gb18030,// View中的实体也需要重置，重新同步给客户端,
+kbe/src/server/cellapp/entity.cpp,2163,gb18030,// 防止自己在一些脚本回调中被销毁，这里对自己做一次引用,
+kbe/src/server/cellapp/entity.cpp,2172,gb18030,// 最后，设置controlledBy为自己的base,
+kbe/src/server/cellapp/entity.cpp,2191,gb18030,// 需要做中转,
+kbe/src/server/cellapp/entity.cpp,2315,gb18030,// 检查移动,
+kbe/src/server/cellapp/entity.cpp,2384,gb18030,// 如果我已经被控制，那么，数据的来源则是控制者的客户端，,
+kbe/src/server/cellapp/entity.cpp,2385,gb18030,// 所以，我们需要做的是通知来源客户端，而不仅仅是自己的客户端。,
+kbe/src/server/cellapp/entity.cpp,2405,gb18030,// 在跨进程teleport时，极端情况（ghost）在某种状态下witness此时可能为None,
+kbe/src/server/cellapp/entity.cpp,2408,gb18030,// 通知重置,
+kbe/src/server/cellapp/entity.cpp,2487,gb18030,// 这个可能性是存在的，例如数据来源于createWitnessFromStream(),
+kbe/src/server/cellapp/entity.cpp,2488,gb18030,// 又如自己的entity还未在目标客户端上创建,
+kbe/src/server/cellapp/entity.cpp,2614,gb18030,// 第一个坐标点是当前位置，因此可以过滤掉,
+kbe/src/server/cellapp/entity.cpp,2642,gb18030,// 将坐标信息提取出来,
+kbe/src/server/cellapp/entity.cpp,2725,gb18030,// 将坐标信息提取出来,
+kbe/src/server/cellapp/entity.cpp,2776,gb18030,// 将坐标信息提取出来,
+kbe/src/server/cellapp/entity.cpp,2851,gb18030,// 将坐标信息提取出来,
+kbe/src/server/cellapp/entity.cpp,2928,gb18030,// 将坐标信息提取出来,
+kbe/src/server/cellapp/entity.cpp,3255,gb18030,/* 允许在销毁期间调用 */,
+kbe/src/server/cellapp/entity.cpp,3329,gb18030,// 将坐标信息提取出来,
+kbe/src/server/cellapp/entity.cpp,3359,gb18030,// 用户总是期望在entity附近搜寻， 因此我们从身边搜索,
+kbe/src/server/cellapp/entity.cpp,3477,gb18030,"/* 即使entity已经销毁， 但内存未释放时spaceID应该是正确的， 所以理论可以找到space
+	if(entity->isDestroyed())
+	{
+		ERROR_MSG(""Entity::teleport: nearbyMBRef is destroyed!\n"");
+		onTeleportFailure();
+		return;
+	}
+	*/",
+kbe/src/server/cellapp/entity.cpp,3486,gb18030,"/* 即使是ghost， 但space肯定是在当前cell上， 直接操作应该不会有问题
+	if(!entity->isReal())
+	{
+		ERROR_MSG(""Entity::teleport: nearbyMBRef is ghost!\n"");
+		onTeleportFailure();
+		return;
+	}
+	*/",
+kbe/src/server/cellapp/entity.cpp,3497,gb18030,// 如果是相同space则为本地跳转,
+kbe/src/server/cellapp/entity.cpp,3504,gb18030,// 否则为当前cellapp上的space， 那么我们也能够直接执行操作,
+kbe/src/server/cellapp/entity.cpp,3508,gb18030,// 如果要跳转的space不存在或者引用的entity是这个space的创建者且已经销毁， 那么都应该是跳转失败,
+kbe/src/server/cellapp/entity.cpp,3561,gb18030,// 如果这个entity有base部分， 假如是本进程级别的传送，那么相关操作按照正常的执行,
+kbe/src/server/cellapp/entity.cpp,3562,gb18030,// 如果是跨cellapp的传送， 那么我们可以先设置entity为ghost并立即序列化entity发往目的cellapp,
+kbe/src/server/cellapp/entity.cpp,3563,gb18030,// 如果期间有base的消息发送过来， entity的ghost机制能够转到real上去， 因此传送之前不需要对base,
+kbe/src/server/cellapp/entity.cpp,3564,gb18030,// 做一些设置，传送成功后先设置base的关系base在被改变关系后仍然有0.1秒的时间收到包继续发往ghost，,
+kbe/src/server/cellapp/entity.cpp,3565,gb18030,"// 如果一直有包则一直刷新时间直到没有任何包需要广播并且超时0.1秒之后的包才会直接发往real）, 这样做的好处是传送并不需要非常谨慎的与base耦合",
+kbe/src/server/cellapp/entity.cpp,3566,gb18030,// 传送过程中有任何错误也不会影响到base部分，base部分的包也能够按照秩序送往real。,
+kbe/src/server/cellapp/entity.cpp,3569,gb18030,"// 如果有base部分, 我们还需要调用一下备份功能。",
+kbe/src/server/cellapp/entity.cpp,3570,gb18030,// 由于ghost功能会addCellDataToStream一次数据流，并且在传送失败时能重用该实体,
+kbe/src/server/cellapp/entity.cpp,3571,gb18030,// 因此这里不需要进行备份,
+kbe/src/server/cellapp/entity.cpp,3577,gb18030,// 同时需要通知base暂存发往cellapp的消息，因为后面如果跳转成功需要切换cellEntityCall映射关系到新的cellapp,
+kbe/src/server/cellapp/entity.cpp,3578,gb18030,// 为了避免在切换的一瞬间消息次序发生混乱(旧的cellapp消息也会转到新的cellapp上)， 因此需要在传送前进行,
+kbe/src/server/cellapp/entity.cpp,3579,gb18030,// 暂存， 传送成功后通知旧的cellapp销毁entity之后同时通知baseapp改变映射关系。,
+kbe/src/server/cellapp/entity.cpp,3602,gb18030,// 我们需要将entity打包发往目的cellapp,
+kbe/src/server/cellapp/entity.cpp,3632,gb18030,"// 暂时不销毁这个entity, 等那边成功创建之后再回来销毁",
+kbe/src/server/cellapp/entity.cpp,3633,gb18030,// 此期间的消息可以通过ghost转发给real,
+kbe/src/server/cellapp/entity.cpp,3634,gb18030,// 如果未能正确传输过去则可以从当前cell继续恢复entity.,
+kbe/src/server/cellapp/entity.cpp,3639,gb18030,// 序列化后将entity先停止移动， 如果传送失败了则可以根据序列化的内容进行恢复,
+kbe/src/server/cellapp/entity.cpp,3646,gb18030,// 本地跳转在未来需要考虑space被分割为多cell的情况， 当前直接操作,
+kbe/src/server/cellapp/entity.cpp,3649,gb18030,// 先要从CoordinateSystem中删除entity节点,
+kbe/src/server/cellapp/entity.cpp,3653,gb18030,// 此时不会扰动ranglist,
+kbe/src/server/cellapp/entity.cpp,3658,gb18030,// 通知位置强制改变,
+kbe/src/server/cellapp/entity.cpp,3688,gb18030,// 这个可能性是存在的，例如数据来源于createWitnessFromStream(),
+kbe/src/server/cellapp/entity.cpp,3689,gb18030,// 又如自己的entity还未在目标客户端上创建,
+kbe/src/server/cellapp/entity.cpp,3693,gb18030,// 通知位置强制改变,
+kbe/src/server/cellapp/entity.cpp,3712,gb18030,"/*
+		1: 任何形式的teleport都被认为是瞬间移动的（可突破空间限制进入到任何空间）， 哪怕是在当前位置只移动了0.1米, 这就造成如果当前entity
+			刚好在某个trap中， teleport向前移动0.1米但是没有出trap， 因为这是瞬间移动的特性我们目前认为
+			entity会先离开trap并且触发相关回调, 然后瞬时出现在了另一个点， 那么因为该点也是在当前trap中所以又会抛出进入trap回调.
+
+		2: 如果是当前space上跳转则立即进行移动操作
+
+		3: 如果是跳转到其他space上, 但是那个space也在当前cellapp上的情况时， 立即执行跳转操作(因为不需要进行任何其他关系的维护， 直接切换就好了)。 
+		
+		4: 如果要跳转的目标space在另一个cellapp上：
+			4.1: 当前entity没有base部分， 不考虑维护base部分的关系， 但是还是要考虑意外情况导致跳转失败， 那么此时应该返回跳转失败回调并且继续
+			正常存在于当前space上。
+		
+			4.2: 当前entity有base部分， 那么我们需要改变base所映射的cell部分(并且在未正式切换关系时baseapp上所有送达cell的消息都应该不被丢失)， 为了安全我们需要做一些工作
+	*/",
+kbe/src/server/cellapp/entity.cpp,3730,gb18030,// 如果为None则是entity自己想在本space上跳转到某位置,
+kbe/src/server/cellapp/entity.cpp,3733,gb18030,// 直接执行操作,
+kbe/src/server/cellapp/entity.cpp,3740,gb18030,// 如果是entity则一定是在本cellapp上， 可以直接进行操作,
+kbe/src/server/cellapp/entity.cpp,3747,gb18030,"// 如果是entityCall, 先检查本cell上是否能够通过这个entityCall的ID找到entity",
+kbe/src/server/cellapp/entity.cpp,3748,gb18030,// 如果能找到则也是在本cellapp上可直接进行操作,
+kbe/src/server/cellapp/entity.cpp,3765,gb18030,// 如果不是entity， 也不是entityCall同时也不是None? 那肯定是输入错误,
+kbe/src/server/cellapp/entity.cpp,3780,gb18030,// 这个方法仅在base.teleport跳转之前被调用， cell.teleport是不会被调用的。,
+kbe/src/server/cellapp/entity.cpp,3806,gb18030,// 如果身上有trap等触发器还得重新添加进去,
+kbe/src/server/cellapp/entity.cpp,3963,gb18030,// 一个entity要转变为ghost,
+kbe/src/server/cellapp/entity.cpp,3964,gb18030,// 首先需要设置自身的realCell,
+kbe/src/server/cellapp/entity.cpp,3965,gb18030,// 将所有def数据添加进流,
+kbe/src/server/cellapp/entity.cpp,3966,gb18030,"// 序列化controller并停止所有的controller(timer, navigate, trap,...)",
+kbe/src/server/cellapp/entity.cpp,3967,gb18030,// 卸载witness， 并且序列化,
+kbe/src/server/cellapp/entity.cpp,3983,gb18030,// 必须放在前面,
+kbe/src/server/cellapp/entity.cpp,4009,gb18030,// 一个entity要转变为real,
+kbe/src/server/cellapp/entity.cpp,4010,gb18030,// 首先需要设置自身的ghostCell,
+kbe/src/server/cellapp/entity.cpp,4011,gb18030,// 将所有def数据添加进流,
+kbe/src/server/cellapp/entity.cpp,4012,gb18030,"// 反序列化controller并恢复所有的controller(timer, navigate, trap,...)",
+kbe/src/server/cellapp/entity.cpp,4013,gb18030,// 反序列化安装witness,
+kbe/src/server/cellapp/entity.cpp,4078,gb18030,// 此时强制设置为不在地面，无法判定其是否在地面，角色需要客户端上报是否在地面,
+kbe/src/server/cellapp/entity.cpp,4079,gb18030,// 而服务端的NPC则与移动后是否在地面来判定。,
+kbe/src/server/cellapp/entity.cpp,4086,gb18030,// 设置entity的baseEntityCall,
+kbe/src/server/cellapp/entity.cpp,4090,gb18030,// 如果传送前的控制者是系统或自己的客户端，则继续保持,
+kbe/src/server/cellapp/entity.cpp,4091,gb18030,// 如果是其它客户端在控制，则尝试恢复控制关系，如果无法恢复，则重置,
+kbe/src/server/cellapp/entity.cpp,4128,gb18030,// 必须先清理移动相关的Controllers,
+kbe/src/server/cellapp/entity.cpp,4256,gb18030,// 不要使用setWitness，因为此时不需要走onAttach流程，客户端不需要重新enterworld。,
+kbe/src/server/cellapp/entity.h,48,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/cellapp/entity.h,57,gb18030,"/** 
+		销毁这个entity 
+	*/",
+kbe/src/server/cellapp/entity.h,62,gb18030,"/**
+		销毁场景
+	*/",
+kbe/src/server/cellapp/entity.h,68,gb18030,"/** 
+		当前实体所在的space将要销毁时触发  
+	*/",
+kbe/src/server/cellapp/entity.h,73,gb18030,"/** 
+		判断自身是否是一个realEntity 
+	*/",
+kbe/src/server/cellapp/entity.h,78,gb18030,"/** 
+		判断自身是否有ghostEntity 
+	*/",
+kbe/src/server/cellapp/entity.h,83,gb18030,"/** 
+		判断自身是否是一个realEntity 
+	*/",
+kbe/src/server/cellapp/entity.h,89,gb18030,"/** 
+		判断自身是否有ghostEntity 
+	*/",
+kbe/src/server/cellapp/entity.h,95,gb18030,"/** 
+		定义属性数据被改变了 
+	*/",
+kbe/src/server/cellapp/entity.h,101,gb18030,"/** 
+		该entity通信通道
+	*/",
+kbe/src/server/cellapp/entity.h,133,gb18030,"/**
+		脚本获取controlledBy属性
+	*/",
+kbe/src/server/cellapp/entity.h,143,gb18030,"/** 
+		脚本获取和设置entity的position 
+	*/",
+kbe/src/server/cellapp/entity.h,150,gb18030,"/** 
+		脚本获取和设置entity的方向 
+	*/",
+kbe/src/server/cellapp/entity.h,157,gb18030,"/**
+		是否在地面上
+	*/",
+kbe/src/server/cellapp/entity.h,164,gb18030,"/** 
+		设置entity方向和位置 
+	*/",
+kbe/src/server/cellapp/entity.h,180,gb18030,"/** 网络接口
+		客户端设置新位置
+	*/",
+kbe/src/server/cellapp/entity.h,185,gb18030,"/** 网络接口
+		客户端设置新位置
+	*/",
+kbe/src/server/cellapp/entity.h,190,gb18030,"/** 网络接口
+		客户端设置位置
+	*/",
+kbe/src/server/cellapp/entity.h,195,gb18030,"/** 网络接口
+		客户端设置位置
+	*/",
+kbe/src/server/cellapp/entity.h,200,gb18030,"/**
+		cell上的传送方法
+	*/",
+kbe/src/server/cellapp/entity.h,210,gb18030,"/**
+		传送成功和失败相关回调
+	*/",
+kbe/src/server/cellapp/entity.h,219,gb18030,"/**
+		进入离开cell等回调
+	*/",
+kbe/src/server/cellapp/entity.h,227,gb18030,"/**
+		进入离开space等回调
+	*/",
+kbe/src/server/cellapp/entity.h,233,gb18030,"/** 
+		当cellapp意外终止后， baseapp如果能找到合适的cellapp则将其恢复后
+		会调用此方法
+	*/",
+kbe/src/server/cellapp/entity.h,239,gb18030,"/**
+		脚本调试view
+	*/",
+kbe/src/server/cellapp/entity.h,245,gb18030,"/** 
+		当前entity设置自身的View半径范围 
+	*/",
+kbe/src/server/cellapp/entity.h,255,gb18030,"/**
+		返回观察该实体的所有观察者
+	*/",
+kbe/src/server/cellapp/entity.h,260,gb18030,"/** 
+		当前entity是否为real 
+	*/",
+kbe/src/server/cellapp/entity.h,265,gb18030,"/** 
+		向baseapp发送备份数据
+	*/",
+kbe/src/server/cellapp/entity.h,270,gb18030,"/** 
+		将要保存到数据库之前的通知 
+	*/",
+kbe/src/server/cellapp/entity.h,275,gb18030,"/** 
+		脚本获取和设置entity的position 
+	*/",
+kbe/src/server/cellapp/entity.h,281,gb18030,"/** 
+		entity移动导航 
+	*/",
+kbe/src/server/cellapp/entity.h,294,gb18030,"/** 
+		entity获得随机点 
+	*/",
+kbe/src/server/cellapp/entity.h,300,gb18030,"/** 
+		entity移动到某个点 
+	*/",
+kbe/src/server/cellapp/entity.h,308,gb18030,"/** 
+		entity移动到某个entity 
+	*/",
+kbe/src/server/cellapp/entity.h,316,gb18030,"/**
+	entity移动加速
+	*/",
+kbe/src/server/cellapp/entity.h,322,gb18030,"/** 
+		脚本获取和设置entity的最高xz移动速度 
+	*/",
+kbe/src/server/cellapp/entity.h,329,gb18030,"/** 
+		脚本获取和设置entity的最高y移动速度 
+	*/",
+kbe/src/server/cellapp/entity.h,336,gb18030,"/** 
+		脚本请求获得一定范围内的某种类型的entities 
+	*/",
+kbe/src/server/cellapp/entity.h,341,gb18030,"/** 
+		脚本请求获得View范围内的entities 
+	*/",
+kbe/src/server/cellapp/entity.h,347,gb18030,"/**
+		设置获取是否自动备份
+	*/",
+kbe/src/server/cellapp/entity.h,354,gb18030,"/** 网络接口
+		远程呼叫本entity的方法 
+	*/",
+kbe/src/server/cellapp/entity.h,362,gb18030,"/**
+		观察者
+	*/",
+kbe/src/server/cellapp/entity.h,368,gb18030,"/** 
+		是否被任何proxy监视到, 如果这个entity没有客户端， 则这个值有效 
+	*/",
+kbe/src/server/cellapp/entity.h,374,gb18030,"/** 
+		entity是否是一个观察者 
+	*/",
+kbe/src/server/cellapp/entity.h,380,gb18030,"/** 
+		自身被一个观察者观察到了 
+	*/",
+kbe/src/server/cellapp/entity.h,385,gb18030,"/** 
+		移除一个观察自身的观察者 
+	*/",
+kbe/src/server/cellapp/entity.h,391,gb18030,"/**
+		 指定的entity是否是观察自己的人之一
+	*/",
+kbe/src/server/cellapp/entity.h,399,gb18030,"/** 网络接口
+		entity绑定了一个观察者(客户端)
+
+	*/",
+kbe/src/server/cellapp/entity.h,407,gb18030,"/** 网络接口
+		entity丢失了一个观察者(客户端)
+
+	*/",
+kbe/src/server/cellapp/entity.h,413,gb18030,"/** 
+		client更新数据
+	*/",
+kbe/src/server/cellapp/entity.h,418,gb18030,"/** 
+		添加一个范围触发器  
+	*/",
+kbe/src/server/cellapp/entity.h,424,gb18030,"/** 
+		调用客户端实体的方法  
+	*/",
+kbe/src/server/cellapp/entity.h,429,gb18030,"/** 
+		恢复所有的范围触发器 
+		在teleport时会出现这样的情况
+	*/",
+kbe/src/server/cellapp/entity.h,435,gb18030,"/** 
+		删除一个控制器 
+	*/",
+kbe/src/server/cellapp/entity.h,441,gb18030,"/** 
+		一个entity进入了这个entity的某个范围触发器  
+	*/",
+kbe/src/server/cellapp/entity.h,447,gb18030,"/** 
+		一个entity离开了这个entity的某个范围触发器  
+	*/",
+kbe/src/server/cellapp/entity.h,453,gb18030,"/** 
+		当entity跳到一个新的space上去后，离开范围触发器事件将触发这个接口 
+	*/",
+kbe/src/server/cellapp/entity.h,460,gb18030,"/** 
+		一个entity进入了View区域
+	*/",
+kbe/src/server/cellapp/entity.h,465,gb18030,"/** 
+		停止任何移动行为
+	*/",
+kbe/src/server/cellapp/entity.h,470,gb18030,"/** 
+		entity的一次移动完成 
+	*/",
+kbe/src/server/cellapp/entity.h,475,gb18030,"/** 
+		entity的移动完成 
+	*/",
+kbe/src/server/cellapp/entity.h,480,gb18030,"/** 
+		entity移动失败
+	*/",
+kbe/src/server/cellapp/entity.h,485,gb18030,"/**
+		entity转动朝向
+	*/",
+kbe/src/server/cellapp/entity.h,493,gb18030,"/**
+		entity转向完成
+	*/",
+kbe/src/server/cellapp/entity.h,498,gb18030,"/**
+		获取自身在space的entities中的位置
+	*/",
+kbe/src/server/cellapp/entity.h,504,gb18030,"/**
+		获取entity所在节点
+	*/",
+kbe/src/server/cellapp/entity.h,510,gb18030,"/**
+		安装卸载节点
+	*/",
+kbe/src/server/cellapp/entity.h,517,gb18030,"/**
+		获取entity位置朝向在某时间是否改变过
+	*/",
+kbe/src/server/cellapp/entity.h,523,gb18030,"/** 
+		real请求更新属性到ghost
+	*/",
+kbe/src/server/cellapp/entity.h,528,gb18030,"/** 
+		ghost请求调用def方法real
+	*/",
+kbe/src/server/cellapp/entity.h,533,gb18030,"/** 
+		real请求更新属性到ghost
+	*/",
+kbe/src/server/cellapp/entity.h,538,gb18030,"/** 
+		转变为ghost, 自身必须为real
+	*/",
+kbe/src/server/cellapp/entity.h,543,gb18030,"/** 
+		转变为real, 自身必须为ghost
+	*/",
+kbe/src/server/cellapp/entity.h,566,gb18030,"/** 
+		获得实体控制器管理器
+	*/",
+kbe/src/server/cellapp/entity.h,571,gb18030,"/** 
+		设置实体持久化数据是否已脏，脏了会自动存档 
+	*/",
+kbe/src/server/cellapp/entity.h,583,gb18030,"/**
+		调用实体的回调函数，有可能被缓存
+	*/",
+kbe/src/server/cellapp/entity.h,590,gb18030,"/** 
+		发送teleport结果到base端
+	*/",
+kbe/src/server/cellapp/entity.h,601,gb18030,// 可以为NULL， NULL说明没有参数,
+kbe/src/server/cellapp/entity.h,612,gb18030,// 这个entity的客户端部分的entityCall,
+kbe/src/server/cellapp/entity.h,615,gb18030,// 这个entity的baseapp部分的entityCall,
+kbe/src/server/cellapp/entity.h,618,gb18030,"/** 这个entity的坐标和朝向当前受谁的客户端控制
+	    null表示没有客户端在控制（即系统控制），
+	    否则指向控制这个entity的对象的baseEntityCall_，
+		玩家自己控制自己则Entity.controlledBy = self.base
+	*/",
+kbe/src/server/cellapp/entity.h,625,gb18030,// 如果一个entity为ghost，那么entity会存在一个源cell的指向,
+kbe/src/server/cellapp/entity.h,628,gb18030,// 如果一个entity为real，那么entity可能会存在一个ghost的指向,
+kbe/src/server/cellapp/entity.h,631,gb18030,// entity的当前位置,
+kbe/src/server/cellapp/entity.h,636,gb18030,// entity的当前方向,
+kbe/src/server/cellapp/entity.h,640,gb18030,// entity位置朝向在某时间是否改变过,
+kbe/src/server/cellapp/entity.h,641,gb18030,// 此属性可用于如:决定在某期间是否要高度同步该entity,
+kbe/src/server/cellapp/entity.h,645,gb18030,// 是否在地面上,
+kbe/src/server/cellapp/entity.h,648,gb18030,"// entity x,z轴最高移动速度",
+kbe/src/server/cellapp/entity.h,651,gb18030,// entity y轴最高移动速度,
+kbe/src/server/cellapp/entity.h,654,gb18030,// 自身在space的entities中的位置,
+kbe/src/server/cellapp/entity.h,657,gb18030,// 是否被任何观察者监视到,
+kbe/src/server/cellapp/entity.h,661,gb18030,// 观察者对象,
+kbe/src/server/cellapp/entity.h,667,gb18030,// entity节点,
+kbe/src/server/cellapp/entity.h,670,gb18030,// 控制器管理器,
+kbe/src/server/cellapp/entity.h,678,gb18030,// entity层，可以做任意表示，基于tile的游戏可以表示为海陆空等层，纯3d也可以表示各种层,
+kbe/src/server/cellapp/entity.h,679,gb18030,// 在脚本层做搜索的时候可以按层搜索.,
+kbe/src/server/cellapp/entity.h,682,gb18030,// 需要持久化的数据是否变脏（内存sha1），如果没有变脏不需要持久化,
+kbe/src/server/cellapp/entity.h,685,gb18030,// 如果用户有设置过Volatileinfo，则此处创建Volatileinfo，否则为NULL使用ScriptDefModule的Volatileinfo,
+kbe/src/server/cellapp/entity_component.cpp,41,gb18030,"// 如果是ghost调用def方法则需要rpc调用。
+",
+kbe/src/server/cellapp/entity_coordinate_node.cpp,120,gb18030,"/**
+ 查找离中心点最近的节点
+ 模版参数 NODEWRAP 取值为以下三者之一：
+   - CoordinateNodeWrapX
+   - CoordinateNodeWrapZ
+   - CoordinateNodeWrapY
+*/",
+kbe/src/server/cellapp/entity_coordinate_node.cpp,133,gb18030,// 先找到一个EntityNode做支点,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,135,gb18030,// 先找当前节点，找不到则往左边遍历寻找,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,146,gb18030,// 如果找不到，则往右边编历寻找,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,159,gb18030,// 理论上不可能找不到,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,165,gb18030,// 能来到这里，表示一定是找到了，开始找离目标位置最近的Node,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,169,gb18030,// 相等,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,173,gb18030,// Entity Node在中心点的右边,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,180,gb18030,// 由于是从中心点的右边往左边遍历，,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,181,gb18030,// 因此第一个position小于中心点的entity就一定是离中心点最近的,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,192,gb18030,// Entity Node在中心点的左边,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,199,gb18030,// 由于是从中心点的左边往右边遍历，,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,200,gb18030,// 因此第一个position大于中心点的entity就一定是离中心点最近的,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,215,gb18030,"/**
+ 查找一个轴上符合范围的entity
+ 模版参数 NODEWRAP 取值为以下三者之一：
+   - CoordinateNodeWrapX
+   - CoordinateNodeWrapZ
+   - CoordinateNodeWrapY
+*/",
+kbe/src/server/cellapp/entity_coordinate_node.cpp,232,gb18030,// 如果节点自己也符合条件，则把自己加进去,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,347,gb18030,// 在这里做一下更新的原因是，很可能在CoordinateNode::update()的过程中导致实体位置被移动,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,348,gb18030,// 而导致次数update被调用，在某种情况下会出现问题,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,349,gb18030,"// 例如：// A->B, B-A（此时old_*是B）, A->B（此时old_*是B，而xx等目的地就是B）,此时update中会误判为没有移动。",
+kbe/src/server/cellapp/entity_coordinate_node.cpp,360,gb18030,// 此处必须使用watcherNodes_.size()而不能使用迭代器遍历，防止在update中导致增加了watcherNodes_数量而破坏迭代器,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,414,gb18030,// 先设置为NULL， 在后面update时进行删除,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,415,gb18030,// 此处不能对watcherNodes_做大小做修改，因为可能由EntityCoordinateNode::update()中导致该处调用,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,416,gb18030,// 那么可能导致EntityCoordinateNode::update()在循环watcherNodes_中被修改而出错。,
+kbe/src/server/cellapp/entity_coordinate_node.cpp,476,gb18030,// 查找Y,
+kbe/src/server/cellapp/entity_coordinate_node.h,19,gb18030,"/**
+		(扩展坐标)
+		x && z由不同的应用实现(从不同处获取)
+	*/",
+kbe/src/server/cellapp/entity_interface_macros.h,22,gb18030,"/**
+	Entity消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/cellapp/entity_interface_macros.h,85,gb18030,"/**
+	Entity消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/cellapp/entity_interface_macros.h,150,gb18030,"/**
+	Entity消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/cellapp/entity_interface_macros.h,224,gb18030,"/**
+	Entity消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/cellapp/entity_interface_macros.h,288,gb18030,"/**
+	Entity消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/cellapp/entity_remotemethod.cpp,67,gb18030,// 如果是调用客户端方法， 我们记录事件并且记录带宽,
+kbe/src/server/cellapp/entity_remotemethod.cpp,116,gb18030,// 记录这个事件产生的数据量大小,
+kbe/src/server/cellapp/entity_remotemethod.h,15,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/cellapp/entityref.h,16,gb18030,// 进入客户端中标志,
+kbe/src/server/cellapp/entityref.h,17,gb18030,// 离开客户端中标志,
+kbe/src/server/cellapp/entityref.h,18,gb18030,// 常规状态,
+kbe/src/server/cellapp/forward_message_over_handler.cpp,49,gb18030,// 添加到space,
+kbe/src/server/cellapp/ghost_manager.cpp,47,gb18030,// 先从队列删除,
+kbe/src/server/cellapp/ghost_manager.cpp,160,gb18030,// 将消息同步到ghost,
+kbe/src/server/cellapp/ghost_manager.cpp,179,gb18030,// 将位置等信息同步到ghost,
+kbe/src/server/cellapp/ghost_manager.h,19,gb18030,"/*
+	* cell1: entity(1) is real, 则在GhostManager中存放于entityIDs_进行检查  (向其他ghost更新)
+
+	* cell2: entity(1) is ghost, 如果cell2被整体迁移走，则需要向ghost_route_临时设置一个路由地址， 路由在最后一次收包超过一定时间擦除。
+	                    如果期间有一些包被转发过来， 那么找不到entity就查询路由表，并继续转发到ghostEntity(例如real销毁了要求立即销毁ghost)。
+
+	* cell1: entity(1) is real, 如果被再迁移到cell3， 则需要向ghost_route_临时设置一个路由地址， 路由在最后一次收ghost请求包超过一定时间擦除。
+	                    如果期间有一些ghost请求包被转发过来， 那么找不到entity就查询路由表，并继续转发到realEntity。
+*/",
+kbe/src/server/cellapp/ghost_manager.h,40,gb18030,"/**
+	创建发送bundle，该bundle可能是从send放入发送队列中获取的，如果队列为空
+	则创建一个新的
+	*/",
+kbe/src/server/cellapp/ghost_manager.h,74,gb18030,// 所有存在ghost的相关entity,
+kbe/src/server/cellapp/ghost_manager.h,77,gb18030,// ghost路由， 分布式程序某些时候无法保证同步， 那么在本机上的某些entity被迁移走了的,
+kbe/src/server/cellapp/ghost_manager.h,78,gb18030,// 时候可能会还会收到一些网络消息， 因为其他app可能还无法立即得到迁移地址， 此时我们,
+kbe/src/server/cellapp/ghost_manager.h,79,gb18030,// 可以在当前app上将迁移走的entity指向缓存一下， 有网络消息过来我们可以继续转发到新的地址,
+kbe/src/server/cellapp/ghost_manager.h,82,gb18030,// 所有需要广播的事件消息,
+kbe/src/server/cellapp/history_event.h,17,gb18030,"/**
+	描述一个历史事件
+*/",
+kbe/src/server/cellapp/history_event.h,37,gb18030,"/**
+	管理所有的历史事件
+*/",
+kbe/src/server/cellapp/initprogress_handler.cpp,136,gb18030,"// 所有脚本都加载完毕
+",
+kbe/src/server/cellapp/initprogress_handler.cpp,155,gb18030,"// 所有脚本都加载完毕
+",
+kbe/src/server/cellapp/move_controller.cpp,68,gb18030,// 既然自己要销毁了，那么与自己相联的updatable也应该停止了,
+kbe/src/server/cellapp/moveto_point_handler.cpp,92,gb18030,// 如果在onMoveOver中调用cancelController（id）会导致MoveController析构导致pController_为NULL,
+kbe/src/server/cellapp/moveto_point_handler.cpp,128,gb18030,// 单位化向量,
+kbe/src/server/cellapp/moveto_point_handler.cpp,149,gb18030,// 单位化向量,
+kbe/src/server/cellapp/moveto_point_handler.cpp,152,gb18030,// 移动位置,
+kbe/src/server/cellapp/moveto_point_handler.cpp,157,gb18030,// 是否需要改变面向,
+kbe/src/server/cellapp/moveto_point_handler.cpp,167,gb18030,// 设置entity的新位置和面向,
+kbe/src/server/cellapp/moveto_point_handler.cpp,171,gb18030,// 非navigate都不能确定其在地面上,
+kbe/src/server/cellapp/moveto_point_handler.cpp,175,gb18030,// 通知脚本,
+kbe/src/server/cellapp/moveto_point_handler.cpp,179,gb18030,// 如果在onMove过程中被停止，又或者达到目的地了，则直接销毁并返回false,
+kbe/src/server/cellapp/moveto_point_handler.h,18,gb18030,// 常规类型,
+kbe/src/server/cellapp/moveto_point_handler.h,19,gb18030,// 范围触发器类型,
+kbe/src/server/cellapp/moveto_point_handler.h,20,gb18030,// 移动控制器类型,
+kbe/src/server/cellapp/moveto_point_handler.h,53,gb18030,// 速度,
+kbe/src/server/cellapp/moveto_point_handler.h,54,gb18030,// 是否不改变面向移动,
+kbe/src/server/cellapp/moveto_point_handler.h,55,gb18030,// true则可以飞起来移动否则贴地,
+kbe/src/server/cellapp/proximity_controller.cpp,57,gb18030,// 跨cellapp场景跳转时可能出现这种情况,
+kbe/src/server/cellapp/proximity_controller.cpp,58,gb18030,// 因为使用ProximityController::ProximityController(Entity* pEntity)构造,
+kbe/src/server/cellapp/proximity_controller.h,14,gb18030,"/*
+	管理trap。
+*/",
+kbe/src/server/cellapp/range_trigger.cpp,58,gb18030,"/*
+	注意：此处必须是先安装negativeBoundary_再安装positiveBoundary_，如果调换顺序则会导致View的BUG，例如：在一个实体enterView触发时销毁了进入View的实体
+	此时实体销毁时并未触发离开View事件，而未触发View事件导致其他实体的View列表中引用的该销毁的实体是一个无效指针。
+
+	原因如下：
+	由于总是优先安装在positiveBoundary_，而边界在安装过程中导致另一个实体进入View了， 然后他在这个过程中可能销毁了， 而另一个边界negativeBoundary_还没有安装， 
+	而节点删除时会设置节点的xx为-FLT_MAX，让其向negativeBoundary_方向离开，所以positiveBoundary_不能检查到这个边界也就不会触发View离开事件。
+	*/",
+kbe/src/server/cellapp/range_trigger.cpp,73,gb18030,// update可能导致实体销毁间接导致自己被重置，此时应该返回安装失败,
+kbe/src/server/cellapp/range_trigger.cpp,115,gb18030,// 此处不必release node， 节点的释放统一交给CoordinateSystem,
+kbe/src/server/cellapp/range_trigger.cpp,131,gb18030,// 如果Z轴情况有变化，则Z轴再判断，优先级为zyx，这样才可以保证只有一次enter或者leave,
+kbe/src/server/cellapp/range_trigger.cpp,138,gb18030,// 必须同时检查其他轴， 如果节点x轴在范围内，理论上其他轴也在范围内,
+kbe/src/server/cellapp/range_trigger.cpp,156,gb18030,// 如果情况没有发生变化则忽略,
+kbe/src/server/cellapp/range_trigger.cpp,179,gb18030,// 如果Z轴情况有变化，则Z轴再判断，优先级为zyx，这样才可以保证只有一次enter或者leave,
+kbe/src/server/cellapp/range_trigger.cpp,189,gb18030,// 必须同时检查其他轴， 如果节点x轴在范围内，理论上其他轴也在范围内,
+kbe/src/server/cellapp/range_trigger.h,31,gb18030,"/**
+		更新范围数据
+	*/",
+kbe/src/server/cellapp/range_trigger.h,36,gb18030,"/**
+		某个节点进入或者离开了rangeTrigger
+	*/",
+kbe/src/server/cellapp/range_trigger.h,42,gb18030,"/**
+		某个节点变动经过了本节点
+		@isfront: 向前移动还是向后移动
+	*/",
+kbe/src/server/cellapp/range_trigger_node.cpp,62,gb18030,// 既然自己都要删除了，通知pRangeTrigger_卸载,
+kbe/src/server/cellapp/range_trigger_node.cpp,70,gb18030,// 既然自己都要删除了，通知pRangeTrigger_卸载,
+kbe/src/server/cellapp/range_trigger_node.h,27,gb18030,"/**
+		(扩展坐标)
+		x && z由不同的应用实现(从不同处获取)
+	*/",
+kbe/src/server/cellapp/range_trigger_node.h,50,gb18030,"/**
+		父节点删除
+	*/",
+kbe/src/server/cellapp/range_trigger_node.h,59,gb18030,"/**
+		某个节点变动经过了本节点
+		@isfront: 向前移动还是向后移动
+	*/",
+kbe/src/server/cellapp/real_entity_method.cpp,64,gb18030,// 如果是给组件的消息,
+kbe/src/server/cellapp/real_entity_method.cpp,120,gb18030,// 记录这个事件产生的数据量大小,
+kbe/src/server/cellapp/real_entity_method.h,31,gb18030,/** 子类化 将一些py操作填充进派生类 */,
+kbe/src/server/cellapp/real_entity_method.h,55,gb18030,// 是否是一个组件中的方法,
+kbe/src/server/cellapp/real_entity_method.h,56,gb18030,// 这个方法的描述,
+kbe/src/server/cellapp/rotator_handler.cpp,70,gb18030,// 如果在onTurn中调用cancelController（id）会导致Controller析构导致pController_为NULL,
+kbe/src/server/cellapp/rotator_handler.cpp,99,gb18030,// 得到差值,
+kbe/src/server/cellapp/rotator_handler.cpp,103,gb18030,/* 由于我们的弧度表示范围在-PI ~ PI，此处防止溢出 */,
+kbe/src/server/cellapp/rotator_handler.cpp,123,gb18030,// 设置entity的新位置和面向,
+kbe/src/server/cellapp/rotator_handler.cpp,127,gb18030,// 如果达到目的地则返回true,
+kbe/src/server/cellapp/space.h,33,gb18030,/** 子类化将一些py操作填充进派生类 */,
+kbe/src/server/cellapp/space_viewer.cpp,82,gb18030,// 如果该viewer地址找不到了则将其擦除,
+kbe/src/server/cellapp/space_viewer.cpp,152,gb18030,// 初始化,
+kbe/src/server/cellapp/space_viewer.cpp,155,gb18030,// 更新实体,
+kbe/src/server/cellapp/space_viewer.cpp,189,gb18030,// 先下发脚本ID对应脚本模块的名称，便于降低后面实体同步量，实体只同步id过去,
+kbe/src/server/cellapp/space_viewer.cpp,202,gb18030,// 改变为更新实体,
+kbe/src/server/cellapp/space_viewer.cpp,220,gb18030,// 最多每次更新500个实体,
+kbe/src/server/cellapp/space_viewer.cpp,224,gb18030,// 获取本次与上次结果的差值，将差值放入stream中更新到客户端,
+kbe/src/server/cellapp/space_viewer.cpp,225,gb18030,// 差值包括新增的实体，以及已经有的实体的位置变化,
+kbe/src/server/cellapp/space_viewer.cpp,231,gb18030,// 先检查已经监视的实体，对于版本号较低的优先更新,
+kbe/src/server/cellapp/space_viewer.cpp,249,gb18030,// 找不到实体， 说明已经销毁或者跑到其他进程了,
+kbe/src/server/cellapp/space_viewer.cpp,250,gb18030,// 如果在其他进程， 其他进程会将其更新到客户端,
+kbe/src/server/cellapp/space_viewer.cpp,254,gb18030,// true为更新， false为销毁,
+kbe/src/server/cellapp/space_viewer.cpp,256,gb18030,// 将其从viewedEntities删除,
+kbe/src/server/cellapp/space_viewer.cpp,264,gb18030,// 将其从viewedEntities删除,
+kbe/src/server/cellapp/space_viewer.cpp,269,gb18030,"/*
+				if (pEntity->cellID() != cellID_)
+				{
+					// 将其从viewedEntities删除
+					viewedEntities.erase(viewerIter++);
+					continue;
+				}
+				*/",
+kbe/src/server/cellapp/space_viewer.cpp,278,gb18030,// 有新增的实体或者已经观察到的实体，检查位置变化,
+kbe/src/server/cellapp/space_viewer.cpp,279,gb18030,// 如果没有变化则pass,
+kbe/src/server/cellapp/space_viewer.cpp,293,gb18030,// true为更新， false为销毁,
+kbe/src/server/cellapp/space_viewer.cpp,304,gb18030,// 再检查是否有新增的实体,
+kbe/src/server/cellapp/space_viewer.cpp,337,gb18030,// true为更新， false为销毁,
+kbe/src/server/cellapp/space_viewer.cpp,346,gb18030,// 如果全部更新完毕，更换版本号,
+kbe/src/server/cellapp/space_viewer.h,38,gb18030,// 更新序列号， 所有实体都更新完毕则序列号+1， 在某些时候量比较大的情况每次迭代一部分实体更新,
+kbe/src/server/cellapp/space_viewer.h,56,gb18030,// 改变了查看space的cell,
+kbe/src/server/cellapp/space_viewer.h,65,gb18030,// 当前所查看的space和cell,
+kbe/src/server/cellapp/space_viewer.h,73,gb18030,// 更新序列号， 所有实体都更新完毕则序列号+1， 在某些时候量比较大的情况每次迭代一部分实体更新,
+kbe/src/server/cellapp/spacememory.cpp,80,gb18030,// 因为space在destroy时做过一次清理，因此这里理论上剩下的是ghosts实体,
+kbe/src/server/cellapp/spacememory.cpp,305,gb18030,// 通知脚本,
+kbe/src/server/cellapp/spacememory.cpp,335,gb18030,// 通知脚本,
+kbe/src/server/cellapp/spacememory.cpp,391,gb18030,// 先获取到所在位置,
+kbe/src/server/cellapp/spacememory.cpp,397,gb18030,// 如果有2个或以上的entity则将最后一个entity移至删除的这个entity所在位置,
+kbe/src/server/cellapp/spacememory.cpp,406,gb18030,// 这句必须在onLeaveWorld之后， 因为可能rangeTrigger需要参考pEntityCoordinateNode,
+kbe/src/server/cellapp/spacememory.cpp,410,gb18030,"// 如果没有entity了则需要销毁space, 因为space最少存在一个entity",
+kbe/src/server/cellapp/spacememory.cpp,435,gb18030,// 如果是一个有Witness(通常是玩家)则需要将当前场景已经创建的有client部分的entity广播给他,
+kbe/src/server/cellapp/spacememory.cpp,436,gb18030,// 否则是一个普通的entity进入世界， 那么需要将这个entity广播给所有看见他的有Witness的entity。,
+kbe/src/server/cellapp/spacememory.cpp,456,gb18030,// 向其他人客户端广播自己的离开,
+kbe/src/server/cellapp/spacememory.cpp,457,gb18030,// 向客户端发送onLeaveWorld消息,
+kbe/src/server/cellapp/spacememory.cpp,605,gb18030,// 通知脚本,
+kbe/src/server/cellapp/spacememory.h,29,gb18030,"/** 
+		更新space中的内容 
+	*/",
+kbe/src/server/cellapp/spacememory.h,40,gb18030,"/**
+		一个entity进入了游戏世界
+	*/",
+kbe/src/server/cellapp/spacememory.h,54,gb18030,"/**
+		销毁
+	*/",
+kbe/src/server/cellapp/spacememory.h,59,gb18030,"/**
+		这个space的cell
+	*/",
+kbe/src/server/cellapp/spacememory.h,65,gb18030,"/**
+		添加space的几何映射
+	*/",
+kbe/src/server/cellapp/spacememory.h,78,gb18030,"/**
+		spaceData相关操作接口
+	*/",
+kbe/src/server/cellapp/spacememory.h,108,gb18030,// 这个space的ID,
+kbe/src/server/cellapp/spacememory.h,111,gb18030,// 创建这个space时用的实体脚本模块名称,
+kbe/src/server/cellapp/spacememory.h,114,gb18030,// 这个space上的entity,
+kbe/src/server/cellapp/spacememory.h,117,gb18030,// 是否加载过地形数据,
+kbe/src/server/cellapp/spacememory.h,120,gb18030,// 每个space最多只有一个cell,
+kbe/src/server/cellapp/spacememory.h,127,gb18030,"// spaceData, 只能存储字符串资源， 这样能比较好的兼容客户端。",
+kbe/src/server/cellapp/spacememory.h,128,gb18030,// 开发者可以将其他类型转换成字符串进行传输,
+kbe/src/server/cellapp/spacememorys.cpp,67,gb18030,// 延时一段时间再销毁,
+kbe/src/server/cellapp/spacememorys.h,24,gb18030,"/** 
+		创建一个新的space 
+	*/",
+kbe/src/server/cellapp/spacememorys.h,29,gb18030,"/**
+		销毁一个space
+	*/",
+kbe/src/server/cellapp/spacememorys.h,34,gb18030,"/** 
+		寻找一个指定space 
+	*/",
+kbe/src/server/cellapp/spacememorys.h,39,gb18030,"/** 
+		更新所有的space 
+	*/",
+kbe/src/server/cellapp/trap_trigger.h,21,gb18030,"/**
+		某个节点进入或者离开了rangeTrigger
+	*/",
+kbe/src/server/cellapp/turn_controller.cpp,49,gb18030,// 既然自己要销毁了，那么与自己相联的updatable也应该停止了,
+kbe/src/server/cellapp/updatable.h,19,gb18030,"/*
+	用来描述一个总是会被更新的对象， app每个tick都会调用所有的
+	Updatable来更新状态， 需要实现不同的Updatable来完成不同的更新特性。
+*/",
+kbe/src/server/cellapp/updatable.h,37,gb18030,// 自身在Updatables容器中的位置,
+kbe/src/server/cellapp/updatables.cpp,29,gb18030,// 由于没有大量优先级需求，因此这里固定优先级数组,
+kbe/src/server/cellapp/updatables.cpp,41,gb18030,// 防止重复,
+kbe/src/server/cellapp/updatables.cpp,47,gb18030,// 记录存储位置,
+kbe/src/server/cellapp/view_trigger.h,18,gb18030,"/**
+		某个节点进入或者离开了rangeTrigger
+	*/",
+kbe/src/server/cellapp/witness.cpp,60,gb18030,"/**
+	 * @TODO(phw): 注释下面的原始代码，简单修正如下的问题：
+	 * 想象一下：A、B、C三个玩家互相能看见对方，那么它们的viewEntities_里面必须会互相记录着对方的entityID，
+	 * 那么假如三个玩家都在同一时间传送到另一个cellapp的地图的同一点上，
+	 * 这时三个玩家还原的时候都会为另两个玩家生成一个flags_ == ENTITYREF_FLAG_UNKONWN的EntityRef实例，
+	 * 把它们记录在自己的viewEntities_，
+	 * 但是，Witness::update()并没有针对flags_ == ENTITYREF_FLAG_UNKONWN的情况做特殊处理——把玩家entity数据发送给客户端，
+	 * 所以进入了默认的updateVolatileData()流程，
+	 * 使得客户端在没有别的玩家entity的情况下就收到了别的玩家的坐标更新的信息，导致客户端错误发生。
+	
+	s << viewRadius_ << viewHysteresisArea_ << clientViewSize_;	
+	
+	uint32 size = viewEntitiesmap_.size();
+	s << size;
+
+	EntityRef::VIEW_ENTITIES::iterator iter = viewEntities_.begin();
+	for(; iter != viewEntities_.end(); ++iter)
+	{
+		(*iter)->addToStream(s);
+	}
+	*/",
+kbe/src/server/cellapp/witness.cpp,82,gb18030,// 当前这么做能解决问题，但是在space多cell分割的情况下将会出现问题,
+kbe/src/server/cellapp/witness.cpp,124,gb18030,// 初始化默认View范围,
+kbe/src/server/cellapp/witness.cpp,140,gb18030,// 通知客户端enterworld,
+kbe/src/server/cellapp/witness.cpp,177,gb18030,// 通知客户端leaveworld,
+kbe/src/server/cellapp/witness.cpp,213,gb18030,// 不需要销毁，后面还可以重用,
+kbe/src/server/cellapp/witness.cpp,214,gb18030,// 此处销毁可能会产生错误，因为enterview过程中可能导致实体销毁,
+kbe/src/server/cellapp/witness.cpp,215,gb18030,// 在pViewTrigger_流程没走完之前这里销毁了pViewTrigger_就crash,
+kbe/src/server/cellapp/witness.cpp,285,gb18030,// 由于位置同步使用了相对位置压缩传输，可用范围为-512~512之间，因此超过范围将出现同步错误,
+kbe/src/server/cellapp/witness.cpp,286,gb18030,// 这里做一个限制，如果需要过大的数值客户端应该调整坐标单位比例，将其放大使用。,
+kbe/src/server/cellapp/witness.cpp,287,gb18030,// 参考: MemoryStream::appendPackXZ,
+kbe/src/server/cellapp/witness.cpp,298,gb18030,// 不返回，继续生效,
+kbe/src/server/cellapp/witness.cpp,309,gb18030,// 如果实体已经在场景中，那么需要安装,
+kbe/src/server/cellapp/witness.cpp,317,gb18030,// 如果实体已经在场景中，那么需要安装,
+kbe/src/server/cellapp/witness.cpp,322,gb18030,/*上面update流程可能导致销毁 */,
+kbe/src/server/cellapp/witness.cpp,336,gb18030,// 如果实体已经在场景中，那么需要安装,
+kbe/src/server/cellapp/witness.cpp,343,gb18030,// 注意：此处如果不销毁pViewHysteresisAreaTrigger_则必须是update,
+kbe/src/server/cellapp/witness.cpp,344,gb18030,// 因为离开View的判断如果pViewHysteresisAreaTrigger_存在，那么必须出了pViewHysteresisAreaTrigger_才算出View,
+kbe/src/server/cellapp/witness.cpp,358,gb18030,// 如果进入的是Hysteresis区域，那么不产生作用,
+kbe/src/server/cellapp/witness.cpp,362,gb18030,// 先增加一个引用，避免实体在回调中被销毁造成后续判断出错,
+kbe/src/server/cellapp/witness.cpp,365,gb18030,// 在onEnteredview和addWitnessed可能导致自己销毁然后,
+kbe/src/server/cellapp/witness.cpp,366,gb18030,// pEntity_将被设置为NULL，后面没有机会DECREF,
+kbe/src/server/cellapp/witness.cpp,379,gb18030,// 如果flags是ENTITYREF_FLAG_LEAVE_CLIENT_PENDING | ENTITYREF_FLAG_NORMAL状态那么我们,
+kbe/src/server/cellapp/witness.cpp,380,gb18030,// 只需要撤销离开状态并将其还原到ENTITYREF_FLAG_NORMAL即可,
+kbe/src/server/cellapp/witness.cpp,381,gb18030,// 如果是ENTITYREF_FLAG_LEAVE_CLIENT_PENDING状态那么此时应该将它设置为进入状态 ENTITYREF_FLAG_ENTER_CLIENT_PENDING,
+kbe/src/server/cellapp/witness.cpp,443,gb18030,// 如果设置过Hysteresis区域，那么离开Hysteresis区域才算离开View,
+kbe/src/server/cellapp/witness.cpp,460,gb18030,// 这里不delete， 我们需要待update将此行为更新至客户端时再进行,
+kbe/src/server/cellapp/witness.cpp,501,gb18030,// 通知位置强制改变,
+kbe/src/server/cellapp/witness.cpp,510,gb18030,// 通知进入了新地图,
+kbe/src/server/cellapp/witness.cpp,520,gb18030,// 发送消息并清理,
+kbe/src/server/cellapp/witness.cpp,564,gb18030,// 在设置View半径为0后掉线重登陆会出现这种情况,
+kbe/src/server/cellapp/witness.cpp,568,gb18030,// 必须先安装pViewHysteresisAreaTrigger_，否则一些极端情况会出现错误的结果,
+kbe/src/server/cellapp/witness.cpp,569,gb18030,// 例如：一个Avatar正好进入到世界此时正在安装View触发器，而安装过程中这个实体onWitnessed触发导致自身被销毁了,
+kbe/src/server/cellapp/witness.cpp,570,gb18030,// 由于View触发器并未完全安装完毕导致触发器的节点old_xx等都为-FLT_MAX，所以该实体在离开坐标管理器时Avatar的View触发器判断错误,
+kbe/src/server/cellapp/witness.cpp,571,gb18030,// 如果先安装pViewHysteresisAreaTrigger_则不会触发实体进入View事件，这样在安装pViewTrigger_时触发事件导致上面出现的问题时也能之前捕获离开事件了,
+kbe/src/server/cellapp/witness.cpp,572,gb18030,/*上面流程可能导致销毁 */,
+kbe/src/server/cellapp/witness.cpp,575,gb18030,/*上面流程可能导致销毁 */,
+kbe/src/server/cellapp/witness.cpp,593,gb18030,// 通知所有实体离开View,
+kbe/src/server/cellapp/witness.cpp,638,gb18030,// 注意：不可在该模块外部使用，否则可能出现客户端表找不到entityID的情况,
+kbe/src/server/cellapp/witness.cpp,639,gb18030,// clientViewSize_需要实体真正同步到客户端时才会增加,
+kbe/src/server/cellapp/witness.cpp,709,gb18030,// 溢出,
+kbe/src/server/cellapp/witness.cpp,770,gb18030,// 得到当前pSendBundle中是否有数据，如果有数据表示该bundle是重用的缓存的数据包,
+kbe/src/server/cellapp/witness.cpp,784,gb18030,// 这里使用id查找一下， 避免entity在进入View时的回调里被意外销毁,
+kbe/src/server/cellapp/witness.cpp,866,gb18030,/*NETWORK_ENTITY_MESSAGE_FORWARD_CLIENT_BEGIN产生的基础包大小*/,
+kbe/src/server/cellapp/witness.cpp,879,gb18030,// 如果bundle是channel缓存的包,
+kbe/src/server/cellapp/witness.cpp,880,gb18030,// 取出来重复利用的如果想丢弃本次消息发送,
+kbe/src/server/cellapp/witness.cpp,881,gb18030,// 此时应该将NETWORK_ENTITY_MESSAGE_FORWARD_CLIENT_BEGIN从其中抹除掉,
+kbe/src/server/cellapp/witness.cpp,1582,gb18030,"/* 如果目标被我控制了，则目标的位置不通知我的客户端。
+	   注意：当这个被我控制的entity在服务器中使用moveToPoint()等接口移动时，
+	         也会由于这个判定导致坐标不会同步到控制者的客户端中
+	*/",
+kbe/src/server/cellapp/witness.h,34,gb18030,/** 观察者信息结构 */,
+kbe/src/server/cellapp/witness.h,49,gb18030,// 当前所在详情级别,
+kbe/src/server/cellapp/witness.h,50,gb18030,// 所表达的entity,
+kbe/src/server/cellapp/witness.h,51,gb18030,// 当前与这个entity的距离,
+kbe/src/server/cellapp/witness.h,52,gb18030,// 表示这个entity都进入过该entity的哪些详情级别， 提供属性广播优化用的,
+kbe/src/server/cellapp/witness.h,53,gb18030,// 当没有进入过某级别时， 会将所有这个级别的属性更新给他， 否则只更新近段时间曾经改变过的属性,
+kbe/src/server/cellapp/witness.h,54,gb18030,// entity离开了某个详情级别(没有脱离witness)后， 这期间有某个详情级别的属性改变均记录在这里,
+kbe/src/server/cellapp/witness.h,57,gb18030,"/**
+	这个模块用来监视我们感兴趣的entity数据， 如：view， 属性更新， 调用entity的方法
+	并将其传输给监视者。
+*/",
+kbe/src/server/cellapp/witness.h,112,gb18030,"/**
+		基础位置， 如果有坐骑基础位置可能是坐骑等
+	*/",
+kbe/src/server/cellapp/witness.h,117,gb18030,"/**
+	基础朝向， 如果有坐骑基础朝向可能是坐骑等
+	*/",
+kbe/src/server/cellapp/witness.h,131,gb18030,"/**
+		获得实体本次同步Volatile数据的标记
+	*/",
+kbe/src/server/cellapp/witness.h,142,gb18030,"/**
+		使用何种协议来更新客户端
+	*/",
+kbe/src/server/cellapp/witness.h,147,gb18030,"/**
+		添加基础位置到更新包
+	*/",
+kbe/src/server/cellapp/witness.h,152,gb18030,"/**
+		向witness客户端推送一条消息
+	*/",
+kbe/src/server/cellapp/witness.h,161,gb18030,/** 获得viewentity的引用 */,
+kbe/src/server/cellapp/witness.h,164,gb18030,/** entityID是否在view内 */,
+kbe/src/server/cellapp/witness.h,173,gb18030,"/**
+		重置View范围内的entities， 使其同步状态恢复到最初未同步的状态
+	*/",
+kbe/src/server/cellapp/witness.h,179,gb18030,"/**
+		如果view中entity数量小于256则只发送索引位置
+	*/",
+kbe/src/server/cellapp/witness.h,184,gb18030,"/**
+		当update执行时view列表有改变的时候需要更新entityRef的aliasID
+	*/",
+kbe/src/server/cellapp/witness.h,192,gb18030,// 当前entity的view半径,
+kbe/src/server/cellapp/witness.h,194,gb18030,// 当前entityView的一个滞后范围,
+kbe/src/server/cellappmgr/cellappmgr.cpp,28,gb18030,// 必须存在一个准备好的进程,
+kbe/src/server/cellappmgr/cellappmgr.cpp,125,gb18030,// 添加了一个新的cellapp,
+kbe/src/server/cellappmgr/cellappmgr.cpp,152,gb18030,// 如果是app死亡了,
+kbe/src/server/cellappmgr/cellappmgr.cpp,243,gb18030,// 首先进程必须活着且初始化完毕,
+kbe/src/server/cellappmgr/cellappmgr.cpp,246,gb18030,// 如果没有任何实体则无条件分配,
+kbe/src/server/cellappmgr/cellappmgr.cpp,250,gb18030,// 比较并记录负载最小的进程最终被分配,
+kbe/src/server/cellappmgr/cellappmgr.cpp,317,gb18030,// 如果cellappIndex为0，则代表不强制指定cellapp,
+kbe/src/server/cellappmgr/cellappmgr.cpp,318,gb18030,"// 非0的情况下，选择的cellapp可以用1,2,3,4来代替",
+kbe/src/server/cellappmgr/cellappmgr.cpp,319,gb18030,// 假如预期有4个cellapp， 假如不够4个， 只有3个， 那么4代表1,
+kbe/src/server/cellappmgr/cellappmgr.cpp,347,gb18030,// 选择特定的cellapp创建space,
+kbe/src/server/cellappmgr/cellappmgr.cpp,386,gb18030,// 预先将实体数量增加,
+kbe/src/server/cellappmgr/cellappmgr.cpp,445,gb18030,// 预先将实体数量增加,
+kbe/src/server/cellappmgr/cellappmgr.cpp,517,gb18030,// 输出日志，如果要校验cellapp插入的顺序是否正确，可以打开下面的注释进行测试,
+kbe/src/server/cellappmgr/cellappmgr.cpp,576,gb18030,// 如果不强制，则在win64下，它是8字节，而win32下是4字节,
+kbe/src/server/cellappmgr/cellappmgr.cpp,597,gb18030,// 其他信息待分割功能实现后完成,
+kbe/src/server/cellappmgr/cellappmgr.cpp,598,gb18030,// 例如cell大小形状等信息,
+kbe/src/server/cellappmgr/cellappmgr.h,43,gb18030,/* 初始化相关接口 */,
+kbe/src/server/cellappmgr/cellappmgr.h,49,gb18030,/** 找出一个最空闲的cellapp */,
+kbe/src/server/cellappmgr/cellappmgr.h,53,gb18030,"/** 网络接口
+		baseEntity请求创建在一个新的space中
+	*/",
+kbe/src/server/cellappmgr/cellappmgr.h,58,gb18030,"/** 网络接口
+		baseEntity请求创建在一个新的space中
+	*/",
+kbe/src/server/cellappmgr/cellappmgr.h,63,gb18030,"/** 网络接口
+		消息转发， 由某个app想通过本app将消息转发给某个app。
+	*/",
+kbe/src/server/cellappmgr/cellappmgr.h,68,gb18030,"/** 网络接口
+		更新cellapp情况。
+	*/",
+kbe/src/server/cellappmgr/cellappmgr.h,73,gb18030,"/** 网络接口
+		cellapp同步自己的初始化信息
+		startGlobalOrder: 全局启动顺序 包括各种不同组件
+		startGroupOrder: 组内启动顺序， 比如在所有baseapp中第几个启动。
+	*/",
+kbe/src/server/cellappmgr/cellappmgr.h,90,gb18030,"/* 以groupOrderID为排序基准，
+	   増加一个cellapp component id到cellapp_cids_列表中
+	*/",
+kbe/src/server/cellappmgr/cellappmgr.h,95,gb18030,"/** 网络接口
+	查询所有相关进程负载信息
+	*/",
+kbe/src/server/cellappmgr/cellappmgr.h,100,gb18030,"/** 网络接口
+	查询所有相关进程space信息
+	*/",
+kbe/src/server/cellappmgr/cellappmgr.h,105,gb18030,"/** 网络接口
+	更新相关进程space信息，注意：此spaceData并非API文档中描述的spaceData
+	是指space的一些信息
+	*/",
+kbe/src/server/cellappmgr/cellappmgr.h,111,gb18030,"/** 网络接口
+	工具请求改变space查看器（含添加和删除功能）
+	如果是请求更新并且服务器上不存在该地址的查看器则自动创建，如果是删除则明确给出删除要求
+	*/",
+kbe/src/server/cellappmgr/cellappmgr.h,127,gb18030,// 通过工具查看space,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,26,gb18030,"/**
+	BASEAPPMGR所有消息接口在此定义
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface.h,30,gb18030,// 某app注册自己的接口地址到本app,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,44,gb18030,// 某app主动请求look。,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,47,gb18030,// 某个app请求查看该app负载状态。,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,50,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,55,gb18030,// baseEntity请求创建在一个新的space中。,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,58,gb18030,// baseEntity请求恢复在一个新的space中。,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,61,gb18030,// 消息转发， 由某个app想通过本app将消息转发给某个app。,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,64,gb18030,// 请求关闭服务器,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,67,gb18030,// 请求查询watcher数据,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,70,gb18030,// 更新cellapp信息。,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,77,gb18030,// 开始profile,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,80,gb18030,// 请求强制杀死当前app,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,83,gb18030,// cellapp同步自己的初始化信息,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,90,gb18030,// 查询所有相关进程负载信息,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,93,gb18030,// 查询所有相关进程space信息,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,96,gb18030,// 更新相关进程space信息，注意：此spaceData并非API文档中描述的spaceData,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,97,gb18030,// 是指space的一些信息,
+kbe/src/server/cellappmgr/cellappmgr_interface.h,100,gb18030,// 工具请求改变space查看器（含添加和删除功能）,
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,22,gb18030,"/**
+	Cellappmgr消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,63,gb18030,"/**
+	Cellappmgr消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,105,gb18030,"/**
+	Cellappmgr消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,149,gb18030,"/**
+	Cellappmgr消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,201,gb18030,"/**
+	Cellappmgr消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,263,gb18030,"/**
+	Cellappmgr消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,331,gb18030,"/**
+	Cellappmgr消息宏，  只有五个参数的消息
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,408,gb18030,"/**
+	Cellappmgr消息宏，  只有六个参数的消息
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,492,gb18030,"/**
+	Cellappmgr消息宏，  只有八个参数的消息
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,594,gb18030,"/**
+	Cellappmgr消息宏，  只有九个参数的消息
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,704,gb18030,"/**
+	Cellappmgr消息宏，  只有十个参数的消息
+*/",
+kbe/src/server/cellappmgr/cellappmgr_interface_macros.h,823,gb18030,"/**
+	Cellappmgr消息宏，  只有十一个参数的消息
+*/",
+kbe/src/server/cellappmgr/space_viewer.cpp,80,gb18030,// 如果该viewer地址找不到了则将其擦除,
+kbe/src/server/cellappmgr/space_viewer.cpp,181,gb18030,// 其他信息待分割功能实现后完成,
+kbe/src/server/cellappmgr/space_viewer.cpp,182,gb18030,// 例如cell大小形状等信息,
+kbe/src/server/cellappmgr/space_viewer.h,43,gb18030,// 当前所查看的space,
+kbe/src/server/dbmgr/buffered_dbtasks.cpp,106,gb18030,// 如果没有任务则退出,
+kbe/src/server/dbmgr/buffered_dbtasks.cpp,128,gb18030,// 如果没有任务则退出,
+kbe/src/server/dbmgr/buffered_dbtasks.h,16,gb18030,"/*
+	数据库线程任务buffer
+*/",
+kbe/src/server/dbmgr/buffered_dbtasks.h,91,gb18030,"/**
+		提供给watcher使用
+	*/",
+kbe/src/server/dbmgr/buffered_dbtasks.h,102,gb18030,"/**
+		提供给watcher使用
+	*/",
+kbe/src/server/dbmgr/buffered_dbtasks.h,113,gb18030,"/**
+		提供给watcher使用
+	*/",
+kbe/src/server/dbmgr/dbmgr.cpp,80,gb18030,"// 所有脚本都加载完毕
+",
+kbe/src/server/dbmgr/dbmgr.cpp,154,gb18030,"// 通知脚本
+",
+kbe/src/server/dbmgr/dbmgr.cpp,227,gb18030,"// 检查丢失的组件进程，如果在一段时间之内仍然无法发现，需要清理数据库中entitylog
+",
+kbe/src/server/dbmgr/dbmgr.cpp,269,gb18030,"// 初始化所有扩展模块
+",
+kbe/src/server/dbmgr/dbmgr.cpp,287,gb18030,"// 添加一个timer， 每秒检查一些状态
+",
+kbe/src/server/dbmgr/dbmgr.cpp,294,gb18030,"// 添加globalData, baseAppData, cellAppData支持
+",
+kbe/src/server/dbmgr/dbmgr.cpp,308,gb18030,"// 所有脚本都加载完毕
+",
+kbe/src/server/dbmgr/dbmgr.cpp,507,gb18030,"// 获取一个id段 并传输给IDClient
+",
+kbe/src/server/dbmgr/dbmgr.cpp,546,gb18030,"// 下一步:
+",
+kbe/src/server/dbmgr/dbmgr.cpp,547,gb18030,"// 如果是连接到dbmgr则需要等待接收app初始信息
+",
+kbe/src/server/dbmgr/dbmgr.cpp,548,gb18030,"// 例如：初始会分配entityID段以及这个app启动的顺序信息（是否第一个baseapp启动）
+",
+kbe/src/server/dbmgr/dbmgr.cpp,579,gb18030,"// 如果是baseapp或者cellapp则将自己注册到所有其他baseapp和cellapp
+",
+kbe/src/server/dbmgr/dbmgr.cpp,1240,gb18030,"// 把请求交由脚本处理
+",
+kbe/src/server/dbmgr/dbmgr.cpp,1269,gb18030,"// 如果是app死亡了
+",
+kbe/src/server/dbmgr/dbmgr.h,55,gb18030,/* 初始化相关接口 */,
+kbe/src/server/dbmgr/dbmgr.h,74,gb18030,/** 获取ID服务器指针 */,
+kbe/src/server/dbmgr/dbmgr.h,77,gb18030,"/** 网络接口
+		请求分配一个ENTITY_ID段
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,82,gb18030,"/* 网络接口
+		注册一个新激活的baseapp或者cellapp或者dbmgr
+		通常是一个新的app被启动了， 它需要向某些组件注册自己。
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,93,gb18030,"/** 网络接口
+		dbmgr广播global数据的改变
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,99,gb18030,"/** 网络接口
+		请求创建账号
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,105,gb18030,"/** 网络接口
+		请求擦除客户端请求任务
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,110,gb18030,"/** 网络接口
+		一个新用户登录， 需要检查合法性
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,116,gb18030,"/** 网络接口
+		baseapp请求查询account信息
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,122,gb18030,"/** 网络接口
+		实体自动加载功能
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,127,gb18030,"/** 网络接口
+		账号从baseapp上线了
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,133,gb18030,"/** 网络接口
+		entity-baseapp下线了
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,138,gb18030,"/** 网络接口
+		执行数据库查询
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,143,gb18030,"/** 网络接口
+		某个entity存档
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,148,gb18030,"/** 网络接口
+		删除某个entity的存档数据
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,153,gb18030,"/** 网络接口
+		通过dbid从数据库中删除一个实体的回调
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,158,gb18030,"/** 网络接口
+		通过dbid查询一个实体是否从数据库检出
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,163,gb18030,"/** 网络接口
+		请求从db获取entity的所有数据
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,169,gb18030,"/** 网络接口
+		同步entity流模板
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,176,gb18030,"/** 网络接口
+		请求充值
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,181,gb18030,"/** 网络接口
+		充值回调
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,187,gb18030,"/** 网络接口
+		激活回调
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,192,gb18030,"/** 网络接口
+		账号重置密码
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,199,gb18030,"/** 网络接口
+		账号绑定邮箱
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,206,gb18030,"/** 网络接口
+		账号修改密码
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,230,gb18030,"/**
+		向dbmgr请求执行一个数据库命令
+	*/",
+kbe/src/server/dbmgr/dbmgr.h,243,gb18030,"// entityID分配服务端
+",
+kbe/src/server/dbmgr/dbmgr_interface.h,28,gb18030,"/**
+	Dbmgr消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/dbmgr/dbmgr_interface.h,32,gb18030,"/**
+	DBMGR所有消息接口在此定义
+*/",
+kbe/src/server/dbmgr/dbmgr_interface.h,36,gb18030,// 某app注册自己的接口地址到本app,
+kbe/src/server/dbmgr/dbmgr_interface.h,50,gb18030,// 某app主动请求look。,
+kbe/src/server/dbmgr/dbmgr_interface.h,53,gb18030,// 某个app请求查看该app负载状态。,
+kbe/src/server/dbmgr/dbmgr_interface.h,56,gb18030,// 某app请求获取一个entityID段 ,
+kbe/src/server/dbmgr/dbmgr_interface.h,61,gb18030,// global数据改变,
+kbe/src/server/dbmgr/dbmgr_interface.h,64,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/dbmgr/dbmgr_interface.h,69,gb18030,// loginapp请求创建账号。,
+kbe/src/server/dbmgr/dbmgr_interface.h,73,gb18030,// 登陆账号。,
+kbe/src/server/dbmgr/dbmgr_interface.h,77,gb18030,// baseapp查询账号信息。,
+kbe/src/server/dbmgr/dbmgr_interface.h,88,gb18030,// baseapp上账号上线。,
+kbe/src/server/dbmgr/dbmgr_interface.h,94,gb18030,// baseapp上entity下线。,
+kbe/src/server/dbmgr/dbmgr_interface.h,100,gb18030,// 请求擦除客户端请求任务。,
+kbe/src/server/dbmgr/dbmgr_interface.h,104,gb18030,// 数据库查询,
+kbe/src/server/dbmgr/dbmgr_interface.h,107,gb18030,// 某个entity存档,
+kbe/src/server/dbmgr/dbmgr_interface.h,110,gb18030,// 删除某个entity的存档,
+kbe/src/server/dbmgr/dbmgr_interface.h,113,gb18030,// 请求从数据库删除实体,
+kbe/src/server/dbmgr/dbmgr_interface.h,116,gb18030,// 通过dbid查询一个实体是否从数据库检出,
+kbe/src/server/dbmgr/dbmgr_interface.h,119,gb18030,// 请求关闭服务器,
+kbe/src/server/dbmgr/dbmgr_interface.h,122,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/dbmgr/dbmgr_interface.h,132,gb18030,// 实体自动加载功能,
+kbe/src/server/dbmgr/dbmgr_interface.h,135,gb18030,// 同步entity流模板,
+kbe/src/server/dbmgr/dbmgr_interface.h,138,gb18030,// 请求查询watcher数据,
+kbe/src/server/dbmgr/dbmgr_interface.h,141,gb18030,// 充值请求,
+kbe/src/server/dbmgr/dbmgr_interface.h,144,gb18030,// 充值回调,
+kbe/src/server/dbmgr/dbmgr_interface.h,147,gb18030,// 激活回调。,
+kbe/src/server/dbmgr/dbmgr_interface.h,151,gb18030,// 账号请求重置密码。,
+kbe/src/server/dbmgr/dbmgr_interface.h,155,gb18030,// 账号完成重置密码。,
+kbe/src/server/dbmgr/dbmgr_interface.h,161,gb18030,// 账号请求绑定邮箱。,
+kbe/src/server/dbmgr/dbmgr_interface.h,168,gb18030,// 账号完成绑定邮箱。,
+kbe/src/server/dbmgr/dbmgr_interface.h,173,gb18030,// 账号修改密码。,
+kbe/src/server/dbmgr/dbmgr_interface.h,180,gb18030,// 开始profile,
+kbe/src/server/dbmgr/dbmgr_interface.h,183,gb18030,// 请求强制杀死当前app,
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,60,gb18030,"/**
+	Dbmgr消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,102,gb18030,"/**
+	Dbmgr消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,145,gb18030,"/**
+	Dbmgr消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,197,gb18030,"/**
+	Dbmgr消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,258,gb18030,"/**
+	Dbmgr消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,326,gb18030,"/**
+	Dbmgr消息宏，  只有五个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,403,gb18030,"/**
+	Dbmgr消息宏，  只有六个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,487,gb18030,"/**
+	Dbmgr消息宏，  只有七个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,581,gb18030,"/**
+	Dbmgr消息宏，  只有八个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,683,gb18030,"/**
+	Dbmgr消息宏，  只有九个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,793,gb18030,"/**
+	Dbmgr消息宏，  只有十个参数的消息
+*/",
+kbe/src/server/dbmgr/dbmgr_interface_macros.h,912,gb18030,"/**
+	Dbmgr消息宏，  只有十一个参数的消息
+*/",
+kbe/src/server/dbmgr/dbtasks.cpp,184,utf-8,// Èç¹û²»ÐèÒª»Øµ÷Ôò½áÊø,
+kbe/src/server/dbmgr/dbtasks.cpp,225,utf-8,// Ö»ÄÜÓÉ×Ô¼º·¢³ö,
+kbe/src/server/dbmgr/dbtasks.cpp,248,utf-8,// Èç¹û²»ÐèÒª»Øµ÷Ôò½áÊø,
+kbe/src/server/dbmgr/dbtasks.cpp,289,utf-8,// Ö»ÄÜÓÉ×Ô¼º·¢³ö,
+kbe/src/server/dbmgr/dbtasks.cpp,361,utf-8,// ÏÈÐ´log£¬ Èç¹ûÐ´Ê§°ÜÔò¿ÉÄÜÕâ¸öentityÒÑ¾­ÔÚÏß,
+kbe/src/server/dbmgr/dbtasks.cpp,383,utf-8,// ·µ»ØÐ´entityµÄ½á¹û£¬ ³É¹¦»òÕßÊ§°Ü,
+kbe/src/server/dbmgr/dbtasks.cpp,474,utf-8,// Èç¹ûÓÐÔÚÏß¼ÍÂ¼,
+kbe/src/server/dbmgr/dbtasks.cpp,601,utf-8,// Èç¹ûÓÐÔÚÏß¼ÍÂ¼,
+kbe/src/server/dbmgr/dbtasks.cpp,693,utf-8,// Ñ°ÕÒdblogÊÇ·ñÓÐ´ËÕËºÅ£¬ Èç¹ûÓÐÔò´´½¨Ê§°Ü,
+kbe/src/server/dbmgr/dbtasks.cpp,694,utf-8,// Èç¹ûÃ»ÓÐÔòÏòaccount±íÐÂ½¨Ò»¸öentityÊý¾ÝÍ¬Ê±ÔÚaccountlog±íÐ´ÈëÒ»¸ölog¹ØÁªdbid,
+kbe/src/server/dbmgr/dbtasks.cpp,730,utf-8,// ·ÀÖ¹¶àÏß³ÌÎÊÌâ£¬ ÕâÀï×öÒ»¸ö¿½±´¡£,
+kbe/src/server/dbmgr/dbtasks.cpp,848,utf-8,// Ñ°ÕÒdblogÊÇ·ñÓÐ´ËÕËºÅ£¬ Èç¹ûÓÐÔò´´½¨Ê§°Ü,
+kbe/src/server/dbmgr/dbtasks.cpp,865,utf-8,// Éú³É¼¤»îÂë²¢´æ´¢¼¤»îÂëµ½Êý¾Ý¿â,
+kbe/src/server/dbmgr/dbtasks.cpp,866,utf-8,// ·¢ËÍsmtpÓÊ¼þµ½ÓÊÏä£¬ ÓÃ»§µã»÷È·ÈÏºó¼´¿É¼¤»î,
+kbe/src/server/dbmgr/dbtasks.cpp,1010,utf-8,// Éú³É¼¤»îÂë²¢´æ´¢¼¤»îÂëµ½Êý¾Ý¿â,
+kbe/src/server/dbmgr/dbtasks.cpp,1011,utf-8,// ·¢ËÍsmtpÓÊ¼þµ½ÓÊÏä£¬ ÓÃ»§µã»÷È·ÈÏºó¼´¿É¼¤»î,
+kbe/src/server/dbmgr/dbtasks.cpp,1126,utf-8,// Éú³É¼¤»îÂë²¢´æ´¢¼¤»îÂëµ½Êý¾Ý¿â,
+kbe/src/server/dbmgr/dbtasks.cpp,1127,utf-8,// ·¢ËÍsmtpÓÊ¼þµ½ÓÊÏä£¬ ÓÃ»§µã»÷È·ÈÏºó¼´¿É¼¤»î,
+kbe/src/server/dbmgr/dbtasks.cpp,1332,utf-8,// ÎªÁËÃ¿´Î¶¼ÄÜ»ñµÃbindataÒò´ËÕâÀïÐèÒªÃ¿´Î¶¼²éÑ¯,
+kbe/src/server/dbmgr/dbtasks.cpp,1383,utf-8,// ÏÈÐ´log£¬ Èç¹ûÐ´Ê§°ÜÔò¿ÉÄÜÕâ¸öentityÒÑ¾­ÔÚÏß,
+kbe/src/server/dbmgr/dbtasks.cpp,1466,utf-8,"/*
+	// Èç¹ûÃ»ÓÐÁ¬½ÓdbÔò´ÓlogÖÐ²éÕÒÕËºÅÊÇ·ñ»¹ÔÚÏß
+	if(!pDBInterface_)
+	{
+		PROXICES_ONLINE_LOG::iterator iter = proxicesOnlineLogs_.find(accountName_);
+		if(iter != proxicesOnlineLogs_.end())
+		{
+			iter->second.cid = componentID_;
+			iter->second.eid = entityID_;
+		}
+		else
+		{
+			proxicesOnlineLogs_[accountName].cid = componentID_;
+			proxicesOnlineLogs_[accountName].eid = entityID_;
+		}
+	}
+	*/",
+kbe/src/server/dbmgr/dbtasks.cpp,1552,utf-8,// Èç¹ûInterfacesÒÑ¾­ÅÐ¶Ï²»³É¹¦¾ÍÃ»±ØÒª¼ÌÐøÏÂÈ¥,
+kbe/src/server/dbmgr/dbtasks.cpp,1611,utf-8,/*µÚÈý·½´¦Àí³É¹¦Ôò×Ô¶¯´´½¨ÕËºÅ*/,
+kbe/src/server/dbmgr/dbtasks.cpp,1661,utf-8,// Èç¹ûÓÐÔÚÏß¼ÍÂ¼,
+kbe/src/server/dbmgr/dbtasks.cpp,1707,utf-8,// Ò»¸öÓÃ»§µÇÂ¼£¬ ¹¹ÔìÒ»¸öÊý¾Ý¿â²éÑ¯Ö¸Áî²¢¼ÓÈëµ½Ö´ÐÐ¶ÓÁÐ£¬ Ö´ÐÐÍê±Ï½«½á¹û·µ»Ø¸øloginapp,
+kbe/src/server/dbmgr/dbtasks.cpp,1716,utf-8,// Èç¹û´óÓÚ0Ôò±íÊ¾ÕËºÅ»¹´æ»îÔÚÄ³¸öbaseappÉÏ,
+kbe/src/server/dbmgr/dbtasks.cpp,1767,utf-8,// ÏÈÐ´log£¬ Èç¹ûÐ´Ê§°ÜÔò¿ÉÄÜÕâ¸öentityÒÑ¾­ÔÚÏß,
+kbe/src/server/dbmgr/dbtasks.h,22,gb18030,"/*
+	数据库线程任务基础类
+*/",
+kbe/src/server/dbmgr/dbtasks.h,100,gb18030,"/**
+	执行一条sql语句
+*/",
+kbe/src/server/dbmgr/dbtasks.h,125,gb18030,"/**
+	执行一条sql语句
+*/",
+kbe/src/server/dbmgr/dbtasks.h,149,gb18030,"/**
+	向数据库写entity， 备份entity时也是这个机制
+*/",
+kbe/src/server/dbmgr/dbtasks.h,176,gb18030,"/**
+	从数据库中删除entity
+*/",
+kbe/src/server/dbmgr/dbtasks.h,200,gb18030,"/**
+	从数据库中删除entity
+*/",
+kbe/src/server/dbmgr/dbtasks.h,227,gb18030,"/**
+	从数据库中自动加载实体
+*/",
+kbe/src/server/dbmgr/dbtasks.h,252,gb18030,"/**
+	通过dbid查询一个实体是否从数据库检出
+*/",
+kbe/src/server/dbmgr/dbtasks.h,280,gb18030,"/**
+	创建一个账号到数据库
+*/",
+kbe/src/server/dbmgr/dbtasks.h,308,gb18030,"/**
+	创建一个email账号
+*/",
+kbe/src/server/dbmgr/dbtasks.h,333,gb18030,"/**
+	创建一个email账号
+*/",
+kbe/src/server/dbmgr/dbtasks.h,354,gb18030,"/**
+	请求重置账号
+*/",
+kbe/src/server/dbmgr/dbtasks.h,377,gb18030,"/**
+	完成重置账号
+*/",
+kbe/src/server/dbmgr/dbtasks.h,401,gb18030,"/**
+	请求绑定email
+*/",
+kbe/src/server/dbmgr/dbtasks.h,427,gb18030,"/**
+	完成绑定email
+*/",
+kbe/src/server/dbmgr/dbtasks.h,449,gb18030,"/**
+	设置新密码
+*/",
+kbe/src/server/dbmgr/dbtasks.h,472,gb18030,"/**
+	baseapp请求查询account信息
+*/",
+kbe/src/server/dbmgr/dbtasks.h,507,gb18030,"/**
+	账号上线
+*/",
+kbe/src/server/dbmgr/dbtasks.h,529,gb18030,"/**
+	entity下线
+*/",
+kbe/src/server/dbmgr/dbtasks.h,549,gb18030,"/**
+	一个新用户登录， 需要检查合法性
+*/",
+kbe/src/server/dbmgr/dbtasks.h,582,gb18030,"/**
+	baseapp请求查询entity信息
+*/",
+kbe/src/server/dbmgr/dbtasks.h,609,gb18030,// 如果实体已经激活，则这个属性指向实体所在app,
+kbe/src/server/dbmgr/dbtasks.h,617,gb18030,"/**
+	写服务器日志
+*/",
+kbe/src/server/dbmgr/dbtasks.h,635,gb18030,"/**
+	擦除某个baseapp记录的entitylog
+*/",
+kbe/src/server/dbmgr/interfaces_handler.cpp,70,gb18030,// 如果是email，先查询账号是否存在然后将其登记入库,
+kbe/src/server/dbmgr/interfaces_handler.cpp,517,gb18030,// 不检查超时,
+kbe/src/server/dbmgr/interfaces_handler.cpp,610,gb18030,// 此时应该随机找一个baseapp调用onLoseChargeCB,
+kbe/src/server/dbmgr/interfaces_handler.cpp,672,gb18030,// 该功能不支持第三方系统，所以当做本地账号系统执行,
+kbe/src/server/dbmgr/interfaces_handler.cpp,679,gb18030,// 该功能不支持第三方系统，所以当做本地账号系统执行,
+kbe/src/server/dbmgr/interfaces_handler.cpp,686,gb18030,// 该功能不支持第三方系统，所以当做本地账号系统执行,
+kbe/src/server/dbmgr/interfaces_handler.cpp,694,gb18030,// 该功能不支持第三方系统，所以当做本地账号系统执行,
+kbe/src/server/dbmgr/interfaces_handler.cpp,701,gb18030,// 该功能不支持第三方系统，所以当做本地账号系统执行,
+kbe/src/server/dbmgr/interfaces_handler.cpp,709,gb18030,// 该功能不支持第三方系统，所以当做本地账号系统执行,
+kbe/src/server/dbmgr/interfaces_handler.h,21,gb18030,"/*
+	处理计费、第三方运营账号、注册登录系统等挂接
+*/",
+kbe/src/server/dbmgr/sync_app_datas_handler.cpp,99,gb18030,// 如果是连接到dbmgr则需要等待接收app初始信息,
+kbe/src/server/dbmgr/sync_app_datas_handler.cpp,100,gb18030,// 例如：初始会分配entityID段以及这个app启动的顺序信息（是否第一个baseapp启动）,
+kbe/src/server/loginapp/clientsdk_downloader.cpp,63,gb18030,// 用双引号把命令行括起来，以避免路径中存在空格，从而执行错误,
+kbe/src/server/loginapp/clientsdk_downloader.cpp,66,gb18030,// 増加参数,
+kbe/src/server/loginapp/clientsdk_downloader.cpp,71,gb18030,// 使用machine当前的工作目录作为新进程的工作目录，,
+kbe/src/server/loginapp/clientsdk_downloader.cpp,72,gb18030,// 为一些与相对目录的文件操作操作一致的工作目录（如日志）,
+kbe/src/server/loginapp/clientsdk_downloader.cpp,113,gb18030,// 改变当前目录，以让出问题的时候core能在此处生成,
+kbe/src/server/loginapp/clientsdk_downloader.cpp,176,gb18030,// 必须kbcmd进程已经结束,
+kbe/src/server/loginapp/http_cb_handler.cpp,221,gb18030,// 向dbmgr激活账号,
+kbe/src/server/loginapp/http_cb_handler.cpp,268,gb18030,// 向dbmgr重置账号,
+kbe/src/server/loginapp/http_cb_handler.cpp,299,gb18030,// 向dbmgr绑定账号账号,
+kbe/src/server/loginapp/loginapp.cpp,60,gb18030,"// 通知脚本
+",
+kbe/src/server/loginapp/loginapp.cpp,104,gb18030,"// 如果是外部通道则处理
+",
+kbe/src/server/loginapp/loginapp.cpp,109,gb18030,"// 通知dbmgr从队列中清除他的请求， 避免拥塞
+",
+kbe/src/server/loginapp/loginapp.cpp,128,gb18030,"// 把请求交由脚本处理
+",
+kbe/src/server/loginapp/loginapp.cpp,167,gb18030,"// 添加一个timer， 每秒检查一些状态
+",
+kbe/src/server/loginapp/loginapp.cpp,173,gb18030,"// 所有脚本都加载完毕
+",
+kbe/src/server/loginapp/loginapp.cpp,264,gb18030,"// 再次同步自己的新信息(startGlobalOrder, startGroupOrder等)到machine
+",
+kbe/src/server/loginapp/loginapp.cpp,364,gb18030,"// 把请求交由脚本处理
+",
+kbe/src/server/loginapp/loginapp.cpp,588,gb18030,"// 把请求交由脚本处理
+",
+kbe/src/server/loginapp/loginapp.cpp,888,gb18030,"// 前端类别
+",
+kbe/src/server/loginapp/loginapp.cpp,892,gb18030,"// 附带数据
+",
+kbe/src/server/loginapp/loginapp.cpp,895,gb18030,"// 帐号登录名
+",
+kbe/src/server/loginapp/loginapp.cpp,898,gb18030,"// 密码
+",
+kbe/src/server/loginapp/loginapp.cpp,940,gb18030,"// 首先必须baseappmgr和dbmgr都已经准备完毕了。
+",
+kbe/src/server/loginapp/loginapp.cpp,985,gb18030,"// 如果是机器人登陆，如果设置了强制使用内部地址登陆则需要读取这个标志
+",
+kbe/src/server/loginapp/loginapp.cpp,986,gb18030,"// 详细看配置文件中的forceInternalLogin
+",
+kbe/src/server/loginapp/loginapp.cpp,1011,gb18030,"// 把请求交由脚本处理
+",
+kbe/src/server/loginapp/loginapp.cpp,1111,gb18030,"// 向dbmgr查询用户合法性
+",
+kbe/src/server/loginapp/loginapp.cpp,1182,gb18030,"// 登录名既登录时客户端输入的名称， 账号名则是dbmgr查询得到的名称
+",
+kbe/src/server/loginapp/loginapp.cpp,1183,gb18030,"// 这个机制用于一个账号多名称系统或者多个第三方账号系统登入服务器
+",
+kbe/src/server/loginapp/loginapp.cpp,1184,gb18030,"// accountName为本游戏服务器账号所绑定的终身名称
+",
+kbe/src/server/loginapp/loginapp.cpp,1185,gb18030,"// 客户端得到baseapp地址的同时也会返回这个账号名称
+",
+kbe/src/server/loginapp/loginapp.cpp,1186,gb18030,"// 客户端登陆baseapp应该使用这个账号名称登陆
+",
+kbe/src/server/loginapp/loginapp.cpp,1229,gb18030,"// 把请求交由脚本处理
+",
+kbe/src/server/loginapp/loginapp.cpp,1260,gb18030,"// 获得baseappmgr地址。
+",
+kbe/src/server/loginapp/loginapp.cpp,1272,gb18030,"// 如果大于0则说明当前账号仍然存活于某个baseapp上
+",
+kbe/src/server/loginapp/loginapp.cpp,1284,gb18030,"// 注册到baseapp并且获取baseapp的地址
+",
+kbe/src/server/loginapp/loginapp.cpp,1323,gb18030,"// 这里可以不做删除， 仍然使其保留一段时间避免同一时刻同时登录造成意外影响
+",
+kbe/src/server/loginapp/loginapp.cpp,1373,gb18030,"// 此消息不允许加密，所以设定已加密忽略再次加密，当第一次send消息不是立即发生而是交由epoll通知时会出现这种情况（一般用于测试，正规环境不会出现）
+",
+kbe/src/server/loginapp/loginapp.cpp,1374,gb18030,"// web协议必须要加密，所以不能设置为true
+",
+kbe/src/server/loginapp/loginapp.cpp,1384,gb18030,"// 替换为一个加密的过滤器
+",
+kbe/src/server/loginapp/loginapp.cpp,1530,gb18030,"// root节点下没有子节点了
+",
+kbe/src/server/loginapp/loginapp.cpp,1591,gb18030,"// 防止线上被恶意调用
+",
+kbe/src/server/loginapp/loginapp.cpp,1605,gb18030,"// 如果ip不等于空， 那么新建一个tcp连接返回数据，否则原路返回
+",
+kbe/src/server/loginapp/loginapp.h,45,gb18030,/* 初始化相关接口 */,
+kbe/src/server/loginapp/loginapp.h,55,gb18030,"/** 信号处理
+	*/",
+kbe/src/server/loginapp/loginapp.h,65,gb18030,"/** 网络接口
+		某个client向本app告知处于活动状态。
+	*/",
+kbe/src/server/loginapp/loginapp.h,70,gb18030,"/** 网络接口
+		创建账号
+	*/",
+kbe/src/server/loginapp/loginapp.h,77,gb18030,"/** 网络接口
+		创建email账号
+	*/",
+kbe/src/server/loginapp/loginapp.h,82,gb18030,"/** 网络接口
+		创建账号
+	*/",
+kbe/src/server/loginapp/loginapp.h,88,gb18030,"/** 网络接口
+		重置账号密码申请（忘记密码?）
+	*/",
+kbe/src/server/loginapp/loginapp.h,95,gb18030,"/** 网络接口
+		dbmgr账号激活返回
+	*/",
+kbe/src/server/loginapp/loginapp.h,100,gb18030,"/** 网络接口
+		dbmgr账号绑定email返回
+	*/",
+kbe/src/server/loginapp/loginapp.h,105,gb18030,"/** 网络接口
+		dbmgr账号重设密码返回
+	*/",
+kbe/src/server/loginapp/loginapp.h,110,gb18030,"/** 网络接口
+	baseapp请求绑定email（返回时需要找到loginapp的地址）
+	*/",
+kbe/src/server/loginapp/loginapp.h,116,gb18030,"/** 网络接口
+		用户登录服务器
+		clientType[COMPONENT_CLIENT_TYPE]: 前端类别(手机， web， pcexe端)
+		clientData[str]: 前端附带数据(可以是任意的， 比如附带手机型号， 浏览器类型等)
+		accountName[str]: 帐号名
+		password[str]: 密码
+	*/",
+kbe/src/server/loginapp/loginapp.h,125,gb18030,"/*
+		登录失败
+		failedcode: 失败返回码 NETWORK_ERR_SRV_NO_READY:服务器没有准备好, 
+									NETWORK_ERR_SRV_OVERLOAD:服务器负载过重, 
+									NETWORK_ERR_NAME_PASSWORD:用户名或者密码不正确
+	*/",
+kbe/src/server/loginapp/loginapp.h,134,gb18030,"/** 网络接口
+		dbmgr返回的登录账号检测结果
+	*/",
+kbe/src/server/loginapp/loginapp.h,139,gb18030,"/** 网络接口
+		baseappmgr返回的登录网关地址
+	*/",
+kbe/src/server/loginapp/loginapp.h,146,gb18030,"/** 网络接口
+		dbmgr发送初始信息
+		startGlobalOrder: 全局启动顺序 包括各种不同组件
+		startGroupOrder: 组内启动顺序， 比如在所有baseapp中第几个启动。
+	*/",
+kbe/src/server/loginapp/loginapp.h,154,gb18030,"/** 网络接口
+		客户端协议导出
+	*/",
+kbe/src/server/loginapp/loginapp.h,159,gb18030,"/** 网络接口
+		错误码描述导出
+	*/",
+kbe/src/server/loginapp/loginapp.h,164,gb18030,"/** 网络接口
+	客户端SDK导出
+	*/",
+kbe/src/server/loginapp/loginapp.h,169,gb18030,// 引擎版本不匹配,
+kbe/src/server/loginapp/loginapp.h,172,gb18030,// 引擎脚本层版本不匹配,
+kbe/src/server/loginapp/loginapp.h,175,gb18030,"/** 网络接口
+		baseapp同步自己的初始化信息
+		startGlobalOrder: 全局启动顺序 包括各种不同组件
+		startGroupOrder: 组内启动顺序， 比如在所有baseapp中第几个启动。
+	*/",
+kbe/src/server/loginapp/loginapp.h,185,gb18030,// 记录注册账号还未登陆的请求,
+kbe/src/server/loginapp/loginapp.h,188,gb18030,// 记录登录到服务器但还未处理完毕的账号,
+kbe/src/server/loginapp/loginapp_interface.h,27,gb18030,"/**
+	LOGINAPP所有消息接口在此定义
+*/",
+kbe/src/server/loginapp/loginapp_interface.h,31,gb18030,// 客户端协议导出。,
+kbe/src/server/loginapp/loginapp_interface.h,35,gb18030,// 错误码描述导出。,
+kbe/src/server/loginapp/loginapp_interface.h,39,gb18030,// 客户端SDK导出。,
+kbe/src/server/loginapp/loginapp_interface.h,43,gb18030,// 某app主动请求断线。,
+kbe/src/server/loginapp/loginapp_interface.h,46,gb18030,// 某app主动请求look。,
+kbe/src/server/loginapp/loginapp_interface.h,49,gb18030,// 某个app请求查看该app负载状态。,
+kbe/src/server/loginapp/loginapp_interface.h,52,gb18030,// hello握手。,
+kbe/src/server/loginapp/loginapp_interface.h,56,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/loginapp/loginapp_interface.h,60,gb18030,// 请求创建账号,
+kbe/src/server/loginapp/loginapp_interface.h,67,gb18030,// 重置账号密码申请,
+kbe/src/server/loginapp/loginapp_interface.h,72,gb18030,// 重置账号密码申请的回调,
+kbe/src/server/loginapp/loginapp_interface.h,78,gb18030,// 用户登录服务器 ,
+kbe/src/server/loginapp/loginapp_interface.h,82,gb18030,// 某app请求获取一个entityID段的回调,
+kbe/src/server/loginapp/loginapp_interface.h,88,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/loginapp/loginapp_interface.h,93,gb18030,// 从dbmgr查询到用户合法性结果,
+kbe/src/server/loginapp/loginapp_interface.h,96,gb18030,// baseappmgr返回的登录网关地址,
+kbe/src/server/loginapp/loginapp_interface.h,104,gb18030,// 向dbmgr请求创建账号返回结果,
+kbe/src/server/loginapp/loginapp_interface.h,108,gb18030,// dbmgr账号激活返回,
+kbe/src/server/loginapp/loginapp_interface.h,113,gb18030,// dbmgr账号绑定email返回,
+kbe/src/server/loginapp/loginapp_interface.h,118,gb18030,// dbmgr账号重设密码返回,
+kbe/src/server/loginapp/loginapp_interface.h,123,gb18030,// baseapp请求绑定email（返回时需要找到loginapp的地址）,
+kbe/src/server/loginapp/loginapp_interface.h,132,gb18030,// 请求关闭服务器,
+kbe/src/server/loginapp/loginapp_interface.h,136,gb18030,// 请求查询watcher数据,
+kbe/src/server/loginapp/loginapp_interface.h,139,gb18030,// baseapp同步自己的初始化信息,
+kbe/src/server/loginapp/loginapp_interface.h,143,gb18030,// 开始profile,
+kbe/src/server/loginapp/loginapp_interface.h,146,gb18030,// 请求强制杀死当前app,
+kbe/src/server/loginapp/loginapp_interface_macros.h,22,gb18030,"/**
+	Loginapp消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/loginapp/loginapp_interface_macros.h,69,gb18030,"/**
+	Loginapp消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/loginapp/loginapp_interface_macros.h,110,gb18030,"/**
+	Loginapp消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/loginapp/loginapp_interface_macros.h,153,gb18030,"/**
+	Loginapp消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/loginapp/loginapp_interface_macros.h,204,gb18030,"/**
+	Loginapp消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/loginapp/loginapp_interface_macros.h,265,gb18030,"/**
+	Loginapp消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/loginapp/loginapp_interface_macros.h,333,gb18030,"/**
+	Loginapp消息宏，  只有五个参数的消息
+*/",
+kbe/src/server/loginapp/loginapp_interface_macros.h,410,gb18030,"/**
+	Loginapp消息宏，  只有六个参数的消息
+*/",
+kbe/src/server/loginapp/loginapp_interface_macros.h,494,gb18030,"/**
+	Loginapp消息宏，  只有八个参数的消息
+*/",
+kbe/src/server/machine/machine.cpp,71,gb18030,// 先查询一下是否存在相同身份，如果是相同身份且不是一个进程我们需要告知对方启动非法,
+kbe/src/server/machine/machine.cpp,109,gb18030,// 只记录本机启动的进程,
+kbe/src/server/machine/machine.cpp,127,gb18030,// 一台硬件上只能存在一个machine,
+kbe/src/server/machine/machine.cpp,169,gb18030,"// 如果不是guiconsole发出的, uid也不等于当前服务器的uid则不理会。",
+kbe/src/server/machine/machine.cpp,245,gb18030,// 如果是控制台， 且uid不是一致的则无需返回找不到消息,
+kbe/src/server/machine/machine.cpp,246,gb18030,// 控制台可能广播到其他组去了,
+kbe/src/server/machine/machine.cpp,283,gb18030,// 如果已经不可用且允许自动擦除则擦除它,
+kbe/src/server/machine/machine.cpp,557,gb18030,// uid不等于当前服务器的uid则不理会。,
+kbe/src/server/machine/machine.cpp,835,gb18030,// machine不需要与其他组件保持活动状态关系,
+kbe/src/server/machine/machine.cpp,929,gb18030,// 如果组件ID大于0则仅停止指定ID的组件,
+kbe/src/server/machine/machine.cpp,1036,gb18030,"// 超时, 可能对方繁忙",
+kbe/src/server/machine/machine.cpp,1119,gb18030,// 如果组件ID大于0则仅停止指定ID的组件,
+kbe/src/server/machine/machine.cpp,1174,gb18030,// 杀死进程,
+kbe/src/server/machine/machine.cpp,1254,gb18030,// 如果组件ID大于0则仅停止指定ID的组件,
+kbe/src/server/machine/machine.cpp,1363,gb18030,"// 超时, 可能对方繁忙",
+kbe/src/server/machine/machine.cpp,1494,gb18030,// 改变当前目录，以让出问题的时候core能在此处生成,
+kbe/src/server/machine/machine.cpp,1507,gb18030,// 关闭父类的socket,
+kbe/src/server/machine/machine.cpp,1543,gb18030,// 用双引号把命令行括起来，以避免路径中存在空格，从而执行错误,
+kbe/src/server/machine/machine.cpp,1546,gb18030,// 増加参数,
+kbe/src/server/machine/machine.cpp,1552,gb18030,// 使用machine当前的工作目录作为新进程的工作目录，,
+kbe/src/server/machine/machine.cpp,1553,gb18030,// 为一些与相对目录的文件操作操作一致的工作目录（如日志）,
+kbe/src/server/machine/machine.h,47,gb18030,"/** 网络接口
+		某个app广播了自己的地址
+	*/",
+kbe/src/server/machine/machine.h,57,gb18030,"/** 网络接口
+		某个app寻找另一个app的地址
+	*/",
+kbe/src/server/machine/machine.h,63,gb18030,"/** 网络接口
+		查询所有接口信息
+	*/",
+kbe/src/server/machine/machine.h,69,gb18030,"/** 网络接口
+	查询所有machine进程
+	*/",
+kbe/src/server/machine/machine.h,82,gb18030,/* 初始化相关接口 */,
+kbe/src/server/machine/machine.h,89,gb18030,"/** 网络接口
+		启动服务器
+		@uid: 提供启动的uid参数
+		@components: 启动哪些组件(可能采取分布式启动方案)
+	*/",
+kbe/src/server/machine/machine.h,96,gb18030,"/** 信号处理
+	*/",
+kbe/src/server/machine/machine.h,102,gb18030,"/**
+	* 在linux下启动一个新进程
+	*/",
+kbe/src/server/machine/machine.h,108,gb18030,"/**
+	* 在windows下启动一个新进程
+	*/",
+kbe/src/server/machine/machine.h,115,gb18030,"/** 网络接口
+		关闭服务器
+		@uid: 提供启动的uid参数
+	*/",
+kbe/src/server/machine/machine.h,121,gb18030,"/** 网络接口
+	杀死服务器
+	@uid: 提供启动的uid参数
+	*/",
+kbe/src/server/machine/machine.h,127,gb18030,"/** 网络接口
+		设置flags
+		@uid: 提供启动的uid参数
+	*/",
+kbe/src/server/machine/machine.h,133,gb18030,"/**
+		对本机运行的组件进行检查是否可用
+	*/",
+kbe/src/server/machine/machine.h,139,gb18030,// udp广播地址,
+kbe/src/server/machine/machine.h,150,gb18030,// 本机使用的uid,
+kbe/src/server/machine/machine_interface.h,27,gb18030,"/**
+	machine所有消息接口在此定义
+*/",
+kbe/src/server/machine/machine_interface.h,31,gb18030,// 其他组件向app广播自己的接口地址,
+kbe/src/server/machine/machine_interface.h,59,gb18030,// 其他组件向app请求获取某个组件类别的地址,
+kbe/src/server/machine/machine_interface.h,69,gb18030,// 查询所有接口信息,
+kbe/src/server/machine/machine_interface.h,75,gb18030,// 查询所有machine进程,
+kbe/src/server/machine/machine_interface.h,88,gb18030,// 某app主动请求look。,
+kbe/src/server/machine/machine_interface.h,91,gb18030,// 某个app请求查看该app负载状态。,
+kbe/src/server/machine/machine_interface.h,94,gb18030,// 启动服务器,
+kbe/src/server/machine/machine_interface.h,97,gb18030,// 关闭服务器,
+kbe/src/server/machine/machine_interface.h,100,gb18030,// 关闭服务器,
+kbe/src/server/machine/machine_interface.h,103,gb18030,// 设置flags,
+kbe/src/server/machine/machine_interface.h,106,gb18030,// 请求强制杀死当前app,
+kbe/src/server/machine/machine_interface_macros.h,22,gb18030,"/**
+	Machine消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/machine/machine_interface_macros.h,63,gb18030,"/**
+	Machine消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,105,gb18030,"/**
+	Machine消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,148,gb18030,"/**
+	Machine消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,200,gb18030,"/**
+	Machine消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,261,gb18030,"/**
+	Machine消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,329,gb18030,"/**
+	Machine消息宏，  只有五个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,406,gb18030,"/**
+	Machine消息宏，  只有六个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,491,gb18030,"/**
+	Machine消息宏，  只有七个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,586,gb18030,"/**
+	Machine消息宏，  只有八个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,688,gb18030,"/**
+	Machine消息宏，  只有九个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,798,gb18030,"/**
+	Machine消息宏，  只有十个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,917,gb18030,"/**
+	Machine消息宏，  只有十一个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,1044,gb18030,"/**
+	Machine消息宏，  只有十五个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,1204,gb18030,"/**
+	Machine消息宏，  只有十六个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,1373,gb18030,"/**
+	Machine消息宏，  只有十八个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,1558,gb18030,"/**
+	Machine消息宏，  只有二十个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,1760,gb18030,"/**
+	Machine消息宏，  只有二十一个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,1971,gb18030,"/**
+	Machine消息宏，  只有二十二个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,2191,gb18030,"/**
+	Machine消息宏，  只有二十四个参数的消息
+*/",
+kbe/src/server/machine/machine_interface_macros.h,2427,gb18030,"/**
+Machine消息宏，  只有二十五个参数的消息
+*/",
+kbe/src/server/tools/bots/bots.cpp,48,gb18030,// 初始化EntityDef模块获取entity实体函数地址,
+kbe/src/server/tools/bots/bots.cpp,66,gb18030,// 广播自己的地址给网上上的所有kbemachine,
+kbe/src/server/tools/bots/bots.cpp,101,gb18030,// 所有脚本都加载完毕,
+kbe/src/server/tools/bots/bots.cpp,123,gb18030,// 结束通知脚本,
+kbe/src/server/tools/bots/bots.cpp,184,gb18030,// 注册设置脚本输出类型,
+kbe/src/server/tools/bots/bots.cpp,214,gb18030,// 安装入口模块,
+kbe/src/server/tools/bots/bots.cpp,487,gb18030,// 将结果返回给客户端,
+kbe/src/server/tools/bots/bots.h,69,gb18030,"/**
+		设置脚本输出类型前缀
+	*/",
+kbe/src/server/tools/bots/bots.h,76,gb18030,"/**
+		由entityCall来尝试获取一个channel的实例
+	*/",
+kbe/src/server/tools/bots/bots.h,81,gb18030,"/**
+	通过entity的ID尝试寻找它的实例
+	*/",
+kbe/src/server/tools/bots/bots.h,86,gb18030,"/** 网络接口
+		某个app请求查看该app
+	*/",
+kbe/src/server/tools/bots/bots.h,91,gb18030,"/** 网络接口
+		请求关闭服务器
+	*/",
+kbe/src/server/tools/bots/bots.h,96,gb18030,"/** 网络接口
+		请求关闭服务器
+	*/",
+kbe/src/server/tools/bots/bots.h,124,gb18030,"/** 网络接口
+	   添加bots
+	   @total uint32: 总共添加的个数
+	   @ticknum uint32: 每个tick添加多少个
+	   @ticktime float: 一个tick的时间
+	*/",
+kbe/src/server/tools/bots/bots.h,132,gb18030,"/** 网络接口
+		某个app向本app告知处于活动状态。
+	*/",
+kbe/src/server/tools/bots/bots.h,141,gb18030,"/** 网络接口
+		和服务端的版本不匹配
+	*/",
+kbe/src/server/tools/bots/bots.h,146,gb18030,"/** 网络接口
+		和服务端的脚本层版本不匹配
+	*/",
+kbe/src/server/tools/bots/bots.h,151,gb18030,"/** 网络接口
+		创建账号成功和失败回调
+	   @failedcode: 失败返回码 NETWORK_ERR_SRV_NO_READY:服务器没有准备好, 
+									NETWORK_ERR_ACCOUNT_CREATE:创建失败（已经存在）, 
+									NETWORK_SUCCESS:账号创建成功
+
+									SERVER_ERROR_CODE failedcode;
+		@二进制附带数据:二进制额外数据: uint32长度 + bytearray
+	*/",
+kbe/src/server/tools/bots/bots.h,164,gb18030,"/** 网络接口
+	   登录失败回调
+	   @failedcode: 失败返回码 NETWORK_ERR_SRV_NO_READY:服务器没有准备好, 
+									NETWORK_ERR_SRV_OVERLOAD:服务器负载过重, 
+									NETWORK_ERR_NAME_PASSWORD:用户名或者密码不正确
+	*/",
+kbe/src/server/tools/bots/bots.h,172,gb18030,"/** 网络接口
+	   登录成功
+	   @ip: 服务器ip地址
+	   @port: 服务器端口
+	*/",
+kbe/src/server/tools/bots/bots.h,179,gb18030,"/** 网络接口
+	   登录失败回调
+	   @failedcode: 失败返回码 NETWORK_ERR_SRV_NO_READY:服务器没有准备好, 
+									NETWORK_ERR_ILLEGAL_LOGIN:非法登录, 
+									NETWORK_ERR_NAME_PASSWORD:用户名或者密码不正确
+	*/",
+kbe/src/server/tools/bots/bots.h,187,gb18030,"/** 网络接口
+	   重登陆baseapp成功
+	*/",
+kbe/src/server/tools/bots/bots.h,192,gb18030,"/** 网络接口
+		服务器端已经创建了一个与客户端关联的代理Entity
+	   在登录时也可表达成功回调
+	   @datas: 账号entity的信息
+	*/",
+kbe/src/server/tools/bots/bots.h,200,gb18030,"/** 网络接口
+		服务器上的entity已经进入游戏世界了
+	*/",
+kbe/src/server/tools/bots/bots.h,206,gb18030,"/** 网络接口
+		服务器上的entity已经离开游戏世界了
+	*/",
+kbe/src/server/tools/bots/bots.h,212,gb18030,"/** 网络接口
+		告诉客户端某个entity销毁了， 此类entity通常是还未onEntityEnterWorld
+	*/",
+kbe/src/server/tools/bots/bots.h,217,gb18030,"/** 网络接口
+		服务器上的entity已经进入space了
+	*/",
+kbe/src/server/tools/bots/bots.h,222,gb18030,"/** 网络接口
+		服务器上的entity已经离开space了
+	*/",
+kbe/src/server/tools/bots/bots.h,227,gb18030,"/** 网络接口
+		远程调用entity的方法 
+	*/",
+kbe/src/server/tools/bots/bots.h,233,gb18030,"/** 网络接口
+	   被踢出服务器
+	*/",
+kbe/src/server/tools/bots/bots.h,238,gb18030,"/** 网络接口
+		服务器更新entity属性
+	*/",
+kbe/src/server/tools/bots/bots.h,244,gb18030,"/** 网络接口
+		服务器更新avatar基础位置和朝向
+	*/",
+kbe/src/server/tools/bots/bots.h,251,gb18030,"/** 网络接口
+		服务器强制设置entity的位置与朝向
+	*/",
+kbe/src/server/tools/bots/bots.h,256,gb18030,"/** 网络接口
+		服务器更新VolatileData
+	*/",
+kbe/src/server/tools/bots/bots.h,261,gb18030,"/** 网络接口
+		非优化高精度同步
+	*/",
+kbe/src/server/tools/bots/bots.h,290,gb18030,"/** 网络接口
+		优化的位置同步
+	*/",
+kbe/src/server/tools/bots/bots.h,319,gb18030,"/** 网络接口
+		download stream开始了 
+	*/",
+kbe/src/server/tools/bots/bots.h,324,gb18030,"/** 网络接口
+		接收到streamData
+	*/",
+kbe/src/server/tools/bots/bots.h,329,gb18030,"/** 网络接口
+		download stream完成了 
+	*/",
+kbe/src/server/tools/bots/bots.h,334,gb18030,"/** 网络接口
+		space相关操作接口
+		服务端添加了某个space的几何映射
+	*/",
+kbe/src/server/tools/bots/bots.h,342,gb18030,"/** 网络接口
+		请求查看watcher
+	*/",
+kbe/src/server/tools/bots/bots.h,347,gb18030,"/** 网络接口
+		console请求开始profile
+	*/",
+kbe/src/server/tools/bots/bots.h,353,gb18030,"/** 网络接口
+	    服务器告诉客户端：你当前（取消）控制谁的位移同步
+	*/",
+kbe/src/server/tools/bots/bots.h,358,gb18030,"/** 网络接口
+		服务器心跳返回
+	*/",
+kbe/src/server/tools/bots/bots.h,368,gb18030,// console请求创建到服务端的bots数量,
+kbe/src/server/tools/bots/bots.h,373,gb18030,// 处理创建与登录的handler,
+kbe/src/server/tools/bots/bots_interface.h,28,gb18030,"/**
+	Bots所有消息接口在此定义
+*/",
+kbe/src/server/tools/bots/bots_interface.h,33,gb18030,// 某app主动请求look。,
+kbe/src/server/tools/bots/bots_interface.h,36,gb18030,// 请求关闭服务器,
+kbe/src/server/tools/bots/bots_interface.h,39,gb18030,// console远程执行python语句。,
+kbe/src/server/tools/bots/bots_interface.h,42,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/tools/bots/bots_interface.h,47,gb18030,// 添加bots。,
+kbe/src/server/tools/bots/bots_interface.h,50,gb18030,// 请求查询watcher数据,
+kbe/src/server/tools/bots/bots_interface.h,53,gb18030,// 开始profile,
+kbe/src/server/tools/bots/bots_interface.h,56,gb18030,// 请求强制杀死当前app,
+kbe/src/server/tools/bots/bots_interface_macros.h,22,gb18030,"/**
+	Bots消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/tools/bots/bots_interface_macros.h,63,gb18030,"/**
+	Bots消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/tools/bots/bots_interface_macros.h,104,gb18030,"/**
+	Bots消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/tools/bots/bots_interface_macros.h,156,gb18030,"/**
+	Bots消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/tools/bots/bots_interface_macros.h,199,gb18030,"/**
+	Bots消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/tools/bots/bots_interface_macros.h,267,gb18030,"/**
+	Bots消息宏，  只有五个参数的消息
+*/",
+kbe/src/server/tools/bots/bots_interface_macros.h,344,gb18030,"/**
+	Bots消息宏，  只有六个参数的消息
+*/",
+kbe/src/server/tools/bots/bots_interface_macros.h,428,gb18030,"/**
+	Bots消息宏，  只有八个参数的消息
+*/",
+kbe/src/server/tools/bots/clientobject.cpp,184,gb18030,//不在这里注册,
+kbe/src/server/tools/bots/clientobject.cpp,236,gb18030,// 首先尝试用udp交互,
+kbe/src/server/tools/bots/clientobject.cpp,258,gb18030,// 等待接收返回包,
+kbe/src/server/tools/bots/clientobject.cpp,346,gb18030,// 如果udp可以通讯则不再启用tcp交互,
+kbe/src/server/tools/bots/clientobject.cpp,384,gb18030,//不在这里注册,
+kbe/src/server/tools/bots/clientobject.cpp,533,gb18030,// 继续尝试登录,
+kbe/src/server/tools/bots/clientobject.cpp,576,gb18030,// 继续尝试登录,
+kbe/src/server/tools/bots/clientobject.h,22,gb18030,"/** 
+		子类化 将一些py操作填充进派生类 
+	*/",
+kbe/src/server/tools/bots/clientobject.h,70,gb18030,"/** 网络接口
+		创建账号成功和失败回调
+	   @failedcode: 失败返回码 NETWORK_ERR_SRV_NO_READY:服务器没有准备好, 
+									NETWORK_ERR_ACCOUNT_CREATE:创建失败（已经存在）, 
+									NETWORK_SUCCESS:账号创建成功
+
+									SERVER_ERROR_CODE failedcode;
+		@二进制附带数据:二进制额外数据: uint32长度 + bytearray
+	*/",
+kbe/src/server/tools/bots/clientobject.h,81,gb18030,"/** 网络接口
+	   登录失败回调
+	   @failedcode: 失败返回码 NETWORK_ERR_SRV_NO_READY:服务器没有准备好, 
+									NETWORK_ERR_SRV_OVERLOAD:服务器负载过重, 
+									NETWORK_ERR_NAME_PASSWORD:用户名或者密码不正确
+	*/",
+kbe/src/server/tools/bots/clientobject.h,89,gb18030,"/** 网络接口
+	   登录成功
+	   @ip: 服务器ip地址
+	   @port: 服务器端口
+	*/",
+kbe/src/server/tools/bots/create_and_login_handler.cpp,47,gb18030,// 每个tick减去0.1秒， 为0则可以创建一次且重置;,
+kbe/src/server/tools/bots/pybots.cpp,140,gb18030,// PyObject Entity* 增加一个引用,
+kbe/src/server/tools/bots/pybots.h,30,gb18030,"/** 
+		子类化 将一些py操作填充进派生类 
+	*/",
+kbe/src/server/tools/bots/pybots.h,38,gb18030,"/** 
+		暴露一些字典方法给python 
+	*/",
+kbe/src/server/tools/bots/pybots.h,49,gb18030,"/** 
+		map操作函数相关 
+	*/",
+kbe/src/server/tools/guiconsole/ConnectRemoteMachineWindow.cpp,224,gb18030,"//创建一个XML的文档对象。
+",
+kbe/src/server/tools/guiconsole/ConnectRemoteMachineWindow.cpp,278,gb18030,"// 如果已经存在这个host的记录则清空
+",
+kbe/src/server/tools/guiconsole/LogWindow.cpp,353,gb18030,"// 请求服务器拉取日志
+",
+kbe/src/server/tools/guiconsole/MultiLineListBox.cpp,335,gb18030,//拖动滑块,
+kbe/src/server/tools/guiconsole/MultiLineListBox.cpp,336,gb18030,//点击左边的箭头,
+kbe/src/server/tools/guiconsole/MultiLineListBox.cpp,337,gb18030,//点击右边的箭头,
+kbe/src/server/tools/guiconsole/ProfileWindow.cpp,45,gb18030,//选中某行使整行高亮（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/ProfileWindow.cpp,46,gb18030,//网格线（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/ProfileWindow.cpp,48,gb18030,//设置扩展风格,
+kbe/src/server/tools/guiconsole/StartServerLayoutWindow.cpp,53,gb18030,//选中某行使整行高亮（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/StartServerLayoutWindow.cpp,54,gb18030,//网格线（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/StartServerLayoutWindow.cpp,56,gb18030,//设置扩展风格,
+kbe/src/server/tools/guiconsole/StartServerLayoutWindow.cpp,106,gb18030,//创建一个XML的文档对象。,
+kbe/src/server/tools/guiconsole/StartServerWindow.cpp,49,gb18030,//选中某行使整行高亮（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/StartServerWindow.cpp,50,gb18030,//网格线（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/StartServerWindow.cpp,52,gb18030,//设置扩展风格,
+kbe/src/server/tools/guiconsole/StartServerWindow.cpp,55,gb18030,//选中某行使整行高亮（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/StartServerWindow.cpp,56,gb18030,//网格线（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/StartServerWindow.cpp,58,gb18030,//设置扩展风格,
+kbe/src/server/tools/guiconsole/StartServerWindow.cpp,172,gb18030,// 超时可能对方繁忙,
+kbe/src/server/tools/guiconsole/StartServerWindow.cpp,306,gb18030,// 超时可能对方繁忙,
+kbe/src/server/tools/guiconsole/StartServerWindow.cpp,398,gb18030,//创建一个XML的文档对象。,
+kbe/src/server/tools/guiconsole/StatusWindow.cpp,110,gb18030,"// 超时, 可能对方繁忙
+",
+kbe/src/server/tools/guiconsole/StatusWindow.cpp,252,gb18030,"//选中某行使整行高亮（只适用与report风格的listctrl）
+",
+kbe/src/server/tools/guiconsole/StatusWindow.cpp,253,gb18030,"//网格线（只适用与report风格的listctrl）
+",
+kbe/src/server/tools/guiconsole/StatusWindow.cpp,255,gb18030,"//设置扩展风格
+",
+kbe/src/server/tools/guiconsole/WatcherWindow.cpp,40,gb18030,//选中某行使整行高亮（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/WatcherWindow.cpp,41,gb18030,//网格线（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/WatcherWindow.cpp,43,gb18030,//设置扩展风格,
+kbe/src/server/tools/guiconsole/WatcherWindow.cpp,52,gb18030,//选中某行使整行高亮（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/WatcherWindow.cpp,53,gb18030,//网格线（只适用与report风格的listctrl）,
+kbe/src/server/tools/guiconsole/WatcherWindow.cpp,55,gb18030,//设置扩展风格,
+kbe/src/server/tools/guiconsole/guiconsole.h,54,gb18030,"//CListCtrl控件指针
+",
+kbe/src/server/tools/guiconsole/guiconsole.h,55,gb18030,"//l列号
+",
+kbe/src/server/tools/guiconsole/guiconsole.h,56,gb18030,"//1为升序，0为降序
+",
+kbe/src/server/tools/guiconsole/guiconsoleDlg.cpp,247,gb18030,"// 防止接收到的数据不是想要的数据
+",
+kbe/src/server/tools/guiconsole/guiconsoleDlg.cpp,571,gb18030,"/*
+	// 对普通的输入加入print 让服务器回显信息
+    if((strCommand.Find(L""="")) == -1 &&
+		(strCommand.Find(L""print("")) == -1 &&
+		(strCommand.Find(L""import "")) == -1 &&
+		(strCommand.Find(L""class "")) == -1 &&
+		(strCommand.Find(L""def "")) == -1 &&
+		(strCommand.Find(L""del "")) == -1 &&
+		(strCommand.Find(L""if "")) == -1 &&
+		(strCommand.Find(L""for "")) == -1 &&
+		(strCommand.Find(L""while "")) == -1
+		)
+        strCommand = L""print("" + strCommand + L"")"";
+	*/",
+kbe/src/server/tools/guiconsole/guiconsoleDlg.cpp,622,gb18030,"//创建一个XML的文档对象。
+",
+kbe/src/server/tools/guiconsole/guiconsoleDlg.cpp,1191,gb18030,"//鼠标位置
+",
+kbe/src/server/tools/guiconsole/guiconsoleDlg.cpp,1575,gb18030,"// 复选框被选中就连接否则断开连接
+",
+kbe/src/server/tools/guiconsole/guiconsoleDlg.cpp,1653,gb18030,"/*
+	COMPONENT_TYPE startComponentTypes[] = {BASEAPP_TYPE, CELLAPP_TYPE, BASEAPPMGR_TYPE, CELLAPPMGR_TYPE, LOGINAPP_TYPE, DBMGR_TYPE, BOTS_TYPE, UNKNOWN_COMPONENT_TYPE};
+	
+	int i = 0;
+
+	while(1)
+	{
+		srand(KBEngine::getSystemTime());
+		uint16 nport = KBE_PORT_START + (rand() % 1000);
+		Network::BundleBroadcast bhandler(_networkInterface, nport);
+
+		if(!bhandler.good())
+		{
+			KBEngine::sleep(10);
+			nport = KBE_PORT_START + (rand() % 1000);
+			continue;
+		}
+
+		if(bhandler.pCurrPacket() != NULL)
+		{
+			bhandler.pCurrPacket()->resetPacket();
+		}
+
+		COMPONENT_TYPE componentType = startComponentTypes[i++];
+		if(componentType == UNKNOWN_COMPONENT_TYPE)
+			break;
+
+		bhandler.newMessage(MachineInterface::startserver);
+		bhandler << KBEngine::getUserUID();
+		bhandler << componentType;
+
+		uint32 ip = _networkInterface.intaddr().ip;
+		uint16 port = bhandler.epListen().addr().port;
+		bhandler << ip << port;
+
+		if(!bhandler.broadcast())
+		{
+			ERROR_MSG(""CguiconsoleDlg::OnToolBar_StartServer: broadcast error!\n"");
+			//::AfxMessageBox(L""不能发送服务器启动包。"");
+			break;
+		}
+
+		if(!bhandler.receive(NULL, 0, 1000000))
+		{
+			ERROR_MSG(""CguiconsoleDlg::OnToolBar_StartServer: recv error!\n"");
+			//::AfxMessageBox(L""接收服务器启动包错误。"");
+			break;
+		}
+		
+		bool success;
+		bhandler >> success;
+	}
+
+	_networkInterface.deregisterAllChannels();
+	Components::getSingleton().clear();
+	Components::getSingleton().delComponent(Components::ANY_UID, LOGGER_TYPE, 0, true, false);
+	Components::getSingleton().delComponent(Components::ANY_UID, BOTS_TYPE, 0, true, false);
+	::SetTimer(m_hWnd, 2, 1000, NULL);
+	*/",
+kbe/src/server/tools/guiconsole/guiconsoleDlg.cpp,1759,gb18030,"//::AfxMessageBox(L""不能发送服务器启动包。"");
+",
+kbe/src/server/tools/guiconsole/guiconsoleDlg.cpp,1766,gb18030,"//::AfxMessageBox(L""接收服务器启动包错误。"");
+",
+kbe/src/server/tools/guiconsole/guiconsoleDlg.h,38,gb18030,/** 服务器执行指令完毕回显 */,
+kbe/src/server/tools/guiconsole/guiconsoleDlg.h,137,gb18030,"// 线程池
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,77,gb18030,"// 通知脚本
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,131,gb18030,"// 广播自己的地址给网上上的所有kbemachine
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,144,gb18030,"// 不做频道超时检查
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,152,gb18030,"// 所有脚本都加载完毕
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,521,gb18030,"// 把请求交由脚本处理
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,545,gb18030,"// 理论上不可能找不到，但如果真找不到，这是个很恐怖的事情，必须写日志记录下来
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,578,gb18030,"// 清理
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,633,gb18030,"// 把请求交由脚本处理
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,657,gb18030,"// 理论上不可能找不到，但如果真找不到，这是个很恐怖的事情，必须写日志记录下来
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,690,gb18030,"// 清理
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,748,gb18030,"// 把请求交由脚本处理
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,776,gb18030,"// 这种情况也需要baseapp处理onLoseChargeCB
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,777,gb18030,"// 例如某些时候客户端出问题未向服务器注册这个订单号，但是计费平台有返回的情况
+",
+kbe/src/server/tools/interfaces/interfaces.cpp,778,gb18030,"// 将订单发送给注册的所有的dbmgr
+",
+kbe/src/server/tools/interfaces/interfaces.h,45,gb18030,/* 初始化相关接口 */,
+kbe/src/server/tools/interfaces/interfaces.h,58,gb18030,"/** 网络接口
+	注册一个新激活的baseapp或者cellapp或者dbmgr
+	通常是一个新的app被启动了， 它需要向某些组件注册自己。
+	*/",
+kbe/src/server/tools/interfaces/interfaces.h,68,gb18030,"/** 网络接口
+		请求创建账号
+	*/",
+kbe/src/server/tools/interfaces/interfaces.h,73,gb18030,"/** 网络接口
+		一个新用户登录， 需要检查合法性
+	*/",
+kbe/src/server/tools/interfaces/interfaces.h,78,gb18030,"/** 网络接口
+		请求擦除客户端请求任务
+	*/",
+kbe/src/server/tools/interfaces/interfaces.h,83,gb18030,"/** 网络接口
+		请求充值
+	*/",
+kbe/src/server/tools/interfaces/interfaces.h,88,gb18030,"/** Python回调接口
+	    充值响应
+	*/",
+kbe/src/server/tools/interfaces/interfaces.h,94,gb18030,"/** Python回调接口
+	    请求登录账号的响应
+	*/",
+kbe/src/server/tools/interfaces/interfaces.h,101,gb18030,"/** Python回调接口
+	    请求创建账号的响应
+	*/",
+kbe/src/server/tools/interfaces/interfaces.h,119,gb18030,"/**
+		向dbmgr请求执行一个数据库命令
+	*/",
+kbe/src/server/tools/interfaces/interfaces.h,131,gb18030,// 订单,
+kbe/src/server/tools/interfaces/interfaces.h,134,gb18030,// 所有的请求记录， 避免某类重复性请求。,
+kbe/src/server/tools/interfaces/interfaces_interface.h,27,gb18030,"/**
+	Interfaces消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface.h,31,gb18030,"/**
+	Interfaces所有消息接口在此定义
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface.h,35,gb18030,// 某app注册自己的接口地址到本app,
+kbe/src/server/tools/interfaces/interfaces_interface.h,49,gb18030,// 请求创建账号。,
+kbe/src/server/tools/interfaces/interfaces_interface.h,52,gb18030,// 登陆账号。,
+kbe/src/server/tools/interfaces/interfaces_interface.h,55,gb18030,// 充值请求,
+kbe/src/server/tools/interfaces/interfaces_interface.h,58,gb18030,// 某app主动请求look。,
+kbe/src/server/tools/interfaces/interfaces_interface.h,61,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/tools/interfaces/interfaces_interface.h,66,gb18030,// 请求关闭服务器,
+kbe/src/server/tools/interfaces/interfaces_interface.h,69,gb18030,// 请求查询watcher数据,
+kbe/src/server/tools/interfaces/interfaces_interface.h,72,gb18030,// 请求擦除客户端请求任务。,
+kbe/src/server/tools/interfaces/interfaces_interface.h,76,gb18030,// 开始profile,
+kbe/src/server/tools/interfaces/interfaces_interface.h,79,gb18030,// 请求强制杀死当前app,
+kbe/src/server/tools/interfaces/interfaces_interface.h,82,gb18030,// executeRawDatabaseCommand从dbmgr的回调,
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,60,gb18030,"/**
+	Interfaces消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,102,gb18030,"/**
+	Interfaces消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,145,gb18030,"/**
+	Interfaces消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,197,gb18030,"/**
+	Interfaces消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,258,gb18030,"/**
+	Interfaces消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,326,gb18030,"/**
+	Interfaces消息宏，  只有五个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,403,gb18030,"/**
+	Interfaces消息宏，  只有六个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,487,gb18030,"/**
+	Interfaces消息宏，  只有八个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,589,gb18030,"/**
+	Interfaces消息宏，  只有九个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,699,gb18030,"/**
+	Interfaces消息宏，  只有十个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_interface_macros.h,818,gb18030,"/**
+	Interfaces消息宏，  只有十一个参数的消息
+*/",
+kbe/src/server/tools/interfaces/interfaces_tasks.h,29,gb18030,// 提交时用的名称,
+kbe/src/server/tools/interfaces/interfaces_tasks.h,30,gb18030,// 在游戏服务器数据库中与account绑定的名称,
+kbe/src/server/tools/interfaces/interfaces_tasks.h,31,gb18030,// 密码,
+kbe/src/server/tools/interfaces/interfaces_tasks.h,32,gb18030,// 提交的附带数据,
+kbe/src/server/tools/interfaces/interfaces_tasks.h,33,gb18030,// 返回给客户端的附带数据,
+kbe/src/server/tools/kbcmd/client_sdk.cpp,838,gb18030,// 先写BaseEntityCall,
+kbe/src/server/tools/kbcmd/client_sdk.cpp,937,gb18030,// 再写CellEntityCall,
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,156,gb18030,"// 如果元素又是数组
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,1150,gb18030,"// 如果是非匿名的数组，则第一层解析应该直接设置为有名字的类别
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,1151,gb18030,"// 否则设置为系统List类别
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,1206,gb18030,"// 如果是非匿名的数组，则第一层解析应该直接设置为有名字的类别
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,1207,gb18030,"// 否则设置为系统List类别
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,1334,gb18030,"// 先创建属性
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,1377,gb18030,"// 创建createFromStreamEx方法
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,1412,gb18030,"// 创建addToStreamEx方法
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,1628,gb18030,"// 如果pDescr为None，并且是客户端方法，那么需要强制设定useMethodDescrAlias为true，否则默认为false将会出现问题
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,2192,gb18030,"// 写entityCall属性
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,2216,gb18030,"// 写entityCall属性
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,2255,gb18030,"// 函数返回后，后续流程为写实体属性..
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,2326,gb18030,"// attach组件
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,2350,gb18030,"// detach组件
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,2617,gb18030,"// 处理方法
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,2847,gb18030,"// 处理属性
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,2985,gb18030,"// entity即使在属性小于0时仍然存在默认属性，而组件则可能因为没有属性导致空switch编译出错
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,3103,gb18030,"// 处理属性callPropertysSetMethods
+",
+kbe/src/server/tools/kbcmd/client_sdk_ue4.cpp,3508,gb18030,"// 对于匿名数组需要解析，否则直接填类型名称
+",
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,800,gb18030,// 如果是非匿名的数组，则第一层解析应该直接设置为有名字的类别,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,801,gb18030,// 否则设置为系统List类别,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,858,gb18030,// 如果是非匿名的数组，则第一层解析应该直接设置为有名字的类别,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,859,gb18030,// 否则设置为系统List类别,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,987,gb18030,// 先创建属性,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,1030,gb18030,// 创建createFromStreamEx方法,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,1064,gb18030,// 创建addToStreamEx方法,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,1250,gb18030,// 如果pDescr为None，并且是客户端方法，那么需要强制设定useMethodDescrAlias为true，否则默认为false将会出现问题,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,1761,gb18030,// 写entityCall属性,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,1770,gb18030,// 写entityCall属性,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,1792,gb18030,// 如果元素又是数组,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,1989,gb18030,// attach/detach组件,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,2029,gb18030,// 处理方法,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,2230,gb18030,// 处理属性,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,2464,gb18030,// 处理属性callPropertysSetMethods,
+kbe/src/server/tools/kbcmd/client_sdk_unity.cpp,2877,gb18030,// 对于匿名数组需要解析，否则直接填类型名称,
+kbe/src/server/tools/kbcmd/kbcmd.cpp,118,gb18030,// 广播自己的地址给网上上的所有kbemachine,
+kbe/src/server/tools/kbcmd/kbcmd.cpp,175,gb18030,// 创建中间目录  ,
+kbe/src/server/tools/kbcmd/kbcmd.cpp,185,gb18030,"//如果不存在,创建  ",
+kbe/src/server/tools/kbcmd/kbcmd.cpp,200,gb18030,"//支持linux,将所有\换成/  ",
+kbe/src/server/tools/kbcmd/kbcmd.h,37,gb18030,/* 初始化相关接口 */,
+kbe/src/server/tools/kbcmd/kbcmd_interface.h,27,gb18030,"/**
+	KBCMD消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/tools/kbcmd/kbcmd_interface.h,31,gb18030,"/**
+	KBCMD所有消息接口在此定义
+*/",
+kbe/src/server/tools/kbcmd/kbcmd_interface.h,36,gb18030,// 某app主动请求look。,
+kbe/src/server/tools/kbcmd/kbcmd_interface.h,39,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/tools/kbcmd/kbcmd_interface_macros.h,22,gb18030,"/**
+	KBCMD消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/tools/kbcmd/kbcmd_interface_macros.h,63,gb18030,"/**
+	KBCMD消息宏，  只有零个参数的消息
+	*/",
+kbe/src/server/tools/kbcmd/kbcmd_interface_macros.h,104,gb18030,"/**
+	KBCMD消息宏，  只有二个参数的消息
+	*/",
+kbe/src/server/tools/kbcmd/kbcmd_interface_macros.h,156,gb18030,"/**
+	KBCMD消息宏，  只有一个参数的消息
+	*/",
+kbe/src/server/tools/kbcmd/kbcmd_interface_macros.h,199,gb18030,"/**
+	KBCMD消息宏，  只有四个参数的消息
+	*/",
+kbe/src/server/tools/kbcmd/kbcmd_interface_macros.h,267,gb18030,"/**
+	KBCMD消息宏，  只有五个参数的消息
+	*/",
+kbe/src/server/tools/kbcmd/kbcmd_interface_macros.h,344,gb18030,"/**
+	KBCMD消息宏，  只有六个参数的消息
+	*/",
+kbe/src/server/tools/kbcmd/kbcmd_interface_macros.h,428,gb18030,"/**
+	KBCMD消息宏，  只有八个参数的消息
+	*/",
+kbe/src/server/tools/kbcmd/main.cpp,170,gb18030,"// 如果还有日志未同步完成， 这里会继续同步完成才结束
+",
+kbe/src/server/tools/kbcmd/main.cpp,181,gb18030,"// 如果还有日志未同步完成， 这里会继续同步完成才结束
+",
+kbe/src/server/tools/kbcmd/main.cpp,194,gb18030,"// 如果还有日志未同步完成， 这里会继续同步完成才结束
+",
+kbe/src/server/tools/kbcmd/main.cpp,224,gb18030,"// 如果检测到设置了zip文件，那么从zip文件得到path
+",
+kbe/src/server/tools/kbcmd/main.cpp,261,gb18030,"// 开始打包
+",
+kbe/src/server/tools/kbcmd/main.cpp,292,gb18030,"// 如果还有日志未同步完成， 这里会继续同步完成才结束
+",
+kbe/src/server/tools/kbcmd/main.cpp,303,gb18030,"// 根据assetsType设置KBE_RES_PATH的项目环境变量
+",
+kbe/src/server/tools/kbcmd/main.cpp,355,gb18030,"// 如果还有日志未同步完成， 这里会继续同步完成才结束
+",
+kbe/src/server/tools/kbcmd/main.cpp,366,gb18030,"// 如果还有日志未同步完成， 这里会继续同步完成才结束
+",
+kbe/src/server/tools/kbcmd/main.cpp,379,gb18030,"// 如果还有日志未同步完成， 这里会继续同步完成才结束
+",
+kbe/src/server/tools/kbcmd/main.cpp,418,gb18030,"// 如果还有日志未同步完成， 这里会继续同步完成才结束
+",
+kbe/src/server/tools/logger/logger.cpp,120,gb18030,"// 由于logger接收其他app的log，如果跟踪包输出将会非常卡。
+",
+kbe/src/server/tools/logger/logger.cpp,128,gb18030,"// 所有脚本都加载完毕
+",
+kbe/src/server/tools/logger/logger.cpp,178,gb18030,"// 所有脚本都加载完毕
+",
+kbe/src/server/tools/logger/logger.cpp,214,gb18030,"// 通知脚本
+",
+kbe/src/server/tools/logger/logger.cpp,284,gb18030,"// 记录下完整的日志，以在脚本回调时使用
+",
+kbe/src/server/tools/logger/logger.cpp,348,gb18030,"// 缓存一部分log，提供工具查看log时能快速获取初始上下文
+",
+kbe/src/server/tools/logger/logger.h,75,gb18030,/* 初始化相关接口 */,
+kbe/src/server/tools/logger/logger.h,89,gb18030,"/** 网络接口
+		写日志
+	*/",
+kbe/src/server/tools/logger/logger.h,94,gb18030,"/** 网络接口
+		注册log监听者
+	*/",
+kbe/src/server/tools/logger/logger.h,99,gb18030,"/** 网络接口
+		注销log监听者
+	*/",
+kbe/src/server/tools/logger/logger.h,104,gb18030,"/** 网络接口
+		log监听者更新自己的设置
+	*/",
+kbe/src/server/tools/logger/logger_interface.h,27,gb18030,"/**
+	Logger所有消息接口在此定义
+*/",
+kbe/src/server/tools/logger/logger_interface.h,31,gb18030,// 某app注册自己的接口地址到本app,
+kbe/src/server/tools/logger/logger_interface.h,45,gb18030,// 某app主动请求look。,
+kbe/src/server/tools/logger/logger_interface.h,48,gb18030,// 某个app请求查看该app负载状态。,
+kbe/src/server/tools/logger/logger_interface.h,51,gb18030,// 某个app向本app告知处于活动状态。,
+kbe/src/server/tools/logger/logger_interface.h,56,gb18030,// 远程写日志,
+kbe/src/server/tools/logger/logger_interface.h,59,gb18030,// 注册log监听者,
+kbe/src/server/tools/logger/logger_interface.h,62,gb18030,// 注销log监听者,
+kbe/src/server/tools/logger/logger_interface.h,65,gb18030,// log监听者更新自己的设置,
+kbe/src/server/tools/logger/logger_interface.h,68,gb18030,// 请求关闭服务器,
+kbe/src/server/tools/logger/logger_interface.h,71,gb18030,// 请求查询watcher数据,
+kbe/src/server/tools/logger/logger_interface.h,74,gb18030,// 开始profile,
+kbe/src/server/tools/logger/logger_interface.h,77,gb18030,// 请求强制杀死当前app,
+kbe/src/server/tools/logger/logger_interface_macros.h,22,gb18030,"/**
+	Logger消息宏，  参数为流， 需要自己解开
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,63,gb18030,"/**
+	Logger消息宏，  只有零个参数的消息
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,105,gb18030,"/**
+	Logger消息宏，  只有一个参数的消息
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,148,gb18030,"/**
+	Logger消息宏，  只有二个参数的消息
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,200,gb18030,"/**
+	Logger消息宏，  只有三个参数的消息
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,261,gb18030,"/**
+	Logger消息宏，  只有四个参数的消息
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,329,gb18030,"/**
+	Logger消息宏，  只有五个参数的消息
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,406,gb18030,"/**
+	Logger消息宏，  只有六个参数的消息
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,490,gb18030,"/**
+	Logger消息宏，  只有八个参数的消息
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,592,gb18030,"/**
+	Logger消息宏，  只有九个参数的消息
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,701,gb18030,"/**
+	Logger消息宏，  只有十个参数的消息
+*/",
+kbe/src/server/tools/logger/logger_interface_macros.h,820,gb18030,"/**
+	Logger消息宏，  只有十一个参数的消息
+*/",
+kbe/src/server/tools/logger/main.cpp,3,gb18030,"// logger需要增加吞吐量
+",

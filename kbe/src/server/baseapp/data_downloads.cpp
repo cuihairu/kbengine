@@ -4,10 +4,10 @@
 #include "data_download.h"
 #include "data_downloads.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
-DataDownload * DataDownloadFactory::create(DataDownloadType dltype, PyObjectPtr objptr, 
+DataDownload * DataDownloadFactory::create(DataDownloadType dltype, PyObjectPtr objptr,
 		const std::string & desc, int16 id)
 {
 	switch(dltype)
@@ -22,7 +22,7 @@ DataDownload * DataDownloadFactory::create(DataDownloadType dltype, PyObjectPtr 
 
 	return NULL;
 }
-	
+
 //-------------------------------------------------------------------------------------
 DataDownloads::DataDownloads():
 downloads_(),
@@ -66,7 +66,7 @@ int16 DataDownloads::pushDownload(DataDownload* pdl)
 //-------------------------------------------------------------------------------------
 void DataDownloads::onDownloadCompleted(DataDownload* pdl)
 {
-	INFO_MSG(fmt::format("DataDownloads::onDownloadCompleted: proxy({0}), downloadID({1}), type({3}), sentTotalBytes={2}.\n", 
+	INFO_MSG(fmt::format("DataDownloads::onDownloadCompleted: proxy({0}), downloadID({1}), type({3}), sentTotalBytes={2}.\n",
 		pdl->entityID(), pdl->id(), pdl->totalBytes(), (int)pdl->type()));
 
 	downloads_.erase(pdl->id());

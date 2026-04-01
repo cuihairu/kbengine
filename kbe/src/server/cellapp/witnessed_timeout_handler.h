@@ -7,7 +7,7 @@
 #include "helper/debug_helper.h"
 #include "common/common.h"
 // #define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
@@ -16,8 +16,8 @@
 namespace KBEngine{
 
 class WitnessedTimeoutHandler : public TimerHandler
-{	
-public:	
+{
+public:
 	WitnessedTimeoutHandler();
 
 	~WitnessedTimeoutHandler();
@@ -34,7 +34,7 @@ private:
 
 	std::map<ENTITY_ID, uint16>		witnessedEntityIDs_;
 	TimerHandle* pTimerHandle_;
-};	
+};
 
 
 }

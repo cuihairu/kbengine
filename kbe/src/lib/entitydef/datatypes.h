@@ -54,7 +54,7 @@ protected:
 	static DATATYPE_MAP dataTypesLowerName_;
 	static UID_DATATYPE_MAP uid_dataTypes_;
 
-	// ÀàĞÍ¶¨ÒåµÄÏÈºóË³Ğò£¬ÓÃÓÚ´úÂëÉú³É£¬ c++µÈÓïÑÔĞèÒªÏÈºóË³ĞòÒÀÀµ
+	// ç±»å‹å®šä¹‰çš„å…ˆåé¡ºåºï¼Œç”¨äºä»£ç ç”Ÿæˆï¼Œ c++ç­‰è¯­è¨€éœ€è¦å…ˆåé¡ºåºä¾èµ–
 	static DATATYPE_ORDERS dataTypesOrders_;
 };
 

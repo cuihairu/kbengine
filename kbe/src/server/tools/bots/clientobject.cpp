@@ -31,7 +31,7 @@ SCRIPT_MEMBER_DECLARE_END()
 
 SCRIPT_GETSET_DECLARE_BEGIN(ClientObject)
 SCRIPT_GETSET_DECLARE_END()
-SCRIPT_INIT(ClientObject, 0, 0, 0, 0, 0)		
+SCRIPT_INIT(ClientObject, 0, 0, 0, 0, 0)
 
 //-------------------------------------------------------------------------------------
 ClientObject::ClientObject(std::string name, Network::NetworkInterface& ninterface):
@@ -56,14 +56,14 @@ ClientObject::~ClientObject()
 	SAFE_RELEASE(pBlowfishFilter_);
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 void ClientObject::finalise(void)
 {
 	reset();
 	ClientObjectBase::finalise();
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 void ClientObject::reset(void)
 {
 	if(pTCPPacketReceiverEx_)
@@ -89,11 +89,11 @@ void ClientObject::reset(void)
 
 	SAFE_RELEASE(pKCPPacketSenderEx_);
 	SAFE_RELEASE(pKCPPacketReceiverEx_);
-	
+
 	std::string name = name_;
 	std::string passwd = password_;
 	ClientObjectBase::reset();
-	
+
 	name_ = name;
 	password_ = passwd;
 	clientDatas_ = "bots";
@@ -134,7 +134,7 @@ bool ClientObject::initCreate()
 	clearStates();
 
 	Network::EndPoint* pEndpoint = Network::EndPoint::createPoolObject(OBJECTPOOL_POINT);
-	
+
 	pEndpoint->socket(SOCK_STREAM);
 	if (!pEndpoint->good())
 	{
@@ -143,7 +143,7 @@ bool ClientObject::initCreate()
 		error_ = C_ERROR_INIT_NETWORK_FAILED;
 		return false;
 	}
-	
+
 	ENGINE_COMPONENT_INFO& infos = g_kbeSrvConfig.getBots();
 	if (infos.login_port_max > infos.login_port_min)
 	{
@@ -180,8 +180,8 @@ bool ClientObject::initCreate()
 	pTCPPacketSenderEx_ = new Network::TCPPacketSenderEx(*pEndpoint, this->networkInterface_, this);
 	pTCPPacketReceiverEx_ = new Network::TCPPacketReceiverEx(*pEndpoint, this->networkInterface_, this);
 	Bots::getSingleton().networkInterface().dispatcher().registerReadFileDescriptor((*pEndpoint), pTCPPacketReceiverEx_);
-	
-	//≤ª‘⁄’‚¿Ô◊¢≤·
+
+	//‰∏çÂú®ËøôÈáåÊ≥®ÂÜå
 	//Bots::getSingleton().networkInterface().dispatcher().registerWriteFileDescriptor((*pEndpoint), pTCPPacketSenderEx_);
 	pServerChannel_->pPacketSender(pTCPPacketSenderEx_);
 
@@ -233,7 +233,7 @@ bool ClientObject::initLoginBaseapp()
 	connectedBaseapp_ = false;
 	pServerChannel_->id(0);
 
-	//  ◊œ»≥¢ ‘”√udpΩªª•
+	// È¶ñÂÖàÂ∞ùËØïÁî®udp‰∫§‰∫í
 	if (udp_port_ > 0)
 	{
 		Network::EndPoint* pUdpEndpoint = Network::EndPoint::createPoolObject(OBJECTPOOL_POINT);
@@ -255,7 +255,7 @@ bool ClientObject::initLoginBaseapp()
 
 		if (pUdpEndpoint->sendto((void*)Network::UDP_HELLO, strlen(Network::UDP_HELLO)) != -1)
 		{
-			// µ»¥˝Ω” ’∑µªÿ∞¸
+			// Á≠âÂæÖÊé•Êî∂ËøîÂõûÂåÖ
 			Network::UDPPacket* pHelloAckUDPPacket = Network::UDPPacket::createPoolObject(OBJECTPOOL_POINT);
 
 			bool ret = Network::kbe_poll(int(*pUdpEndpoint));
@@ -282,7 +282,7 @@ bool ClientObject::initLoginBaseapp()
 				{
 					if (versionString != KBEVersion::versionString())
 					{
-						ERROR_MSG(fmt::format("ClientObject::initLogin: Version mismatch! {} != serverVersionString({})\n", 
+						ERROR_MSG(fmt::format("ClientObject::initLogin: Version mismatch! {} != serverVersionString({})\n",
 							KBEVersion::versionString(), versionString));
 
 						error_ = C_ERROR_INIT_NETWORK_FAILED;
@@ -343,7 +343,7 @@ bool ClientObject::initLoginBaseapp()
 		}
 	}
 
-	// »Áπ˚udpø…“‘Õ®—∂‘Ú≤ª‘Ÿ∆Ù”√tcpΩªª•
+	// Â¶ÇÊûúudpÂèØ‰ª•ÈÄöËÆØÂàô‰∏çÂÜçÂêØÁî®tcp‰∫§‰∫í
 	if (!connectedBaseapp_ && tcp_port_ > 0)
 	{
 		Network::EndPoint* pTcpEndpoint = Network::EndPoint::createPoolObject(OBJECTPOOL_POINT);
@@ -381,7 +381,7 @@ bool ClientObject::initLoginBaseapp()
 		pTCPPacketReceiverEx_ = new Network::TCPPacketReceiverEx(*pTcpEndpoint, this->networkInterface_, this);
 		Bots::getSingleton().networkInterface().dispatcher().registerReadFileDescriptor((*pTcpEndpoint), pTCPPacketReceiverEx_);
 
-		//≤ª‘⁄’‚¿Ô◊¢≤·
+		//‰∏çÂú®ËøôÈáåÊ≥®ÂÜå
 		//Bots::getSingleton().networkInterface().dispatcher().registerWriteFileDescriptor((*pEndpoint), pTCPPacketSenderEx_);
 		pServerChannel_->pPacketSender(pTCPPacketSenderEx_);
 
@@ -420,7 +420,7 @@ void ClientObject::gameTick()
 			destroy();
 			return;
 		}
-		
+
 		pServerChannel()->updateTick(NULL);
 	}
 	else
@@ -432,8 +432,8 @@ void ClientObject::gameTick()
 			connectedBaseapp_ = false;
 			canReset_ = true;
 			state_ = C_STATE_INIT;
-			
-			DEBUG_MSG(fmt::format("ClientObject({})::tickSend: serverCloased! name({})!\n", 
+
+			DEBUG_MSG(fmt::format("ClientObject({})::tickSend: serverCloased! name({})!\n",
 			this->appID(), this->name()));
 		}
 	}
@@ -486,7 +486,7 @@ void ClientObject::gameTick()
 
 			break;
 		case C_STATE_PLAY:
-			break;	
+			break;
 		case C_STATE_DESTROYED:
 			return;
 		default:
@@ -497,9 +497,9 @@ void ClientObject::gameTick()
 	tickSend();
 }
 
-//-------------------------------------------------------------------------------------	
-void ClientObject::onHelloCB_(Network::Channel* pChannel, const std::string& verInfo, 
-		const std::string& scriptVerInfo, const std::string& protocolMD5, const std::string& entityDefMD5, 
+//-------------------------------------------------------------------------------------
+void ClientObject::onHelloCB_(Network::Channel* pChannel, const std::string& verInfo,
+		const std::string& scriptVerInfo, const std::string& protocolMD5, const std::string& entityDefMD5,
 		COMPONENT_TYPE componentType)
 {
 	if(Network::g_channelExternalEncryptType == 1)
@@ -530,12 +530,12 @@ void ClientObject::onCreateAccountResult(Network::Channel * pChannel, MemoryStre
 	{
 		//error_ = C_ERROR_CREATE_FAILED;
 
-		// ºÃ–¯≥¢ ‘µ«¬º
+		// ÁªßÁª≠Â∞ùËØïÁôªÂΩï
 		state_ = C_STATE_LOGIN;
-		
-		INFO_MSG(fmt::format("ClientObject::onCreateAccountResult: {} create is failed! code={}.\n", 
+
+		INFO_MSG(fmt::format("ClientObject::onCreateAccountResult: {} create is failed! code={}.\n",
 			name_, SERVER_ERR_STR[retcode]));
-		
+
 		return;
 	}
 
@@ -543,7 +543,7 @@ void ClientObject::onCreateAccountResult(Network::Channel * pChannel, MemoryStre
 	INFO_MSG(fmt::format("ClientObject::onCreateAccountResult: {} create is successfully!\n", name_));
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void ClientObject::onLoginSuccessfully(Network::Channel * pChannel, MemoryStream& s)
 {
 	std::string accountName;
@@ -554,13 +554,13 @@ void ClientObject::onLoginSuccessfully(Network::Channel * pChannel, MemoryStream
 	s >> udp_port_;
 	s.readBlob(serverDatas_);
 
-	INFO_MSG(fmt::format("ClientObject::onLoginSuccessfully: {} addr={}:{}|{}!\n", 
+	INFO_MSG(fmt::format("ClientObject::onLoginSuccessfully: {} addr={}:{}|{}!\n",
 		name_, ip_, tcp_port_, udp_port_));
 
 	state_ = C_STATE_LOGIN_BASEAPP_CREATE;
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void ClientObject::onLoginFailed(Network::Channel * pChannel, MemoryStream& s)
 {
 	SERVER_ERROR_CODE failedcode;
@@ -568,16 +568,16 @@ void ClientObject::onLoginFailed(Network::Channel * pChannel, MemoryStream& s)
 	s >> failedcode;
 	s.readBlob(serverDatas_);
 
-	INFO_MSG(fmt::format("ClientObject::onLoginFailed: {} failedcode={}!\n", 
+	INFO_MSG(fmt::format("ClientObject::onLoginFailed: {} failedcode={}!\n",
 		name_, SERVER_ERR_STR[failedcode]));
 
 	// error_ = C_ERROR_LOGIN_FAILED;
 
-	// ºÃ–¯≥¢ ‘µ«¬º
+	// ÁªßÁª≠Â∞ùËØïÁôªÂΩï
 	state_ = C_STATE_LOGIN;
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void ClientObject::onLoginBaseappFailed(Network::Channel * pChannel, SERVER_ERROR_CODE failedcode)
 {
 	ClientObjectBase::onLoginBaseappFailed(pChannel, failedcode);

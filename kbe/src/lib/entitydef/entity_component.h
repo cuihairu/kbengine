@@ -12,7 +12,7 @@
 
 namespace KBEngine {
 
-// µ÷ÓÃËùÓĞ×é¼şµÄ·½·¨
+// è°ƒç”¨æ‰€æœ‰ç»„ä»¶çš„æ–¹æ³•
 #define CALL_ENTITY_AND_COMPONENTS_METHOD(ENTITYOBJ, CALLCODE)													\
 {																												\
 	{																											\
@@ -78,14 +78,14 @@ namespace KBEngine {
 
 class EntityComponent : public script::ScriptObject
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
 	BASE_SCRIPT_HREADER(EntityComponent, ScriptObject)
 public:
-	EntityComponent(ENTITY_ID ownerID, ScriptDefModule* pComponentDescrs, COMPONENT_TYPE assignmentToComponentType/*ÊôĞÔËùÊôÊµÌåµÄÄÄÒ»²¿·Ö£¬cell»òÕßbase?*/);
+	EntityComponent(ENTITY_ID ownerID, ScriptDefModule* pComponentDescrs, COMPONENT_TYPE assignmentToComponentType/*å±æ€§æ‰€å±å®ä½“çš„å“ªä¸€éƒ¨åˆ†ï¼Œcellæˆ–è€…base?*/);
 	~EntityComponent();
 
 	/** 
-		»ñÈ¡entityID 
+		è·å–entityID 
 	*/
 	ENTITY_ID ownerID() const;
 
@@ -112,34 +112,34 @@ public:
 	DECLARE_PY_MOTHOD_ARG1(pyDelTimer, PyObject_ptr);
 
 	/** 
-		»ñµÃÃèÊö 
+		è·å¾—æè¿° 
 	*/
 	INLINE ScriptDefModule* pComponentDescrs(void) const;
 
 	/**
-		½Å±¾±»°²×°Ê±±»µ÷ÓÃ
+		è„šæœ¬è¢«å®‰è£…æ—¶è¢«è°ƒç”¨
 	*/
 	static void onInstallScript(PyObject* mod);
 
 	/** 
-		Ö§³Öpickler ·½·¨ 
+		æ”¯æŒpickler æ–¹æ³• 
 	*/
 	static PyObject* __py_reduce_ex__(PyObject* self, PyObject* protocol);
 	
 	/**
-		unpickle·½·¨
+		unpickleæ–¹æ³•
 	*/
 	static PyObject* __unpickle__(PyObject* self, PyObject* args);
 
 	/**
-		½Å±¾ÇëÇó»ñÈ¡ÊôĞÔ»òÕß·½·¨
+		è„šæœ¬è¯·æ±‚è·å–å±æ€§æˆ–è€…æ–¹æ³•
 	*/
 	PyObject* onScriptGetAttribute(PyObject* attr);
 	int onScriptSetAttribute(PyObject* attr, PyObject* value);
 	int onScriptDelAttribute(PyObject* attr);
 
 	/**
-		ÕâĞ©³õÊ¼»¯½Ó¿ÚÓÉentityÔÚÏà¶ÔÓ¦µÄ½Ó¿ÚÖĞ³õÊ¼»¯
+		è¿™äº›åˆå§‹åŒ–æ¥å£ç”±entityåœ¨ç›¸å¯¹åº”çš„æ¥å£ä¸­åˆå§‹åŒ–
 	*/
 	void initializeScript();
 
@@ -149,7 +149,7 @@ public:
 	void initProperty(bool isReload = false);
 
 	/**
-		»ñµÃ¶ÔÏóµÄÃèÊö
+		è·å¾—å¯¹è±¡çš„æè¿°
 	*/
 	PyObject* tp_repr();
 	PyObject* tp_str();
@@ -210,37 +210,37 @@ public:
 	static std::vector<EntityComponent*> getComponents(const std::string& name, PyObject* pEntity, ScriptDefModule* pEntityScriptDescrs);
 
 	/**
-		½Å±¾ÇëÇó»ñÈ¡clientµØÖ·
+		è„šæœ¬è¯·æ±‚è·å–clientåœ°å€
 	*/
 	DECLARE_PY_GET_MOTHOD(pyName);
 
 	/**
-		½Å±¾»ñÈ¡entityCall
+		è„šæœ¬è·å–entityCall
 	*/
 	DECLARE_PY_GET_MOTHOD(pyGetCellEntityCall);
 
 	/**
-		½Å±¾»ñÈ¡entityCall
+		è„šæœ¬è·å–entityCall
 	*/
 	DECLARE_PY_GET_MOTHOD(pyGetBaseEntityCall);
 
 	/**
-		½Å±¾»ñÈ¡entityCall
+		è„šæœ¬è·å–entityCall
 	*/
 	DECLARE_PY_GET_MOTHOD(pyGetClientEntityCall);
 
 	/**
-		½Å±¾»ñÈ¡entityCall
+		è„šæœ¬è·å–entityCall
 	*/
 	DECLARE_PY_GET_MOTHOD(pyGetAllClients);
 
 	/**
-		½Å±¾»ñÈ¡entityCall
+		è„šæœ¬è·å–entityCall
 	*/
 	DECLARE_PY_GET_MOTHOD(pyGetOtherClients);
 
 	/**
-		µ÷ÓÃ¿Í»§¶ËÊµÌåµÄ·½·¨
+		è°ƒç”¨å®¢æˆ·ç«¯å®ä½“çš„æ–¹æ³•
 	*/
 	DECLARE_PY_MOTHOD_ARG1(pyClientEntity, ENTITY_ID);
 
@@ -252,7 +252,7 @@ protected:
 	COMPONENT_TYPE							componentType_;
 	ENTITY_ID								ownerID_;								// entityID
 	PyObject*								owner_;
-	ScriptDefModule*						pComponentDescrs_;						// ×é¼şµÄÃèÊö
+	ScriptDefModule*						pComponentDescrs_;						// ç»„ä»¶çš„æè¿°
 
 	void _setATIdx(ENTITY_COMPONENTS::size_type idx) {
 		atIdx_ = idx;
@@ -262,7 +262,7 @@ protected:
 
 	OnDataChangedEvent						onDataChangedEvent_;
 
-	PropertyDescription*					pPropertyDescription_;					// ³ĞÔØÕâ¸ö×é¼ş×ÔÉíµÄÊµÌåÊôĞÔÃèÊö
+	PropertyDescription*					pPropertyDescription_;					// æ‰¿è½½è¿™ä¸ªç»„ä»¶è‡ªèº«çš„å®ä½“å±æ€§æè¿°
 
 private:
 	int32									clientappID_;

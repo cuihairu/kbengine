@@ -4,21 +4,21 @@
 #define KBE_COORDINATE_NODE_H
 
 #include "helper/debug_helper.h"
-#include "common/common.h"	
+#include "common/common.h"
 
 namespace KBEngine{
 
 #define COORDINATE_NODE_FLAG_UNKNOWN				0x00000000
-#define COORDINATE_NODE_FLAG_ENTITY					0x00000001		// Ò»¸öEntity½Úµã
-#define COORDINATE_NODE_FLAG_TRIGGER				0x00000002		// Ò»¸ö´¥·¢Æ÷½Úµã
-#define COORDINATE_NODE_FLAG_HIDE					0x00000004		// Òş²Ø½Úµã(ÆäËû½Úµã²»¿É¼û)
-#define COORDINATE_NODE_FLAG_REMOVING				0x00000008		// É¾³ıÖĞµÄ½Úµã
-#define COORDINATE_NODE_FLAG_REMOVED				0x00000010		// É¾³ı½Úµã
-#define COORDINATE_NODE_FLAG_PENDING				0x00000020		// ÕâÀà½Úµã´¦ÓÚupdate²Ù×÷ÖĞ¡£
-#define COORDINATE_NODE_FLAG_ENTITY_NODE_UPDATING	0x00000040		// entity½ÚµãÕıÔÚÖ´ĞĞupdate²Ù×÷
-#define COORDINATE_NODE_FLAG_INSTALLING				0x00000080		// ½ÚµãÕıÔÚ°²×°²Ù×÷
-#define COORDINATE_NODE_FLAG_POSITIVE_BOUNDARY		0x00000100		// ½ÚµãÊÇ´¥·¢Æ÷µÄÕı±ß½ç
-#define COORDINATE_NODE_FLAG_NEGATIVE_BOUNDARY		0x00000200		// ½ÚµãÊÇ´¥·¢Æ÷µÄ¸º±ß½ç
+#define COORDINATE_NODE_FLAG_ENTITY					0x00000001		// ä¸€ä¸ªEntityèŠ‚ç‚¹
+#define COORDINATE_NODE_FLAG_TRIGGER				0x00000002		// ä¸€ä¸ªè§¦å‘å™¨èŠ‚ç‚¹
+#define COORDINATE_NODE_FLAG_HIDE					0x00000004		// éšè—èŠ‚ç‚¹(å…¶ä»–èŠ‚ç‚¹ä¸å¯è§)
+#define COORDINATE_NODE_FLAG_REMOVING				0x00000008		// åˆ é™¤ä¸­çš„èŠ‚ç‚¹
+#define COORDINATE_NODE_FLAG_REMOVED				0x00000010		// åˆ é™¤èŠ‚ç‚¹
+#define COORDINATE_NODE_FLAG_PENDING				0x00000020		// è¿™ç±»èŠ‚ç‚¹å¤„äºupdateæ“ä½œä¸­ã€‚
+#define COORDINATE_NODE_FLAG_ENTITY_NODE_UPDATING	0x00000040		// entityèŠ‚ç‚¹æ­£åœ¨æ‰§è¡Œupdateæ“ä½œ
+#define COORDINATE_NODE_FLAG_INSTALLING				0x00000080		// èŠ‚ç‚¹æ­£åœ¨å®‰è£…æ“ä½œ
+#define COORDINATE_NODE_FLAG_POSITIVE_BOUNDARY		0x00000100		// èŠ‚ç‚¹æ˜¯è§¦å‘å™¨çš„æ­£è¾¹ç•Œ
+#define COORDINATE_NODE_FLAG_NEGATIVE_BOUNDARY		0x00000200		// èŠ‚ç‚¹æ˜¯è§¦å‘å™¨çš„è´Ÿè¾¹ç•Œ
 
 #define COORDINATE_NODE_FLAG_HIDE_OR_REMOVED		(COORDINATE_NODE_FLAG_REMOVED | COORDINATE_NODE_FLAG_HIDE)
 
@@ -28,7 +28,7 @@ class CoordinateNode
 public:
 	CoordinateNode(CoordinateSystem* pCoordinateSystem = NULL);
 	virtual ~CoordinateNode();
-	
+
 	INLINE void flags(uint32 v);
 	INLINE uint32 flags() const;
 	INLINE void addFlags(uint32 v);
@@ -36,8 +36,8 @@ public:
 	INLINE bool hasFlags(uint32 v) const;
 
 	/**
-		(½Úµã±¾ÉíµÄ×ø±ê)
-		x && zÓÉ²»Í¬µÄÓ¦ÓÃÊµÏÖ(´Ó²»Í¬´¦»ñÈ¡)
+		(èŠ‚ç‚¹æœ¬èº«çš„åæ ‡)
+		x && zç”±ä¸åŒçš„åº”ç”¨å®ç°(ä»ä¸åŒå¤„è·å–)
 	*/
 	virtual float x() const { return x_; }
 	virtual float y() const { return y_; }
@@ -48,8 +48,8 @@ public:
 	virtual void z(float v) { z_ = v; }
 
 	/**
-		(À©Õ¹×ø±ê)
-		x && zÓÉ²»Í¬µÄÓ¦ÓÃÊµÏÖ(´Ó²»Í¬´¦»ñÈ¡)
+		(æ‰©å±•åæ ‡)
+		x && zç”±ä¸åŒçš„åº”ç”¨å®ç°(ä»ä¸åŒå¤„è·å–)
 	*/
 	virtual float xx() const { return 0.f; }
 	virtual float yy() const { return 0.f; }
@@ -65,7 +65,7 @@ public:
 
 	int8 weight() const { return weight_; }
 
-	virtual void resetOld() { 
+	virtual void resetOld() {
 		old_xx_ = xx();
 		old_yy_ = yy();
 		old_zz_ = zz();
@@ -89,7 +89,7 @@ public:
 	}
 
 	/**
-		»ñÈ¡Á´±íµÄÇ°ºó¶ËÖ¸Õë
+		è·å–é“¾è¡¨çš„å‰åç«¯æŒ‡é’ˆ
 	*/
 	INLINE CoordinateNode* pPrevX() const;
 	INLINE CoordinateNode* pNextX() const;
@@ -99,7 +99,7 @@ public:
 	INLINE CoordinateNode* pNextZ() const;
 
 	/**
-		ÉèÖÃÁ´±íµÄÇ°ºó¶ËÖ¸Õë
+		è®¾ç½®é“¾è¡¨çš„å‰åç«¯æŒ‡é’ˆ
 	*/
 	INLINE void pPrevX(CoordinateNode* pNode);
 	INLINE void pNextX(CoordinateNode* pNode);
@@ -109,8 +109,8 @@ public:
 	INLINE void pNextZ(CoordinateNode* pNode);
 
 	/**
-		Ä³¸ö½Úµã±ä¶¯¾­¹ıÁË±¾½Úµã
-		@isfront: ÏòÇ°ÒÆ¶¯»¹ÊÇÏòºóÒÆ¶¯
+		æŸä¸ªèŠ‚ç‚¹å˜åŠ¨ç»è¿‡äº†æœ¬èŠ‚ç‚¹
+		@isfront: å‘å‰ç§»åŠ¨è¿˜æ˜¯å‘åç§»åŠ¨
 	*/
 	virtual void onNodePassX(CoordinateNode* pNode, bool isfront);
 	virtual void onNodePassY(CoordinateNode* pNode, bool isfront);
@@ -119,14 +119,14 @@ public:
 	virtual void onRemove();
 
 	/**
-		¸¸½ÚµãÉ¾³ı
+		çˆ¶èŠ‚ç‚¹åˆ é™¤
 	*/
 	virtual void onParentRemove(CoordinateNode* pParentNode) {
 	}
 
 	/**
-		µ±½ÚµãÓĞ±ä¶¯Ê±£¬ĞèÒª¸üĞÂËüÔÚlistÖĞµÄ
-		Ïà¹ØÎ»ÖÃµÈĞÅÏ¢
+		å½“èŠ‚ç‚¹æœ‰å˜åŠ¨æ—¶ï¼Œéœ€è¦æ›´æ–°å®ƒåœ¨listä¸­çš„
+		ç›¸å…³ä½ç½®ç­‰ä¿¡æ¯
 	*/
 	virtual void update();
 
@@ -139,7 +139,7 @@ public:
 #endif
 
 protected:
-	// Á´±íµÄÇ°¶ËºÍºó¶Ë
+	// é“¾è¡¨çš„å‰ç«¯å’Œåç«¯
 	CoordinateNode* pPrevX_;
 	CoordinateNode* pNextX_;
 	CoordinateNode* pPrevY_;

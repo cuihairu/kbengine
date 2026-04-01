@@ -4,7 +4,7 @@
 #include "cellapp.h"
 #include "common/memorystream.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
 EntityRef::EntityRef(Entity* pEntity):
@@ -76,10 +76,10 @@ void EntityRef::onReclaimObject()
 //-------------------------------------------------------------------------------------
 void EntityRef::pEntity(Entity* e)
 {
-	pEntity_ = e; 
+	pEntity_ = e;
 
 	if(e)
-		id_ = e->id(); 
+		id_ = e->id();
 }
 
 //-------------------------------------------------------------------------------------

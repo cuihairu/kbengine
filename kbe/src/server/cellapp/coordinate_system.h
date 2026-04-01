@@ -4,7 +4,7 @@
 #define KBE_COORDINATE_SYSTEM_H
 
 #include "helper/debug_helper.h"
-#include "common/common.h"	
+#include "common/common.h"
 
 //#define DEBUG_COORDINATE_SYSTEM
 
@@ -19,12 +19,12 @@ public:
 	~CoordinateSystem();
 
 	/**
-		ÏòlistÖĞ²åÈë½Úµã
+		å‘listä¸­æ’å…¥èŠ‚ç‚¹
 	*/
 	bool insert(CoordinateNode* pNode);
 
 	/**
-		½«½Úµã´ÓlistÖĞÒÆ³ı
+		å°†èŠ‚ç‚¹ä»listä¸­ç§»é™¤
 	*/
 	bool remove(CoordinateNode* pNode);
 	bool removeReal(CoordinateNode* pNode);
@@ -32,13 +32,13 @@ public:
 	void releaseNodes();
 
 	/**
-		µ±Ä³¸ö½ÚµãÓĞ±ä¶¯Ê±£¬ĞèÒª¸üĞÂËüÔÚlistÖĞµÄ
-		Ïà¹ØÎ»ÖÃµÈĞÅÏ¢
+		å½“æŸä¸ªèŠ‚ç‚¹æœ‰å˜åŠ¨æ—¶ï¼Œéœ€è¦æ›´æ–°å®ƒåœ¨listä¸­çš„
+		ç›¸å…³ä½ç½®ç­‰ä¿¡æ¯
 	*/
 	void update(CoordinateNode* pNode);
 
 	/**
-		ÒÆ¶¯½Úµã
+		ç§»åŠ¨èŠ‚ç‚¹
 	*/
 	void moveNodeX(CoordinateNode* pNode, float px, CoordinateNode* pCurrNode);
 	void moveNodeY(CoordinateNode* pNode, float py, CoordinateNode* pCurrNode);
@@ -60,7 +60,7 @@ public:
 private:
 	uint32 size_;
 
-	// Á´±íµÄÊ×Î²Ö¸Õë
+	// é“¾è¡¨çš„é¦–å°¾æŒ‡é’ˆ
 	CoordinateNode* first_x_coordinateNode_;
 	CoordinateNode* first_y_coordinateNode_;
 	CoordinateNode* first_z_coordinateNode_;

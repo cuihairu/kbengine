@@ -31,7 +31,7 @@ public:
 	virtual bool writeServerErrorDescrsModuleErrDescr(int errorID, const std::string& errname, const std::string& errdescr);
 	virtual bool writeServerErrorDescrsModuleEnd();
 
-	
+
 	virtual bool writeEngineMessagesModuleBegin();
 	virtual bool writeEngineMessagesModuleMessage(Network::ExposedMessageInfo& messageInfos, COMPONENT_TYPE componentType);
 	virtual bool writeEngineMessagesModuleEnd();
@@ -57,7 +57,7 @@ public:
 	virtual bool writeBaseEntityCallEnd(ScriptDefModule* pScriptDefModule);
 	virtual bool writeCellEntityCallBegin(ScriptDefModule* pScriptDefModule);
 	virtual bool writeCellEntityCallEnd(ScriptDefModule* pScriptDefModule);
-	virtual bool writeEntityCallMethodBegin(ScriptDefModule* pScriptDefModule, MethodDescription* pMethodDescription, 
+	virtual bool writeEntityCallMethodBegin(ScriptDefModule* pScriptDefModule, MethodDescription* pMethodDescription,
 		const char* fillString1, const char* fillString2, COMPONENT_TYPE componentType);
 	virtual bool writeEntityCallMethodEnd(ScriptDefModule* pScriptDefModule, MethodDescription* pMethodDescription);
 

@@ -12,10 +12,10 @@
 #include "server/components.h"
 #include <sstream>
 #include "server/telnet_server.h"
-#include "profile.h"	
+#include "profile.h"
 
 namespace KBEngine{
-	
+
 ServerConfig g_serverConfig;
 KBE_SINGLETON_INIT(Logger);
 
@@ -34,8 +34,8 @@ uint64 secsNumlogs()
 }
 
 //-------------------------------------------------------------------------------------
-Logger::Logger(Network::EventDispatcher& dispatcher, 
-				 Network::NetworkInterface& ninterface, 
+Logger::Logger(Network::EventDispatcher& dispatcher,
+				 Network::NetworkInterface& ninterface,
 				 COMPONENT_TYPE componentType,
 				 COMPONENT_ID componentID):
 	PythonApp(dispatcher, ninterface, componentType, componentID),
@@ -52,7 +52,7 @@ Logger::~Logger()
 {
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 bool Logger::initializeWatcher()
 {
 	ProfileVal::setWarningPeriod(stampsPerSecond() / g_kbeSrvConfig.gameUpdateHertz());
@@ -117,7 +117,7 @@ bool Logger::initializeEnd()
 {
 	PythonApp::initializeEnd();
 
-	// ÓÉÓÚlogger½ÓÊÕÆäËûappµÄlog£¬Èç¹û¸ú×Ù°üÊä³ö½«»á·Ç³£¿¨¡£
+	// ç”±äºloggeræ¥æ”¶å…¶ä»–appçš„logï¼Œå¦‚æœè·Ÿè¸ªåŒ…è¾“å‡ºå°†ä¼šéå¸¸å¡ã€‚
 	Network::g_trace_packet = 0;
 
 	timer_ = this->dispatcher().addTimer(1000000 / 50, this,
@@ -125,7 +125,7 @@ bool Logger::initializeEnd()
 
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 
-	// ËùÓĞ½Å±¾¶¼¼ÓÔØÍê±Ï
+	// æ‰€æœ‰è„šæœ¬éƒ½åŠ è½½å®Œæ¯•
 	if (getEntryScript().get())
 	{
 		PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
@@ -170,12 +170,12 @@ void Logger::finalise()
 	PythonApp::finalise();
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 ShutdownHandler::CAN_SHUTDOWN_STATE Logger::canShutdown()
 {
 	if (getEntryScript().get() && PyObject_HasAttrString(getEntryScript().get(), "onReadyForShutDown") > 0)
 	{
-		// ËùÓĞ½Å±¾¶¼¼ÓÔØÍê±Ï
+		// æ‰€æœ‰è„šæœ¬éƒ½åŠ è½½å®Œæ¯•
 		PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(),
 			const_cast<char*>("onReadyForShutDown"),
 			const_cast<char*>(""));
@@ -206,12 +206,12 @@ ShutdownHandler::CAN_SHUTDOWN_STATE Logger::canShutdown()
 	return ShutdownHandler::CAN_SHUTDOWN_STATE_TRUE;
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Logger::onShutdownBegin()
 {
 	PythonApp::onShutdownBegin();
 
-	// Í¨Öª½Å±¾
+	// é€šçŸ¥è„šæœ¬
 	if (getEntryScript().get())
 	{
 		SCOPED_PROFILE(SCRIPTCALL_PROFILE);
@@ -219,7 +219,7 @@ void Logger::onShutdownBegin()
 	}
 }
 
-//-------------------------------------------------------------------------------------	
+//-------------------------------------------------------------------------------------
 void Logger::onShutdownEnd()
 {
 	PythonApp::onShutdownEnd();
@@ -244,7 +244,7 @@ void Logger::writeLog(Network::Channel* pChannel, KBEngine::MemoryStream& s)
 	s >> pLogItem->kbetime;
 	s.readBlob(str);
 
-	time_t tt = static_cast<time_t>(pLogItem->t);	
+	time_t tt = static_cast<time_t>(pLogItem->t);
     tm* aTm = localtime(&tt);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
@@ -274,14 +274,14 @@ void Logger::writeLog(Network::Channel* pChannel, KBEngine::MemoryStream& s)
 	pLogItem->logstream << pLogItem->componentID;
 	pLogItem->logstream << " ";
 
-    kbe_snprintf(timebuf, MAX_BUF, " [%-4d-%02d-%02d %02d:%02d:%02d %03d] ", aTm->tm_year+1900, aTm->tm_mon+1, 
+    kbe_snprintf(timebuf, MAX_BUF, " [%-4d-%02d-%02d %02d:%02d:%02d %03d] ", aTm->tm_year+1900, aTm->tm_mon+1,
 		aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec, pLogItem->kbetime);
 	pLogItem->logstream << timebuf;
 
 	pLogItem->logstream << "- ";
 	pLogItem->logstream << str;
 
-	// ¼ÇÂ¼ÏÂÍêÕûµÄÈÕÖ¾£¬ÒÔÔÚ½Å±¾»Øµ÷Ê±Ê¹ÓÃ
+	// è®°å½•ä¸‹å®Œæ•´çš„æ—¥å¿—ï¼Œä»¥åœ¨è„šæœ¬å›è°ƒæ—¶ä½¿ç”¨
 	std::string sLog = pLogItem->logstream.str();
 
 	static bool notificationScript = getEntryScript().get() && PyObject_HasAttrString(getEntryScript().get(), "onLogWrote") > 0;
@@ -334,7 +334,7 @@ void Logger::writeLog(Network::Channel* pChannel, KBEngine::MemoryStream& s)
 			delete pLogItem;
 			return;
 		}
-		 
+
 		PRINT_MSG(sLog);
 		DebugHelper::getSingleton().changeLogger("default");
 	}
@@ -345,7 +345,7 @@ void Logger::writeLog(Network::Channel* pChannel, KBEngine::MemoryStream& s)
 		iter->second.onMessage(pLogItem);
 	}
 
-	// »º´æÒ»²¿·Ölog£¬Ìá¹©¹¤¾ß²é¿´logÊ±ÄÜ¿ìËÙ»ñÈ¡³õÊ¼ÉÏÏÂÎÄ
+	// ç¼“å­˜ä¸€éƒ¨åˆ†logï¼Œæä¾›å·¥å…·æŸ¥çœ‹logæ—¶èƒ½å¿«é€Ÿè·å–åˆå§‹ä¸Šä¸‹æ–‡
 	buffered_logs_.push_back(pLogItem);
 	if(buffered_logs_.size() > 64)
 	{

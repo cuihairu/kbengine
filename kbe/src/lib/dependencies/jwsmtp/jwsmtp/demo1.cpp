@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
    // display the html if the client is set to show html messages.
    //    m.setmessageHTMLfile("/home/myname/thefile.html");
    
-	//¾­¹ı²âÊÔ£¬163Ö§³ÖµÄauthÈÏÖ¤ÊÇPLAINÄ£Ê½  
+	//ç»è¿‡æµ‹è¯•ï¼Œ163æ”¯æŒçš„authè®¤è¯æ˜¯PLAINæ¨¡å¼  
    m.authtype(jwsmtp::mailer::PLAIN);  
 
    // Build our html from a string. You can also send html as a vector.

@@ -6,7 +6,7 @@
 #include "coordinate_system.h"
 #include "range_trigger_node.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ public:
 	INLINE bool valid() const { return !pCurrentNode_->hasFlags(COORDINATE_NODE_FLAG_HIDE_OR_REMOVED); }
 	INLINE CoordinateNode* currentNode() const { return pCurrentNode_; }
 	INLINE Entity* currentNodeEntity() const { return static_cast<EntityCoordinateNode*>(pCurrentNode_)->pEntity(); }
-	
+
 	INLINE CoordinateNode* prev() {
 		pCurrentNode_ = pCurrentNode_->pPrevX();
 		return pCurrentNode_;
@@ -118,8 +118,8 @@ public:
 
 //-------------------------------------------------------------------------------------
 /**
- ²éÕÒÀëÖĞĞÄµã×î½üµÄ½Úµã
- Ä£°æ²ÎÊı NODEWRAP È¡ÖµÎªÒÔÏÂÈıÕßÖ®Ò»£º
+ æŸ¥æ‰¾ç¦»ä¸­å¿ƒç‚¹æœ€è¿‘çš„èŠ‚ç‚¹
+ æ¨¡ç‰ˆå‚æ•° NODEWRAP å–å€¼ä¸ºä»¥ä¸‹ä¸‰è€…ä¹‹ä¸€ï¼š
    - CoordinateNodeWrapX
    - CoordinateNodeWrapZ
    - CoordinateNodeWrapY
@@ -130,9 +130,9 @@ CoordinateNode* findNearestNode(CoordinateNode* rootNode, const Position3D& orig
 	CoordinateNode* pRN = NULL;
 	CoordinateNode* pCoordinateNode = rootNode;
 
-	// ÏÈÕÒµ½Ò»¸öEntityNode×öÖ§µã
+	// å…ˆæ‰¾åˆ°ä¸€ä¸ªEntityNodeåšæ”¯ç‚¹
 	{
-		// ÏÈÕÒµ±Ç°½Úµã£¬ÕÒ²»µ½ÔòÍù×ó±ß±éÀúÑ°ÕÒ
+		// å…ˆæ‰¾å½“å‰èŠ‚ç‚¹ï¼Œæ‰¾ä¸åˆ°åˆ™å¾€å·¦è¾¹éå†å¯»æ‰¾
 		NODEWRAP wrap(rootNode, originPos);
 		do
 		{
@@ -143,7 +143,7 @@ CoordinateNode* findNearestNode(CoordinateNode* rootNode, const Position3D& orig
 			}
 		} while (wrap.prev());
 
-		// Èç¹ûÕÒ²»µ½£¬ÔòÍùÓÒ±ß±àÀúÑ°ÕÒ
+		// å¦‚æœæ‰¾ä¸åˆ°ï¼Œåˆ™å¾€å³è¾¹ç¼–å†å¯»æ‰¾
 		if (!pRN)
 		{
 			wrap.reset();
@@ -156,29 +156,29 @@ CoordinateNode* findNearestNode(CoordinateNode* rootNode, const Position3D& orig
 				}
 			}
 
-			// ÀíÂÛÉÏ²»¿ÉÄÜÕÒ²»µ½
+			// ç†è®ºä¸Šä¸å¯èƒ½æ‰¾ä¸åˆ°
 			if (!pRN)
 				return NULL;
 		}
 	}
 
-	// ÄÜÀ´µ½ÕâÀï£¬±íÊ¾Ò»¶¨ÊÇÕÒµ½ÁË£¬¿ªÊ¼ÕÒÀëÄ¿±êÎ»ÖÃ×î½üµÄNode
+	// èƒ½æ¥åˆ°è¿™é‡Œï¼Œè¡¨ç¤ºä¸€å®šæ˜¯æ‰¾åˆ°äº†ï¼Œå¼€å§‹æ‰¾ç¦»ç›®æ ‡ä½ç½®æœ€è¿‘çš„Node
 	NODEWRAP wrap(pRN, originPos);
 	int v = wrap.compare();
-	
-	if (v == 0)  // ÏàµÈ
+
+	if (v == 0)  // ç›¸ç­‰
 	{
 		return wrap.currentNode();
 	}
-	else if (v > 0)  // Entity NodeÔÚÖĞĞÄµãµÄÓÒ±ß
+	else if (v > 0)  // Entity Nodeåœ¨ä¸­å¿ƒç‚¹çš„å³è¾¹
 	{
 		pCoordinateNode = wrap.currentNode();
 		while (wrap.prev())
 		{
 			if (wrap.isEntityNode() && wrap.valid())
 			{
-				// ÓÉÓÚÊÇ´ÓÖĞĞÄµãµÄÓÒ±ßÍù×ó±ß±éÀú£¬
-				// Òò´ËµÚÒ»¸öpositionĞ¡ÓÚÖĞĞÄµãµÄentity¾ÍÒ»¶¨ÊÇÀëÖĞĞÄµã×î½üµÄ
+				// ç”±äºæ˜¯ä»ä¸­å¿ƒç‚¹çš„å³è¾¹å¾€å·¦è¾¹éå†ï¼Œ
+				// å› æ­¤ç¬¬ä¸€ä¸ªpositionå°äºä¸­å¿ƒç‚¹çš„entityå°±ä¸€å®šæ˜¯ç¦»ä¸­å¿ƒç‚¹æœ€è¿‘çš„
 				if (wrap.compare() <= 0)
 				{
 					return wrap.currentNode();
@@ -189,15 +189,15 @@ CoordinateNode* findNearestNode(CoordinateNode* rootNode, const Position3D& orig
 		}
 		return pCoordinateNode;
 	}
-	else   // Entity NodeÔÚÖĞĞÄµãµÄ×ó±ß
+	else   // Entity Nodeåœ¨ä¸­å¿ƒç‚¹çš„å·¦è¾¹
 	{
 		pCoordinateNode = wrap.currentNode();
 		while (wrap.next())
 		{
 			if (wrap.isEntityNode() && wrap.valid())
 			{
-				// ÓÉÓÚÊÇ´ÓÖĞĞÄµãµÄ×ó±ßÍùÓÒ±ß±éÀú£¬
-				// Òò´ËµÚÒ»¸öposition´óÓÚÖĞĞÄµãµÄentity¾ÍÒ»¶¨ÊÇÀëÖĞĞÄµã×î½üµÄ
+				// ç”±äºæ˜¯ä»ä¸­å¿ƒç‚¹çš„å·¦è¾¹å¾€å³è¾¹éå†ï¼Œ
+				// å› æ­¤ç¬¬ä¸€ä¸ªpositionå¤§äºä¸­å¿ƒç‚¹çš„entityå°±ä¸€å®šæ˜¯ç¦»ä¸­å¿ƒç‚¹æœ€è¿‘çš„
 				if (wrap.compare() >= 0)
 				{
 					return wrap.currentNode();
@@ -213,8 +213,8 @@ CoordinateNode* findNearestNode(CoordinateNode* rootNode, const Position3D& orig
 
 //-------------------------------------------------------------------------------------
 /**
- ²éÕÒÒ»¸öÖáÉÏ·ûºÏ·¶Î§µÄentity
- Ä£°æ²ÎÊı NODEWRAP È¡ÖµÎªÒÔÏÂÈıÕßÖ®Ò»£º
+ æŸ¥æ‰¾ä¸€ä¸ªè½´ä¸Šç¬¦åˆèŒƒå›´çš„entity
+ æ¨¡ç‰ˆå‚æ•° NODEWRAP å–å€¼ä¸ºä»¥ä¸‹ä¸‰è€…ä¹‹ä¸€ï¼š
    - CoordinateNodeWrapX
    - CoordinateNodeWrapZ
    - CoordinateNodeWrapY
@@ -229,7 +229,7 @@ void entitiesInAxisRange(std::set<Entity*>& foundEntities, CoordinateNode* rootN
 
 	NODEWRAP wrap(pCoordinateNode, originPos);
 
-	// Èç¹û½Úµã×Ô¼ºÒ²·ûºÏÌõ¼ş£¬Ôò°Ñ×Ô¼º¼Ó½øÈ¥
+	// å¦‚æœèŠ‚ç‚¹è‡ªå·±ä¹Ÿç¬¦åˆæ¡ä»¶ï¼Œåˆ™æŠŠè‡ªå·±åŠ è¿›å»
 	if (wrap.isEntityNode() && wrap.valid())
 	{
 		Entity* pEntity = wrap.currentNodeEntity();
@@ -344,9 +344,9 @@ float EntityCoordinateNode::zz() const
 //-------------------------------------------------------------------------------------
 void EntityCoordinateNode::update()
 {
-	// ÔÚÕâÀï×öÒ»ÏÂ¸üĞÂµÄÔ­ÒòÊÇ£¬ºÜ¿ÉÄÜÔÚCoordinateNode::update()µÄ¹ı³ÌÖĞµ¼ÖÂÊµÌåÎ»ÖÃ±»ÒÆ¶¯
-	// ¶øµ¼ÖÂ´ÎÊıupdate±»µ÷ÓÃ£¬ÔÚÄ³ÖÖÇé¿öÏÂ»á³öÏÖÎÊÌâ
-	// ÀıÈç£º// A->B, B-A£¨´ËÊ±old_*ÊÇB£©, A->B£¨´ËÊ±old_*ÊÇB£¬¶øxxµÈÄ¿µÄµØ¾ÍÊÇB£©,´ËÊ±updateÖĞ»áÎóÅĞÎªÃ»ÓĞÒÆ¶¯¡£
+	// åœ¨è¿™é‡Œåšä¸€ä¸‹æ›´æ–°çš„åŸå› æ˜¯ï¼Œå¾ˆå¯èƒ½åœ¨CoordinateNode::update()çš„è¿‡ç¨‹ä¸­å¯¼è‡´å®ä½“ä½ç½®è¢«ç§»åŠ¨
+	// è€Œå¯¼è‡´æ¬¡æ•°updateè¢«è°ƒç”¨ï¼Œåœ¨æŸç§æƒ…å†µä¸‹ä¼šå‡ºç°é—®é¢˜
+	// ä¾‹å¦‚ï¼š// A->B, B-Aï¼ˆæ­¤æ—¶old_*æ˜¯Bï¼‰, A->Bï¼ˆæ­¤æ—¶old_*æ˜¯Bï¼Œè€Œxxç­‰ç›®çš„åœ°å°±æ˜¯Bï¼‰,æ­¤æ—¶updateä¸­ä¼šè¯¯åˆ¤ä¸ºæ²¡æœ‰ç§»åŠ¨ã€‚
 	// https://github.com/kbengine/kbengine/issues/407
 	old_xx(x());
 	old_yy(y());
@@ -357,7 +357,7 @@ void EntityCoordinateNode::update()
 	addFlags(COORDINATE_NODE_FLAG_ENTITY_NODE_UPDATING);
 	++entityNodeUpdating_;
 
-	// ´Ë´¦±ØĞëÊ¹ÓÃwatcherNodes_.size()¶ø²»ÄÜÊ¹ÓÃµü´úÆ÷±éÀú£¬·ÀÖ¹ÔÚupdateÖĞµ¼ÖÂÔö¼ÓÁËwatcherNodes_ÊıÁ¿¶øÆÆ»µµü´úÆ÷
+	// æ­¤å¤„å¿…é¡»ä½¿ç”¨watcherNodes_.size()è€Œä¸èƒ½ä½¿ç”¨è¿­ä»£å™¨éå†ï¼Œé˜²æ­¢åœ¨updateä¸­å¯¼è‡´å¢åŠ äº†watcherNodes_æ•°é‡è€Œç ´åè¿­ä»£å™¨
 	for (WATCHER_NODES::size_type i = 0; i < watcherNodes_.size(); ++i)
 	{
 		CoordinateNode* pCoordinateNode = watcherNodes_[i];
@@ -411,9 +411,9 @@ void EntityCoordinateNode::onRemove()
 		if (!pCoordinateNode)
 			continue;
 
-		// ÏÈÉèÖÃÎªNULL£¬ ÔÚºóÃæupdateÊ±½øĞĞÉ¾³ı
-		// ´Ë´¦²»ÄÜ¶ÔwatcherNodes_×ö´óĞ¡×öĞŞ¸Ä£¬ÒòÎª¿ÉÄÜÓÉEntityCoordinateNode::update()ÖĞµ¼ÖÂ¸Ã´¦µ÷ÓÃ
-		// ÄÇÃ´¿ÉÄÜµ¼ÖÂEntityCoordinateNode::update()ÔÚÑ­»·watcherNodes_ÖĞ±»ĞŞ¸Ä¶ø³ö´í¡£
+		// å…ˆè®¾ç½®ä¸ºNULLï¼Œ åœ¨åé¢updateæ—¶è¿›è¡Œåˆ é™¤
+		// æ­¤å¤„ä¸èƒ½å¯¹watcherNodes_åšå¤§å°åšä¿®æ”¹ï¼Œå› ä¸ºå¯èƒ½ç”±EntityCoordinateNode::update()ä¸­å¯¼è‡´è¯¥å¤„è°ƒç”¨
+		// é‚£ä¹ˆå¯èƒ½å¯¼è‡´EntityCoordinateNode::update()åœ¨å¾ªç¯watcherNodes_ä¸­è¢«ä¿®æ”¹è€Œå‡ºé”™ã€‚
 		watcherNodes_[i] = NULL;
 		++delWatcherNodeNum_;
 
@@ -433,7 +433,7 @@ bool EntityCoordinateNode::addWatcherNode(CoordinateNode* pNode)
 		return false;
 
 	watcherNodes_.push_back(pNode);
-	
+
 	onAddWatcherNode(pNode);
 	return true;
 }
@@ -473,7 +473,7 @@ void EntityCoordinateNode::entitiesInRange(std::vector<Entity*>& foundEntities, 
 	entitiesInAxisRange<CoordinateNodeWrapX>(entities_X, rootNode, originPos, radius, entityUType);
 	entitiesInAxisRange<CoordinateNodeWrapZ>(entities_Z, rootNode, originPos, radius, entityUType);
 
-	// ²éÕÒY
+	// æŸ¥æ‰¾Y
 	if (CoordinateSystem::hasY)
 	{
 		std::set<Entity*> entities_Y;

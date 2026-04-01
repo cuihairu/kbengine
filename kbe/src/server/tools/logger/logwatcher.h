@@ -2,18 +2,18 @@
 
 #ifndef KBE_LOGWATCHER_H
 #define KBE_LOGWATCHER_H
-	
-// common include	
+
+// common include
 
 //#define NDEBUG
 #include "common/common.h"
 #include "network/address.h"
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine
 {
 class MemoryStream;
@@ -47,7 +47,7 @@ public:
 
 	void reset();
 	void addr(const Network::Address& address) { addr_ = address; }
-	
+
 	void onMessage(LOG_ITEM* pLogItem);
 
 	STATES state() const{ return state_; }

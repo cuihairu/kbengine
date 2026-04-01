@@ -36,7 +36,7 @@ BOOL CEditSendbuffer::PreTranslateMessage(MSG* pMsg)
 			this->GetWindowTextW(s);
 			dlg->commitPythonCommand(s);
 			this->SetWindowTextW(L"");
-			return FALSE;  
+			return FALSE;
 		}
 		else if((GetKeyState(VK_MENU) < 0 || GetKeyState(VK_CONTROL) < 0) && GetKeyState(VK_UP) < 0)
 		{

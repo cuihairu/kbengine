@@ -13,14 +13,14 @@
 IMPLEMENT_DYNAMIC(CLogWindow, CDialog)
 
 CString  state_flags[8] = {
-	L"®I",
-	L"°¸",
-	L"®J",
-	L"°˙",
-	L"®K ",
-	L"°˝",
-	L"®L",
-	L"°˚",
+	L"‚Üñ",
+	L"‚Üë",
+	L"‚Üó",
+	L"‚Üí",
+	L"‚Üò ",
+	L"‚Üì",
+	L"‚Üô",
+	L"‚Üê",
 };
 
 int state_flags_idx = 0;
@@ -62,7 +62,7 @@ void CLogWindow::DoDataExchange(CDataExchange* pDX)
 BOOL CLogWindow::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	m_componentlist.AddString(L"cellapp");
 	m_componentlist.AddString(L"baseapp");
 	m_componentlist.AddString(L"cellappmgr");
@@ -115,22 +115,22 @@ BOOL CLogWindow::OnInitDialog()
 	m_infoChecked = TRUE;
 
 
-	hInfoBitmap = LoadBitmap(AfxGetInstanceHandle(),   
+	hInfoBitmap = LoadBitmap(AfxGetInstanceHandle(),
 			MAKEINTRESOURCE(IDB_INFO));
 
-	hInfoBitmap1 = LoadBitmap(AfxGetInstanceHandle(),   
+	hInfoBitmap1 = LoadBitmap(AfxGetInstanceHandle(),
 			MAKEINTRESOURCE(IDB_INFO1));
 
-	hWarnBitmap = LoadBitmap(AfxGetInstanceHandle(),   
+	hWarnBitmap = LoadBitmap(AfxGetInstanceHandle(),
 		MAKEINTRESOURCE(IDB_WARNING));
 
-	hWarnBitmap1 = LoadBitmap(AfxGetInstanceHandle(),   
+	hWarnBitmap1 = LoadBitmap(AfxGetInstanceHandle(),
 		MAKEINTRESOURCE(IDB_WARNING1));
 
-	hErrBitmap = LoadBitmap(AfxGetInstanceHandle(),   
+	hErrBitmap = LoadBitmap(AfxGetInstanceHandle(),
 		MAKEINTRESOURCE(IDB_ERROR));
 
-	hErrBitmap1 = LoadBitmap(AfxGetInstanceHandle(),   
+	hErrBitmap1 = LoadBitmap(AfxGetInstanceHandle(),
 		MAKEINTRESOURCE(IDB_ERROR1));
 
 	updateLogBtnStatus(false);
@@ -141,9 +141,9 @@ BOOL CLogWindow::OnInitDialog()
 
 void CLogWindow::updateLogBtnStatus(bool updateList)
 {
-	m_infoBtn.SetBitmap(m_infoChecked ? hInfoBitmap : hInfoBitmap1);  
-	m_warnBtn.SetBitmap(m_warnChecked? hWarnBitmap : hWarnBitmap1);  
-	m_errBtn.SetBitmap(m_errChecked ? hErrBitmap : hErrBitmap1); 
+	m_infoBtn.SetBitmap(m_infoChecked ? hInfoBitmap : hInfoBitmap1);
+	m_warnBtn.SetBitmap(m_warnChecked? hWarnBitmap : hWarnBitmap1);
+	m_errBtn.SetBitmap(m_errChecked ? hErrBitmap : hErrBitmap1);
 
 	CString s;
 	s.Format(L"%d", m_warnCount);
@@ -187,7 +187,7 @@ void CLogWindow::OnTimer(UINT_PTR nIDEvent)
 	// TODO: Add your message handler code here and/or call default
 
 	CDialog::OnTimer(nIDEvent);
-	
+
 	if(nIDEvent == 1)
 	{
 		CRect rect;
@@ -197,7 +197,7 @@ void CLogWindow::OnTimer(UINT_PTR nIDEvent)
 		{
 			CPoint point;
 			GetCursorPos(&point);
-			ScreenToClient(&point); 
+			ScreenToClient(&point);
 
 			if(m_startShowOptionWnd)
 			{
@@ -275,7 +275,7 @@ void CLogWindow::onReceiveRemoteLog(std::string str, bool fromServer)
 {
 	if(str.size() <= 0)
 		return;
-	
+
 	if(fromServer)
 		m_logs_.push_back(str);
 
@@ -350,9 +350,9 @@ void CLogWindow::onConnectionState(bool success, KBEngine::Network::Address addr
 void CLogWindow::OnBnClickedButton1()
 {
 	// TODO: Add your control notification handler code here
-	// «Î«Û∑˛ŒÒ∆˜¿≠»°»’÷æ
+	// ËØ∑Ê±ÇÊúçÂä°Âô®ÊãâÂèñÊó•Âøó
 	CguiconsoleDlg* dlg = static_cast<CguiconsoleDlg*>(theApp.m_pMainWnd);
-	
+
 	HTREEITEM item = dlg->hasCheckApp(LOGGER_TYPE);
 	if(item == NULL)
 	{
@@ -384,7 +384,7 @@ void CLogWindow::pullLogs(KBEngine::Network::Address addr)
 		(*pBundle) << uid;
 
 		(*pBundle) << getSelLogTypes();
-	
+
 		CString apporder;
 		m_appIDEdit.GetWindowTextW(apporder);
 
@@ -615,7 +615,7 @@ void CLogWindow::updateSettingToServer()
 	(*pBundle) << uid;
 
 	(*pBundle) << getSelLogTypes();
-	
+
 	CString apporder;
 	m_appIDEdit.GetWindowTextW(apporder);
 

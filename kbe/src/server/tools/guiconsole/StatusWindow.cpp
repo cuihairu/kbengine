@@ -58,7 +58,7 @@ public:
 			ERROR_MSG("LookAppTask::process: couldn't create a socket\n");
 			return false;
 		}
-	
+
 		epListen.setnonblocking(true);
 
 		fd_set	frds, fwds;
@@ -74,7 +74,7 @@ public:
 			int selgot = select(epListen+1, &frds, &fwds, NULL, &tv);
 			if(selgot <= 0)
 			{
-				ERROR_MSG(fmt::format("LookAppTask::process: couldn't connect to:{}\n", 
+				ERROR_MSG(fmt::format("LookAppTask::process: couldn't connect to:{}\n",
 					address.c_str()));
 
 				return false;
@@ -107,8 +107,8 @@ public:
 			int selgot = select(epListen+1, &fds, NULL, NULL, &tv);
 			if(selgot == 0)
 			{
-				// ³¬Ê±, ¿ÉÄÜ¶Ô·½·±Ã¦
-				return false;	
+				// è¶…æ—¶, å¯èƒ½å¯¹æ–¹ç¹å¿™
+				return false;
 			}
 			else if(selgot == -1)
 			{
@@ -139,12 +139,12 @@ public:
 
 				int len = epListen.recv(packet.data(), recvsize);
 				packet.wpos(len);
-		
+
 				if(recvsize != len)
 				{
-					ERROR_MSG(fmt::format("LookAppTask::process: packet invalid(recvsize({}) != ctype_cid_len({}).\n" 
+					ERROR_MSG(fmt::format("LookAppTask::process: packet invalid(recvsize({}) != ctype_cid_len({}).\n"
 						, len, recvsize));
-			
+
 					if(len == 0)
 						return false;
 
@@ -152,7 +152,7 @@ public:
 				}
 
 				packet >> ctype >> cid >> istate;
-		
+
 				if(ctype == CELLAPP_TYPE)
 				{
 					packet >> entitySize >> cellSize >> telnet_port;
@@ -186,7 +186,7 @@ public:
 					extradata1 = cellSize;
 					extradata3 = telnet_port;
 				}
-			
+
 				if(ctype == BASEAPP_TYPE)
 				{
 					extradata = entitySize;
@@ -201,13 +201,13 @@ public:
 	}
 
 	virtual thread::TPTask::TPTaskState presentMainThread()
-	{ 
+	{
 		if(!_success)
-			return thread::TPTask::TPTASK_STATE_COMPLETED; 
+			return thread::TPTask::TPTASK_STATE_COMPLETED;
 
 		Components::ComponentInfos* winfo = Components::getSingleton().findComponent(_componentType, _cid);
 		if(winfo == NULL)
-			return thread::TPTask::TPTASK_STATE_COMPLETED; 
+			return thread::TPTask::TPTASK_STATE_COMPLETED;
 
 		winfo->state = (COMPONENT_STATE)state;
 		winfo->extradata = extradata;
@@ -216,7 +216,7 @@ public:
 		winfo->extradata3 = extradata3;
 
 		_pStatusWindow->update(*winfo);
-		return thread::TPTask::TPTASK_STATE_COMPLETED; 
+		return thread::TPTask::TPTASK_STATE_COMPLETED;
 	}
 };
 
@@ -247,12 +247,12 @@ END_MESSAGE_MAP()
 BOOL StatusWindow::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	DWORD dwStyle = m_statusList.GetExtendedStyle();
-	dwStyle |= LVS_EX_FULLROWSELECT;					//Ñ¡ÖĞÄ³ĞĞÊ¹ÕûĞĞ¸ßÁÁ£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
-	dwStyle |= LVS_EX_GRIDLINES;						//Íø¸ñÏß£¨Ö»ÊÊÓÃÓëreport·ç¸ñµÄlistctrl£©
+	dwStyle |= LVS_EX_FULLROWSELECT;					//é€‰ä¸­æŸè¡Œä½¿æ•´è¡Œé«˜äº®ï¼ˆåªé€‚ç”¨ä¸reporté£æ ¼çš„listctrlï¼‰
+	dwStyle |= LVS_EX_GRIDLINES;						//ç½‘æ ¼çº¿ï¼ˆåªé€‚ç”¨ä¸reporté£æ ¼çš„listctrlï¼‰
 	//dwStyle |= LVS_EX_ONECLICKACTIVATE;
-	m_statusList.SetExtendedStyle(dwStyle);				//ÉèÖÃÀ©Õ¹·ç¸ñ
+	m_statusList.SetExtendedStyle(dwStyle);				//è®¾ç½®æ‰©å±•é£æ ¼
 
 	int idx = 0;
 	m_statusList.InsertColumn(idx++, _T("uid"),					LVCFMT_CENTER,	40);

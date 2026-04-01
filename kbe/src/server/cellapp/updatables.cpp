@@ -1,9 +1,9 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
-#include "updatables.h"	
-#include "helper/profile.h"	
+#include "updatables.h"
+#include "helper/profile.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 
 //-------------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ void Updatables::clear()
 //-------------------------------------------------------------------------------------
 bool Updatables::add(Updatable* updatable)
 {
-	// ÓÉÓÚÃ»ÓĞ´óÁ¿ÓÅÏÈ¼¶ĞèÇó£¬Òò´ËÕâÀï¹Ì¶¨ÓÅÏÈ¼¶Êı×é
+	// ç”±äºæ²¡æœ‰å¤§é‡ä¼˜å…ˆçº§éœ€æ±‚ï¼Œå› æ­¤è¿™é‡Œå›ºå®šä¼˜å…ˆçº§æ•°ç»„
 	if (objects_.size() == 0)
 	{
 		objects_.push_back(std::map<uint32, Updatable*>());
@@ -38,13 +38,13 @@ bool Updatables::add(Updatable* updatable)
 	static uint32 idx = 1;
 	std::map<uint32, Updatable*>& pools = objects_[updatable->updatePriority()];
 
-	// ·ÀÖ¹ÖØ¸´
+	// é˜²æ­¢é‡å¤
 	while (pools.find(idx) != pools.end())
 		++idx;
 
 	pools[idx] = updatable;
 
-	// ¼ÇÂ¼´æ´¢Î»ÖÃ
+	// è®°å½•å­˜å‚¨ä½ç½®
 	updatable->removeIdx = idx++;
 
 	return true;

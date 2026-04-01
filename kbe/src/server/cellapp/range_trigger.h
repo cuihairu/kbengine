@@ -5,7 +5,7 @@
 
 #include "coordinate_node.h"
 #include "helper/debug_helper.h"
-#include "common/common.h"	
+#include "common/common.h"
 
 namespace KBEngine{
 
@@ -29,19 +29,19 @@ public:
 	INLINE void origin(CoordinateNode* pCoordinateNode);
 
 	/**
-		更新范围数据
+		鏇存柊鑼冨洿鏁版嵁
 	*/
 	virtual void update(float xz, float y);
 
 	/**
-		某个节点进入或者离开了rangeTrigger
+		鏌愪釜鑺傜偣杩涘叆鎴栬�呯寮�浜唕angeTrigger
 	*/
 	virtual void onEnter(CoordinateNode * pNode) = 0;
 	virtual void onLeave(CoordinateNode * pNode) = 0;
 
 	/**
-		某个节点变动经过了本节点
-		@isfront: 向前移动还是向后移动
+		鏌愪釜鑺傜偣鍙樺姩缁忚繃浜嗘湰鑺傜偣
+		@isfront: 鍚戝墠绉诲姩杩樻槸鍚戝悗绉诲姩
 	*/
 	virtual void onNodePassX(RangeTriggerNode* pRangeTriggerNode, CoordinateNode* pNode, bool isfront);
 	virtual void onNodePassY(RangeTriggerNode* pRangeTriggerNode, CoordinateNode* pNode, bool isfront);

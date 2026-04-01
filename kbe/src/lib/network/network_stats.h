@@ -7,14 +7,14 @@
 #include "common/common.h"
 #include "common/singleton.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 namespace Network
 {
 
 class MessageHandler;
 
 /*
-	¼ÇÂ¼networkÁ÷Á¿µÈĞÅÏ¢
+	è®°å½•networkæµé‡ç­‰ä¿¡æ¯
 */
 class NetworkStats : public Singleton<NetworkStats>
 {
@@ -59,6 +59,8 @@ private:
 
 	std::vector<NetworkStatsHandler*> handlers_;
 };
+
+extern NetworkStats g_networkStats;
 
 }
 }

@@ -136,7 +136,7 @@ SCRIPT_MEMBER_DECLARE_END()
 
 SCRIPT_GETSET_DECLARE_BEGIN(ClientEntity)
 SCRIPT_GETSET_DECLARE_END()
-SCRIPT_INIT(ClientEntity, 0, 0, 0, 0, 0)		
+SCRIPT_INIT(ClientEntity, 0, 0, 0, 0, 0)
 
 //-------------------------------------------------------------------------------------
 ClientEntity::ClientEntity(ENTITY_ID srcEntityID,
@@ -159,24 +159,24 @@ PyObject* ClientEntity::onScriptGetAttribute(PyObject* attr)
 
 	if(srcEntity == NULL)
 	{
-		PyErr_Format(PyExc_AssertionError, "Entity::clientEntity: srcEntityID(%d) not found!\n",		
-			 srcEntityID_);		
+		PyErr_Format(PyExc_AssertionError, "Entity::clientEntity: srcEntityID(%d) not found!\n",
+			 srcEntityID_);
 
 		return 0;
 	}
 
 	if(srcEntity->isDestroyed())
 	{
-		PyErr_Format(PyExc_AssertionError, "Entity::clientEntity: srcEntityID(%d) is destroyed!\n",		
-			srcEntityID_);		
+		PyErr_Format(PyExc_AssertionError, "Entity::clientEntity: srcEntityID(%d) is destroyed!\n",
+			srcEntityID_);
 
 		return 0;
 	}
 
 	if(srcEntity->pWitness() == NULL)
 	{
-		PyErr_Format(PyExc_AssertionError, "%s::clientEntity: no client, srcEntityID(%d).\n",		
-			srcEntity->scriptName(), srcEntity->id());		
+		PyErr_Format(PyExc_AssertionError, "%s::clientEntity: no client, srcEntityID(%d).\n",
+			srcEntity->scriptName(), srcEntity->id());
 
 		return 0;
 	}
@@ -187,8 +187,8 @@ PyObject* ClientEntity::onScriptGetAttribute(PyObject* attr)
 
 	if(e == NULL)
 	{
-		PyErr_Format(PyExc_AssertionError, "%s::clientEntity: not found entity(%d), srcEntityID(%d).\n",		
-			srcEntity->scriptName(), clientEntityID_, srcEntity->id());		
+		PyErr_Format(PyExc_AssertionError, "%s::clientEntity: not found entity(%d), srcEntityID(%d).\n",
+			srcEntity->scriptName(), clientEntityID_, srcEntity->id());
 
 		return 0;
 	}
@@ -203,7 +203,7 @@ PyObject* ClientEntity::onScriptGetAttribute(PyObject* attr)
 	}
 	else
 	{
-		// ÊÇ·ñÊÇ×é¼ş·½·¨µ÷ÓÃ
+		// æ˜¯å¦æ˜¯ç»„ä»¶æ–¹æ³•è°ƒç”¨
 		PropertyDescription* pComponentPropertyDescription = const_cast<ScriptDefModule*>(e->pScriptModule())->findComponentPropertyDescription(ccattr);
 		if (pComponentPropertyDescription)
 		{

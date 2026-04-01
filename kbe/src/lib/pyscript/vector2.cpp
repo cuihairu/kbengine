@@ -35,7 +35,7 @@ PyNumberMethods ScriptVector2::numberMethods =
 	ScriptVector2::py_negative,			//unaryfunc nb_negative;
 	ScriptVector2::py_positive,			//unaryfunc nb_positive;
 	0,									//unaryfunc nb_absolute;
-	ScriptVector2::py_nonzero,			//inquiry nb_nonzero  nb_nonzeroÖØÃüÃûÎªnb_bool,__nonzero__()ÖØÃüÃûÎª__bool__();
+	ScriptVector2::py_nonzero,			//inquiry nb_nonzero  nb_nonzeroé‡å‘½åä¸ºnb_bool,__nonzero__()é‡å‘½åä¸º__bool__();
 	0,									//unaryfunc nb_invert;
 	0,									//binaryfunc nb_lshift;
 	0,									//binaryfunc nb_rshift;
@@ -511,7 +511,7 @@ PyObject* ScriptVector2::py_positive(PyObject *self)
 int ScriptVector2::py_nonzero(PyObject *self)
 {
 	ScriptVector2* sv = static_cast<ScriptVector2*>(self);
-	// µã³Ë
+	// ç‚¹ä¹˜
 	Vector2 v = sv->getVector();
 	float val = v.x * v.x + v.y * v.y;
 	return val > 0.f;
@@ -600,7 +600,7 @@ PyObject* ScriptVector2::__py_pyDistTo(PyObject* self, PyObject* args)
 	convertPyObjectToVector2(v1, pyVal);
 	
 	Vector2 rv = (v - v1);
-	return PyFloat_FromDouble(KBEVec2Length(&rv)); //¼ÆËã³¤¶È²¢·µ»Ø
+	return PyFloat_FromDouble(KBEVec2Length(&rv)); //è®¡ç®—é•¿åº¦å¹¶è¿”å›
 }
 
 //-------------------------------------------------------------------------------------
@@ -626,7 +626,7 @@ PyObject* ScriptVector2::__py_pyDistSqrTo(PyObject* self, PyObject* args)
 	convertPyObjectToVector2(v1, pyVal);
 	
 	Vector2 rv = (v - v1);
-	return PyFloat_FromDouble(KBEVec2LengthSq(&rv)); //¼ÆËãµã³Ë²¢·µ»Ø
+	return PyFloat_FromDouble(KBEVec2LengthSq(&rv)); //è®¡ç®—ç‚¹ä¹˜å¹¶è¿”å›
 }
 
 //-------------------------------------------------------------------------------------
@@ -740,7 +740,7 @@ PyObject* ScriptVector2::__py_pySet(PyObject* self, PyObject* args)
 	bool good = false;
 	Vector2 v;
 
-	// Èç¹û²ÎÊıÖ»ÓĞ1¸öÔªËØ
+	// å¦‚æœå‚æ•°åªæœ‰1ä¸ªå…ƒç´ 
 	int tupleSize = (int)PyTuple_Size(args);
 	if(tupleSize == 1)
 	{

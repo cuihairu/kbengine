@@ -9,18 +9,18 @@
 #ifndef KBE_PROXY_INTERFACE_MACRO_H
 #define KBE_PROXY_INTERFACE_MACRO_H
 
-// common include	
+// common include
 #include "network/interface_defs.h"
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine{
 
 /**
-	PROXYÏûÏ¢ºê£¬  ²ÎÊıÎªÁ÷£¬ ĞèÒª×Ô¼º½â¿ª
+	PROXYæ¶ˆæ¯å®ï¼Œ  å‚æ•°ä¸ºæµï¼Œ éœ€è¦è‡ªå·±è§£å¼€
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef PROXY_MESSAGE_HANDLER_STREAM
@@ -55,7 +55,7 @@ namespace KBEngine{
 													KBEngine::MemoryStream& s)	\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define PROXY_MESSAGE_HANDLER_STREAM(NAME)										\
@@ -75,7 +75,7 @@ namespace KBEngine{
 																				\
 
 /**
-	ProxyÏûÏ¢ºê£¬  Ö»ÓĞÁã¸ö²ÎÊıµÄÏûÏ¢
+	Proxyæ¶ˆæ¯å®ï¼Œ  åªæœ‰é›¶ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef PROXY_MESSAGE_HANDLER_ARGS0
@@ -110,7 +110,7 @@ namespace KBEngine{
 											KBEngine::MemoryStream& s)			\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define PROXY_MESSAGE_HANDLER_ARGS0(NAME)										\
@@ -128,9 +128,9 @@ namespace KBEngine{
 	NETWORK_MESSAGE_DECLARE_ARGS0(Proxy, NAME,									\
 				NAME##ProxyMessagehandler0, MSG_LENGTH)							\
 																				\
-	
+
 /**
-	ProxyÏûÏ¢ºê£¬  Ö»ÓĞÒ»¸ö²ÎÊıµÄÏûÏ¢
+	Proxyæ¶ˆæ¯å®ï¼Œ  åªæœ‰ä¸€ä¸ªå‚æ•°çš„æ¶ˆæ¯
 */
 #if defined(NETWORK_INTERFACE_DECLARE_BEGIN)
 	#undef PROXY_MESSAGE_HANDLER_ARGS1
@@ -167,7 +167,7 @@ namespace KBEngine{
 											KBEngine::MemoryStream& s)			\
 	{																			\
 	}																			\
-		
+
 #endif
 #else
 #define PROXY_MESSAGE_HANDLER_ARGS1(NAME, ARG_TYPE1, ARG_NAME1)					\

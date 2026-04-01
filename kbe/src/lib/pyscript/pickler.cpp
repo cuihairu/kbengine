@@ -54,7 +54,7 @@ bool Pickler::initialize(void)
 
 	if (isInit)
 	{
-		// ³õÊ¼»¯Ò»¸öunpickleº¯Êı±íÄ£¿é£¬ ËùÓĞ×Ô¶¨ÒåÀàµÄunpickleº¯Êı¶¼ĞèÒªÔÚ´Ë×¢²á
+		// åˆå§‹åŒ–ä¸€ä¸ªunpickleå‡½æ•°è¡¨æ¨¡å—ï¼Œ æ‰€æœ‰è‡ªå®šä¹‰ç±»çš„unpickleå‡½æ•°éƒ½éœ€è¦åœ¨æ­¤æ³¨å†Œ
 		pyPickleFuncTableModule_ = PyImport_AddModule("_upf");
 
 		static struct PyModuleDef moduleDesc =

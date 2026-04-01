@@ -249,7 +249,7 @@ __RECONNECT:
 			return false;
 		}
 
-		// 不需要关闭自动提交，底层会START TRANSACTION之后再COMMIT
+		// 涓嶉渶瑕佸叧闂嚜鍔ㄦ彁浜わ紝搴曞眰浼歋TART TRANSACTION涔嬪悗鍐岰OMMIT
 		// mysql_autocommit(mysql(), 0);
 
 		char characterset_sql[MAX_BUF];

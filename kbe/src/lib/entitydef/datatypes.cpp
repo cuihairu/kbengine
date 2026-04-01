@@ -42,7 +42,7 @@ void DataTypes::finalise(void)
 //-------------------------------------------------------------------------------------
 bool DataTypes::validTypeName(const std::string& typeName)
 {
-	// ²»ÔÊĞíÇ°Ãæ¼Ó_, ÒòÎªÄÚ²¿²úÉúµÄÒ»Ğ©ÁÙÊ±½á¹¹Ç°ÃæÊ¹ÓÃÁË_, ±ÜÃâÎóÅĞ
+	// ä¸å…è®¸å‰é¢åŠ _, å› ä¸ºå†…éƒ¨äº§ç”Ÿçš„ä¸€äº›ä¸´æ—¶ç»“æ„å‰é¢ä½¿ç”¨äº†_, é¿å…è¯¯åˆ¤
 	if (typeName.size() > 0 && typeName[0] == '_')
 		return false;
 
@@ -52,7 +52,7 @@ bool DataTypes::validTypeName(const std::string& typeName)
 //-------------------------------------------------------------------------------------
 bool DataTypes::initialize(std::string file)
 {
-	// ³õÊ¼»¯Ò»Ğ©»ù´¡Àà±ğ
+	// åˆå§‹åŒ–ä¸€äº›åŸºç¡€ç±»åˆ«
 	addDataType("UINT8",		new IntType<uint8>);
 	addDataType("UINT16",		new IntType<uint16>);
 	addDataType("UINT64",		new UInt64Type);
@@ -93,7 +93,7 @@ std::vector< std::string > DataTypes::getBaseTypeNames()
 //-------------------------------------------------------------------------------------
 bool DataTypes::loadTypes(std::string& file)
 {
-	// ÔÊĞí´¿½Å±¾¶¨Òå£¬Ôò¿ÉÄÜÃ»ÓĞÕâ¸öÎÄ¼ş
+	// å…è®¸çº¯è„šæœ¬å®šä¹‰ï¼Œåˆ™å¯èƒ½æ²¡æœ‰è¿™ä¸ªæ–‡ä»¶
 	if (access(file.c_str(), 0) != 0)
 		return true;
 
@@ -111,7 +111,7 @@ bool DataTypes::loadTypes(SmartPointer<XML>& xml)
 
 	if(node == NULL)
 	{
-		// root½ÚµãÏÂÃ»ÓĞ×Ó½ÚµãÁË
+		// rootèŠ‚ç‚¹ä¸‹æ²¡æœ‰å­èŠ‚ç‚¹äº†
 		return true;
 	}
 

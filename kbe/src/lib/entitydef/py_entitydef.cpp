@@ -399,8 +399,8 @@ bool DefContext::addChildContext(DefContext& defContext)
 	{
 		if ((*iter).attrName == defContext.attrName)
 		{
-			// 当多次assemblyContexts时可能会发生这样的情况
-			// 不做操作即可
+			// 碌卤露脿麓脦assemblyContexts脢卤驴脡脛脺禄谩路垄脡煤脮芒脩霉碌脛脟茅驴枚
+			// 虏禄脳枚虏脵脳梅录麓驴脡
 			if (moduleName != defContext.moduleName || (*iter).pyObjectSourceFile == defContext.pyObjectSourceFile)
 				return true;
 
@@ -461,7 +461,7 @@ static bool assemblyContexts(bool notfoundModuleError = false)
 		DefContext::allScriptDefContextMaps.erase((*diter));
 	}
 
-	// 尝试将父类信息填充到派生类
+	// 鲁垄脢脭陆芦赂赂脌脿脨脜脧垄脤卯鲁盲碌陆脜脡脡煤脌脿
 	iter = DefContext::allScriptDefContextMaps.begin();
 	for (; iter != DefContext::allScriptDefContextMaps.end(); ++iter)
 	{
@@ -525,7 +525,7 @@ static bool registerDefContext(DefContext& defContext)
 			return false;
 		}
 
-		// 检查作用域是否属于该进程
+		// 录矛虏茅脳梅脫脙脫貌脢脟路帽脢么脫脷赂脙陆酶鲁脤
 		bool flagsGood = true;
 
 		if (defContext.componentType == BASEAPP_TYPE)
@@ -579,12 +579,12 @@ static bool registerDefContext(DefContext& defContext)
 			return false;
 		}
 
-		// 由于可能出现客户端方法的声明名称与服务器方法一致的情况，这里需要将客户端方法临时做个别名
+		// 脫脡脫脷驴脡脛脺鲁枚脧脰驴脥禄搂露脣路陆路篓碌脛脡霉脙梅脙没鲁脝脫毛路镁脦帽脝梅路陆路篓脪禄脰脗碌脛脟茅驴枚拢卢脮芒脌茂脨猫脪陋陆芦驴脥禄搂露脣路陆路篓脕脵脢卤脳枚赂枚卤冒脙没
 		name += ".#client#." + defContext.attrName;
 	}
 	else if (defContext.type == DefContext::DC_TYPE_FIXED_ITEM)
 	{
-		// 字典里面的字段放开关键字限制，例如允许定义名称为id的字段
+		// 脳脰碌盲脌茂脙忙碌脛脳脰露脦路脜驴陋鹿脴录眉脳脰脧脼脰脝拢卢脌媒脠莽脭脢脨铆露篓脪氓脙没鲁脝脦陋id碌脛脳脰露脦
 		//if (!EntityDef::validDefPropertyName(defContext.attrName))
 		//{
 		//	PyErr_Format(PyExc_AssertionError, "EntityDef.%s: '%s.%s' is limited!\n\n",
@@ -613,7 +613,7 @@ static bool registerDefContext(DefContext& defContext)
 	{
 		if (iter->second.pyObjectSourceFile != defContext.pyObjectSourceFile)
 		{
-			// 如果是不同进程的脚本部分，那么需要进行合并注册
+			// 脠莽鹿没脢脟虏禄脥卢陆酶鲁脤碌脛陆脜卤戮虏驴路脰拢卢脛脟脙麓脨猫脪陋陆酶脨脨潞脧虏垄脳垄虏谩
 			if (iter->second.componentType != defContext.componentType && DefContext::allScriptDefContextLineMaps.find(defContext.pyObjectSourceFile) != DefContext::allScriptDefContextLineMaps.end() &&
 				(defContext.type == DefContext::DC_TYPE_ENTITY || defContext.type == DefContext::DC_TYPE_COMPONENT || defContext.type == DefContext::DC_TYPE_INTERFACE) && 
 				iter->second.type == defContext.type)
@@ -636,7 +636,7 @@ static bool registerDefContext(DefContext& defContext)
 						iter->second.hasClient = true;
 				}
 
-				// 脚本对象强制设置为当前进程的对象
+				// 陆脜卤戮露脭脧贸脟驴脰脝脡猫脰脙脦陋碌卤脟掳陆酶鲁脤碌脛露脭脧贸
 				if (g_componentType == defContext.componentType)
 				{
 					iter->second.pyObjectPtr = defContext.pyObjectPtr;
@@ -806,7 +806,7 @@ static bool isRefEntityDefModule(PyObject *pyObj)
 		}	\
 		else	\
 		{	\
-			/* 防止不同系统造成的路径不一致，剔除系统相关路径 */		\
+			/* 路脌脰鹿虏禄脥卢脧碌脥鲁脭矛鲁脡碌脛脗路戮露虏禄脪禄脰脗拢卢脤脼鲁媒脧碌脥鲁脧脿鹿脴脗路戮露 */		\
 			OUT = PyUnicode_AsUTF8AndSize(pyFile, NULL);	\
 			strutil::kbe_replace(OUT, "\\\\", "/");	\
 			strutil::kbe_replace(OUT, "\\", "/");	\
@@ -849,7 +849,7 @@ static bool isRefEntityDefModule(PyObject *pyObj)
 		}	\
 		else	\
 		{	\
-			/* 加上行号，避免同文件中多次定义 */		\
+			/* 录脫脡脧脨脨潞脜拢卢卤脺脙芒脥卢脦脛录镁脰脨露脿麓脦露篓脪氓 */		\
 			OUT += fmt::format("#{}",  PyLong_AsLong(pyLine));	\
 			Py_DECREF(pyLine);	\
 		}	\
@@ -1064,8 +1064,8 @@ static PyObject* __py_def_parse(PyObject *self, PyObject* args)
 				PY_RETURN_ERROR;
 			}
 
-			// 如果是数据类型定义，默认应该是存储的
-			// fixed_item只有定义fixed_dict时会用到
+			// 脠莽鹿没脢脟脢媒戮脻脌脿脨脥露篓脪氓拢卢脛卢脠脧脫娄赂脙脢脟麓忙麓垄碌脛
+			// fixed_item脰禄脫脨露篓脪氓fixed_dict脢卤禄谩脫脙碌陆
 			defContext.persistent = true;
 
 			if (pyPersistent)
@@ -1075,7 +1075,7 @@ static PyObject* __py_def_parse(PyObject *self, PyObject* args)
 				defContext.databaseLength = (int)PyLong_AsLong(pyDatabaseLength);
 		}
 
-		// 对于属性， 我们需要获得返回值作为默认值
+		// 露脭脫脷脢么脨脭拢卢 脦脪脙脟脨猫脪陋禄帽碌脙路碌禄脴脰碌脳梅脦陋脛卢脠脧脰碌
 		PyObject* pyRet = PyObject_CallFunction(pyFunc,
 			const_cast<char*>("(O)"), Py_None);
 
@@ -1148,7 +1148,7 @@ static PyObject* __py_def_parse(PyObject *self, PyObject* args)
 				PY_RETURN_ERROR;
 			}
 
-			// 如果是组件属性，默认应该是不存储的
+			// 脠莽鹿没脢脟脳茅录镁脢么脨脭拢卢脛卢脠脧脫娄赂脙脢脟虏禄麓忙麓垄碌脛
 			defContext.persistent = false;
 
 			if (pyPersistent)
@@ -1327,7 +1327,7 @@ static PyObject* __py_def_parse(PyObject *self, PyObject* args)
 
 					std::string svalue = "";
 
-					// 如果是EntityDef.Array则此处可能是一个tuple，参考__py_array
+					// 脠莽鹿没脢脟EntityDef.Array脭貌麓脣麓娄驴脡脛脺脢脟脪禄赂枚tuple拢卢虏脦驴录__py_array
 					if (PyTuple_Check(value) && PyTuple_Size(value) == 2)
 					{
 						PyObject *entitydefModule = PyImport_AddModule(pyDefModuleName.c_str());
@@ -1472,7 +1472,7 @@ static PyObject* __py_def_parse(PyObject *self, PyObject* args)
 	}
 	else if (defContext.optionName == "property")
 	{
-		// 验证这个字符串是否可以还原成对象
+		// 脩茅脰陇脮芒赂枚脳脰路没麓庐脢脟路帽驴脡脪脭禄鹿脭颅鲁脡露脭脧贸
 		if (defContext.propertyDefaultVal.size() > 0)
 		{
 			PyObject* module = PyImport_AddModule("__main__");
@@ -1520,20 +1520,20 @@ static PyObject* __py_def_parse(PyObject *self, PyObject* args)
 	}
 	else if (defContext.optionName == "anonymous_fixed_array")
 	{
-		// 创建一个新数组
+		// 麓麓陆篓脪禄赂枚脨脗脢媒脳茅
 		DefContext arrayType;
 		arrayType = defContext;
 		arrayType.moduleName += ".anonymous_fixed_array";
 
-		// 防止2个源文件行数一致，底层认为重复添加
+		// 路脌脰鹿2赂枚脭麓脦脛录镁脨脨脢媒脪禄脰脗拢卢碌脳虏茫脠脧脦陋脰脴赂麓脤铆录脫
 		arrayType.pyObjectSourceFile += "(array)";
 
-		// 增加一个item类别
+		// 脭枚录脫脪禄赂枚item脌脿卤冒
 		DefContext itemType;
 		itemType = arrayType;
 		itemType.optionName = "fixed_item";
 
-		// 防止2个源文件行数一致，底层认为重复添加
+		// 路脌脰鹿2赂枚脭麓脦脛录镁脨脨脢媒脪禄脰脗拢卢碌脳虏茫脠脧脦陋脰脴赂麓脤铆录脫
 		itemType.pyObjectSourceFile += "(array_item)";
 
 		noerror = onDefFixedItem(itemType);
@@ -1584,7 +1584,7 @@ static PyObject* __py_def_rename(PyObject* self, PyObject* args, PyObject* kwarg
 	cc.pyKwargs = kwargs ? PyObjectPtr(Copy::deepcopy(kwargs), PyObjectPtr::STEAL_REF) : PyObjectPtr(NULL);
 	cc.optionName = "rename";
 
-	// 类似这种定义方式 EntityDef.rename(ENTITY_ID=EntityDef.INT32)
+	// 脌脿脣脝脮芒脰脰露篓脪氓路陆脢陆 EntityDef.rename(ENTITY_ID=EntityDef.INT32)
 	if (kwargs)
 	{
 		PyObject *key, *value;
@@ -1680,7 +1680,7 @@ static PyObject* __py_def_fixed_array(PyObject* self, PyObject* args, PyObject* 
 	cc.pyKwargs = kwargs ? PyObjectPtr(Copy::deepcopy(kwargs), PyObjectPtr::STEAL_REF) : PyObjectPtr(NULL);
 	cc.optionName = "fixed_array";
 
-	// 类似这种定义方式 EntityDef.fixed_array(XXArray=EntityDef.INT32)
+	// 脌脿脣脝脮芒脰脰露篓脪氓路陆脢陆 EntityDef.fixed_array(XXArray=EntityDef.INT32)
 	if (kwargs)
 	{
 		PyObject *key, *value;
@@ -1765,7 +1765,7 @@ static PyObject* __py_def_fixed_array(PyObject* self, PyObject* args, PyObject* 
 	g_callContexts.push(cc);
 
 	// @EntityDef.fixed_array()
-	// class XXXArray：
+	// class XXXArray拢潞
 	return PyCFunction_New(&__call_def_parse, self);
 }
 
@@ -1885,7 +1885,7 @@ static bool loadAllScriptForComponentType(COMPONENT_TYPE loadComponentType)
 	std::vector<std::wstring> results;
 	Resmgr::getSingleton().listPathRes(wpath, L"py|pyc", results);
 
-	// 优先执行入口脚本
+	// 脫脜脧脠脰麓脨脨脠毛驴脷陆脜卤戮
 	std::vector<std::wstring>::iterator iter = results.begin();
 	for (; iter != results.end(); )
 	{
@@ -1995,7 +1995,44 @@ static bool execPython(COMPONENT_TYPE componentType)
 	strutil::kbe_replace(pyPaths.second, L";", L":");
 #endif
 
-	PySys_SetPath(pyPaths.second.c_str());
+	PyObject* sysPath = PySys_GetObject("path");
+	if (!sysPath || !PyList_Check(sysPath))
+	{
+		ERROR_MSG("PyEntityDef::execPython(): invalid sys.path\n");
+		return false;
+	}
+
+	PyList_SetSlice(sysPath, 0, PyList_Size(sysPath), NULL);
+
+#if KBE_PLATFORM == PLATFORM_WIN32
+	const wchar_t separator = L';';
+#else
+	const wchar_t separator = L':';
+#endif
+
+	std::wstring::size_type start = 0;
+	while (start <= pyPaths.second.size())
+	{
+		std::wstring::size_type end = pyPaths.second.find(separator, start);
+		std::wstring path = pyPaths.second.substr(start, end == std::wstring::npos ? std::wstring::npos : end - start);
+		if (!path.empty())
+		{
+			PyObject* pyPath = PyUnicode_FromWideChar(path.c_str(), static_cast<Py_ssize_t>(path.size()));
+			if (!pyPath || PyList_Append(sysPath, pyPath) != 0)
+			{
+				Py_XDECREF(pyPath);
+				SCRIPT_ERROR_CHECK();
+				return false;
+			}
+
+			Py_DECREF(pyPath);
+		}
+
+		if (end == std::wstring::npos)
+			break;
+
+		start = end + 1;
+	}
 
 	PyObject* modulesNew = PySys_GetObject("modules");
 	PyDict_Merge(modulesNew, Script::getSingleton().getSysInitModules(), 0);
@@ -2032,10 +2069,10 @@ static bool execPython(COMPONENT_TYPE componentType)
 		}
 	}
 
-	// 重定向python输出
+	// 脰脴露篓脧貌python脢盲鲁枚
 	ScriptStdOutErr* pyStdouterr = new ScriptStdOutErr();
 
-	// 安装py重定向脚本模块
+	// 掳虏脳掳py脰脴露篓脧貌陆脜卤戮脛拢驴茅
 	if (!pyStdouterr->install()) 
 	{
 		ERROR_MSG("PyEntityDef::execPython(): pyStdouterr->install() is failed!\n");
@@ -2046,7 +2083,7 @@ static bool execPython(COMPONENT_TYPE componentType)
 
 	PyObject *m = PyImport_AddModule("__main__");
 
-	// 添加一个脚本基础模块
+	// 脤铆录脫脪禄赂枚陆脜卤戮禄霉麓隆脛拢驴茅
 	PyObject* kbeModule = PyImport_AddModule("KBEngine");
 	KBE_ASSERT(kbeModule);
 
@@ -2068,7 +2105,7 @@ static bool execPython(COMPONENT_TYPE componentType)
 
 	APPEND_SCRIPT_MODULE_METHOD(kbeModule, publish, __py_getAppPublish, METH_VARARGS, 0);
 
-	// 将模块对象加入main
+	// 陆芦脛拢驴茅露脭脧贸录脫脠毛main
 	PyObject_SetAttrString(m, "KBEngine", kbeModule);
 
 	if (pNewInterpreter != PyThreadState_Swap(pCurInterpreter))
@@ -2103,7 +2140,7 @@ static bool execPython(COMPONENT_TYPE componentType)
 		return false;
 	}
 
-	// 此处不能使用Py_EndInterpreter，会导致Math、Def等模块析构
+	// 麓脣麓娄虏禄脛脺脢鹿脫脙Py_EndInterpreter拢卢禄谩碌录脰脗Math隆垄Def碌脠脛拢驴茅脦枚鹿鹿
 	PyInterpreterState_Clear(pNewInterpreter->interp);
 	PyInterpreterState_Delete(pNewInterpreter->interp);
 	return otherPartSuccess;
@@ -2221,7 +2258,7 @@ static bool registerDefTypes()
 	std::vector< DefContext* > defContexts;
 
 	{
-		// 由于注册的类型有先后依赖关系，这里对他们做个排序再后续处理
+		// 脫脡脫脷脳垄虏谩碌脛脌脿脨脥脫脨脧脠潞贸脪脌脌碌鹿脴脧碌拢卢脮芒脌茂露脭脣没脙脟脳枚赂枚脜脜脨貌脭脵潞贸脨酶麓娄脌铆
 		DefContext::DEF_CONTEXT_MAP::iterator iter = DefContext::allScriptDefContextMaps.begin();
 		for (; iter != DefContext::allScriptDefContextMaps.end(); ++iter)
 		{
@@ -2329,13 +2366,13 @@ static bool registerDefMethods(ScriptDefModule* pScriptModule, DefContext& defCo
 
 		size_t argIdx = 0;
 
-		// 检查第一个参数是否是Exposed callerID
+		// 录矛虏茅碌脷脪禄赂枚虏脦脢媒脢脟路帽脢脟Exposed callerID
 		if (defMethodContext.argsvecs.size() > 0)
 		{
 			std::string argName = defMethodContext.argsvecs[0];
 			std::string argType = defMethodContext.annotationsMaps[argName];
 
-			// 如果是exposed方法的callerID参数就忽略
+			// 脠莽鹿没脢脟exposed路陆路篓碌脛callerID虏脦脢媒戮脥潞枚脗脭
 			if (argType == "CALLER_ID")
 			{
 				if (!defMethodContext.exposed)
@@ -2373,7 +2410,7 @@ static bool registerDefMethods(ScriptDefModule* pScriptModule, DefContext& defCo
 			std::string argName = defMethodContext.argsvecs[argIdx];
 			std::string argType = defMethodContext.annotationsMaps[argName];
 
-			// 如果是exposed方法的callerID参数就忽略
+			// 脠莽鹿没脢脟exposed路陆路篓碌脛callerID虏脦脢媒戮脥潞枚脗脭
 			if (argType == "CALLER_ID")
 			{
 				ERROR_MSG(fmt::format("PyEntityDef::registerDefMethods: Def.CallerID must be the first parameter! is {}.{}(arg={}), file: \"{}\"!\n",
@@ -2441,7 +2478,7 @@ static bool registerDefMethods(ScriptDefModule* pScriptModule, DefContext& defCo
 		}
 	}
 
-	// 除了这几个进程以外，其他进程不需要根据方法检测脚本的正确性
+	// 鲁媒脕脣脮芒录赂赂枚陆酶鲁脤脪脭脥芒拢卢脝盲脣没陆酶鲁脤虏禄脨猫脪陋赂霉戮脻路陆路篓录矛虏芒陆脜卤戮碌脛脮媒脠路脨脭
 	if (g_componentType == BASEAPP_TYPE || g_componentType == CELLAPP_TYPE || g_componentType == BOTS_TYPE || g_componentType == CLIENT_TYPE)
 	{
 		if (!EntityDef::checkDefMethod(pScriptModule, defContext.pyObjectPtr.get(), defContext.moduleName))
@@ -2473,8 +2510,8 @@ static bool registerDefPropertys(ScriptDefModule* pScriptModule, DefContext& def
 		int32						hasClientFlags = 0;
 		DataType*					dataType = NULL;
 		bool						isPersistent = (defPropContext.persistent != 0);
-		bool						isIdentifier = false;									// 是否是一个索引键
-		uint32						databaseLength = defPropContext.databaseLength;			// 这个属性在数据库中的长度
+		bool						isIdentifier = false;									// 脢脟路帽脢脟脪禄赂枚脣梅脪媒录眉
+		uint32						databaseLength = defPropContext.databaseLength;			// 脮芒赂枚脢么脨脭脭脷脢媒戮脻驴芒脰脨碌脛鲁陇露脠
 		std::string					indexType = defPropContext.propertyIndex;
 		DETAIL_TYPE					detailLevel = DETAIL_LEVEL_FAR;
 		std::string					name = defPropContext.attrName;
@@ -2532,7 +2569,7 @@ static bool registerDefPropertys(ScriptDefModule* pScriptModule, DefContext& def
 				return false;
 			}
 
-			// 组件放到组件函数中处理
+			// 脳茅录镁路脜碌陆脳茅录镁潞炉脢媒脰脨麓娄脌铆
 			if (pDefPropTypeContext->type == DefContext::DC_TYPE_COMPONENT)
 				continue;
 
@@ -2558,7 +2595,7 @@ static bool registerDefPropertys(ScriptDefModule* pScriptModule, DefContext& def
 			return false;
 		}
 
-		// 产生一个属性描述实例
+		// 虏煤脡煤脪禄赂枚脢么脨脭脙猫脢枚脢碌脌媒
 		PropertyDescription* propertyDescription = PropertyDescription::createDescription(futype, defPropContext.returnType,
 			name, flags, isPersistent,
 			dataType, isIdentifier, indexType,
@@ -2567,7 +2604,7 @@ static bool registerDefPropertys(ScriptDefModule* pScriptModule, DefContext& def
 
 		bool ret = true;
 
-		// 添加到模块中
+		// 脤铆录脫碌陆脛拢驴茅脰脨
 		if (hasCellFlags > 0)
 			ret = pScriptModule->addPropertyDescription(name.c_str(),
 				propertyDescription, CELLAPP_TYPE);
@@ -2619,10 +2656,10 @@ static bool registerDefComponents(ScriptDefModule* pScriptModule, DefContext& de
 		if (!EntityDef::calcDefPropertyUType(pScriptModule->getName(), componentName, defPropContext.utype > 0 ? defPropContext.utype : -1, pScriptModule, futype))
 			return false;
 
-		// 产生一个属性描述实例
+		// 虏煤脡煤脪禄赂枚脢么脨脭脙猫脢枚脢碌脌媒
 		uint32						flags = ED_FLAG_BASE | ED_FLAG_CELL_PUBLIC | ENTITY_CLIENT_DATA_FLAGS;
-		bool						isIdentifier = false;		// 是否是一个索引键
-		uint32						databaseLength = 0;			// 这个属性在数据库中的长度
+		bool						isIdentifier = false;		// 脢脟路帽脢脟脪禄赂枚脣梅脪媒录眉
+		uint32						databaseLength = 0;			// 脮芒赂枚脢么脨脭脭脷脢媒戮脻驴芒脰脨碌脛鲁陇露脠
 		std::string					indexType = "";
 		DETAIL_TYPE					detailLevel = DETAIL_LEVEL_FAR;
 		std::string					detailLevelStr = "";
@@ -2637,7 +2674,7 @@ static bool registerDefComponents(ScriptDefModule* pScriptModule, DefContext& de
 			return false;
 		}
 
-		// 查找是否有这个模块，如果有说明已经加载过相关描述，这里无需再次加载
+		// 虏茅脮脪脢脟路帽脫脨脮芒赂枚脛拢驴茅拢卢脠莽鹿没脫脨脣碌脙梅脪脩戮颅录脫脭脴鹿媒脧脿鹿脴脙猫脢枚拢卢脮芒脌茂脦脼脨猫脭脵麓脦录脫脭脴
 		ScriptDefModule* pCompScriptDefModule = EntityDef::findScriptModule(componentTypeName.c_str(), false);
 
 		if (!pCompScriptDefModule)
@@ -2673,11 +2710,11 @@ static bool registerDefComponents(ScriptDefModule* pScriptModule, DefContext& de
 
 		autosetHasClient(*pDefPropTypeContext);
 
-		// 除了这几个进程以外，其他进程不需要访问脚本
+		// 鲁媒脕脣脮芒录赂赂枚陆酶鲁脤脪脭脥芒拢卢脝盲脣没陆酶鲁脤虏禄脨猫脪陋路脙脦脢陆脜卤戮
 		if (g_componentType == BASEAPP_TYPE || g_componentType == CELLAPP_TYPE || g_componentType == BOTS_TYPE || g_componentType == CLIENT_TYPE)
 		{
-			// 如果是bots类型，需要将脚本类设置为程序环境的类
-			// 注意：如果是CLIENT_TYPE使用def文件模式或者将定义放在一个common的py中，因为该模式相关定义都在服务器代码上，而客户端环境没有服务器代码
+			// 脠莽鹿没脢脟bots脌脿脨脥拢卢脨猫脪陋陆芦陆脜卤戮脌脿脡猫脰脙脦陋鲁脤脨貌禄路戮鲁碌脛脌脿
+			// 脳垄脪芒拢潞脠莽鹿没脢脟CLIENT_TYPE脢鹿脫脙def脦脛录镁脛拢脢陆禄貌脮脽陆芦露篓脪氓路脜脭脷脪禄赂枚common碌脛py脰脨拢卢脪貌脦陋赂脙脛拢脢陆脧脿鹿脴露篓脪氓露录脭脷路镁脦帽脝梅麓煤脗毛脡脧拢卢露酶驴脥禄搂露脣禄路戮鲁脙禄脫脨路镁脦帽脝梅麓煤脗毛
 			if ((g_componentType == BOTS_TYPE || g_componentType == CLIENT_TYPE) && pDefPropTypeContext->hasClient)
 			{
 				if (!updateScript(*pDefPropTypeContext))
@@ -2703,7 +2740,7 @@ static bool registerDefComponents(ScriptDefModule* pScriptModule, DefContext& de
 			}
 		}
 
-		// 注册属性描述
+		// 脳垄虏谩脢么脨脭脙猫脢枚
 		if (!registerDefPropertys(pCompScriptDefModule, *pDefPropTypeContext))
 		{
 			ERROR_MSG(fmt::format("PyEntityDef::registerDefComponents: failed to registerDefPropertys(), entity:{}\n",
@@ -2712,7 +2749,7 @@ static bool registerDefComponents(ScriptDefModule* pScriptModule, DefContext& de
 			return false;
 		}
 
-		// 注册方法描述
+		// 脳垄虏谩路陆路篓脙猫脢枚
 		if(!registerDefMethods(pCompScriptDefModule, *pDefPropTypeContext))
 		{
 			ERROR_MSG(fmt::format("PyEntityDef::registerDefComponents: failed to registerDefMethods(), entity:{}\n",
@@ -2721,7 +2758,7 @@ static bool registerDefComponents(ScriptDefModule* pScriptModule, DefContext& de
 			return false;
 		}
 
-		// 尝试加载detailLevelInfo数据
+		// 鲁垄脢脭录脫脭脴detailLevelInfo脢媒戮脻
 		if (!registerDetailLevelInfo(pCompScriptDefModule, *pDefPropTypeContext))
 		{
 			ERROR_MSG(fmt::format("PyEntityDef::registerDefComponents: failed to register component:{} detailLevelInfo.\n",
@@ -2761,7 +2798,7 @@ static bool registerDefComponents(ScriptDefModule* pScriptModule, DefContext& de
 //-------------------------------------------------------------------------------------
 static bool registerEntityDef(ScriptDefModule* pScriptModule, DefContext& defContext)
 {
-	// 注册属性描述
+	// 脳垄虏谩脢么脨脭脙猫脢枚
 	if (!registerDefPropertys(pScriptModule, defContext))
 	{
 		ERROR_MSG(fmt::format("PyEntityDef::registerEntityDef: failed to registerDefPropertys(), entity:{}\n",
@@ -2770,7 +2807,7 @@ static bool registerEntityDef(ScriptDefModule* pScriptModule, DefContext& defCon
 		return false;
 	}
 
-	// 注册方法描述
+	// 脳垄虏谩路陆路篓脙猫脢枚
 	if (!registerDefMethods(pScriptModule, defContext))
 	{
 		ERROR_MSG(fmt::format("PyEntityDef::registerDefComponents: failed to registerDefMethods(), entity:{}\n",
@@ -2779,7 +2816,7 @@ static bool registerEntityDef(ScriptDefModule* pScriptModule, DefContext& defCon
 		return false;
 	}
 
-	// 注册组件描述， 并将他们的方法和属性加入到模块中
+	// 脳垄虏谩脳茅录镁脙猫脢枚拢卢 虏垄陆芦脣没脙脟碌脛路陆路篓潞脥脢么脨脭录脫脠毛碌陆脛拢驴茅脰脨
 	if (!registerDefComponents(pScriptModule, defContext))
 	{
 		ERROR_MSG(fmt::format("PyEntityDef::registerEntityDef: failed to registerDefComponents(), component:{}\n",
@@ -2788,7 +2825,7 @@ static bool registerEntityDef(ScriptDefModule* pScriptModule, DefContext& defCon
 		return false;
 	}
 
-	// 尝试注册detailLevelInfo数据
+	// 鲁垄脢脭脳垄虏谩detailLevelInfo脢媒戮脻
 	if (!registerDetailLevelInfo(pScriptModule, defContext))
 	{
 		ERROR_MSG(fmt::format("PyEntityDef::registerEntityDef: failed to register entity:{} detailLevelInfo.\n",
@@ -2797,7 +2834,7 @@ static bool registerEntityDef(ScriptDefModule* pScriptModule, DefContext& defCon
 		return false;
 	}
 
-	// 尝试注册volatileInfo数据
+	// 鲁垄脢脭脳垄虏谩volatileInfo脢媒戮脻
 	if (!registerVolatileInfo(pScriptModule, defContext))
 	{
 		ERROR_MSG(fmt::format("PyEntityDef::registerEntityDef: failed to register entity:{} volatileInfo.\n",
@@ -2806,7 +2843,7 @@ static bool registerEntityDef(ScriptDefModule* pScriptModule, DefContext& defCon
 		return false;
 	}
 
-	// 除了这几个进程以外，其他进程不需要访问脚本
+	// 鲁媒脕脣脮芒录赂赂枚陆酶鲁脤脪脭脥芒拢卢脝盲脣没陆酶鲁脤虏禄脨猫脪陋路脙脦脢陆脜卤戮
 	if (g_componentType == BASEAPP_TYPE || g_componentType == CELLAPP_TYPE || g_componentType == BOTS_TYPE || g_componentType == CLIENT_TYPE)
 	{
 		if (defContext.pyObjectSourceFileComponentType == g_componentType)
@@ -2846,12 +2883,12 @@ static bool registerEntityDefs()
 		if (defContext.type != DefContext::DC_TYPE_ENTITY)
 			continue;
 
-		// 根据是否包含客户端属性或者方法决定是否这个实体拥有客户端部分
-		// hasClient=True也可以强制指定拥有客户端部分
+		// 赂霉戮脻脢脟路帽掳眉潞卢驴脥禄搂露脣脢么脨脭禄貌脮脽路陆路篓戮枚露篓脢脟路帽脮芒赂枚脢碌脤氓脫碌脫脨驴脥禄搂露脣虏驴路脰
+		// hasClient=True脪虏驴脡脪脭脟驴脰脝脰赂露篓脫碌脫脨驴脥禄搂露脣虏驴路脰
 		// autosetHasClient(defContext);
 
-		// 如果是bots类型，需要将脚本类设置为程序环境的类
-		// 注意：如果是CLIENT_TYPE使用def文件模式或者将定义放在一个common的py中，因为该模式相关定义都在服务器代码上，而客户端环境没有服务器代码
+		// 脠莽鹿没脢脟bots脌脿脨脥拢卢脨猫脪陋陆芦陆脜卤戮脌脿脡猫脰脙脦陋鲁脤脨貌禄路戮鲁碌脛脌脿
+		// 脳垄脪芒拢潞脠莽鹿没脢脟CLIENT_TYPE脢鹿脫脙def脦脛录镁脛拢脢陆禄貌脮脽陆芦露篓脪氓路脜脭脷脪禄赂枚common碌脛py脰脨拢卢脪貌脦陋赂脙脛拢脢陆脧脿鹿脴露篓脪氓露录脭脷路镁脦帽脝梅麓煤脗毛脡脧拢卢露酶驴脥禄搂露脣禄路戮鲁脙禄脫脨路镁脦帽脝梅麓煤脗毛
 		if ((g_componentType == BOTS_TYPE || g_componentType == CLIENT_TYPE) && defContext.hasClient)
 		{
 			if (!updateScript(defContext))

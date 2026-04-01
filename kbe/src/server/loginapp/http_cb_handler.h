@@ -23,7 +23,7 @@ public:
 	void onAccountResetPassword(std::string& code, bool success);
 
 protected:
-	
+
 	struct CLIENT
 	{
 		KBEShared_ptr< Network::EndPoint > endpoint;

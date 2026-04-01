@@ -20,7 +20,7 @@
 #include "dbmgr/dbmgr_interface.h"
 #include "loginapp/loginapp_interface.h"
 
-namespace KBEngine {	
+namespace KBEngine {
 
 //-------------------------------------------------------------------------------------
 ServerAssets::ServerAssets():

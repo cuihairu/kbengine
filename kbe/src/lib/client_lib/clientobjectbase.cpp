@@ -182,7 +182,7 @@ void ClientObjectBase::tickSend()
 		return;
 	}
 
-	// Ïò·þÎñÆ÷·¢ËÍtick
+	// å‘æœåŠ¡å™¨å‘é€tick
 	uint64 check = uint64( Network::g_channelExternalTimeout * stampsPerSecond() ) / 2;
 	if (timestamp() - lastSentActiveTickTime_ > check)
 	{
@@ -346,10 +346,10 @@ client::Entity* ClientObjectBase::createEntity(const char* entityType, PyObject*
 	if(initProperty)
 		entity->initProperty();
 
-	// ½«entity¼ÓÈëentities
+	// å°†entityåŠ å…¥entities
 	pEntities_->add(eid, entity); 
 
-	// ³õÊ¼»¯½Å±¾
+	// åˆå§‹åŒ–è„šæœ¬
 	if(isInitializeScript)
 		entity->initializeEntity(params);
 
@@ -415,9 +415,9 @@ ENTITY_ID ClientObjectBase::getViewEntityIDFromStream(MemoryStream& s)
 		uint8 aliasID = 0;
 		s >> aliasID;
 
-		// Èç¹ûÎª0ÇÒ¿Í»§¶ËÉÏÒ»²½ÊÇÖØµÇÂ½»òÕßÖØÁ¬²Ù×÷²¢ÇÒ·þÎñ¶ËentityÔÚ¶ÏÏßÆÚ¼äÒ»Ö±´¦ÓÚÔÚÏß×´Ì¬
-		// Ôò¿ÉÒÔºöÂÔÕâ¸ö´íÎó, ÒòÎªcellapp¿ÉÄÜÒ»Ö±ÔÚÏòbaseapp·¢ËÍÍ¬²½ÏûÏ¢£¬ µ±¿Í»§¶ËÖØÁ¬ÉÏÊ±Î´µÈ
-		// ·þÎñ¶Ë³õÊ¼»¯²½Öè¿ªÊ¼ÔòÊÕµ½Í¬²½ÐÅÏ¢, ´ËÊ±ÕâÀï¾Í»á³ö´í¡£
+		// å¦‚æžœä¸º0ä¸”å®¢æˆ·ç«¯ä¸Šä¸€æ­¥æ˜¯é‡ç™»é™†æˆ–è€…é‡è¿žæ“ä½œå¹¶ä¸”æœåŠ¡ç«¯entityåœ¨æ–­çº¿æœŸé—´ä¸€ç›´å¤„äºŽåœ¨çº¿çŠ¶æ€
+		// åˆ™å¯ä»¥å¿½ç•¥è¿™ä¸ªé”™è¯¯, å› ä¸ºcellappå¯èƒ½ä¸€ç›´åœ¨å‘baseappå‘é€åŒæ­¥æ¶ˆæ¯ï¼Œ å½“å®¢æˆ·ç«¯é‡è¿žä¸Šæ—¶æœªç­‰
+		// æœåŠ¡ç«¯åˆå§‹åŒ–æ­¥éª¤å¼€å§‹åˆ™æ”¶åˆ°åŒæ­¥ä¿¡æ¯, æ­¤æ—¶è¿™é‡Œå°±ä¼šå‡ºé”™ã€‚
 		if (pEntityIDAliasIDList_.size() <= aliasID)
 			return 0;
 
@@ -448,7 +448,7 @@ bool ClientObjectBase::deregisterEventHandle(EventHandle* pEventHandle)
 //-------------------------------------------------------------------------------------
 bool ClientObjectBase::createAccount()
 {
-	// ´´½¨ÕËºÅ
+	// åˆ›å»ºè´¦å·
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 	(*pBundle).newMessage(LoginappInterface::reqCreateAccount);
 	(*pBundle) << name_;
@@ -605,7 +605,7 @@ bool ClientObjectBase::login()
 {
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 
-	// Ìá½»ÕËºÅÃÜÂëÇëÇóµÇÂ¼
+	// æäº¤è´¦å·å¯†ç è¯·æ±‚ç™»å½•
 	(*pBundle).newMessage(LoginappInterface::login);
 	(*pBundle) << typeClient_;
 	(*pBundle).appendBlob(clientDatas_);
@@ -640,7 +640,7 @@ void ClientObjectBase::onLogin(Network::Bundle* pBundle)
 //-------------------------------------------------------------------------------------
 bool ClientObjectBase::loginBaseapp()
 {
-	// ÇëÇóµÇÂ¼Íø¹Ø, ÄÜ×ßµ½ÕâÀïÀ´Ò»¶¨ÊÇÁ¬½ÓÁËÍø¹Ø
+	// è¯·æ±‚ç™»å½•ç½‘å…³, èƒ½èµ°åˆ°è¿™é‡Œæ¥ä¸€å®šæ˜¯è¿žæŽ¥äº†ç½‘å…³
 	connectedBaseapp_ = true;
 
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
@@ -654,7 +654,7 @@ bool ClientObjectBase::loginBaseapp()
 //-------------------------------------------------------------------------------------
 bool ClientObjectBase::reloginBaseapp()
 {
-	// ÇëÇóÖØµÇÂ½Íø¹Ø, Í¨³£ÊÇµôÏßÁËÖ®ºóÖ´ÐÐ
+	// è¯·æ±‚é‡ç™»é™†ç½‘å…³, é€šå¸¸æ˜¯æŽ‰çº¿äº†ä¹‹åŽæ‰§è¡Œ
 	connectedBaseapp_ = true;
 
 	Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
@@ -727,7 +727,7 @@ void ClientObjectBase::onLoginBaseappFailed(Network::Channel * pChannel, SERVER_
 {
 	INFO_MSG(fmt::format("ClientObjectBase::onLoginBaseappFailed: {} failedcode={}!\n", name_, failedcode));
 
-	// ÄÜ×ßµ½ÕâÀïÀ´Ò»¶¨ÊÇÁ¬½ÓÁËÍø¹Ø
+	// èƒ½èµ°åˆ°è¿™é‡Œæ¥ä¸€å®šæ˜¯è¿žæŽ¥äº†ç½‘å…³
 	connectedBaseapp_ = true;
 
 	EventData_LoginBaseappFailed eventdata;
@@ -741,7 +741,7 @@ void ClientObjectBase::onReloginBaseappFailed(Network::Channel * pChannel, SERVE
 {
 	INFO_MSG(fmt::format("ClientObjectBase::onReloginBaseappFailed: {} failedcode={}!\n", name_, failedcode));
 
-	// ÄÜ×ßµ½ÕâÀïÀ´Ò»¶¨ÊÇÁ¬½ÓÁËÍø¹Ø
+	// èƒ½èµ°åˆ°è¿™é‡Œæ¥ä¸€å®šæ˜¯è¿žæŽ¥äº†ç½‘å…³
 	connectedBaseapp_ = true;
 
 	EventData_LoginBaseappFailed eventdata;
@@ -769,7 +769,7 @@ void ClientObjectBase::onCreatedProxies(Network::Channel * pChannel, uint64 rndU
 	entityID_ = eid;
 	rndUUID_ = rndUUID;
 	
-	// ÄÜ×ßµ½ÕâÀïÀ´Ò»¶¨ÊÇÁ¬½ÓÁËÍø¹Ø
+	// èƒ½èµ°åˆ°è¿™é‡Œæ¥ä¸€å®šæ˜¯è¿žæŽ¥äº†ç½‘å…³
 	connectedBaseapp_ = true;
 		
 	BUFFEREDMESSAGE::iterator iter = bufferedCreateEntityMessage_.find(eid);
@@ -782,7 +782,7 @@ void ClientObjectBase::onCreatedProxies(Network::Channel * pChannel, uint64 rndU
 		INFO_MSG(fmt::format("ClientObject::onCreatedProxies({}): rndUUID={} eid={} entityType={}!\n",
 			name_, rndUUID, eid, entityType));
 
-		// ÉèÖÃentityµÄbaseEntityCall
+		// è®¾ç½®entityçš„baseEntityCall
 		EntityCall* entityCall = new EntityCall(EntityDef::findScriptModule(entityType.c_str()), 
 			NULL, appID(), eid, ENTITYCALL_TYPE_BASE);
 
@@ -791,7 +791,7 @@ void ClientObjectBase::onCreatedProxies(Network::Channel * pChannel, uint64 rndU
 
 		if(hasBufferedMessage)
 		{
-			// ÏÈ¸üÐÂÊôÐÔÔÙ³õÊ¼»¯½Å±¾
+			// å…ˆæ›´æ–°å±žæ€§å†åˆå§‹åŒ–è„šæœ¬
 			this->onUpdatePropertys(pChannel, *iter->second.get());
 			bufferedCreateEntityMessage_.erase(iter);
 			pEntity->initializeEntity(NULL);
@@ -811,7 +811,7 @@ void ClientObjectBase::onCreatedProxies(Network::Channel * pChannel, uint64 rndU
 	{
 		if(hasBufferedMessage)
 		{
-			// ÏÈ¸üÐÂÊôÐÔÔÙ³õÊ¼»¯½Å±¾
+			// å…ˆæ›´æ–°å±žæ€§å†åˆå§‹åŒ–è„šæœ¬
 			this->onUpdatePropertys(pChannel, *iter->second.get());
 			bufferedCreateEntityMessage_.erase(iter);
 			entity->initializeEntity(NULL);
@@ -855,14 +855,14 @@ void ClientObjectBase::onEntityEnterWorld(Network::Channel * pChannel, MemoryStr
 			ScriptDefModule* sm = EntityDef::findScriptModule(scriptType);
 			KBE_ASSERT(sm);
 			
-			// ÉèÖÃentityµÄcellEntityCall
+			// è®¾ç½®entityçš„cellEntityCall
 			EntityCall* entityCall = new EntityCall(EntityDef::findScriptModule(sm->getName()), 
 				NULL, appID(), eid, ENTITYCALL_TYPE_CELL);
 
 			entity = createEntity(sm->getName(), NULL, false, eid, true, NULL, entityCall);
 			KBE_ASSERT(entity != NULL);
 
-			// ÏÈ¸üÐÂÊôÐÔÔÙ³õÊ¼»¯½Å±¾
+			// å…ˆæ›´æ–°å±žæ€§å†åˆå§‹åŒ–è„šæœ¬
 			this->onUpdatePropertys(pChannel, *iter->second.get());
 			bufferedCreateEntityMessage_.erase(iter);
 			entity->isOnGround(isOnGround > 0);
@@ -890,7 +890,7 @@ void ClientObjectBase::onEntityEnterWorld(Network::Channel * pChannel, MemoryStr
 			entity->clientPos(entity->position());
 			entity->clientDir(entity->direction());
 
-			// ³õÊ¼»¯Ò»ÏÂ·þÎñ¶Ëµ±Ç°µÄÎ»ÖÃ
+			// åˆå§‹åŒ–ä¸€ä¸‹æœåŠ¡ç«¯å½“å‰çš„ä½ç½®
 			entity->serverPosition(entity->position());
 
 			DEBUG_MSG(fmt::format("ClientObjectBase::onPlayerEnterWorld: {}({}), isOnGround({}), appID({}).\n",
@@ -898,15 +898,15 @@ void ClientObjectBase::onEntityEnterWorld(Network::Channel * pChannel, MemoryStr
 
 			KBE_ASSERT(entity->cellEntityCall() == NULL);
 
-			// ÉèÖÃentityµÄcellEntityCall
+			// è®¾ç½®entityçš„cellEntityCall
 			EntityCall* entityCall = new EntityCall(entity->pScriptModule(), 
 				NULL, appID(), eid, ENTITYCALL_TYPE_CELL);
 
 			entity->cellEntityCall(entityCall);
 
-			// °²È«Æð¼û£¬ ÕâÀïÇå¿ÕÒ»ÏÂ
-			// Èç¹û·þÎñ¶ËÉÏÊ¹ÓÃgiveClientToÇÐ»»¿ØÖÆÈ¨
-			// Ö®Ç°µÄÊµÌåÒÑ¾­½øÈëÊÀ½ç£¬ ÇÐ»»ºóµÄÊµÌåÒ²½øÈëÊÀ½ç£¬ ÕâÀï¿ÉÄÜ»á²ÐÁôÖ®Ç°ÄÇ¸öÊµÌå½øÈëÊÀ½çµÄÐÅÏ¢
+			// å®‰å…¨èµ·è§ï¼Œ è¿™é‡Œæ¸…ç©ºä¸€ä¸‹
+			// å¦‚æžœæœåŠ¡ç«¯ä¸Šä½¿ç”¨giveClientToåˆ‡æ¢æŽ§åˆ¶æƒ
+			// ä¹‹å‰çš„å®žä½“å·²ç»è¿›å…¥ä¸–ç•Œï¼Œ åˆ‡æ¢åŽçš„å®žä½“ä¹Ÿè¿›å…¥ä¸–ç•Œï¼Œ è¿™é‡Œå¯èƒ½ä¼šæ®‹ç•™ä¹‹å‰é‚£ä¸ªå®žä½“è¿›å…¥ä¸–ç•Œçš„ä¿¡æ¯
 			pEntityIDAliasIDList_.clear();
 			std::vector<ENTITY_ID> excludes;
 			excludes.push_back(entityID_);
@@ -973,7 +973,7 @@ void ClientObjectBase::onEntityLeaveWorld(Network::Channel * pChannel, ENTITY_ID
 
 	eventHandler_.fire(&eventdata);
 
-	// Èç¹û²»ÊÇÍæ¼Ò
+	// å¦‚æžœä¸æ˜¯çŽ©å®¶
 	if(entityID_ != eid)
 	{
 		destroyEntity(eid, false);
@@ -1015,7 +1015,7 @@ void ClientObjectBase::onEntityEnterSpace(Network::Channel * pChannel, MemoryStr
 	entity->clientPos(entity->position());
 	entity->clientDir(entity->direction());
 
-	// ³õÊ¼»¯Ò»ÏÂ·þÎñ¶Ëµ±Ç°µÄÎ»ÖÃ
+	// åˆå§‹åŒ–ä¸€ä¸‹æœåŠ¡ç«¯å½“å‰çš„ä½ç½®
 	entity->serverPosition(entity->position());
 
 	EventData_EnterSpace eventdata;
@@ -1237,7 +1237,7 @@ void ClientObjectBase::updatePlayerToServer()
         pServerChannel_->send(pBundle);
     }
 
-    // Í¬²½ËùÓÐcontrolled entityµÄÎ»ÖÃÓë³¯Ïò
+    // åŒæ­¥æ‰€æœ‰controlled entityçš„ä½ç½®ä¸Žæœå‘
     std::list<client::Entity *>::iterator itr = controlledEntities_.begin();
     for (; itr != controlledEntities_.end(); itr++)
     {
@@ -2146,9 +2146,9 @@ void ClientObjectBase::_updateVolatileData(ENTITY_ID entityID, float x, float y,
 	client::Entity* entity = pEntities_->find(entityID);
 	if(entity == NULL)
 	{
-		// Èç¹ûÎª0ÇÒ¿Í»§¶ËÉÏÒ»²½ÊÇÖØµÇÂ½»òÕßÖØÁ¬²Ù×÷²¢ÇÒ·þÎñ¶ËentityÔÚ¶ÏÏßÆÚ¼äÒ»Ö±´¦ÓÚÔÚÏß×´Ì¬
-		// Ôò¿ÉÒÔºöÂÔÕâ¸ö´íÎó, ÒòÎªcellapp¿ÉÄÜÒ»Ö±ÔÚÏòbaseapp·¢ËÍÍ¬²½ÏûÏ¢£¬ µ±¿Í»§¶ËÖØÁ¬ÉÏÊ±Î´µÈ
-		// ·þÎñ¶Ë³õÊ¼»¯²½Öè¿ªÊ¼ÔòÊÕµ½Í¬²½ÐÅÏ¢, ´ËÊ±ÕâÀï¾Í»á³ö´í¡£
+		// å¦‚æžœä¸º0ä¸”å®¢æˆ·ç«¯ä¸Šä¸€æ­¥æ˜¯é‡ç™»é™†æˆ–è€…é‡è¿žæ“ä½œå¹¶ä¸”æœåŠ¡ç«¯entityåœ¨æ–­çº¿æœŸé—´ä¸€ç›´å¤„äºŽåœ¨çº¿çŠ¶æ€
+		// åˆ™å¯ä»¥å¿½ç•¥è¿™ä¸ªé”™è¯¯, å› ä¸ºcellappå¯èƒ½ä¸€ç›´åœ¨å‘baseappå‘é€åŒæ­¥æ¶ˆæ¯ï¼Œ å½“å®¢æˆ·ç«¯é‡è¿žä¸Šæ—¶æœªç­‰
+		// æœåŠ¡ç«¯åˆå§‹åŒ–æ­¥éª¤å¼€å§‹åˆ™æ”¶åˆ°åŒæ­¥ä¿¡æ¯, æ­¤æ—¶è¿™é‡Œå°±ä¼šå‡ºé”™ã€‚
 		ERROR_MSG(fmt::format("ClientObjectBase::onUpdateData_xz_yp: not found entity({}).\n", entityID));
 		return;
 	}
@@ -2160,7 +2160,7 @@ void ClientObjectBase::_updateVolatileData(ENTITY_ID entityID, float x, float y,
 		return;
 	}
 
-	// Ð¡ÓÚ0²»ÉèÖÃ
+	// å°äºŽ0ä¸è®¾ç½®
 	if(isOnGround >= 0)
 		entity->isOnGround(isOnGround > 0);
 

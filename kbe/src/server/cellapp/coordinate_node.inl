@@ -24,7 +24,7 @@ INLINE void CoordinateNode::pCoordinateSystem(CoordinateSystem* v) { pCoordinate
 
 //-------------------------------------------------------------------------------------
 INLINE void CoordinateNode::flags(uint32 v) { flags_ = v; }
-	
+
 //-------------------------------------------------------------------------------------
 INLINE uint32 CoordinateNode::flags() const { return flags_; }
 

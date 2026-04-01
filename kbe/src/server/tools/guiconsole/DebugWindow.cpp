@@ -36,7 +36,7 @@ END_MESSAGE_MAP()
 BOOL CDebugWindow::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	return TRUE; 
+	return TRUE;
 };
 
 // CDebugWindow message handlers
@@ -44,7 +44,7 @@ BOOL CDebugWindow::OnInitDialog()
 void CDebugWindow::OnSizing(UINT fwSide, LPRECT pRect)
 {
 	CDialog::OnSizing(fwSide, pRect);
-	
+
 	// TODO: Add your message handler code here
 }
 

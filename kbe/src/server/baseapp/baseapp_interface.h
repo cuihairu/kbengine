@@ -9,7 +9,7 @@
 #ifndef KBE_BASEAPP_INTERFACE_H
 #define KBE_BASEAPP_INTERFACE_H
 
-// common include	
+// common include
 #if defined(BASEAPP)
 #include "baseapp.h"
 #endif
@@ -19,140 +19,140 @@
 #include "network/interface_defs.h"
 #include "server/server_errors.h"
 //#define NDEBUG
-// windows include	
+// windows include
 #if KBE_PLATFORM == PLATFORM_WIN32
 #else
 // linux include
 #endif
-	
+
 namespace KBEngine{
 
 /**
-	BASEAPPËùÓĞÏûÏ¢½Ó¿ÚÔÚ´Ë¶¨Òå
+	BASEAPPæ‰€æœ‰æ¶ˆæ¯æ¥å£åœ¨æ­¤å®šä¹‰
 */
 NETWORK_INTERFACE_DECLARE_BEGIN(BaseappInterface)
-	// ¿Í»§¶ËÇëÇóµ¼ÈëĞ­Òé¡£
+	// å®¢æˆ·ç«¯è¯·æ±‚å¯¼å…¥åè®®ã€‚
 	BASEAPP_MESSAGE_EXPOSED(importClientMessages)
 	BASEAPP_MESSAGE_DECLARE_ARGS0(importClientMessages,								NETWORK_FIXED_MESSAGE)
 
-	// ¿Í»§¶Ëentitydefµ¼³ö¡£
+	// å®¢æˆ·ç«¯entitydefå¯¼å‡ºã€‚
 	BASEAPP_MESSAGE_EXPOSED(importClientEntityDef)
 	BASEAPP_MESSAGE_DECLARE_ARGS0(importClientEntityDef,							NETWORK_FIXED_MESSAGE)
 
-	// Ä³appÖ÷¶¯ÇëÇó¶ÏÏß¡£
+	// æŸappä¸»åŠ¨è¯·æ±‚æ–­çº¿ã€‚
 	BASEAPP_MESSAGE_DECLARE_ARGS0(reqClose,											NETWORK_FIXED_MESSAGE)
 
-	// Ä³appÖ÷¶¯ÇëÇólook¡£
+	// æŸappä¸»åŠ¨è¯·æ±‚lookã€‚
 	BASEAPP_MESSAGE_DECLARE_ARGS0(lookApp,											NETWORK_FIXED_MESSAGE)
 
-	// Ä³¸öappÇëÇó²é¿´¸Ãapp¸ºÔØ×´Ì¬¡£
+	// æŸä¸ªappè¯·æ±‚æŸ¥çœ‹è¯¥appè´Ÿè½½çŠ¶æ€ã€‚
 	BASEAPP_MESSAGE_DECLARE_ARGS0(queryLoad,										NETWORK_FIXED_MESSAGE)
 
-	// consoleÔ¶³ÌÖ´ĞĞpythonÓï¾ä¡£
+	// consoleè¿œç¨‹æ‰§è¡Œpythonè¯­å¥ã€‚
 	BASEAPP_MESSAGE_DECLARE_STREAM(onExecScriptCommand,								NETWORK_VARIABLE_MESSAGE)
 
-	// Ä³app×¢²á×Ô¼ºµÄ½Ó¿ÚµØÖ·µ½±¾app
+	// æŸappæ³¨å†Œè‡ªå·±çš„æ¥å£åœ°å€åˆ°æœ¬app
 	BASEAPP_MESSAGE_DECLARE_ARGS11(onRegisterNewApp,								NETWORK_VARIABLE_MESSAGE,
-									int32,											uid, 
+									int32,											uid,
 									std::string,									username,
-									COMPONENT_TYPE,									componentType, 
-									COMPONENT_ID,									componentID, 
+									COMPONENT_TYPE,									componentType,
+									COMPONENT_ID,									componentID,
 									COMPONENT_ORDER,								globalorderID,
 									COMPONENT_ORDER,								grouporderID,
-									uint32,											intaddr, 
+									uint32,											intaddr,
 									uint16,											intport,
-									uint32,											extaddr, 
+									uint32,											extaddr,
 									uint16,											extport,
 									std::string,									extaddrEx)
 
-	// dbmgr¸æÖªÒÑ¾­Æô¶¯µÄÆäËûbaseapp»òÕßcellappµÄµØÖ·
-	// µ±Ç°appĞèÒªÖ÷¶¯µÄÈ¥ÓëËûÃÇ½¨Á¢Á¬½Ó
+	// dbmgrå‘ŠçŸ¥å·²ç»å¯åŠ¨çš„å…¶ä»–baseappæˆ–è€…cellappçš„åœ°å€
+	// å½“å‰appéœ€è¦ä¸»åŠ¨çš„å»ä¸ä»–ä»¬å»ºç«‹è¿æ¥
 	BASEAPP_MESSAGE_DECLARE_ARGS11(onGetEntityAppFromDbmgr,							NETWORK_VARIABLE_MESSAGE,
-									int32,											uid, 
+									int32,											uid,
 									std::string,									username,
-									COMPONENT_TYPE,									componentType, 
-									COMPONENT_ID,									componentID, 
+									COMPONENT_TYPE,									componentType,
+									COMPONENT_ID,									componentID,
 									COMPONENT_ORDER,								globalorderID,
 									COMPONENT_ORDER,								grouporderID,
-									uint32,											intaddr, 
+									uint32,											intaddr,
 									uint16,											intport,
-									uint32,											extaddr, 
+									uint32,											extaddr,
 									uint16,											extport,
 									std::string,									extaddrEx)
 
-	// Ä³appÇëÇó»ñÈ¡Ò»¸öentityID¶ÎµÄ»Øµ÷
+	// æŸappè¯·æ±‚è·å–ä¸€ä¸ªentityIDæ®µçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_ARGS2(onReqAllocEntityID,								NETWORK_FIXED_MESSAGE,
 									ENTITY_ID,										startID,
 									ENTITY_ID,										endID)
 
 
-	// Ä³appÇëÇó»ñÈ¡Ò»¸öentityID¶ÎµÄ»Øµ÷
+	// æŸappè¯·æ±‚è·å–ä¸€ä¸ªentityIDæ®µçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_ARGS6(onDbmgrInitCompleted,								NETWORK_VARIABLE_MESSAGE,
-									GAME_TIME,										gametime, 
+									GAME_TIME,										gametime,
 									ENTITY_ID,										startID,
 									ENTITY_ID,										endID,
 									COMPONENT_ORDER,								startGlobalOrder,
 									COMPONENT_ORDER,								startGroupOrder,
 									std::string,									digest)
 
-	// helloÎÕÊÖ¡£
+	// helloæ¡æ‰‹ã€‚
 	BASEAPP_MESSAGE_EXPOSED(hello)
 	BASEAPP_MESSAGE_DECLARE_STREAM(hello,											NETWORK_VARIABLE_MESSAGE)
 
-	// globalÊı¾İ¸Ä±ä
+	// globalæ•°æ®æ”¹å˜
 	BASEAPP_MESSAGE_DECLARE_STREAM(onBroadcastGlobalDataChanged,					NETWORK_VARIABLE_MESSAGE)
 	BASEAPP_MESSAGE_DECLARE_STREAM(onBroadcastBaseAppDataChanged,					NETWORK_VARIABLE_MESSAGE)
 
-	// Ä³¸öappÏò±¾app¸æÖª´¦ÓÚ»î¶¯×´Ì¬¡£
+	// æŸä¸ªappå‘æœ¬appå‘ŠçŸ¥å¤„äºæ´»åŠ¨çŠ¶æ€ã€‚
 	BASEAPP_MESSAGE_DECLARE_ARGS2(onAppActiveTick,									NETWORK_FIXED_MESSAGE,
-									COMPONENT_TYPE,									componentType, 
+									COMPONENT_TYPE,									componentType,
 									COMPONENT_ID,									componentID)
 
-	// Ä³¸öappÏò±¾app¸æÖª´¦ÓÚ»î¶¯×´Ì¬¡£
+	// æŸä¸ªappå‘æœ¬appå‘ŠçŸ¥å¤„äºæ´»åŠ¨çŠ¶æ€ã€‚
 	BASEAPP_MESSAGE_EXPOSED(onClientActiveTick)
 	BASEAPP_MESSAGE_DECLARE_ARGS0(onClientActiveTick,								NETWORK_FIXED_MESSAGE)
 
-	// ÊÕµ½baseappmgr¾ö¶¨½«Ä³¸öbaseappÒªÇócreateEntityAnywhereµÄÇëÇóÔÚ±¾baseappÉÏÖ´ĞĞ 
+	// æ”¶åˆ°baseappmgrå†³å®šå°†æŸä¸ªbaseappè¦æ±‚createEntityAnywhereçš„è¯·æ±‚åœ¨æœ¬baseappä¸Šæ‰§è¡Œ
 	BASEAPP_MESSAGE_DECLARE_STREAM(onCreateEntityAnywhere,							NETWORK_VARIABLE_MESSAGE)
 
-	// createEntityAnywhere³É¹¦Ö®ºó»Øµ÷ÏûÏ¢µ½·¢Æğ²ãcreateEntityAnywhereµÄbaseappµÄentity¡£
+	// createEntityAnywhereæˆåŠŸä¹‹åå›è°ƒæ¶ˆæ¯åˆ°å‘èµ·å±‚createEntityAnywhereçš„baseappçš„entityã€‚
 	BASEAPP_MESSAGE_DECLARE_STREAM(onCreateEntityAnywhereCallback,					NETWORK_FIXED_MESSAGE)
 
-	// createEntityRemotely³É¹¦Ö®ºó»Øµ÷ÏûÏ¢µ½·¢Æğ²ãcreateEntityRemotelyµÄbaseappµÄentity¡£
+	// createEntityRemotelyæˆåŠŸä¹‹åå›è°ƒæ¶ˆæ¯åˆ°å‘èµ·å±‚createEntityRemotelyçš„baseappçš„entityã€‚
 	BASEAPP_MESSAGE_DECLARE_STREAM(onCreateEntityRemotely,							NETWORK_FIXED_MESSAGE)
 
-	// createEntityRemotely³É¹¦Ö®ºó»Øµ÷ÏûÏ¢µ½·¢Æğ²ãcreateEntityRemotelyµÄbaseappµÄentity¡£
+	// createEntityRemotelyæˆåŠŸä¹‹åå›è°ƒæ¶ˆæ¯åˆ°å‘èµ·å±‚createEntityRemotelyçš„baseappçš„entityã€‚
 	BASEAPP_MESSAGE_DECLARE_STREAM(onCreateEntityRemotelyCallback,					 NETWORK_FIXED_MESSAGE)
 
-	// createCellEntityµÄcellÊµÌå´´½¨³É¹¦»Øµ÷¡£
+	// createCellEntityçš„cellå®ä½“åˆ›å»ºæˆåŠŸå›è°ƒã€‚
 	BASEAPP_MESSAGE_DECLARE_ARGS3(onEntityGetCell,									NETWORK_FIXED_MESSAGE,
 									ENTITY_ID,										id,
 									COMPONENT_ID,									componentID,
 									SPACE_ID,										spaceID)
 
-	// createCellEntityµÄcellÊµÌå´´½¨³É¹¦»Øµ÷¡£
+	// createCellEntityçš„cellå®ä½“åˆ›å»ºæˆåŠŸå›è°ƒã€‚
 	BASEAPP_MESSAGE_DECLARE_ARGS1(onCreateCellFailure,								NETWORK_FIXED_MESSAGE,
 									ENTITY_ID,										entityID)
 
-	// loginappÏò×Ô¼º×¢²áÒ»¸ö½«ÒªµÇÂ¼µÄÕËºÅ, ÓÉbaseappmgr×ª·¢¡£
+	// loginappå‘è‡ªå·±æ³¨å†Œä¸€ä¸ªå°†è¦ç™»å½•çš„è´¦å·, ç”±baseappmgrè½¬å‘ã€‚
 	BASEAPP_MESSAGE_DECLARE_STREAM(registerPendingLogin,							NETWORK_VARIABLE_MESSAGE)
 
-	// Êı¾İ¿âÖĞ²éÑ¯µÄ×Ô¶¯entity¼ÓÔØĞÅÏ¢·µ»Ø 
+	// æ•°æ®åº“ä¸­æŸ¥è¯¢çš„è‡ªåŠ¨entityåŠ è½½ä¿¡æ¯è¿”å›
 	BASEAPP_MESSAGE_DECLARE_STREAM(onEntityAutoLoadCBFromDBMgr,						NETWORK_VARIABLE_MESSAGE)
 
-	// Ç°¶ËÇëÇóµÇÂ¼µ½Íø¹ØÉÏ¡£
+	// å‰ç«¯è¯·æ±‚ç™»å½•åˆ°ç½‘å…³ä¸Šã€‚
 	BASEAPP_MESSAGE_EXPOSED(loginBaseapp)
 	BASEAPP_MESSAGE_DECLARE_ARGS2(loginBaseapp,										NETWORK_VARIABLE_MESSAGE,
 									std::string,									accountName,
 									std::string,									password)
 
-	// Ç°¶ËÇëÇó´ÓÍø¹ØµÇ³ö¡£
+	// å‰ç«¯è¯·æ±‚ä»ç½‘å…³ç™»å‡ºã€‚
 	BASEAPP_MESSAGE_EXPOSED(logoutBaseapp)
 	BASEAPP_MESSAGE_DECLARE_ARGS2(logoutBaseapp,									NETWORK_FIXED_MESSAGE,
 									uint64,											key,
 									ENTITY_ID,										entityID)
 
-	// Ç°¶ËÇëÇóÖØĞÂµÇÂ¼µ½Íø¹ØÉÏ¡£
+	// å‰ç«¯è¯·æ±‚é‡æ–°ç™»å½•åˆ°ç½‘å…³ä¸Šã€‚
 	BASEAPP_MESSAGE_EXPOSED(reloginBaseapp)
 	BASEAPP_MESSAGE_DECLARE_ARGS4(reloginBaseapp,									NETWORK_VARIABLE_MESSAGE,
 									std::string,									accountName,
@@ -160,44 +160,44 @@ NETWORK_INTERFACE_DECLARE_BEGIN(BaseappInterface)
 									uint64,											key,
 									ENTITY_ID,										entityID)
 
-	// ´Ódbmgr»ñÈ¡µ½ÕËºÅEntityĞÅÏ¢
+	// ä»dbmgrè·å–åˆ°è´¦å·Entityä¿¡æ¯
 	BASEAPP_MESSAGE_DECLARE_STREAM(onQueryAccountCBFromDbmgr,						NETWORK_VARIABLE_MESSAGE)
 
-	// entityÊÕµ½Ô¶³ÌcallÇëÇó, ÓÉÄ³¸öappÉÏµÄentitycall·¢Æğ
+	// entityæ”¶åˆ°è¿œç¨‹callè¯·æ±‚, ç”±æŸä¸ªappä¸Šçš„entitycallå‘èµ·
 	BASEAPP_MESSAGE_DECLARE_STREAM(onEntityCall,									NETWORK_VARIABLE_MESSAGE)
-	
-	// client·ÃÎÊentityµÄcell·½·¨
+
+	// clientè®¿é—®entityçš„cellæ–¹æ³•
 	BASEAPP_MESSAGE_EXPOSED(onRemoteCallCellMethodFromClient)
 	BASEAPP_MESSAGE_DECLARE_STREAM(onRemoteCallCellMethodFromClient,				NETWORK_VARIABLE_MESSAGE)
 
-	// client¸üĞÂÊı¾İ
+	// clientæ›´æ–°æ•°æ®
 	BASEAPP_MESSAGE_EXPOSED(onUpdateDataFromClient)
 	BASEAPP_MESSAGE_DECLARE_STREAM(onUpdateDataFromClient,							NETWORK_VARIABLE_MESSAGE)
 	BASEAPP_MESSAGE_EXPOSED(onUpdateDataFromClientForControlledEntity)
 	BASEAPP_MESSAGE_DECLARE_STREAM(onUpdateDataFromClientForControlledEntity,		NETWORK_VARIABLE_MESSAGE)
 
-	// executeRawDatabaseCommand´ÓdbmgrµÄ»Øµ÷
+	// executeRawDatabaseCommandä»dbmgrçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_STREAM(onExecuteRawDatabaseCommandCB,					NETWORK_VARIABLE_MESSAGE)
 
-	// cellapp±¸·İentityµÄcellÊı¾İ
+	// cellappå¤‡ä»½entityçš„cellæ•°æ®
 	BASEAPP_MESSAGE_DECLARE_STREAM(onBackupEntityCellData,							NETWORK_VARIABLE_MESSAGE)
 
-	// cellapp writeToDBÍê³É
+	// cellapp writeToDBå®Œæˆ
 	BASEAPP_MESSAGE_DECLARE_STREAM(onCellWriteToDBCompleted,						NETWORK_VARIABLE_MESSAGE)
 
-	// cellapp×ª·¢entityÏûÏ¢¸øclient
+	// cellappè½¬å‘entityæ¶ˆæ¯ç»™client
 	BASEAPP_MESSAGE_DECLARE_STREAM(forwardMessageToClientFromCellapp,				NETWORK_VARIABLE_MESSAGE)
 
-	// cellapp×ª·¢entityÏûÏ¢¸øÄ³¸öbaseEntityµÄcellEntity
+	// cellappè½¬å‘entityæ¶ˆæ¯ç»™æŸä¸ªbaseEntityçš„cellEntity
 	BASEAPP_MESSAGE_DECLARE_STREAM(forwardMessageToCellappFromCellapp,				NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇó¹Ø±Õ·şÎñÆ÷
+	// è¯·æ±‚å…³é—­æœåŠ¡å™¨
 	BASEAPP_MESSAGE_DECLARE_STREAM(reqCloseServer,									NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇóÉèÖÃflags
+	// è¯·æ±‚è®¾ç½®flags
 	BASEAPP_MESSAGE_DECLARE_STREAM(reqSetFlags,										NETWORK_VARIABLE_MESSAGE)
 
-	// Ğ´entityµ½db»Øµ÷¡£
+	// å†™entityåˆ°dbå›è°ƒã€‚
 	BASEAPP_MESSAGE_DECLARE_ARGS5(onWriteToDBCallback,								NETWORK_FIXED_MESSAGE,
 									ENTITY_ID,										eid,
 									DBID,											entityDBID,
@@ -205,19 +205,19 @@ NETWORK_INTERFACE_DECLARE_BEGIN(BaseappInterface)
 									CALLBACK_ID,									callbackID,
 									bool,											success)
 
-	// createEntityFromDBIDµÄ»Øµ÷
+	// createEntityFromDBIDçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_STREAM(onCreateEntityFromDBIDCallback,					NETWORK_FIXED_MESSAGE)
 
-	// createEntityAnywhereFromDBIDµÄ»Øµ÷
+	// createEntityAnywhereFromDBIDçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_STREAM(onGetCreateEntityAnywhereFromDBIDBestBaseappID,	NETWORK_FIXED_MESSAGE)
 
-	// createEntityAnywhereFromDBIDµÄ»Øµ÷
+	// createEntityAnywhereFromDBIDçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_STREAM(onCreateEntityAnywhereFromDBIDCallback,			NETWORK_FIXED_MESSAGE)
 
-	// createEntityAnywhereFromDBIDµÄ»Øµ÷
+	// createEntityAnywhereFromDBIDçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_STREAM(createEntityAnywhereFromDBIDOtherBaseapp,		NETWORK_FIXED_MESSAGE)
 
-	// createEntityAnywhereFromDBIDµÄ»Øµ÷
+	// createEntityAnywhereFromDBIDçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_ARGS5(onCreateEntityAnywhereFromDBIDOtherBaseappCallback,NETWORK_VARIABLE_MESSAGE,
 									COMPONENT_ID,									createByBaseappID,
 									std::string,									entityType,
@@ -225,13 +225,13 @@ NETWORK_INTERFACE_DECLARE_BEGIN(BaseappInterface)
 									CALLBACK_ID,									callbackID,
 									DBID,											dbid)
 
-	// createEntityRemotelyFromDBIDµÄ»Øµ÷
+	// createEntityRemotelyFromDBIDçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_STREAM(onCreateEntityRemotelyFromDBIDCallback,			NETWORK_FIXED_MESSAGE)
 
-	// createEntityRemotelyFromDBIDµÄ»Øµ÷
+	// createEntityRemotelyFromDBIDçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_STREAM(createEntityRemotelyFromDBIDOtherBaseapp,		NETWORK_FIXED_MESSAGE)
 
-	// createEntityRemotelyFromDBIDµÄ»Øµ÷
+	// createEntityRemotelyFromDBIDçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_ARGS5(onCreateEntityRemotelyFromDBIDOtherBaseappCallback,NETWORK_VARIABLE_MESSAGE,
 									COMPONENT_ID,									createByBaseappID,
 									std::string,									entityType,
@@ -239,35 +239,35 @@ NETWORK_INTERFACE_DECLARE_BEGIN(BaseappInterface)
 									CALLBACK_ID,									callbackID,
 									DBID,											dbid)
 
-	// ÇëÇó²éÑ¯watcherÊı¾İ
+	// è¯·æ±‚æŸ¥è¯¢watcheræ•°æ®
 	BASEAPP_MESSAGE_DECLARE_STREAM(queryWatcher,									NETWORK_VARIABLE_MESSAGE)
 
-	// ³äÖµ»Øµ÷
+	// å……å€¼å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_STREAM(onChargeCB,										NETWORK_VARIABLE_MESSAGE)
 
-	// ¿ªÊ¼profile
+	// å¼€å§‹profile
 	BASEAPP_MESSAGE_DECLARE_STREAM(startProfile,									NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇó´ÓÊı¾İ¿âÉ¾³ıÊµÌå
+	// è¯·æ±‚ä»æ•°æ®åº“åˆ é™¤å®ä½“
 	BASEAPP_MESSAGE_DECLARE_STREAM(deleteEntityByDBIDCB,							NETWORK_VARIABLE_MESSAGE)
-	
-	// lookUpEntityByDBIDµÄ»Øµ÷
+
+	// lookUpEntityByDBIDçš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_STREAM(lookUpEntityByDBIDCB,							NETWORK_VARIABLE_MESSAGE)
 
-	// Ä³¸öbaseappÉÏµÄspace»Ö¸´ÁËcell£¬ ÅĞ¶Ïµ±Ç°baseappÊÇ·ñÓĞÏà¹ØentityĞèÒª»Ö¸´cell
+	// æŸä¸ªbaseappä¸Šçš„spaceæ¢å¤äº†cellï¼Œ åˆ¤æ–­å½“å‰baseappæ˜¯å¦æœ‰ç›¸å…³entityéœ€è¦æ¢å¤cell
 	BASEAPP_MESSAGE_DECLARE_STREAM(onRestoreSpaceCellFromOtherBaseapp,				NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇóÔÚÆäËûAPPÔÖÄÑ»Ö¸´·µ»Ø½á¹û¡£
+	// è¯·æ±‚åœ¨å…¶ä»–APPç¾éš¾æ¢å¤è¿”å›ç»“æœã€‚
 	BASEAPP_MESSAGE_DECLARE_STREAM(onRequestRestoreCB,								NETWORK_VARIABLE_MESSAGE)
 
-	// ÇëÇó°ó¶¨email
+	// è¯·æ±‚ç»‘å®šemail
 	BASEAPP_MESSAGE_EXPOSED(reqAccountBindEmail)
 	BASEAPP_MESSAGE_DECLARE_ARGS3(reqAccountBindEmail,								NETWORK_VARIABLE_MESSAGE,
 									ENTITY_ID,										entityID,
 									std::string,									password,
 									std::string,									email)
 
-	// ÇëÇó°ó¶¨emailÉêÇëµÄ»Øµ÷
+	// è¯·æ±‚ç»‘å®šemailç”³è¯·çš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_ARGS5(onReqAccountBindEmailCBFromDBMgr,					NETWORK_VARIABLE_MESSAGE,
 									ENTITY_ID,										entityID,
 									std::string,									accountName,
@@ -275,7 +275,7 @@ NETWORK_INTERFACE_DECLARE_BEGIN(BaseappInterface)
 									SERVER_ERROR_CODE,								failedcode,
 									std::string,									code)
 
-	// baseappÇëÇó°ó¶¨email£¨·µ»ØÊ±ĞèÒªÕÒµ½loginappµÄµØÖ·£©
+	// baseappè¯·æ±‚ç»‘å®šemailï¼ˆè¿”å›æ—¶éœ€è¦æ‰¾åˆ°loginappçš„åœ°å€ï¼‰
 	BASEAPP_MESSAGE_DECLARE_ARGS7(onReqAccountBindEmailCBFromBaseappmgr,			NETWORK_VARIABLE_MESSAGE,
 									ENTITY_ID,										entityID,
 									std::string,									accountName,
@@ -285,56 +285,56 @@ NETWORK_INTERFACE_DECLARE_BEGIN(BaseappInterface)
 									std::string,									loginappCBHost,
 									uint16,											loginappCBPort)
 
-	// ÇëÇóĞŞ¸ÄÃÜÂë
+	// è¯·æ±‚ä¿®æ”¹å¯†ç 
 	BASEAPP_MESSAGE_EXPOSED(reqAccountNewPassword)
 	BASEAPP_MESSAGE_DECLARE_ARGS3(reqAccountNewPassword,							NETWORK_VARIABLE_MESSAGE,
 									ENTITY_ID,										entityID,
 									std::string,									oldpassword,
 									std::string,									newpassword)
 
-	// ÇëÇóĞŞ¸ÄÃÜÂëµÄ»Øµ÷
+	// è¯·æ±‚ä¿®æ”¹å¯†ç çš„å›è°ƒ
 	BASEAPP_MESSAGE_DECLARE_ARGS3(onReqAccountNewPasswordCB,						NETWORK_VARIABLE_MESSAGE,
 									ENTITY_ID,										entityID,
 									std::string,									accountName,
 									SERVER_ERROR_CODE,								failedcode)
 
-	// ÇëÇóÇ¿ÖÆÉ±ËÀµ±Ç°app
+	// è¯·æ±‚å¼ºåˆ¶æ€æ­»å½“å‰app
 	BASEAPP_MESSAGE_DECLARE_STREAM(reqKillServer,									NETWORK_VARIABLE_MESSAGE)
 
 	//--------------------------------------------Entity----------------------------------------------------------
-	// Ô¶³Ìºô½Ğentity·½·¨
+	// è¿œç¨‹å‘¼å«entityæ–¹æ³•
 	ENTITY_MESSAGE_EXPOSED(onRemoteMethodCall)
 	ENTITY_MESSAGE_DECLARE_STREAM(onRemoteMethodCall,								NETWORK_VARIABLE_MESSAGE)
 
-	// cellappÍ¨±¨¸ÃentityµÄcell²¿·ÖÏú»Ù»òÕß¶ªÊ§
+	// cellappé€šæŠ¥è¯¥entityçš„celléƒ¨åˆ†é”€æ¯æˆ–è€…ä¸¢å¤±
 	ENTITY_MESSAGE_DECLARE_STREAM(onLoseCell,										NETWORK_VARIABLE_MESSAGE)
 
-	// ¿Í»§¶ËÖ±½Ó·¢ËÍÏûÏ¢¸øcellÊµÌå
+	// å®¢æˆ·ç«¯ç›´æ¥å‘é€æ¶ˆæ¯ç»™cellå®ä½“
 	ENTITY_MESSAGE_EXPOSED(forwardEntityMessageToCellappFromClient)
 	ENTITY_MESSAGE_DECLARE_STREAM(forwardEntityMessageToCellappFromClient,			NETWORK_VARIABLE_MESSAGE)
 
-	// Ä³¸öentityÇëÇóteleportºóµÄ»Øµ÷½á¹û
+	// æŸä¸ªentityè¯·æ±‚teleportåçš„å›è°ƒç»“æœ
 	ENTITY_MESSAGE_DECLARE_ARGS2(onTeleportCB,										NETWORK_FIXED_MESSAGE,
 								SPACE_ID,											spaceID,
 								bool,												fromCellTeleport)
 
-	// Ä³¸öentityÇëÇóteleportºóµÄ»Øµ÷½á¹û
+	// æŸä¸ªentityè¯·æ±‚teleportåçš„å›è°ƒç»“æœ
 	ENTITY_MESSAGE_DECLARE_ARGS1(onGetDBID,											NETWORK_FIXED_MESSAGE,
 								DBID,												dbid)
 
-	// entityÇëÇóÇ¨ÒÆµ½ÁíÒ»¸öcellappÉÏµÄspace¹ı³Ì¿ªÊ¼
+	// entityè¯·æ±‚è¿ç§»åˆ°å¦ä¸€ä¸ªcellappä¸Šçš„spaceè¿‡ç¨‹å¼€å§‹
 	ENTITY_MESSAGE_DECLARE_ARGS2(onMigrationCellappStart,							NETWORK_FIXED_MESSAGE,
 								COMPONENT_ID,										sourceCellAppID,
 								COMPONENT_ID,										targetCellAppID)
-		
-	// entityÇëÇóÇ¨ÒÆµ½ÁíÒ»¸öcellappÉÏµÄspace¹ı³Ì½áÊø
+
+	// entityè¯·æ±‚è¿ç§»åˆ°å¦ä¸€ä¸ªcellappä¸Šçš„spaceè¿‡ç¨‹ç»“æŸ
 	ENTITY_MESSAGE_DECLARE_ARGS2(onMigrationCellappEnd,								NETWORK_FIXED_MESSAGE,
 								COMPONENT_ID,										sourceCellAppID,
 								COMPONENT_ID,										targetCellAppID)
 
 	//--------------------------------------------Proxy---------------------------------------------------------
 	/**
-		Ô¶³Ìºô½Ğentity·½·¨
+		è¿œç¨‹å‘¼å«entityæ–¹æ³•
 	*/
 	//PROXY_MESSAGE_EXPOSED(onClientGetCell)
 	//PROXY_MESSAGE_DECLARE_ARGS0(onClientGetCell,									NETWORK_FIXED_MESSAGE)

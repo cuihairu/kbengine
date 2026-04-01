@@ -31,14 +31,14 @@ SCRIPT_MEMBER_DECLARE_BEGIN(Proxy)
 SCRIPT_MEMBER_DECLARE_END()
 
 SCRIPT_GETSET_DECLARE_BEGIN(Proxy)
-SCRIPT_GET_DECLARE("roundTripTime",						pyGetRoundTripTime,				0,						0)	
-SCRIPT_GET_DECLARE("timeSinceHeardFromClient",			pyGetTimeSinceHeardFromClient,	0,						0)	
-SCRIPT_GET_DECLARE("clientAddr",						pyClientAddr,					0,						0)	
-SCRIPT_GET_DECLARE("hasClient",							pyHasClient,					0,						0)	
-SCRIPT_GET_DECLARE("clientEnabled",						pyGetClientEnabled,				0,						0)	
+SCRIPT_GET_DECLARE("roundTripTime",						pyGetRoundTripTime,				0,						0)
+SCRIPT_GET_DECLARE("timeSinceHeardFromClient",			pyGetTimeSinceHeardFromClient,	0,						0)
+SCRIPT_GET_DECLARE("clientAddr",						pyClientAddr,					0,						0)
+SCRIPT_GET_DECLARE("hasClient",							pyHasClient,					0,						0)
+SCRIPT_GET_DECLARE("clientEnabled",						pyGetClientEnabled,				0,						0)
 SCRIPT_GETSET_DECLARE_END()
-BASE_SCRIPT_INIT(Proxy, 0, 0, 0, 0, 0)	
-	
+BASE_SCRIPT_INIT(Proxy, 0, 0, 0, 0, 0)
+
 //-------------------------------------------------------------------------------------
 Proxy::Proxy(ENTITY_ID id, const ScriptDefModule* pScriptModule):
 Entity(id, pScriptModule, getScriptType(), true),
@@ -81,7 +81,7 @@ PyObject* Proxy::pyDisconnect()
 //-------------------------------------------------------------------------------------
 void Proxy::kick()
 {
-	// Èç¹û±»Ïú»ÙÆµµÀÈÔÈ»´æ»îÔò½«Æä¹Ø±Õ
+	// å¦‚æœè¢«é”€æ¯é¢‘é“ä»ç„¶å­˜æ´»åˆ™å°†å…¶å…³é—­
 	Network::Channel* pChannel = Baseapp::getSingleton().networkInterface().findChannel(addr_);
 	if(pChannel && !pChannel->isDestroyed())
 	{
@@ -103,7 +103,7 @@ void Proxy::initClientBasePropertys()
 
 	MemoryStream* s1 = MemoryStream::createPoolObject(OBJECTPOOL_POINT);
 	addClientDataToStream(s1);
-	
+
 	if(s1->wpos() > 0)
 	{
 		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
@@ -129,14 +129,14 @@ void Proxy::initClientCellPropertys()
 
 	ENTITY_PROPERTY_UID spaceuid = ENTITY_BASE_PROPERTY_UTYPE_SPACEID;
 
-	Network::FixedMessages::MSGInfo* msgInfo = 
+	Network::FixedMessages::MSGInfo* msgInfo =
 		Network::FixedMessages::getSingleton().isFixed("Property::spaceID");
 
 	if(msgInfo != NULL)
 	{
 		spaceuid = msgInfo->msgid;
 	}
-	
+
 	if(pScriptModule()->usePropertyDescrAlias())
 	{
 		uint8 aliasID = ENTITY_BASE_PROPERTY_ALIASID_SPACEID;
@@ -149,7 +149,7 @@ void Proxy::initClientCellPropertys()
 
 	MemoryStream* s = MemoryStream::createPoolObject(OBJECTPOOL_POINT);
 
-	// celldata»ñÈ¡¿Í»§¶Ë¸ĞĞËÈ¤µÄÊı¾İ³õÊ¼»¯¿Í»§¶Ë Èç:ALL_CLIENTS
+	// celldataè·å–å®¢æˆ·ç«¯æ„Ÿå…´è¶£çš„æ•°æ®åˆå§‹åŒ–å®¢æˆ·ç«¯ å¦‚:ALL_CLIENTS
 	try
 	{
 		addCellDataToStream(CLIENT_TYPE, ED_FLAG_ALL_CLIENTS|ED_FLAG_CELL_PUBLIC_AND_OWN|ED_FLAG_OWN_CLIENT, s, true);
@@ -185,13 +185,13 @@ int32 Proxy::onLogOnAttempt(const char* addr, uint32 port, const char* password)
 
 	Py_INCREF(this);
 
-	PyObject* pyResult = PyObject_CallMethod(this, 
-		const_cast<char*>("onLogOnAttempt"), const_cast<char*>("sks"), 
-		addr, 
+	PyObject* pyResult = PyObject_CallMethod(this,
+		const_cast<char*>("onLogOnAttempt"), const_cast<char*>("sks"),
+		addr,
 		port,
 		password
 	);
-	
+
 	int32 ret = LOG_ON_REJECT;
 	if(pyResult != NULL)
 	{
@@ -218,7 +218,7 @@ void Proxy::onClientDeath(void)
 {
 	if(clientEntityCall() == NULL)
 	{
-		ERROR_MSG(fmt::format("{}::onClientDeath: {}, channel is null!\n", 
+		ERROR_MSG(fmt::format("{}::onClientDeath: {}, channel is null!\n",
 			this->scriptName(), this->id()));
 
 		return;
@@ -226,7 +226,7 @@ void Proxy::onClientDeath(void)
 
 	SCOPED_PROFILE(SCRIPTCALL_PROFILE);
 
-	DEBUG_MSG(fmt::format("{}::onClientDeath: {}.\n", 
+	DEBUG_MSG(fmt::format("{}::onClientDeath: {}.\n",
 		this->scriptName(), this->id()));
 
 	Py_DECREF(clientEntityCall());
@@ -239,8 +239,8 @@ void Proxy::onClientDeath(void)
 
 //-------------------------------------------------------------------------------------
 void Proxy::onClientGetCell(Network::Channel* pChannel, COMPONENT_ID componentID)
-{	
-	// »Øµ÷¸ø½Å±¾£¬»ñµÃÁËcell
+{
+	// å›è°ƒç»™è„šæœ¬ï¼Œè·å¾—äº†cell
 	if(cellEntityCall_ == NULL)
 		cellEntityCall_ = new EntityCall(pScriptModule_, NULL, componentID, id_, ENTITYCALL_TYPE_CELL);
 
@@ -276,7 +276,7 @@ PyObject* Proxy::pyGiveClientTo(PyObject* pyOterProxy)
 	if(this->isDestroyed())
 	{
 		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",
-			scriptName(), id());		
+			scriptName(), id());
 		PyErr_PrintEx(0);
 
 		return 0;
@@ -291,11 +291,11 @@ PyObject* Proxy::pyGiveClientTo(PyObject* pyOterProxy)
 		return 0;
 	}
 
-	// Èç¹ûÎªNone ÔòÉèÖÃÎªNULL
+	// å¦‚æœä¸ºNone åˆ™è®¾ç½®ä¸ºNULL
 	Proxy* oterProxy = NULL;
 	if(pyOterProxy != Py_None)
 		oterProxy = static_cast<Proxy*>(pyOterProxy);
-	
+
 	giveClientTo(oterProxy);
 	S_Return;
 }
@@ -313,11 +313,11 @@ void Proxy::giveClientTo(Proxy* proxy)
 	if(isDestroyed())
 	{
 		char err[255];
-		kbe_snprintf(err, 255, "Proxy[%s]::giveClientTo: %d is destroyed.", 
+		kbe_snprintf(err, 255, "Proxy[%s]::giveClientTo: %d is destroyed.",
 			scriptName(), id());
 
 		PyErr_SetString(PyExc_TypeError, err);
-		PyErr_PrintEx(0);	
+		PyErr_PrintEx(0);
 		onGiveClientToFailure();
 		return;
 	}
@@ -343,7 +343,7 @@ void Proxy::giveClientTo(Proxy* proxy)
 				scriptName(), proxy->id());
 
 			PyErr_SetString(PyExc_TypeError, err);
-			PyErr_PrintEx(0);	
+			PyErr_PrintEx(0);
 			onGiveClientToFailure();
 			return;
 		}
@@ -351,11 +351,11 @@ void Proxy::giveClientTo(Proxy* proxy)
 		if(proxy->id() == this->id())
 		{
 			char err[255];
-			kbe_snprintf(err, 255, "Proxy[%s]::giveClientTo: target(%d) is self.", 
-				scriptName(), proxy->id());	
+			kbe_snprintf(err, 255, "Proxy[%s]::giveClientTo: target(%d) is self.",
+				scriptName(), proxy->id());
 
 			PyErr_SetString(PyExc_TypeError, err);
-			PyErr_PrintEx(0);	
+			PyErr_PrintEx(0);
 			onGiveClientToFailure();
 			return;
 		}
@@ -363,10 +363,10 @@ void Proxy::giveClientTo(Proxy* proxy)
 		EntityCall* mb = proxy->clientEntityCall();
 		if(mb != NULL)
 		{
-			ERROR_MSG(fmt::format("Proxy::giveClientTo: {}[{}] give client to {}[{}], {} has clientEntityCall.\n", 
+			ERROR_MSG(fmt::format("Proxy::giveClientTo: {}[{}] give client to {}[{}], {} has clientEntityCall.\n",
 					scriptName(),
 					id(),
-					proxy->scriptName(), 
+					proxy->scriptName(),
 					proxy->id(),
 					proxy->scriptName()));
 
@@ -376,22 +376,22 @@ void Proxy::giveClientTo(Proxy* proxy)
 
 		if(cellEntityCall())
 		{
-			// µ±Ç°Õâ¸öentityÈç¹ûÓĞcell£¬ËµÃ÷ÒÑ¾­°ó¶¨ÁËwitness£¬ ÄÇÃ´¼ÈÈ»ÎÒÃÇ½«¿ØÖÆÈ¨
-			// ½»»»¸øÁËÁíÒ»¸öentity£¬ Õâ¸öentityĞèÒª½â°ó¶¨witness¡£
-			// Í¨Öªcell¶ªÊ§witness
+			// å½“å‰è¿™ä¸ªentityå¦‚æœæœ‰cellï¼Œè¯´æ˜å·²ç»ç»‘å®šäº†witnessï¼Œ é‚£ä¹ˆæ—¢ç„¶æˆ‘ä»¬å°†æ§åˆ¶æƒ
+			// äº¤æ¢ç»™äº†å¦ä¸€ä¸ªentityï¼Œ è¿™ä¸ªentityéœ€è¦è§£ç»‘å®šwitnessã€‚
+			// é€šçŸ¥cellä¸¢å¤±witness
 			Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 			(*pBundle).newMessage(CellappInterface::onLoseWitness);
 			(*pBundle) << this->id();
 			sendToCellapp(pBundle);
 		}
 
-		// ¼ÈÈ»¿Í»§¶ËÊ§È¥¶ÔÆäµÄ¿ØÖÆ, ÄÇÃ´Í¨ÖªclientÏú»ÙÕâ¸öentity
+		// æ—¢ç„¶å®¢æˆ·ç«¯å¤±å»å¯¹å…¶çš„æ§åˆ¶, é‚£ä¹ˆé€šçŸ¥clienté”€æ¯è¿™ä¸ªentity
 		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 		(*pBundle).newMessage(ClientInterface::onEntityDestroyed);
 		(*pBundle) << this->id();
 		sendToClient(ClientInterface::onEntityDestroyed, pBundle);
 
-		// ½«¿ØÖÆÈ¨½»»»
+		// å°†æ§åˆ¶æƒäº¤æ¢
 		clientEnabled_ = false;
 		clientEntityCall()->addr(Network::Address::NONE);
 		Py_DECREF(clientEntityCall());
@@ -408,14 +408,14 @@ void Proxy::giveClientTo(Proxy* proxy)
 //-------------------------------------------------------------------------------------
 void Proxy::onGiveClientTo(Network::Channel* lpChannel)
 {
-	clientEntityCall(new EntityCall(this->pScriptModule_, 
+	clientEntityCall(new EntityCall(this->pScriptModule_,
 		&lpChannel->addr(), 0, id_, ENTITYCALL_TYPE_CLIENT));
 
 	addr(lpChannel->addr());
 	Baseapp::getSingleton().createClientProxies(this);
 
-	// Èç¹ûÓĞcell, ĞèÒªÍ¨ÖªÆä»ñµÃwitness£¬ ÒòÎªÕâ¸ö¿Í»§¶Ë¸Õ¸Õ°ó¶¨µ½Õâ¸öproxy
-	// ´ËÊ±Õâ¸öentity¼´Ê¹ÓĞcellÕı³£Çé¿ö±ØĞëÊÇÃ»ÓĞwitnessµÄ¡£
+	// å¦‚æœæœ‰cell, éœ€è¦é€šçŸ¥å…¶è·å¾—witnessï¼Œ å› ä¸ºè¿™ä¸ªå®¢æˆ·ç«¯åˆšåˆšç»‘å®šåˆ°è¿™ä¸ªproxy
+	// æ­¤æ—¶è¿™ä¸ªentityå³ä½¿æœ‰cellæ­£å¸¸æƒ…å†µå¿…é¡»æ˜¯æ²¡æœ‰witnessçš„ã€‚
 	onGetWitness();
 }
 
@@ -424,7 +424,7 @@ void Proxy::onGetWitness()
 {
 	if(cellEntityCall())
 	{
-		// Í¨Öªcell»ñµÃ¿Í»§¶Ë
+		// é€šçŸ¥cellè·å¾—å®¢æˆ·ç«¯
 		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 		(*pBundle).newMessage(CellappInterface::onGetWitnessFromBase);
 		(*pBundle) << this->id();
@@ -443,22 +443,22 @@ double Proxy::getRoundTripTime() const
 
 //-------------------------------------------------------------------------------------
 PyObject* Proxy::pyGetRoundTripTime()
-{ 
+{
 	if (!hasFlags(ENTITY_FLAGS_DESTROYING) && isDestroyed())
 	{
-		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",		
-			scriptName(), id());		
+		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",
+			scriptName(), id());
 
-		return 0;																				
+		return 0;
 	}
 
-	return PyFloat_FromDouble(this->getRoundTripTime()); 
+	return PyFloat_FromDouble(this->getRoundTripTime());
 }
 
 //-------------------------------------------------------------------------------------
 double Proxy::getTimeSinceHeardFromClient() const
 {
-	if(clientEntityCall() == NULL || clientEntityCall()->getChannel() == NULL || 
+	if(clientEntityCall() == NULL || clientEntityCall()->getChannel() == NULL ||
 		clientEntityCall()->getChannel()->pEndPoint() == NULL)
 		return DBL_MAX;
 
@@ -467,22 +467,22 @@ double Proxy::getTimeSinceHeardFromClient() const
 
 //-------------------------------------------------------------------------------------
 PyObject* Proxy::pyGetTimeSinceHeardFromClient()
-{ 
+{
 	if (!hasFlags(ENTITY_FLAGS_DESTROYING) && isDestroyed())
 	{
-		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",		
-			scriptName(), id());		
+		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",
+			scriptName(), id());
 
-		return 0;																					
+		return 0;
 	}
-	
-	return PyFloat_FromDouble(this->getTimeSinceHeardFromClient()); 
+
+	return PyFloat_FromDouble(this->getTimeSinceHeardFromClient());
 }
 
 //-------------------------------------------------------------------------------------
 bool Proxy::hasClient() const
 {
-	if(clientEntityCall() == NULL || clientEntityCall()->getChannel() == NULL || 
+	if(clientEntityCall() == NULL || clientEntityCall()->getChannel() == NULL ||
 		clientEntityCall()->getChannel()->pEndPoint() == NULL)
 		return false;
 
@@ -491,13 +491,13 @@ bool Proxy::hasClient() const
 
 //-------------------------------------------------------------------------------------
 PyObject* Proxy::pyHasClient()
-{ 
+{
 	if (!hasFlags(ENTITY_FLAGS_DESTROYING) && isDestroyed())
 	{
-		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",		
-			scriptName(), id());		
+		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",
+			scriptName(), id());
 
-		return 0;																				
+		return 0;
 	}
 
 	if(this->hasClient())
@@ -510,18 +510,18 @@ PyObject* Proxy::pyHasClient()
 
 //-------------------------------------------------------------------------------------
 PyObject* Proxy::pyClientAddr()
-{ 
+{
 	if (!hasFlags(ENTITY_FLAGS_DESTROYING) && isDestroyed())
 	{
-		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",		
-			scriptName(), id());		
+		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",
+			scriptName(), id());
 
-		return 0;																				
+		return 0;
 	}
 
 	PyObject* pyobj = PyTuple_New(2);
 
-	if(clientEntityCall() == NULL || clientEntityCall()->getChannel() == NULL || 
+	if(clientEntityCall() == NULL || clientEntityCall()->getChannel() == NULL ||
 		clientEntityCall()->getChannel()->pEndPoint() == NULL)
 	{
 		PyTuple_SetItem(pyobj, 0, PyLong_FromLong(0));
@@ -539,13 +539,13 @@ PyObject* Proxy::pyClientAddr()
 
 //-------------------------------------------------------------------------------------
 PyObject* Proxy::pyGetClientEnabled()
-{ 
+{
 	if (!hasFlags(ENTITY_FLAGS_DESTROYING) && isDestroyed())
 	{
-		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",		
-			scriptName(), id());		
+		PyErr_Format(PyExc_AssertionError, "%s: %d is destroyed!\n",
+			scriptName(), id());
 
-		return 0;																				
+		return 0;
 	}
 
 	if(this->clientEnabled())
@@ -620,22 +620,22 @@ PyObject* Proxy::__py_pyStreamFileToClient(PyObject* self, PyObject* args)
 
 	if(pDescr && strlen(pDescr) > 255)
 	{
-		PyErr_Format(PyExc_TypeError, "Proxy::streamFileToClient: the descr-size(%d > 255)!", 
+		PyErr_Format(PyExc_TypeError, "Proxy::streamFileToClient: the descr-size(%d > 255)!",
 			strlen(pDescr));
 
 		PyErr_PrintEx(0);
 		return NULL;
 	}
 
-	int16 rid = pobj->streamFileToClient(pyResourceName, 
-							(pDescr == NULL ? "" : pDescr),  
+	int16 rid = pobj->streamFileToClient(pyResourceName,
+							(pDescr == NULL ? "" : pDescr),
 							id);
 
 	return PyLong_FromLong(rid);
 }
 
 //-------------------------------------------------------------------------------------
-int16 Proxy::streamFileToClient(PyObjectPtr objptr, 
+int16 Proxy::streamFileToClient(PyObjectPtr objptr,
 	const std::string& descr, int16 id)
 {
 	DataDownload* pDataDownload = DataDownloadFactory::create(
@@ -709,15 +709,15 @@ PyObject* Proxy::__py_pyStreamStringToClient(PyObject* self, PyObject* args)
 
 	if(pDescr && strlen(pDescr) > 255)
 	{
-		PyErr_Format(PyExc_TypeError, "Proxy::streamFileToClient: the descr-size(%d > 255)!", 
+		PyErr_Format(PyExc_TypeError, "Proxy::streamFileToClient: the descr-size(%d > 255)!",
 			strlen(pDescr));
 
 		PyErr_PrintEx(0);
 		return NULL;
 	}
 
-	int16 rid = pobj->streamStringToClient(pyData, 
-						(pDescr == NULL ? "" : pDescr),  
+	int16 rid = pobj->streamStringToClient(pyData,
+						(pDescr == NULL ? "" : pDescr),
 						id);
 
 	if (rid != id)
@@ -729,7 +729,7 @@ PyObject* Proxy::__py_pyStreamStringToClient(PyObject* self, PyObject* args)
 }
 
 //-------------------------------------------------------------------------------------
-int16 Proxy::streamStringToClient(PyObjectPtr objptr, 
+int16 Proxy::streamStringToClient(PyObjectPtr objptr,
 	const std::string& descr, int16 id)
 {
 	DataDownload* pDataDownload = DataDownloadFactory::create(
@@ -748,7 +748,7 @@ Network::Channel* Proxy::pChannel()
 	Network::Channel* pChannel = clientEntityCall()->getChannel();
 	if(!pChannel)
 		return NULL;
-	
+
 	return pChannel;
 }
 
@@ -767,7 +767,7 @@ bool Proxy::pushBundle(Network::Bundle* pBundle)
 	pChannel->pushBundle(pBundle);
 
 	{
-		// Èç¹ûÊı¾İ´óÁ¿×èÈû·¢²»³öÈ¥½«»á±¨¾¯
+		// å¦‚æœæ•°æ®å¤§é‡é˜»å¡å‘ä¸å‡ºå»å°†ä¼šæŠ¥è­¦
 		//AUTO_SCOPED_PROFILE("pushBundleAndSendToClient");
 		//pChannel->send(pBundle);
 	}
@@ -817,7 +817,7 @@ bool Proxy::sendToClient(bool expectData)
 	}
 
 	{
-		// Èç¹ûÊı¾İ´óÁ¿×èÈû·¢²»³öÈ¥½«»á±¨¾¯
+		// å¦‚æœæ•°æ®å¤§é‡é˜»å¡å‘ä¸å‡ºå»å°†ä¼šæŠ¥è­¦
 		AUTO_SCOPED_PROFILE("sendToClient");
 		pChannel->send();
 	}

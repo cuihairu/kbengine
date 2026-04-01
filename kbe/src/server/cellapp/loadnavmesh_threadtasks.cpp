@@ -1,7 +1,7 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 
-#include "spacememory.h"	
-#include "spacememorys.h"	
+#include "spacememory.h"
+#include "spacememorys.h"
 #include "loadnavmesh_threadtasks.h"
 #include "server/serverconfig.h"
 #include "common/deadline.h"
@@ -20,7 +20,7 @@ bool LoadNavmeshTask::process()
 thread::TPTask::TPTaskState LoadNavmeshTask::presentMainThread()
 {
 	NavigationHandlePtr pNavigationHandle = Navigation::getSingleton().findNavigation(resPath_);
-	
+
 	SpaceMemory* pSpace = SpaceMemorys::findSpace(spaceID_);
 	if(pSpace == NULL || !pSpace->isGood())
 	{
@@ -31,8 +31,8 @@ thread::TPTask::TPTaskState LoadNavmeshTask::presentMainThread()
 	{
 		pSpace->onLoadedSpaceGeometryMapping(pNavigationHandle);
 	}
-	
-	return thread::TPTask::TPTASK_STATE_COMPLETED; 
+
+	return thread::TPTask::TPTASK_STATE_COMPLETED;
 }
 
 //-------------------------------------------------------------------------------------

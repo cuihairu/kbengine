@@ -1,0 +1,54 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "Default",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/presets/default",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "vcpkg",
+      "displayName": "vcpkg",
+      "inherits": "default",
+      "binaryDir": "${sourceDir}/build/presets/vcpkg",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "vcpkg",
+      "configurePreset": "vcpkg"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "vcpkg",
+      "configurePreset": "vcpkg",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

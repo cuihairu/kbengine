@@ -10,7 +10,7 @@
 
 #include "../../server/dbmgr/dbmgr_interface.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 #define LOAD_ENTITY_SIZE 32
 
@@ -82,9 +82,9 @@ void EntityAutoLoader::onEntityAutoLoadCBFromDBMgr(Network::Channel* pChannel, M
 
 		if(PyObject_HasAttrString(Baseapp::getSingleton().getEntryScript().get(), "onAutoLoadEntityCreate") > 0)
 		{
-			PyObject* pyResult = PyObject_CallMethod(Baseapp::getSingleton().getEntryScript().get(), 
-												const_cast<char*>("onAutoLoadEntityCreate"), 
-												const_cast<char*>("sK"), 
+			PyObject* pyResult = PyObject_CallMethod(Baseapp::getSingleton().getEntryScript().get(),
+												const_cast<char*>("onAutoLoadEntityCreate"),
+												const_cast<char*>("sK"),
 												EntityDef::findScriptModule(entityType)->getName(),
 												dbid);
 
@@ -102,7 +102,7 @@ void EntityAutoLoader::onEntityAutoLoadCBFromDBMgr(Network::Channel* pChannel, M
 		}
 		else
 		{
-			Baseapp::getSingleton().createEntityAnywhereFromDBID(EntityDef::findScriptModule(entityType)->getName(), dbid, NULL, 
+			Baseapp::getSingleton().createEntityAnywhereFromDBID(EntityDef::findScriptModule(entityType)->getName(), dbid, NULL,
 				g_kbeSrvConfig.dbInterfaceIndex2dbInterfaceName(dbInterfaceIndex));
 		}
 	}

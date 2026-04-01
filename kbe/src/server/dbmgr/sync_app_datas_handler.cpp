@@ -16,7 +16,7 @@
 #include "cellappmgr/cellappmgr_interface.h"
 #include "loginapp/loginapp_interface.h"
 
-namespace KBEngine{	
+namespace KBEngine{
 
 //-------------------------------------------------------------------------------------
 SyncAppDatasHandler::SyncAppDatasHandler(Network::NetworkInterface & networkInterface):
@@ -76,7 +76,7 @@ bool SyncAppDatasHandler::process()
 			continue;
 
 		COMPONENT_TYPE tcomponentType = cinfos->componentType;
-		if(tcomponentType == BASEAPP_TYPE || 
+		if(tcomponentType == BASEAPP_TYPE ||
 			tcomponentType == CELLAPP_TYPE ||
 			tcomponentType == LOGINAPP_TYPE)
 		{
@@ -84,7 +84,7 @@ bool SyncAppDatasHandler::process()
 			break;
 		}
 	}
-	
+
 	if(!hasApp)
 	{
 		lastRegAppTime_ = timestamp();
@@ -96,8 +96,8 @@ bool SyncAppDatasHandler::process()
 
 	std::string digest = EntityDef::md5().getDigestStr();
 
-	// Èç¹ûÊÇÁ¬½Óµ½dbmgrÔòÐèÒªµÈ´ý½ÓÊÕapp³õÊ¼ÐÅÏ¢
-	// ÀýÈç£º³õÊ¼»á·ÖÅäentityID¶ÎÒÔ¼°Õâ¸öappÆô¶¯µÄË³ÐòÐÅÏ¢£¨ÊÇ·ñµÚÒ»¸öbaseappÆô¶¯£©
+	// å¦‚æžœæ˜¯è¿žæŽ¥åˆ°dbmgråˆ™éœ€è¦ç­‰å¾…æŽ¥æ”¶appåˆå§‹ä¿¡æ¯
+	// ä¾‹å¦‚ï¼šåˆå§‹ä¼šåˆ†é…entityIDæ®µä»¥åŠè¿™ä¸ªappå¯åŠ¨çš„é¡ºåºä¿¡æ¯ï¼ˆæ˜¯å¦ç¬¬ä¸€ä¸ªbaseappå¯åŠ¨ï¼‰
 	iter = apps_.begin();
 	for(; iter != apps_.end(); ++iter)
 	{
@@ -109,12 +109,12 @@ bool SyncAppDatasHandler::process()
 
 		COMPONENT_TYPE tcomponentType = cinfos->componentType;
 
-		if(tcomponentType == BASEAPP_TYPE || 
-			tcomponentType == CELLAPP_TYPE || 
+		if(tcomponentType == BASEAPP_TYPE ||
+			tcomponentType == CELLAPP_TYPE ||
 			tcomponentType == LOGINAPP_TYPE)
 		{
 			Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
-			
+
 			switch(tcomponentType)
 			{
 			case BASEAPP_TYPE:
@@ -123,8 +123,8 @@ bool SyncAppDatasHandler::process()
 
 					std::pair<ENTITY_ID, ENTITY_ID> idRange = Dbmgr::getSingleton().idServer().allocRange();
 					(*pBundle).newMessage(BaseappInterface::onDbmgrInitCompleted);
-					BaseappInterface::onDbmgrInitCompletedArgs6::staticAddToBundle((*pBundle), g_kbetime, idRange.first, 
-						idRange.second, cInitInfo.startGlobalOrder, cInitInfo.startGroupOrder, 
+					BaseappInterface::onDbmgrInitCompletedArgs6::staticAddToBundle((*pBundle), g_kbetime, idRange.first,
+						idRange.second, cInitInfo.startGlobalOrder, cInitInfo.startGroupOrder,
 						digest);
 				}
 				break;
@@ -134,15 +134,15 @@ bool SyncAppDatasHandler::process()
 
 					std::pair<ENTITY_ID, ENTITY_ID> idRange = Dbmgr::getSingleton().idServer().allocRange();
 					(*pBundle).newMessage(CellappInterface::onDbmgrInitCompleted);
-					CellappInterface::onDbmgrInitCompletedArgs6::staticAddToBundle((*pBundle), g_kbetime, idRange.first, 
-						idRange.second, cInitInfo.startGlobalOrder, cInitInfo.startGroupOrder, 
+					CellappInterface::onDbmgrInitCompletedArgs6::staticAddToBundle((*pBundle), g_kbetime, idRange.first,
+						idRange.second, cInitInfo.startGlobalOrder, cInitInfo.startGroupOrder,
 						digest);
 				}
 				break;
 			case LOGINAPP_TYPE:
 				(*pBundle).newMessage(LoginappInterface::onDbmgrInitCompleted);
-				LoginappInterface::onDbmgrInitCompletedArgs3::staticAddToBundle((*pBundle), 
-						cInitInfo.startGlobalOrder, cInitInfo.startGroupOrder, 
+				LoginappInterface::onDbmgrInitCompletedArgs3::staticAddToBundle((*pBundle),
+						cInitInfo.startGlobalOrder, cInitInfo.startGroupOrder,
 						digest);
 
 				break;

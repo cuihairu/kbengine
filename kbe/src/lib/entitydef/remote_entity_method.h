@@ -23,7 +23,7 @@ class MethodDescription;
 
 class RemoteEntityMethod : public script::ScriptObject
 {
-	/** ×ÓÀà»¯ ½«Ò»Ğ©py²Ù×÷Ìî³ä½øÅÉÉúÀà */
+	/** å­ç±»åŒ– å°†ä¸€äº›pyæ“ä½œå¡«å……è¿›æ´¾ç”Ÿç±» */
 	INSTANCE_SCRIPT_HREADER(RemoteEntityMethod, script::ScriptObject)	
 		
 public:	
@@ -48,8 +48,8 @@ public:
 	}
 	
 protected:	
-	MethodDescription*		methodDescription_;					// Õâ¸ö·½·¨µÄÃèÊö
-	EntityCallAbstract*		pEntityCall_;						// Õâ¸ö·½·¨ËùÊôµÄentityCall
+	MethodDescription*		methodDescription_;					// è¿™ä¸ªæ–¹æ³•çš„æè¿°
+	EntityCallAbstract*		pEntityCall_;						// è¿™ä¸ªæ–¹æ³•æ‰€å±çš„entityCall
 };
 }
 

@@ -67,7 +67,7 @@ public:
 	virtual bool writeBaseEntityCallEnd(ScriptDefModule* pScriptDefModule);
 	virtual bool writeCellEntityCallBegin(ScriptDefModule* pScriptDefModule);
 	virtual bool writeCellEntityCallEnd(ScriptDefModule* pScriptDefModule);
-	virtual bool writeEntityCallMethodBegin(ScriptDefModule* pScriptDefModule, 
+	virtual bool writeEntityCallMethodBegin(ScriptDefModule* pScriptDefModule,
 		MethodDescription* pMethodDescription, const char* fillString1, const char* fillString2, COMPONENT_TYPE componentType);
 	virtual bool writeEntityCallMethodEnd(ScriptDefModule* pScriptDefModule, MethodDescription* pMethodDescription);
 
@@ -95,12 +95,12 @@ public:
 	virtual bool writeTypeBegin(std::string typeName, FixedArrayType* pDataType, const std::string& parentClass) { return false; }
 	virtual bool writeTypeEnd(std::string typeName, FixedArrayType* pDataType) { return false; }
 
-	virtual std::string typeToType(const std::string& type) 
+	virtual std::string typeToType(const std::string& type)
 	{
 		return "unknown";
 	}
 
-	virtual bool getArrayType(DataType* pDataType, std::string& outstr) 
+	virtual bool getArrayType(DataType* pDataType, std::string& outstr)
 	{
 		return false;
 	}

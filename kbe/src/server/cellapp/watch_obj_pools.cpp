@@ -4,7 +4,7 @@
 #include "watch_obj_pools.h"
 #include "witness.h"
 
-namespace KBEngine { 
+namespace KBEngine {
 
 int32 watchWitnessPool_size()
 {

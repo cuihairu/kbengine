@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "common/md5.h"
+#include "network/common.h"
 #include "server/serverconfig.h"
 #include "server/machine_infos.h"
 #include "helper/sys_info.h"
@@ -12,7 +13,7 @@ namespace KBEngine {
 //-------------------------------------------------------------------------------------
 int32 secondsToTicks(float seconds, int lowerBound)
 {
-	return std::max(lowerBound, int(floorf(seconds * g_kbeSrvConfig.gameUpdateHertz() + 0.5f)));
+	return std::max(lowerBound, int(floorf(seconds * 10.0f + 0.5f)));
 }
 
 //-------------------------------------------------------------------------------------

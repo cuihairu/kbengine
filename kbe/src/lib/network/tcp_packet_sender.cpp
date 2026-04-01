@@ -80,8 +80,8 @@ void TCPPacketSender::onGetError(Channel* pChannel, const std::string& err)
 {
 	pChannel->condemn(err);
 	
-	// ´Ë´¦²»±ØÁ¢¼´Ïú»Ù£¬¿ÉÄÜµ¼ÖÂbufferedReceives_ÄÚ²¿±éÀúµü´úÆ÷ÆÆ»µ
-	// ½»¸øTCPPacketReceiver´¦Àí¼´¿É
+	// æ­¤å¤„ä¸å¿…ç«‹å³é”€æ¯ï¼Œå¯èƒ½å¯¼è‡´bufferedReceives_å†…éƒ¨éåŽ†è¿­ä»£å™¨ç ´å
+	// äº¤ç»™TCPPacketReceiverå¤„ç†å³å¯
 	//pChannel->networkInterface().deregisterChannel(pChannel);
 	//pChannel->destroy();
 }
@@ -91,7 +91,7 @@ bool TCPPacketSender::processSend(Channel* pChannel, int userarg)
 {
 	bool noticed = pChannel == NULL;
 
-	// Èç¹ûÊÇÓÉpollerÍ¨ÖªµÄ£¬ÎÒÃÇÐèÒªÍ¨¹ýµØÖ·ÕÒµ½channel
+	// å¦‚æžœæ˜¯ç”±polleré€šçŸ¥çš„ï¼Œæˆ‘ä»¬éœ€è¦é€šè¿‡åœ°å€æ‰¾åˆ°channel
 	if(noticed)
 		pChannel = getChannel();
 
@@ -132,13 +132,13 @@ bool TCPPacketSender::processSend(Channel* pChannel, int userarg)
 
 			if (reason == REASON_RESOURCE_UNAVAILABLE)
 			{
-				/* ´Ë´¦Êä³ö¿ÉÄÜ»áÔì³ÉdebugHelper´¦ËÀËø
+				/* æ­¤å¤„è¾“å‡ºå¯èƒ½ä¼šé€ æˆdebugHelperå¤„æ­»é”
 					WARNING_MSG(fmt::format("TCPPacketSender::processSend: "
 						"Transmit queue full, waiting for space(kbengine.xml->channelCommon->writeBufferSize->{})...\n",
 						(pChannel->isInternal() ? "internal" : "external")));
 				*/
 
-				// Á¬Ðø³¬¹ý10´ÎÔòÍ¨Öª³ö´í
+				// è¿žç»­è¶…è¿‡10æ¬¡åˆ™é€šçŸ¥å‡ºé”™
 				if (++sendfailCount_ >= 10 && pChannel->isExternal())
 				{
 					onGetError(pChannel, "TCPPacketSender::processSend: sendfailCount >= 10");
@@ -156,7 +156,7 @@ bool TCPPacketSender::processSend(Channel* pChannel, int userarg)
 			{
 				if (pChannel->isExternal())
 				{
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 					this->dispatcher().errorReporter().reportException(reason, pEndpoint_->addr(), "TCPPacketSender::processSend(external)",
 						fmt::format(", errno: {}", errno).c_str());
 #else
@@ -166,7 +166,7 @@ bool TCPPacketSender::processSend(Channel* pChannel, int userarg)
 				}
 				else
 				{
-#if KBE_PLATFORM == PLATFORM_UNIX
+#if KBE_PLATFORM == PLATFORM_UNIX || KBE_PLATFORM == PLATFORM_APPLE
 					this->dispatcher().errorReporter().reportException(reason, pEndpoint_->addr(), "TCPPacketSender::processSend(internal)",
 						fmt::format(", errno: {}, {}", errno, pChannel->c_str()).c_str());
 #else
@@ -216,7 +216,7 @@ Reason TCPPacketSender::processFilterPacket(Channel* pChannel, Packet * pPacket,
 	}
 	else
 	{
-		// Èç¹ûÖ»·¢ËÍÁËÒ»²¿·ÖÊý¾Ý£¬ÔòÈÏÎªÊÇREASON_RESOURCE_UNAVAILABLE
+		// å¦‚æžœåªå‘é€äº†ä¸€éƒ¨åˆ†æ•°æ®ï¼Œåˆ™è®¤ä¸ºæ˜¯REASON_RESOURCE_UNAVAILABLE
 		if (len > 0)
 			return REASON_RESOURCE_UNAVAILABLE;
 	}
