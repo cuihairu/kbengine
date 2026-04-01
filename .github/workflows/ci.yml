@@ -90,7 +90,7 @@ jobs:
             automake \
             build-essential \
             cmake \
-            gcov \
+            gcc \
             lcov \
             libtool \
             ninja-build \
@@ -99,6 +99,9 @@ jobs:
             unzip \
             tar \
             curl
+          # Verify installation
+          gcov --version
+          lcov --version
 
       - name: Bootstrap vcpkg
         run: |
