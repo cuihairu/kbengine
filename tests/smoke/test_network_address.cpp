@@ -5,6 +5,13 @@
 #include "common/common.h"
 #include "network/address.h"
 
+// Use cross-platform uint32 type
+#ifdef _WIN32
+	typedef unsigned long u_int32_t;
+#else
+	#include <sys/types.h>
+#endif
+
 TEST(NetworkAddressBootstrapTest, FormatsAddressAndIpStrings)
 {
   KBEngine::Network::Address address("127.0.0.1", 20013);
@@ -15,7 +22,7 @@ TEST(NetworkAddressBootstrapTest, FormatsAddressAndIpStrings)
 
 TEST(NetworkAddressBootstrapTest, ConvertsBetweenStringAndNumericIp)
 {
-  KBEngine::uint32 raw = 0;
+  u_int32_t raw = 0;
   ASSERT_EQ(KBEngine::Network::Address::string2ip("127.0.0.1", raw), 0);
 
   char buffer[32] = {0};
