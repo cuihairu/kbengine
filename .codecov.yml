@@ -1,16 +1,21 @@
-# Codecov configuration
+# Codecov configuration for KBEngine
 coverage:
+  precision: 2
+  round: down
+  range: "70...100"
   status:
     project:
       default:
         target: 80%
         threshold: 1%
         base: auto
+        if_ci_failed: error
     patch:
       default:
         target: 75%
         threshold: 1%
         base: auto
+        if_ci_failed: error
 
 ignore:
   - "tests/**"
@@ -18,6 +23,8 @@ ignore:
   - "build/**"
   - "kbe/src/lib/dependencies/**"
   - "*.generated.*"
+  - "*/tests/*"
+  - "*/test_*"
 
 comment:
   layout: "diff, flags, files"
@@ -25,12 +32,27 @@ comment:
   require_changes: false
   require_base: false
   require_head: true
+  branches:
+    - "master"
+    - "chore/**"
 
 flags:
   unittests:
+    paths:
+      - tests/
     carryforward: true
   integration:
+    paths:
+      - kbe/src/
     carryforward: true
 
 github_checks:
   annotations: true
+  branches:
+    - "master"
+    - "chore/**"
+
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true

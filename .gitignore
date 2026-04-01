@@ -221,3 +221,8 @@ docs/_build/
 docs/.doctrees/
 site/
 
+# Codecov
+codecov.exe
+*.codecov
+coverage.info
+coverage/*.info
