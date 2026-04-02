@@ -1,74 +1,67 @@
 # PyClientApp类
 
-| KBEngine |
+[KBEngine模块]
 
-KBEngine
----
+PyClientApp是KBEngine模块的一部分，由C++底层模拟一个客户端时创建的客户端对象，脚本层不可直接创建。
 
-# PyClientApp类
-PyClientApp类[KBEngine模块]
-
-[[KBEngine模块](../Modules/KBEngine.html)KBEngine模块]PyClientApp是KBEngine模块的一部分，由C++底层模拟一个客户端时创建的客户端对象，脚本层不可直接创建。
-
-PyClientApp是[KBEngine](../Modules/KBEngine.html)KBEngine模块的一部分，由C++底层模拟一个客户端时创建的客户端对象，脚本层不可直接创建。
 ## 成员函数
-[成员函数](#)成员函数| def getSpaceData( key ): |
-| --- |
-| def player( ): |
 
-def[getSpaceData](#getSpaceData)getSpaceData( key ):def[player](#player)player( ):
+- def [getSpaceData](#getSpaceData)( key ):
+- def [player](#player)( ):
+
 ## 回调函数
-[回调函数](#)回调函数
-## 属性
-[属性](#)属性| id | 只读 Integer |
-| --- | --- |
-| entities | Entities |
 
-[id](#id)id只读 Integer[entities](#entities)entities[Entities](Entities.html)Entities
----
+## 属性
+
+| [id](#id) | 只读 Integer |
+| --- | --- |
+| [entities](#entities) | Entities |
+
+<a id="detailed_description"></a>
 
 ## 详细描述
-详细描述类[Entity](../../keywords.html#entity)Entity的实例代表着在client上的游戏对象。一个[Entity](../../keywords.html#entity)Entity可以通过[ENTITYCALL](../../keywords.html#EntityCall)ENTITYCALL访问在base和cell应用程序上的等价的实体。这需要
+
+类Entity的实例代表着在client上的游戏对象。
+一个Entity可以通过ENTITYCALL访问在base和cell应用程序上的等价的实体。这需要
 一组远程调用的函数（在实体的.def文件里指定）。
----
 
 ## 成员函数文档
-成员函数文档def getSpaceData( key  ):
 
-def getSpaceData(key):功能说明：获取指定key的space数据。space数据由用户在服务端通过[setSpaceData](../../cellapp/Modules/KBEngine.html#setSpaceData)setSpaceData设置。参数：
+<a id="getSpaceData"></a>
 
-key
-string，一个字符串关键字。
+### def getSpaceData(key):
 
-参数：| key | string，一个字符串关键字。 |
+功能说明：
+获取指定key的space数据。
+space数据由用户在服务端通过setSpaceData设置。
 
-keystring，一个字符串关键字。返回：
+参数：
 
+| key | string，一个字符串关键字。 |
+| --- | --- |
 
-string，指定key的字符串数据。
+返回：
 
-返回：| string，指定key的字符串数据。 |
+- string，指定key的字符串数据。
 
-string，指定key的字符串数据。def player(  ):
+<a id="player"></a>
 
-def player():功能说明：获得当前客户端所控制的实体。
----
+### def player():
+
+功能说明：
+获得当前客户端所控制的实体。
 
 ## 回调函数文档
-回调函数文档
----
 
 ## 属性文档
-属性文档entities
 
-entities说明：entities是一个字典对象，包含当前进程上所有的实体。类型：
+<a id="entities"></a>
 
-Entities
+entities
 
-类型：| Entities |
+说明：
+entities是一个字典对象，包含当前进程上所有的实体。
 
-[Entities](Entities.html)Entities
----
-版权归KBEngine所有。
+类型：
 
-版权归KBEngine所有。
+- Entities
