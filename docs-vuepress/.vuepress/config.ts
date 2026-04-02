@@ -25,7 +25,16 @@ export default defineUserConfig({
   },
 
   bundler: viteBundler({
-    viteOptions: {},
+    viteOptions: {
+      css: {
+        preprocessorOptions: {
+          scss: {
+            silenceDeprecations: ['legacy-js-api', 'import'],
+            api: 'legacy-boolean-api',
+          },
+        },
+      },
+    },
     vuePluginOptions: {}
   }),
 
