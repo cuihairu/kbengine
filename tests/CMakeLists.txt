@@ -3,6 +3,8 @@ include(GoogleTest)
 add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_fmt_bootstrap.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_tinyxml_bootstrap.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_xml_wrapper.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_tmxparser.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_zlib_bootstrap.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_base64_sha1.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_common_strutil.cpp"
@@ -87,8 +89,21 @@ set_target_properties(kbe_smoke_tests PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/bin"
 )
 
+add_executable(kbe_entitydef_xml_tests
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_entitydef_xml_loading.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_client_interface_symbols.cpp"
+)
+
+set_target_properties(kbe_entitydef_xml_tests PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/bin"
+)
+
 if(APPLE)
   target_link_options(kbe_smoke_tests PRIVATE
+    LINKER:-no_warn_duplicate_libraries
+  )
+
+  target_link_options(kbe_entitydef_xml_tests PRIVATE
     LINKER:-no_warn_duplicate_libraries
   )
 endif()
@@ -98,6 +113,8 @@ target_link_libraries(kbe_smoke_tests
     GTest::gtest_main
     KBEngine::build_config
     KBEngine::third_party
+    KBEngine::xml
+    KBEngine::dependency_tmxparser
     KBEngine::common_core
     KBEngine::common_md5
     KBEngine::common_ssl
@@ -166,3 +183,15 @@ target_link_libraries(kbe_smoke_tests
 )
 
 gtest_discover_tests(kbe_smoke_tests)
+
+target_link_libraries(kbe_entitydef_xml_tests
+  PRIVATE
+    GTest::gtest_main
+    KBEngine::build_config
+    KBEngine::server_runtime
+    KBEngine::resmgr
+    KBEngine::xml
+    KBEngine::server_serverconfig
+)
+
+gtest_discover_tests(kbe_entitydef_xml_tests)

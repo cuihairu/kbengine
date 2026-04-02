@@ -32,7 +32,7 @@
 
 #include "TmxPoint.h"
 
-class TiXmlNode;
+namespace tinyxml2 { class XMLNode; }
 
 namespace Tmx
 {

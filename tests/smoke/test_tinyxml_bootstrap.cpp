@@ -2,12 +2,12 @@
 
 #include <string>
 
-#include <tinyxml.h>
+#include <tinyxml2.h>
 
 TEST(TinyXmlBootstrapTest, ParsesBasicDocument) {
   const std::string xml = "<root><server><port>6000</port></server></root>";
 
-  TiXmlDocument doc;
+  tinyxml2::XMLDocument doc;
   doc.Parse(xml.c_str());
 
   ASSERT_FALSE(doc.Error());

@@ -68,7 +68,7 @@ public:
 		return pyobj;
 	}
 		
-	virtual bool initialize(XML* xml, TiXmlNode* node);
+	virtual bool initialize(XML* xml, tinyxml2::XMLNode* node);
 
 	virtual PyObject* parseDefaultStr(std::string defaultVal) = 0;
 
@@ -654,7 +654,7 @@ public:
 
 	PyObject* parseDefaultStr(std::string defaultVal);
 
-	bool initialize(XML* xml, TiXmlNode* node, const std::string& parentName);
+	bool initialize(XML* xml, tinyxml2::XMLNode* node, const std::string& parentName);
 	bool initialize(script::entitydef::DefContext* pDefContext, const std::string& parentName);
 
 	const char* getName(void) const{ return "ARRAY";}
@@ -712,7 +712,7 @@ public:
 
 	PyObject* parseDefaultStr(std::string defaultVal);
 
-	bool initialize(XML* xml, TiXmlNode* node, std::string& parentName);
+	bool initialize(XML* xml, tinyxml2::XMLNode* node, std::string& parentName);
 	bool initialize(script::entitydef::DefContext* pDefContext, const std::string& parentName);
 
 	/**	

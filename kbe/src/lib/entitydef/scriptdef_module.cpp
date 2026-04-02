@@ -353,7 +353,7 @@ void ScriptDefModule::autoMatchCompOwn()
 			return;
 
 		// 获得entities.xml根节点, 如果没有定义一个entity那么直接返回true
-		TiXmlNode* node = xml->getRootNode();
+		tinyxml2::XMLNode* node = xml->getRootNode();
 		if (node == NULL)
 			return;
 

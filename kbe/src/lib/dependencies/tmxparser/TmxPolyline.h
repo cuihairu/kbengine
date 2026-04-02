@@ -32,7 +32,7 @@
 
 #include "TmxPoint.h"
 
-class TiXmlNode;
+namespace tinyxml2 { class XMLNode; }
 
 namespace Tmx
 {
@@ -45,7 +45,7 @@ namespace Tmx
 		Polyline();
 
 		// Parse the polyline node.
-		void Parse(const TiXmlNode *polylineNode);
+		void Parse(const tinyxml2::XMLNode *polylineNode);
 
 		// Get one of the vertices.
 		const Tmx::Point &GetPoint(int index) const { return points[index]; }

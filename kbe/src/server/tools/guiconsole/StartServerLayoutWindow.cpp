@@ -7,6 +7,7 @@
 #include "StartServerLayoutWindow.h"
 #include "server/serverconfig.h"
 #include "StartServerWindow.h"
+#include <tinyxml2.h>
 
 // CStartServerLayoutWindow dialog
 
@@ -103,20 +104,19 @@ BOOL CStartServerLayoutWindow::OnInitDialog()
 
 void CStartServerLayoutWindow::saveHistory()
 {
-    //创建一个XML的文档对象。
-    TiXmlDocument *pDocument = new TiXmlDocument();
+	tinyxml2::XMLDocument document;
 
 	int i = 0;
 	std::deque<CString>::iterator iter = m_historyCommand.begin();
-	TiXmlElement *rootElement = new TiXmlElement("root");
-	pDocument->LinkEndChild(rootElement);
+	tinyxml2::XMLElement* rootElement = document.NewElement("root");
+	document.InsertEndChild(rootElement);
 
 	for(; iter != m_historyCommand.end(); iter++)
 	{
 		char key[256] = {0};
 		kbe_snprintf(key, 256, "item%d", i++);
-		TiXmlElement *rootElementChild = new TiXmlElement(key);
-		rootElement->LinkEndChild(rootElementChild);
+		tinyxml2::XMLElement* rootElementChild = document.NewElement(key);
+		rootElement->InsertEndChild(rootElementChild);
 
 		char buffer[4096] = {0};
 		CString strCommand = (*iter);
@@ -126,8 +126,7 @@ void CStartServerLayoutWindow::saveHistory()
 		buffer[len + 1] = '\0';
 
 
-		TiXmlText *content = new TiXmlText(buffer);
-		rootElementChild->LinkEndChild(content);
+		rootElementChild->SetText(buffer);
 	}
 
     CString appPath = GetAppPath();
@@ -139,7 +138,7 @@ void CStartServerLayoutWindow::saveHistory()
 	WideCharToMultiByte(CP_ACP,0, fullPath, fullPath.GetLength(), fname, len, NULL, NULL);
 	fname[len + 1] = '\0';
 
-	pDocument->SaveFile(fname);
+	document.SaveFile(fname);
 
 	m_log.ResetContent();
 	std::deque<CString>::iterator iter1 = m_historyCommand.begin();
@@ -160,12 +159,12 @@ void CStartServerLayoutWindow::loadHistory()
 	WideCharToMultiByte(CP_ACP,0, fullPath, fullPath.GetLength(), fname, len, NULL, NULL);
 	fname[len + 1] = '\0';
 
-	TiXmlDocument *pDocument = new TiXmlDocument(fname);
-	if(pDocument == NULL || !pDocument->LoadFile(TIXML_ENCODING_UTF8))
+	tinyxml2::XMLDocument document;
+	if(document.LoadFile(fname) != tinyxml2::XML_SUCCESS)
 		return;
 
-	TiXmlElement *rootElement = pDocument->RootElement();
-	TiXmlNode* node = rootElement->FirstChild();
+	tinyxml2::XMLElement* rootElement = document.RootElement();
+	tinyxml2::XMLNode* node = rootElement != NULL ? rootElement->FirstChild() : NULL;
 	if(node)
 	{
 		do
@@ -177,8 +176,7 @@ void CStartServerLayoutWindow::loadHistory()
 		}while((node = node->NextSibling()));
 	}
 
-	pDocument->Clear();
-	delete pDocument;
+	document.Clear();
 }
 
 // CStartServerLayoutWindow message handlers

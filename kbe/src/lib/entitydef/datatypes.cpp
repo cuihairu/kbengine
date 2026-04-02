@@ -107,7 +107,7 @@ bool DataTypes::loadTypes(SmartPointer<XML>& xml)
 	if (xml == NULL || !xml->isGood())
 		return false;
 
-	TiXmlNode* node = xml->getRootNode();
+	tinyxml2::XMLNode* node = xml->getRootNode();
 
 	if(node == NULL)
 	{
@@ -119,7 +119,7 @@ bool DataTypes::loadTypes(SmartPointer<XML>& xml)
 	{
 		std::string type = "";
 		std::string aliasName = xml->getKey(node);
-		TiXmlNode* childNode = node->FirstChild();
+		tinyxml2::XMLNode* childNode = node->FirstChild();
 
 		if (!DataTypes::validTypeName(aliasName))
 		{
