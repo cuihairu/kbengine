@@ -1,107 +1,19 @@
-# API 参考
+# 什么是KBEngine?
 
-KBEngine 提供了丰富的 API 用于游戏逻辑开发。
+| KBEngine |
 
-## 概述
+KBEngine
+---
 
-KBEngine 的 API 主要分为以下几类：
+# 什么是KBEngine?
+什么是KBEngine?一款开源的游戏服务端引擎，客户端通过简单的约定协议就能与服务端通讯， 使用KBEngine插件能够快速与(Unity3D, OGRE, Cocos2d-x, HTML5, 等等)技术结合形成一个完整的客户端。服务端底层框架使用C++编写，游戏逻辑层使用Python(支持热更新)，开发者无需重复的实现一些游戏服务端通用的底层技术， 将精力真正集中到游戏开发层面上来，快速的打造各种网络游戏。(经常被问到承载上限，kbengine底层架构被设计为多进程分布式动态负载均衡方案， 理论上只需要不断扩展硬件就能够不断增加承载上限，单台机器的承载上限取决于游戏逻辑本身的复杂度。)Homepage[http://www.kbengine.org](http://www.kbengine.org)http://www.kbengine.orgReleasessources     :[https://github.com/kbengine/kbengine/releases/latest](https://github.com/kbengine/kbengine/releases/latest)https://github.com/kbengine/kbengine/releases/latestbinarys     :[https://sourceforge.net/projects/kbengine/files/](https://sourceforge.net/projects/kbengine/files/)https://sourceforge.net/projects/kbengine/files/Demo sourcesunity3d     :[https://github.com/kbengine/kbengine_unity3d_demo/releases/latest](https://github.com/kbengine/kbengine/releases/latest)https://github.com/kbengine/kbengine_unity3d_demo/releases/latestunity3d     :[https://github.com/kbengine/kbengine_unity3d_warring/releases/latest](https://github.com/kbengine/kbengine_unity3d_warring/releases/latest)https://github.com/kbengine/kbengine_unity3d_warring/releases/latestogre        :[https://github.com/kbengine/kbengine_ogre_demo/releases/latest](https://github.com/kbengine/kbengine_ogre_demo/releases/latest)https://github.com/kbengine/kbengine_ogre_demo/releases/latesthtml5       :[https://github.com/kbengine/kbengine_html5_demo/releases/latest](https://github.com/kbengine/kbengine_html5_demo/releases/latest)https://github.com/kbengine/kbengine_html5_demo/releases/latestDocsdocs        :[http://www.kbengine.org/docs/](http://www.kbengine.org/docs/)http://www.kbengine.org/docs/API         :[https://github.com/kbengine/kbengine/tree/master/docs](https://github.com/kbengine/kbengine/tree/master/docs)https://github.com/kbengine/kbengine/tree/master/docsSupportEmail       :[kbesrv@gmail.com](mailto:kbesrv@gmail.com)kbesrv@gmail.comMaillist    :[https://groups.google.com/d/forum/kbengine_maillist](https://groups.google.com/d/forum/kbengine_maillist)https://groups.google.com/d/forum/kbengine_maillist
+# 开始
+开始您可以先看[安装指南](http://www.kbengine.org/cn/docs/installation.html)安装指南, 了解[常用工具](http://www.kbengine.org/cn/docs/tools/)常用工具之后，您还可以去[GitHub](https://github.com/kbengine/kbengine)GitHub加入开源力量。相信在对KBEngine有足够的了解之后，您会喜欢她的。
+# 想修改和完善文档?
+想修改和完善文档?如果您认为文档中有什么需要改变的，那么您现在就可以改变它。只需要[forking kbengine_docs](https://github.com/kbengine/kbengine_docs)forking kbengine_docs与发起一个pull请求。同样，如果你发现文档中有任何不明白的地方请提交一个[issue](https://github.com/kbengine/kbengine_docs/issues)issue，我将会调整该文档，让更多的人能够得到更好的理解。
+---
 
-- **Logger API** - 日志记录和调试
-- **Entity API** - 实体管理和操作
-- **Network API** - 网络通信
-- **Database API** - 数据库操作
-- **Utility API** - 工具函数
+---
+版权归KBEngine所有。
 
-## Python API
-
-### Logger API
-
-详见 [Logger API 文档](logger.md)
-
-### Entity API
-
-详见 [Entity API 文档](entity.md)
-
-## C++ API
-
-KBEngine 底层使用 C++ 实现，提供了高性能的核心功能。
-
-### 核心类
-
-- `KBEngine::CellApp` - Cell 应用
-- `KBEngine::BaseApp` - Base 应用
-- `KBEngine::Logger` - 日志系统
-- `KBEngine::Network` - 网络通信
-
-## 快速索引
-
-### 按功能分类
-
-- [实体系统](entity.md)
-- [网络通信](network.md)
-- [数据库操作](database.md)
-- [日志系统](logger.md)
-- [工具函数](utility.md)
-
-### 按模块分类
-
-- [BaseApp 模块](baseapp.md)
-- [CellApp 模块](cellapp.md)
-- [Logger 模块](logger.md)
-- [DBMgr 模块](dbmgr.md)
-
-## API 使用示例
-
-### 创建实体
-
-```python
-import KBEngine
-
-# 创建实体
-entity = KBEngine.createEntityLocally("Avatar", params)
-```
-
-### 发送消息
-
-```python
-# 发送到客户端
-self.client.onLogin(success=True)
-
-# 广播消息
-KBEngine.broadcastMessage("system", "Welcome!")
-```
-
-### 数据库操作
-
-```python
-# 查询数据
-def onCallback(result):
-    print(result)
-
-KBEngine.executeRawDatabaseCommand("SELECT * FROM users", onCallback)
-```
-
-## 版本兼容性
-
-| API 版本 | KBEngine 版本 | 状态 |
-|----------|---------------|------|
-| 1.0 | 0.x.x | 已弃用 |
-| 2.0 | 1.x.x | 稳定版 |
-| 2.1 | 1.2.x+ | 当前版本 |
-
-## 迁移指南
-
-### 从 1.0 迁移到 2.0
-
-主要变更：
-- 实体系统重构
-- 网络接口优化
-- 数据库 API 改进
-
-详见迁移指南。
-
-## 参考文档
-
-- [Python API](https://docs.python.org/3/)
-- [C++ API](https://en.cppreference.com/)
-- [KBEngine 源码](https://github.com/cuihairu/kbengine)
+版权归KBEngine所有。
