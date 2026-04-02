@@ -4,7 +4,10 @@ add_library(kbe_build_config INTERFACE)
 add_library(KBEngine::build_config ALIAS kbe_build_config)
 
 target_compile_features(kbe_build_config INTERFACE cxx_std_17)
-target_link_libraries(kbe_build_config INTERFACE fmt::fmt)
+target_link_libraries(kbe_build_config INTERFACE
+  fmt::fmt
+  KBEngine::dependency_utf8cpp
+)
 target_compile_definitions(kbe_build_config INTERFACE ${KBE_COMMON_DEFINITIONS})
 target_include_directories(kbe_build_config INTERFACE
   "${KBE_SOURCE_DIR}"
@@ -18,9 +21,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 if(KBE_USE_LOG4CXX)
-  target_include_directories(kbe_build_config INTERFACE
-    "${KBE_SOURCE_DIR}/lib/dependencies/log4cxx/src/main/include"
-  )
+  target_link_libraries(kbe_build_config INTERFACE KBEngine::dependency_log4cxx)
+endif()
+
+if(KBE_USE_JEMALLOC)
+  target_link_libraries(kbe_build_config INTERFACE KBEngine::dependency_jemalloc)
 endif()
 
 add_library(kbe_common_core STATIC
@@ -491,6 +496,7 @@ target_include_directories(kbe_helper_profiler
 
 add_library(kbe_helper_debug_helper STATIC
   "${KBE_SOURCE_DIR}/lib/helper/debug_helper.cpp"
+  "${KBE_SOURCE_DIR}/lib/helper/script_loglevel.cpp"
 )
 
 if(WIN32)
@@ -1721,7 +1727,7 @@ target_link_libraries(kbe_server_sendmail
     KBEngine::server_serverconfig
     KBEngine::helper_debug_helper
     KBEngine::common_deadline
-    KBEngine::dependency_jwsmtp
+    CURL::libcurl
 )
 
 target_include_directories(kbe_server_sendmail

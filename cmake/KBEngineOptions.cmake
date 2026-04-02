@@ -1,6 +1,7 @@
 option(KBE_ENABLE_WATCHERS "Enable watcher support" ON)
 option(KBE_USE_OPENSSL "Enable OpenSSL-dependent codepaths" ON)
 option(KBE_USE_LOG4CXX "Enable log4cxx-backed logging" OFF)
+option(KBE_USE_JEMALLOC "Enable jemalloc-backed allocation hooks" OFF)
 option(KBE_BUILD_BOOTSTRAP_ONLY "Build only the initial CMake bootstrap targets" ON)
 option(KBE_ENABLE_TESTING "Enable KBEngine C++ unit tests" ON)
 option(KBE_ENABLE_CODE_COVERAGE "Enable code coverage with gcov/lcov" OFF)
@@ -21,6 +22,10 @@ endif()
 
 if(KBE_USE_OPENSSL)
   list(APPEND KBE_COMMON_DEFINITIONS USE_OPENSSL)
+endif()
+
+if(KBE_USE_JEMALLOC)
+  list(APPEND KBE_COMMON_DEFINITIONS USE_JEMALLOC)
 endif()
 
 if(NOT KBE_USE_LOG4CXX)

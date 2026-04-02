@@ -1,16 +1,22 @@
 {
   "name": "kbengine",
   "version-string": "0.1.0",
-  "builtin-baseline": "c4de8d6f4d5f317eab30ab5d42de4a6bc3a5e290",
+  "builtin-baseline": "7679d3b1a006f569e66379069c14ba08d8ecb3f8",
   "dependencies": [
+    "apr",
+    "apr-util",
     "curl",
     "fmt",
     "gtest",
+    "jemalloc",
     "libmariadb",
+    "log4cxx",
     "openssl",
     "python3",
     "hiredis",
     "tinyxml2",
+    "tmxparser",
+    "utfcpp",
     "zlib"
   ]
 }

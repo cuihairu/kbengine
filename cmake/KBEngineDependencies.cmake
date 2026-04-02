@@ -2,8 +2,31 @@ if(KBE_USING_VCPKG)
   find_package(fmt CONFIG REQUIRED)
   find_package(hiredis CONFIG REQUIRED)
   find_package(tinyxml2 CONFIG REQUIRED)
+  find_package(tmxparser CONFIG REQUIRED)
+  find_package(utf8cpp CONFIG REQUIRED)
   find_package(unofficial-libmysql CONFIG QUIET)
   find_package(unofficial-libmariadb CONFIG QUIET)
+  if(KBE_USE_LOG4CXX)
+    find_package(EXPAT REQUIRED)
+    find_package(log4cxx CONFIG REQUIRED)
+  endif()
+endif()
+
+if(TARGET utf8cpp::utf8cpp)
+  add_library(kbe_dependency_utf8cpp INTERFACE)
+  target_link_libraries(kbe_dependency_utf8cpp INTERFACE utf8cpp::utf8cpp)
+  add_library(KBEngine::dependency_utf8cpp ALIAS kbe_dependency_utf8cpp)
+  message(STATUS "KBEngine: using package-provided utf8cpp target")
+elseif(KBE_USING_VCPKG)
+  message(FATAL_ERROR "KBEngine: vcpkg mode requires utf8cpp::utf8cpp from the manifest-managed utfcpp package.")
+else()
+  add_library(kbe_dependency_utf8cpp INTERFACE)
+  target_include_directories(kbe_dependency_utf8cpp
+    INTERFACE
+      "${KBE_SOURCE_DIR}/lib/dependencies"
+  )
+  add_library(KBEngine::dependency_utf8cpp ALIAS kbe_dependency_utf8cpp)
+  message(STATUS "KBEngine: using vendored utf8cpp headers")
 endif()
 
 if(TARGET fmt::fmt)
@@ -38,37 +61,71 @@ target_link_libraries(kbe_dependency_tinyxml
     tinyxml2::tinyxml2
 )
 
-add_library(kbe_dependency_tmxparser STATIC
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/base64.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxImage.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxImageLayer.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxLayer.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxEllipse.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxMap.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxObject.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxObjectGroup.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxPolygon.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxPolyline.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxPropertySet.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxTile.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxTileset.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxUtil.cpp"
-)
+if(KBE_USE_LOG4CXX)
+  set(KBE_LOG4CXX_IMPORTED_TARGET "")
+  foreach(candidate
+      log4cxx::log4cxx
+      log4cxx
+  )
+    if(TARGET ${candidate})
+      set(KBE_LOG4CXX_IMPORTED_TARGET ${candidate})
+      break()
+    endif()
+  endforeach()
+
+  if(KBE_LOG4CXX_IMPORTED_TARGET)
+    add_library(kbe_dependency_log4cxx INTERFACE)
+    target_link_libraries(kbe_dependency_log4cxx INTERFACE ${KBE_LOG4CXX_IMPORTED_TARGET})
+    message(STATUS "KBEngine: using package-provided log4cxx target: ${KBE_LOG4CXX_IMPORTED_TARGET}")
+  elseif(KBE_USING_VCPKG)
+    message(FATAL_ERROR "KBEngine: vcpkg mode requires a package-provided log4cxx target.")
+  else()
+    message(FATAL_ERROR "KBEngine: KBE_USE_LOG4CXX=ON requires a discoverable log4cxx package target.")
+  endif()
+
+  add_library(KBEngine::dependency_log4cxx ALIAS kbe_dependency_log4cxx)
+endif()
+
+if(TARGET tmxparser::tmxparser)
+  add_library(kbe_dependency_tmxparser INTERFACE)
+  target_link_libraries(kbe_dependency_tmxparser INTERFACE tmxparser::tmxparser)
+  message(STATUS "KBEngine: using package-provided tmxparser target")
+elseif(KBE_USING_VCPKG)
+  message(FATAL_ERROR "KBEngine: vcpkg mode requires tmxparser::tmxparser from the overlay port.")
+else()
+  add_library(kbe_dependency_tmxparser STATIC
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/base64.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxImage.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxImageLayer.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxLayer.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxEllipse.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxMap.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxObject.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxObjectGroup.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxPolygon.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxPolyline.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxPropertySet.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxTile.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxTileset.cpp"
+    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser/TmxUtil.cpp"
+  )
+
+  target_compile_features(kbe_dependency_tmxparser PUBLIC cxx_std_17)
+  target_include_directories(kbe_dependency_tmxparser
+    PUBLIC
+      "${KBE_SOURCE_DIR}/lib"
+      "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser"
+      "${KBE_SOURCE_DIR}/lib/dependencies"
+  )
+  target_link_libraries(kbe_dependency_tmxparser
+    PUBLIC
+      KBEngine::tinyxml
+      ZLIB::ZLIB
+  )
+  message(STATUS "KBEngine: using vendored tmxparser sources")
+endif()
 
 add_library(KBEngine::dependency_tmxparser ALIAS kbe_dependency_tmxparser)
-
-target_compile_features(kbe_dependency_tmxparser PUBLIC cxx_std_17)
-target_include_directories(kbe_dependency_tmxparser
-  PUBLIC
-    "${KBE_SOURCE_DIR}/lib"
-    "${KBE_SOURCE_DIR}/lib/dependencies/tmxparser"
-    "${KBE_SOURCE_DIR}/lib/dependencies"
-)
-target_link_libraries(kbe_dependency_tmxparser
-  PUBLIC
-    KBEngine::tinyxml
-    ZLIB::ZLIB
-)
 
 if(TARGET hiredis::hiredis)
   add_library(kbe_dependency_hiredis INTERFACE)
@@ -147,6 +204,28 @@ if(TARGET kbe_dependency_mysqlclient)
   add_library(KBEngine::dependency_mysqlclient ALIAS kbe_dependency_mysqlclient)
 endif()
 
+if(KBE_USE_JEMALLOC)
+  find_path(KBE_JEMALLOC_INCLUDE_DIR
+    NAMES jemalloc/jemalloc.h
+  )
+
+  find_library(KBE_JEMALLOC_LIBRARY
+    NAMES jemalloc jemalloc_s
+  )
+
+  if(KBE_JEMALLOC_INCLUDE_DIR AND KBE_JEMALLOC_LIBRARY)
+    add_library(kbe_dependency_jemalloc INTERFACE)
+    target_include_directories(kbe_dependency_jemalloc INTERFACE "${KBE_JEMALLOC_INCLUDE_DIR}")
+    target_link_libraries(kbe_dependency_jemalloc INTERFACE "${KBE_JEMALLOC_LIBRARY}")
+    add_library(KBEngine::dependency_jemalloc ALIAS kbe_dependency_jemalloc)
+    message(STATUS "KBEngine: using jemalloc library: ${KBE_JEMALLOC_LIBRARY}")
+  elseif(KBE_USING_VCPKG)
+    message(FATAL_ERROR "KBEngine: vcpkg mode requires manifest-managed jemalloc when KBE_USE_JEMALLOC=ON.")
+  else()
+    message(FATAL_ERROR "KBEngine: KBE_USE_JEMALLOC=ON requires jemalloc headers and library.")
+  endif()
+endif()
+
 find_package(ZLIB REQUIRED)
 
 if(TARGET ZLIB::ZLIB)
@@ -190,24 +269,6 @@ if(TARGET Python3::Python)
       endif()
     endif()
   endif()
-endif()
-
-add_library(kbe_dependency_jwsmtp STATIC
-  "${KBE_SOURCE_DIR}/lib/dependencies/jwsmtp/jwsmtp/jwsmtp/base64.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/jwsmtp/jwsmtp/jwsmtp/compat.cpp"
-  "${KBE_SOURCE_DIR}/lib/dependencies/jwsmtp/jwsmtp/jwsmtp/mailer.cpp"
-)
-
-add_library(KBEngine::dependency_jwsmtp ALIAS kbe_dependency_jwsmtp)
-
-target_compile_features(kbe_dependency_jwsmtp PUBLIC cxx_std_17)
-target_include_directories(kbe_dependency_jwsmtp
-  PUBLIC
-    "${KBE_SOURCE_DIR}/lib/dependencies/jwsmtp/jwsmtp/jwsmtp"
-)
-
-if(WIN32)
-  target_link_libraries(kbe_dependency_jwsmtp PUBLIC ws2_32)
 endif()
 
 if(BUILD_TESTING AND KBE_ENABLE_TESTING)

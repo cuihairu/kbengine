@@ -1,0 +1,1 @@
+jwSMTP is distributed under GPL-2.0-or-later as noted in its source headers.
