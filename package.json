@@ -1,0 +1,21 @@
+{
+  "name": "kbengine-docs",
+  "version": "1.0.0",
+  "description": "KBEngine Documentation",
+  "scripts": {
+    "docs:dev": "vuepress dev docs-vuepress",
+    "docs:build": "vuepress build docs-vuepress"
+  },
+  "devDependencies": {
+    "@vuepress/bundler-vite": "2.0.0-rc.18",
+    "@vuepress/theme-default": "2.0.0-rc.54",
+    "vuepress": "2.0.0-rc.18"
+  },
+  "keywords": [
+    "kbengine",
+    "documentation",
+    "vuepress"
+  ],
+  "author": "KBEngine Team",
+  "license": "MIT"
+}
