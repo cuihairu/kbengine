@@ -289,7 +289,7 @@ bool EntityTableMysql::syncIndexToDB(DBInterface* pdbi)
 	}
 
 	bool done = false;
-	std::string sql = fmt::format("ALTER TABLE " ENTITY_TABLE_PERFIX "_{} ", tableName());
+	sql = fmt::format("ALTER TABLE " ENTITY_TABLE_PERFIX "_{} ", tableName());
 	std::vector<EntityTableItem*>::iterator iiter = indexs.begin();
 	for(; iiter != indexs.end(); )
 	{
