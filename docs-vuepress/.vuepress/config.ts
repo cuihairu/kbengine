@@ -7,6 +7,10 @@ export default defineUserConfig({
   title: 'KBEngine',
   description: 'KBEngine 服务端引擎文档',
 
+  head: [
+    ['link', { rel: 'icon', href: '/logo.png' }],
+  ],
+
   locales: {
     '/': {
       lang: 'zh-CN',
