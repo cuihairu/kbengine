@@ -70,7 +70,7 @@ jobs:
       - name: Test
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-        run: ctest --preset vcpkg --output-on-failure
+        run: ctest --preset vcpkg --output-on-failure -E "_NOT_BUILT$"
 
   coverage:
     name: Code Coverage
@@ -258,7 +258,7 @@ jobs:
         shell: pwsh
         env:
           VCPKG_ROOT: ${{ github.workspace }}\vcpkg
-        run: ctest --preset vcpkg --output-on-failure
+        run: ctest --preset vcpkg --output-on-failure -E "_NOT_BUILT$"
 
   macos:
     name: macOS CMake
@@ -315,4 +315,4 @@ jobs:
       - name: Test
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-        run: ctest --preset vcpkg --output-on-failure
+        run: ctest --preset vcpkg --output-on-failure -E "_NOT_BUILT$"

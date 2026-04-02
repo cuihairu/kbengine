@@ -1,0 +1,31 @@
+# 基本数据类型
+
+```python
+[Name]			[Bytes]
+
+UINT8			1
+UINT16			2
+UINT32			4
+UINT64			8
+
+INT8			1
+INT16			2
+INT32			4
+INT64			8
+
+FLOAT			4
+DOUBLE			8
+
+VECTOR2			12
+VECTOR3			16
+VECTOR4			20
+
+STRING			N
+UNICODE			N
+PYTHON			N
+PY_DICT			N
+PY_TUPLE			N
+PY_LIST			N
+ENTITYCALL		N
+BLOB			N
+```
