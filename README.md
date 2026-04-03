@@ -121,12 +121,16 @@ KBEngine uses CMake 3.21+ for cross-platform building. The build system supports
 **Common Requirements:**
 - CMake 3.21 or higher
 - C++17 compatible compiler
-- Python 3.12 development headers
 
 **Platform-Specific:**
 - **Windows**: Visual Studio 2019/2022 with C++ development tools
 - **Linux**: GCC 8+ or Clang 10+
 - **macOS**: Xcode 13+ or Clang 10+
+
+**Dependencies:**
+- All dependencies are managed by **vcpkg** when using vcpkg mode
+- This includes Python 3.12, which is embedded into KBEngine (requires Python headers for compilation)
+- Two libraries use vendored source code: **tmxparser** (map parser) and **g3dlite** (3D math library)
 
 ---
 
@@ -224,13 +228,13 @@ vcpkg install fmt:x64-windows openssl:x64-windows
 **System Dependencies:**
 ```bash
 # Ubuntu/Debian
-sudo apt-get install build-essential cmake ninja-build python3-dev libssl-dev
+sudo apt-get install build-essential cmake ninja-build
 
 # Fedora/RHEL
-sudo dnf install gcc-c++ cmake ninja-build python3-devel openssl-devel
+sudo dnf install gcc-c++ cmake ninja-build
 
 # Arch Linux
-sudo pacman -S base-devel cmake ninja python openssl
+sudo pacman -S base-devel cmake ninja
 ```
 
 **Important Notes:**
@@ -312,17 +316,28 @@ ctest --preset vcpkg --parallel 4
 
 ### vcpkg Dependencies
 
-The project uses vcpkg manifest mode. Current dependencies:
+The project uses **vcpkg manifest mode** for dependency management.
 
-| Dependency | Version | Purpose |
-|------------|---------|---------|
-| fmt | 12.1.0 | Text formatting |
-| OpenSSL | 3.6.1 | Cryptography & SSL/TLS |
-| curl | 8.18.0 | HTTP client |
-| zlib | 1.3.1 | Compression |
-| GTest | 1.17.0 | Testing framework |
-| hiredis | 1.3.0 | Redis client |
-| libmariadb | 3.4.7 | MySQL/MariaDB connector |
+**Required dependencies (provided by vcpkg):**
+- fmt 12.1.0 - Text formatting
+- OpenSSL 3.6.1 - Cryptography & SSL/TLS
+- curl 8.18.0 - HTTP client
+- zlib 1.3.1 - Compression
+- GTest 1.17.0 - Testing framework
+- hiredis 1.3.0 - Redis client
+- libmariadb 3.4.7 - MySQL/MariaDB connector
+- Python 3.12 - Embedded scripting (KBEngine embeds Python interpreter)
+- tinyxml2 - XML parsing
+- utf8cpp - UTF-8 string handling
+- log4cxx - Logging
+- apr/apr-util - Apache Portable Runtime
+- jemalloc - Memory allocator
+
+**Vendored libraries (not in vcpkg):**
+- **tmxparser** - Map tile format parser
+- **g3dlite** - 3D math and geometry library
+
+**Note:** In vcpkg mode, all dependencies must come from vcpkg. The build will fail if any required vcpkg dependency is not found.
 
 **Updating dependencies:**
 ```bash
@@ -387,17 +402,12 @@ clang --version
 # macOS: xcode-select --install
 ```
 
-#### Python Headers Not Found
+#### Python Not Found
 
 ```bash
-# Ubuntu/Debian
-sudo apt-get install python3-dev
-
-# Fedora/RHEL
-sudo dnf install python3-devel
-
-# macOS (using Homebrew)
-brew install python3
+# If CMake cannot find Python3, ensure vcpkg is properly configured
+# Python 3.12 is provided by vcpkg, no system installation needed
+cmake --preset vcpkg -DVCPKG_ROOT=/path/to/vcpkg
 ```
 
 ---
