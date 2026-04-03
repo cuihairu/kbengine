@@ -9,8 +9,16 @@
 #define HAS_EPOLL
 #endif
 
+#if KBE_PLATFORM == PLATFORM_WIN32
+#define HAS_IOCP
+#endif
+
 #ifdef HAS_EPOLL
 #include "poller_epoll.h"
+#endif
+
+#ifdef HAS_IOCP
+#include "poller_iocp.h"
 #endif
 
 namespace KBEngine { 
@@ -185,11 +193,16 @@ int EventPoller::maxFD() const
 //-------------------------------------------------------------------------------------
 EventPoller * EventPoller::create()
 {
-#ifdef HAS_EPOLL
+#if defined(HAS_IOCP)
+	// Windows 平台优先使用 IOCP
+	return new IocpPoller();
+#elif defined(HAS_EPOLL)
+	// Unix/Linux 平台使用 epoll
 	return new EpollPoller();
 #else
+	// 其他平台使用 select
 	return new SelectPoller();
-#endif // HAS_EPOLL
+#endif
 }
 
 }

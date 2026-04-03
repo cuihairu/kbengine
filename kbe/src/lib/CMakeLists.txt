@@ -741,6 +741,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   )
 endif()
 
+if(WIN32)
+  list(APPEND KBE_EVENT_POLLER_SOURCES
+    "${KBE_SOURCE_DIR}/lib/network/poller_iocp.cpp"
+  )
+endif()
+
 add_library(kbe_network_event_poller STATIC
   ${KBE_EVENT_POLLER_SOURCES}
 )
