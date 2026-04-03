@@ -43,6 +43,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_error_reporter.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_packet_filter.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_event_poller.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_iocp_poller.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_math.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_resmgr.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_event_dispatcher.cpp"
