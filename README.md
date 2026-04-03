@@ -1,6 +1,20 @@
 KBEngine
 ========
 
+> **⚠️ Development Fork Notice**
+>
+> This is a **development fork** for contributing improvements to the upstream KBEngine project.
+>
+> - **Branch**: `dev` contains active development work
+> - **Branch**: `master` tracks upstream `kbengine/kbengine`
+>
+> **For production use**, please use the official repository:
+> - Official: https://github.com/kbengine/kbengine
+> - Releases: https://github.com/kbengine/kbengine/releases
+> - Documentation: https://kbengine.github.io/docs/
+>
+> This fork does **NOT** provide stable releases or downloads.
+
 [![CI](https://github.com/cuihairu/kbengine/workflows/CI/badge.svg)](https://github.com/cuihairu/kbengine/actions)
 [![Coverage](https://codecov.io/gh/cuihairu/kbengine/branch/chore/cmake-bootstrap/graph/badge.svg)](https://codecov.io/gh/cuihairu/kbengine)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standard_version)
@@ -88,12 +102,334 @@ KBEngine
 			libmariadb 3.4.7
 		libmariadb 3.4.7 is the MariaDB Connector/C client library used by KBEngine.
 		It is suitable for MariaDB and MySQL deployments, including MySQL 8 authentication flows introduced after older 3.0.x connector releases.
-	
+
 		Example:
 			export VCPKG_ROOT=/path/to/vcpkg
 			cmake --preset vcpkg
 			cmake --build --preset vcpkg
 			ctest --preset vcpkg
+
+## Building with CMake
+
+KBEngine uses CMake 3.21+ for cross-platform building. The build system supports two modes:
+
+1. **vcpkg mode** (Recommended): Uses vcpkg for dependency management
+2. **Fallback mode**: Uses vendored dependencies
+
+### Prerequisites
+
+**Common Requirements:**
+- CMake 3.21 or higher
+- C++17 compatible compiler
+- Python 3.12 development headers
+
+**Platform-Specific:**
+- **Windows**: Visual Studio 2019/2022 with C++ development tools
+- **Linux**: GCC 8+ or Clang 10+
+- **macOS**: Xcode 13+ or Clang 10+
+
+---
+
+### Quick Start (vcpkg mode)
+
+#### Windows
+
+```powershell
+# 1. Set VCPKG_ROOT environment variable
+$env:VCPKG_ROOT = "D:\path\to\vcpkg"
+
+# 2. Configure CMake
+cmake --preset vcpkg
+
+# 3. Build
+cmake --build build/presets/vcpkg --parallel
+
+# 4. Run tests (optional)
+ctest --preset vcpkg --output-on-failure
+```
+
+**Or use the provided build script:**
+```cmd
+REM Modify build.bat to match your Visual Studio path
+build.bat
+```
+
+#### Linux
+
+```bash
+# 1. Set VCPKG_ROOT
+export VCPKG_ROOT=/path/to/vcpkg
+
+# 2. Configure CMake
+cmake --preset vcpkg
+
+# 3. Build
+cmake --build build/presets/vcpkg --parallel
+
+# 4. Run tests (optional)
+ctest --preset vcpkg --output-on-failure
+```
+
+#### macOS
+
+```bash
+# 1. Set VCPKG_ROOT
+export VCPKG_ROOT=/path/to/vcpkg
+
+# 2. Configure CMake
+cmake --preset vcpkg
+
+# 3. Build
+cmake --build build/presets/vcpkg --parallel
+
+# 4. Run tests (optional)
+ctest --preset vcpkg --output-on-failure
+```
+
+---
+
+### Platform-Specific Details
+
+#### Windows
+
+**Key Differences:**
+- **Generator**: Uses Ninja by default (via CMake presets)
+- **Runtime Library**: Uses DLL runtime (`/MD` or `/MDd`)
+- **Compiler**: MSVC with UTF-8 support enabled (`/utf-8`)
+- **Path Handling**: Windows paths use backslashes
+
+**Important Notes:**
+1. Must run from **x64 Native Tools Command Prompt** or setup environment via script
+2. Visual Studio 2019/2022 required
+3. VCPKG_ROOT must be set before configuring
+4. Build output: `kbe\bin\server\`
+
+**Troubleshooting:**
+```cmd
+REM If CMake can't find Visual Studio
+call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
+
+REM If vcpkg dependencies fail
+vcpkg install fmt:x64-windows openssl:x64-windows
+```
+
+#### Linux
+
+**Key Differences:**
+- **Generator**: Uses Ninja (preferred) or Unix Makefiles
+- **Compiler Flags**: Uses GCC/Clang flags for coverage and optimization
+- **Runtime**: Static linking by default
+- **Dependencies**: May need system packages installed
+
+**System Dependencies:**
+```bash
+# Ubuntu/Debian
+sudo apt-get install build-essential cmake ninja-build python3-dev libssl-dev
+
+# Fedora/RHEL
+sudo dnf install gcc-c++ cmake ninja-build python3-devel openssl-devel
+
+# Arch Linux
+sudo pacman -S base-devel cmake ninja python openssl
+```
+
+**Important Notes:**
+1. Use `ninja` for faster builds (automatically used by presets)
+2. Build output: `kbe/bin/server/`
+3. May need to set `LD_LIBRARY_PATH` for runtime dependencies
+
+#### macOS
+
+**Key Differences:**
+- **Compiler**: Clang from Xcode Command Line Tools
+- **Frameworks**: Uses macOS frameworks instead of Linux libraries
+- **Universal Binary**: Can build for x86_64, arm64, or universal
+- **Code Signing**: May require for distribution
+
+**System Requirements:**
+```bash
+# Install Xcode Command Line Tools
+xcode-select --install
+
+# Or install full Xcode from App Store
+
+# Install Homebrew for additional dependencies
+brew install cmake ninja python3
+```
+
+**Architecture-Specific Builds:**
+```bash
+# Apple Silicon (M1/M2/M3)
+cmake --preset vcpkg -DCMAKE_OSX_ARCHITECTURES=arm64
+
+# Intel Mac
+cmake --preset vcpkg -DCMAKE_OSX_ARCHITECTURES=x86_64
+
+# Universal Binary (both architectures)
+cmake --preset vcpkg -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+```
+
+**Important Notes:**
+1. macOS 11 (Big Sur) or later recommended
+2. Build output: `kbe/bin/server/`
+3. May need to adjust SDK version for older macOS support
+
+---
+
+### Build Modes
+
+#### Debug Mode (Default)
+```bash
+cmake --preset vcpkg -DCMAKE_BUILD_TYPE=Debug
+```
+
+#### Release Mode
+```bash
+cmake --preset vcpkg -DCMAKE_BUILD_TYPE=Release
+```
+
+#### Release with Debug Info
+```bash
+cmake --preset vcpkg -DCMAKE_BUILD_TYPE=RelWithDebInfo
+```
+
+---
+
+### Testing
+
+```bash
+# Run all tests
+ctest --preset vcpkg --output-on-failure
+
+# Run specific test
+ctest --preset vcpkg -R <test_name> --verbose
+
+# Run tests with parallel execution
+ctest --preset vcpkg --parallel 4
+```
+
+---
+
+### vcpkg Dependencies
+
+The project uses vcpkg manifest mode. Current dependencies:
+
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| fmt | 12.1.0 | Text formatting |
+| OpenSSL | 3.6.1 | Cryptography & SSL/TLS |
+| curl | 8.18.0 | HTTP client |
+| zlib | 1.3.1 | Compression |
+| GTest | 1.17.0 | Testing framework |
+| hiredis | 1.3.0 | Redis client |
+| libmariadb | 3.4.7 | MySQL/MariaDB connector |
+
+**Updating dependencies:**
+```bash
+# Modify vcpkg.json to change versions
+# Then rebuild
+cmake --preset vcpkg
+cmake --build build/presets/vcpkg
+```
+
+---
+
+### Output Locations
+
+After successful build:
+
+| Platform | Executables | Libraries |
+|----------|-------------|-----------|
+| Windows | `kbe\bin\server\` | `kbe\src\libs\` |
+| Linux | `kbe/bin/server/` | `kbe/src/libs/` |
+| macOS | `kbe/bin/server/` | `kbe/src/libs/` |
+
+---
+
+### Troubleshooting
+
+#### CMake Configuration Fails
+
+```bash
+# Clear CMake cache
+rm -rf build/presets/vcpkg
+
+# Reconfigure
+cmake --preset vcpkg
+```
+
+#### vcpkg Dependencies Fail
+
+```bash
+# Clean vcpkg build
+vcpkg remove --outdated
+
+# Rebuild dependencies
+vcpkg install --recurse
+```
+
+#### Compiler Not Found
+
+**Windows:**
+```cmd
+# Ensure Visual Studio environment is set
+call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x64
+```
+
+**Linux/macOS:**
+```bash
+# Check compiler
+gcc --version
+clang --version
+
+# Install if missing
+# Ubuntu/Debian: sudo apt-get install build-essential
+# macOS: xcode-select --install
+```
+
+#### Python Headers Not Found
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install python3-dev
+
+# Fedora/RHEL
+sudo dnf install python3-devel
+
+# macOS (using Homebrew)
+brew install python3
+```
+
+---
+
+### Advanced Options
+
+#### Disable Tests
+
+```bash
+cmake --preset vcpkg -DBUILD_TESTING=OFF
+```
+
+#### Enable Code Coverage (Linux/macOS only)
+
+```bash
+cmake --preset vcpkg -DKBE_ENABLE_CODE_COVERAGE=ON
+```
+
+#### Custom Installation Prefix
+
+```bash
+cmake --preset vcpkg -DCMAKE_INSTALL_PREFIX=/opt/kbengine
+```
+
+---
+
+### Additional Resources
+
+- **CMake Documentation**: https://cmake.org/documentation/
+- **vcpkg Documentation**: https://vcpkg.io/en/
+- **Upstream Documentation**: https://kbengine.github.io/docs/
+- **Issue Tracker**: https://github.com/kbengine/kbengine/issues
 
 
 ## 中文
