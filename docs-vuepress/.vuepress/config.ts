@@ -4,11 +4,12 @@ import { viteBundler } from '@vuepress/bundler-vite'
 import { searchPlugin } from '@vuepress/plugin-search'
 
 export default defineUserConfig({
+  base: '/kbengine/',
   lang: 'zh-CN',
   title: 'KBEngine 文档',
   description: '基于 CHM 与 PDF 重建的 KBEngine 中文文档站点',
   head: [
-    ['link', { rel: 'icon', href: '/logo.png' }],
+    ['link', { rel: 'icon', href: '/kbengine/logo.png' }],
   ],
   bundler: viteBundler({
     viteOptions: {
