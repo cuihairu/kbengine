@@ -86,16 +86,26 @@ INLINE void EndPoint::setFileDescriptor(int fd)
 
 INLINE void EndPoint::socket(int type)
 {
-	this->setFileDescriptor((int)::socket(AF_INET, type, 0));
-
 #if KBE_PLATFORM == PLATFORM_WIN32
+	// Windows IOCP 需要使用 WSASocket 创建支持异步 I/O 的 Socket
+	// 根据 socket 类型确定 protocol
+	int protocol = 0;
+	if (type == SOCK_STREAM)
+		protocol = IPPROTO_TCP;
+	else if (type == SOCK_DGRAM)
+		protocol = IPPROTO_UDP;
+
+	this->setFileDescriptor((int)::WSASocket(AF_INET, type, protocol, NULL, 0, WSA_FLAG_OVERLAPPED));
+
 	if ((socket_ == INVALID_SOCKET) && (WSAGetLastError() == WSANOTINITIALISED))
 	{
 		EndPoint::initNetwork();
-		this->setFileDescriptor((int)::socket(AF_INET, type, 0));
+		this->setFileDescriptor((int)::WSASocket(AF_INET, type, protocol, NULL, 0, WSA_FLAG_OVERLAPPED));
 		KBE_ASSERT((socket_ != INVALID_SOCKET) && (WSAGetLastError() != WSANOTINITIALISED) && \
 				"EndPoint::socket: create socket error!");
 	}
+#else
+	this->setFileDescriptor((int)::socket(AF_INET, type, 0));
 #endif
 }
 
@@ -429,11 +439,22 @@ INLINE EndPoint * EndPoint::accept(u_int16_t * networkPort, u_int32_t * networkA
 	pNew->setFileDescriptor(ret);
 	pNew->addr(sin.sin_port, sin.sin_addr.s_addr);
 
+#if KBE_PLATFORM == PLATFORM_WIN32
+	// Windows IOCP: accept 返回的 socket 需要设置为异步模式
+	// 注意：accept 返回的 socket 继承了 listening socket 的某些属性，
+	// 但我们仍需要确保它与 IOCP 兼容
 	if(autosetflags)
 	{
 		pNew->setnonblocking(true);
 		pNew->setnodelay(true);
 	}
+#else
+	if(autosetflags)
+	{
+		pNew->setnonblocking(true);
+		pNew->setnodelay(true);
+	}
+#endif
 
 	if (networkPort != NULL) *networkPort = sin.sin_port;
 	if (networkAddr != NULL) *networkAddr = sin.sin_addr.s_addr;
