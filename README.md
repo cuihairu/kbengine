@@ -5,7 +5,6 @@ KBEngine
 [![Coverage](https://codecov.io/gh/cuihairu/kbengine/branch/chore/cmake-bootstrap/graph/badge.svg)](https://codecov.io/gh/cuihairu/kbengine)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standard_version)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT%20or%20Apache%202.0-blue.svg)](LICENSE)
 [![Latest Release](https://img.shields.io/badge/release-v0.1.0-green.svg)](https://github.com/cuihairu/kbengine/releases/latest)
 [![Last Updated](https://img.shields.io/badge/updated-Apr%201%2C%2026-yellow.svg)](https://github.com/cuihairu/kbengine/commits/chore/cmake-bootstrap)
 
@@ -52,7 +51,7 @@ KBEngine
 
 ## What is KBEngine?
 
-	An open source MMOG server engine. 
+	An MMOG server engine. 
 	Just use Python scripting to be able to complete any game logic simply and efficiently (supports hotfixing).
 	Various KBEngine plugins can be quickly combined with (Unity3D, OGRE, Cocos2d-x, HTML5, etc.) technology to 
 	form a complete game client.
@@ -106,7 +105,7 @@ KBEngine
 
 ## 什么是KBEngine?
 
-	一款开源的MMOG游戏服务端引擎，
+	一款MMOG游戏服务端引擎，
 	仅Python脚本即可简单高效的完成任何游戏逻辑(支持热更新)，
 	使用配套客户端插件能够快速与（Unity3D、UE4、OGRE、HTML5、等等）结合形成一个完整的客户端。
 
