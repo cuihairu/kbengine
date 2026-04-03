@@ -14,6 +14,10 @@ target_include_directories(kbe_build_config INTERFACE
   "${KBE_SOURCE_DIR}/lib"
 )
 
+if(WIN32)
+  target_link_libraries(kbe_build_config INTERFACE ws2_32)
+endif()
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   target_compile_options(kbe_build_config INTERFACE
     -Wno-undefined-var-template
