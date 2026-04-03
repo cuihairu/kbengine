@@ -1,0 +1,17 @@
+{
+  "name": "tmxparser",
+  "version-string": "0.0-kbengine",
+  "description": "Tiled TMX map parser used by KBEngine navigation",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    },
+    "tinyxml2",
+    "zlib"
+  ]
+}

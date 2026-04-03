@@ -22,7 +22,6 @@
 #ifndef NO_USE_LOG4CXX
 #include "log4cxx/logger.h"
 #include "log4cxx/logmanager.h"
-#include "log4cxx/net/socketappender.h"
 #include "log4cxx/fileappender.h"
 #include "log4cxx/helpers/inetaddress.h"
 #include "log4cxx/propertyconfigurator.h"
@@ -1246,7 +1245,7 @@ void DebugHelper::closeLogger()
 {
 	// close logger for fork + execv
 #ifndef NO_USE_LOG4CXX
-	g_logger = (const int)NULL;
+	g_logger.reset();
 	log4cxx::LogManager::shutdown();
 #endif
 }

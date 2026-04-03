@@ -10,6 +10,27 @@
 
 namespace KBEngine{
 
+struct EmailServerInfo;
+
+struct PreparedSendMailRequest
+{
+	std::string smtpUrl;
+	std::string fromAddress;
+	std::string toAddress;
+	std::string subjectLine;
+	std::string messageHtml;
+	std::string mailFrom;
+	std::string username;
+	std::string password;
+	std::string loginOptions;
+	bool useSsl = false;
+
+	bool isValid() const
+	{
+		return !smtpUrl.empty() && !fromAddress.empty() && !toAddress.empty();
+	}
+};
+
 class SendEMailTask : public thread::TPTask
 {
 public:
@@ -27,6 +48,7 @@ public:
 	virtual const char* getopkey() = 0;
 	virtual const char* subject() = 0;
 	virtual const char* message() = 0;
+	PreparedSendMailRequest prepareRequest(const EmailServerInfo& emailServerInfo);
 
 protected:
 	std::string emailaddr_, code_, cbaddr_;
