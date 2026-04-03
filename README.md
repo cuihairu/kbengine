@@ -5,8 +5,6 @@ KBEngine
 [![Coverage](https://codecov.io/gh/cuihairu/kbengine/branch/chore/cmake-bootstrap/graph/badge.svg)](https://codecov.io/gh/cuihairu/kbengine)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standard_version)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
-[![Latest Release](https://img.shields.io/badge/release-v0.1.0-green.svg)](https://github.com/cuihairu/kbengine/releases/latest)
-[![Last Updated](https://img.shields.io/badge/updated-Apr%201%2C%2026-yellow.svg)](https://github.com/cuihairu/kbengine/commits/chore/cmake-bootstrap)
 
 
 ## Homepage
