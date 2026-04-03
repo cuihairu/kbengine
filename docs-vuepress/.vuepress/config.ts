@@ -4,12 +4,11 @@ import { viteBundler } from '@vuepress/bundler-vite'
 import { searchPlugin } from '@vuepress/plugin-search'
 
 export default defineUserConfig({
-  base: '/kbengine/',
   lang: 'zh-CN',
   title: 'KBEngine 文档',
   description: '基于 CHM 与 PDF 重建的 KBEngine 中文文档站点',
   head: [
-    ['link', { rel: 'icon', href: '/kbengine/logo.png' }],
+    ['link', { rel: 'icon', href: '/logo.png' }],
   ],
   bundler: viteBundler({
     viteOptions: {
@@ -43,10 +42,21 @@ export default defineUserConfig({
     navbar: [
       { text: '首页', link: '/' },
       { text: '指南', link: '/guide/' },
+      { text: '架构', link: '/architecture/' },
       { text: 'API', link: '/api/' },
+      { text: '资料', link: '/resources/' },
     ],
     sidebar: {
-      '/': [],
+      '/architecture/': [
+        {
+          text: '架构',
+          children: [
+            '/architecture/README.md',
+            '/architecture/source-analysis.md',
+            '/architecture/bigworld.md',
+          ],
+        },
+      ],
       '/guide/': [
         {
           text: '指南',
@@ -55,42 +65,25 @@ export default defineUserConfig({
       ],
       '/api/': [
         {
-          text: '通用内容',
+          text: '核心概念',
           children: ['/api/README.md', '/api/basetypes.md', '/api/keywords.md'],
         },
         {
-          text: 'client',
-          children: ['/api/client/README.md', '/api/client/KBEngine.md', '/api/client/Entity.md'],
+          text: '客户端',
+          children: ['/api/client/README.md', '/api/client/KBEngine.md', '/api/client/Entity.md', '/api/bots/README.md', '/api/bots/KBEngine.md', '/api/bots/Entity.md', '/api/bots/PyClientApp.md'],
         },
         {
-          text: 'cellapp',
-          children: ['/api/cellapp/README.md', '/api/cellapp/KBEngine.md', '/api/cellapp/Entity.md'],
-        },
-        {
-          text: 'baseapp',
-          children: ['/api/baseapp/README.md', '/api/baseapp/KBEngine.md', '/api/baseapp/Entity.md', '/api/baseapp/Proxy.md'],
-        },
-        {
-          text: 'loginapp',
-          children: ['/api/loginapp/README.md', '/api/loginapp/KBEngine.md'],
-        },
-        {
-          text: 'dbmgr',
-          children: ['/api/dbmgr/README.md', '/api/dbmgr/KBEngine.md'],
-        },
-        {
-          text: 'interfaces',
-          children: ['/api/interfaces/README.md', '/api/interfaces/KBEngine.md'],
-        },
-        {
-          text: 'logger',
-          children: ['/api/logger/README.md', '/api/logger/KBEngine.md'],
-        },
-        {
-          text: 'bots',
-          children: ['/api/bots/README.md', '/api/bots/KBEngine.md', '/api/bots/Entity.md', '/api/bots/PyClientApp.md'],
+          text: '服务端组件',
+          children: ['/api/cellapp/README.md', '/api/cellapp/KBEngine.md', '/api/cellapp/Entity.md', '/api/baseapp/README.md', '/api/baseapp/KBEngine.md', '/api/baseapp/Entity.md', '/api/baseapp/Proxy.md', '/api/loginapp/README.md', '/api/loginapp/KBEngine.md', '/api/dbmgr/README.md', '/api/dbmgr/KBEngine.md', '/api/interfaces/README.md', '/api/interfaces/KBEngine.md', '/api/logger/README.md', '/api/logger/KBEngine.md'],
         },
       ],
+      '/resources/': [
+        {
+          text: '资料',
+          children: ['/resources/README.md'],
+        },
+      ],
+      '/': [],
     },
   }),
 })

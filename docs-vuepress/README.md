@@ -1,15 +1,39 @@
-# KBEngine 中文文档
+---
+home: true
+heroImage: /logo.png
+heroText: KBEngine 中文文档
+tagline: 基于仓库内 CHM 与 PDF 整理的中文文档入口
+actions:
+  - text: 开始阅读
+    link: /guide/
+    type: primary
+  - text: 查看架构
+    link: /architecture/
+    type: secondary
+  - text: 查阅 API
+    link: /api/
+    type: secondary
+footer: 文档来源为仓库内已有资料
+---
 
-> 本站以仓库内的 `docs/api/kbengine_api(cn).chm` 与 `docs/WebConsole_Guide(cn).pdf` 为唯一权威来源重新生成。
+## 文档导航
 
-## 内容范围
+### 指南
 
+- [阅读入口](/guide/)
 - [WebConsole 指南](/guide/webconsole.md)
-- [API 总览](/api/README.md)
+
+### 架构
+
+- [架构总览](/architecture/)
+- [源码分析](/architecture/source-analysis.md)
+- [BigWorld 对照](/architecture/bigworld.md)
+
+### API 参考
+
+- [API 总览](/api/)
 - [基本数据类型](/api/basetypes.md)
 - [关键词释义](/api/keywords.md)
-
-## API 模块
 
 - [client API](/api/client/)
 - [cellapp API](/api/cellapp/)
@@ -19,3 +43,7 @@
 - [interfaces API](/api/interfaces/)
 - [logger API](/api/logger/)
 - [bots API](/api/bots/)
+
+### 资料
+
+- [资料与说明](/resources/)

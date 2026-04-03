@@ -469,9 +469,13 @@ def extract_chm_to_temp(chm_file: Path) -> Path:
     if not chm_file.exists():
         raise FileNotFoundError(f"未找到 CHM 文件: {chm_file}")
 
+    hh_exe = shutil.which("hh.exe")
+    if not hh_exe:
+        raise FileNotFoundError("未找到 hh.exe，当前环境无法直接解包 CHM")
+
     temp_root = Path(tempfile.mkdtemp(prefix="kbengine_chm_"))
     result = subprocess.run(
-        ["hh.exe", "-decompile", str(temp_root), str(chm_file)],
+        [hh_exe, "-decompile", str(temp_root), str(chm_file)],
         capture_output=True,
         text=True,
         timeout=120,
@@ -486,6 +490,32 @@ def extract_chm_to_temp(chm_file: Path) -> Path:
         raise RuntimeError("CHM 解包后没有任何输出")
 
     return temp_root
+
+
+def discover_modules_from_output(api_root: Path) -> list[ModuleInfo]:
+    modules: list[ModuleInfo] = []
+    for module_name in MODULE_ORDER:
+        module_dir = api_root / module_name
+        readme_path = module_dir / "README.md"
+        if not readme_path.exists():
+            continue
+
+        module_source = f"{module_name}/Modules/KBEngine.html" if (module_dir / "KBEngine.md").exists() else None
+        class_pages = sorted(
+            path.name
+            for path in module_dir.glob("*.md")
+            if path.name not in {"README.md", "KBEngine.md"}
+        )
+
+        modules.append(
+            ModuleInfo(
+                name=module_name,
+                intro_source=f"{module_name}/index.html",
+                module_source=module_source,
+                classes=class_pages,
+            )
+        )
+    return modules
 
 
 def discover_modules(chm_root: Path) -> list[ModuleInfo]:
@@ -635,23 +665,52 @@ def build_homepage(modules: Iterable[ModuleInfo]) -> str:
         for module in modules
     )
     return (
-        "# KBEngine 中文文档\n\n"
-        "> 本站以仓库内的 `docs/api/kbengine_api(cn).chm` 与 "
-        "`docs/WebConsole_Guide(cn).pdf` 为唯一权威来源重新生成。\n\n"
-        "## 内容范围\n\n"
+        "---\n"
+        "home: true\n"
+        "heroImage: /logo.png\n"
+        "heroText: KBEngine 中文文档\n"
+        "tagline: 基于仓库内 CHM 与 PDF 整理的中文文档入口\n"
+        "actions:\n"
+        "  - text: 开始阅读\n"
+        "    link: /guide/\n"
+        "    type: primary\n"
+        "  - text: 查看架构\n"
+        "    link: /architecture/\n"
+        "    type: secondary\n"
+        "  - text: 查阅 API\n"
+        "    link: /api/\n"
+        "    type: secondary\n"
+        "footer: 文档来源为仓库内已有资料\n"
+        "---\n\n"
+        "## 文档导航\n\n"
+        "### 指南\n\n"
+        "- [阅读入口](/guide/)\n"
         "- [WebConsole 指南](/guide/webconsole.md)\n"
-        "- [API 总览](/api/README.md)\n"
+        "\n"
+        "### 架构\n\n"
+        "- [架构总览](/architecture/)\n"
+        "- [源码分析](/architecture/source-analysis.md)\n"
+        "- [BigWorld 对照](/architecture/bigworld.md)\n"
+        "\n"
+        "### API 参考\n\n"
+        "- [API 总览](/api/)\n"
         "- [基本数据类型](/api/basetypes.md)\n"
         "- [关键词释义](/api/keywords.md)\n\n"
-        "## API 模块\n\n"
-        f"{module_links}\n"
+        f"{module_links}\n\n"
+        "### 资料\n\n"
+        "- [资料与说明](/resources/)\n"
     )
 
 
 def build_guide_index() -> str:
     return (
         "# 指南\n\n"
+        "> 本目录整理现有使用类文档。\n\n"
+        "## 阅读入口\n\n"
         "- [WebConsole 指南](/guide/webconsole.md)\n"
+        "- [架构总览](/architecture/)\n"
+        "- [API 总览](/api/)\n"
+        "- [资料与说明](/resources/)\n"
     )
 
 
@@ -661,37 +720,103 @@ def build_api_index(modules: Iterable[ModuleInfo]) -> str:
         "",
         "> 本目录来自 `docs/api/kbengine_api(cn).chm` 的中文 API 帮助文档。",
         "",
-        "## 通用内容",
+        "## 核心概念",
         "",
         "- [基本数据类型](/api/basetypes.md)",
         "- [关键词释义](/api/keywords.md)",
         "",
-        "## 模块",
+        "## 客户端",
+        "",
+        "- [client](/api/client/)",
+        "- [bots](/api/bots/)",
+        "",
+        "## 服务端组件",
         "",
     ]
     for module in modules:
+        if module.name in {"client", "bots"}:
+            continue
         lines.append(f"- [{module.name}](/api/{module.name}/)")
     lines.append("")
     return "\n".join(lines)
 
 
+def build_architecture_index() -> str:
+    return (
+        "# 架构总览\n\n"
+        "> 本栏目当前仅搭建文档框架，具体内容待按源码、CHM、PDF 逐项核对后补充。\n\n"
+        "## 待整理栏目\n\n"
+        "- [源码分析](/architecture/source-analysis.md)\n"
+        "- [BigWorld 对照](/architecture/bigworld.md)\n\n"
+        "## 说明\n\n"
+        "- 本页当前不提供结论性描述。\n"
+        "- 后续补充时，以源码与仓库内现有资料为准。\n"
+    )
+
+
+def build_source_analysis_index() -> str:
+    return (
+        "# 源码分析\n\n"
+        "> 占位页。后续按源码逐项核对后补充。\n\n"
+        "## 计划整理范围\n\n"
+        "- 组件启动流程\n"
+        "- 实体与消息链路\n"
+        "- Space 与 Cell 相关机制\n"
+        "- 关键模块源码阅读索引\n\n"
+        "## 资料边界\n\n"
+        "- 以仓库源码为主。\n"
+        "- 未核对前不写结论。\n"
+    )
+
+
+def build_bigworld_index() -> str:
+    return (
+        "# BigWorld 对照\n\n"
+        "> 占位页。后续在核对现有资料与源码后补充。\n\n"
+        "## 计划整理范围\n\n"
+        "- 术语对应\n"
+        "- 概念差异\n"
+        "- 架构思路对照\n\n"
+        "## 资料边界\n\n"
+        "- 未核对前不写具体映射结论。\n"
+    )
+
+
+def build_resources_index() -> str:
+    return (
+        "# 资料与说明\n\n"
+        "> 本页仅汇总当前整理所依赖的仓库内资料。\n\n"
+        "## 当前资料\n\n"
+        "- 协议文件：`LICENSE.txt`\n"
+        "- API 中文文档：`docs/api/kbengine_api(cn).chm`\n"
+        "- WebConsole 中文文档：`docs/WebConsole_Guide(cn).pdf`\n"
+        "- 仓库说明：`README.md`\n\n"
+        "## 说明\n\n"
+        "- 本站整理时优先以仓库内现有资料为准。\n"
+        "- 新增说明性内容需要逐项核对后再补充。\n"
+    )
+
+
 def build_vuepress_config(modules: Iterable[ModuleInfo]) -> str:
-    module_sidebar_entries: list[str] = []
+    server_children: list[str] = []
     for module in modules:
+        if module.name in {"client", "bots"}:
+            continue
+
         children = [f"'/api/{module.name}/README.md'"]
         if module.module_source:
             children.append(f"'/api/{module.name}/KBEngine.md'")
         for class_page in module.classes:
             children.append(f"'/api/{module.name}/{Path(class_page).stem}.md'")
 
-        module_sidebar_entries.append(
-            "        {\n"
-            f"          text: '{module.name}',\n"
-            f"          children: [{', '.join(children)}],\n"
-            "        },"
-        )
+        server_children.extend(children)
 
-    module_sidebar = "\n".join(module_sidebar_entries)
+    server_sidebar = (
+        "        {\n"
+        "          text: '服务端组件',\n"
+        f"          children: [{', '.join(server_children)}],\n"
+        "        },\n"
+    )
 
     return (
         "import { defaultTheme } from '@vuepress/theme-default'\n"
@@ -737,23 +862,45 @@ def build_vuepress_config(modules: Iterable[ModuleInfo]) -> str:
         "    navbar: [\n"
         "      { text: '首页', link: '/' },\n"
         "      { text: '指南', link: '/guide/' },\n"
+        "      { text: '架构', link: '/architecture/' },\n"
         "      { text: 'API', link: '/api/' },\n"
+        "      { text: '资料', link: '/resources/' },\n"
         "    ],\n"
         "    sidebar: {\n"
-        "      '/': [],\n"
+        "      '/architecture/': [\n"
+        "        {\n"
+        "          text: '架构',\n"
+        "          children: [\n"
+        "            '/architecture/README.md',\n"
+        "            '/architecture/source-analysis.md',\n"
+        "            '/architecture/bigworld.md',\n"
+        "          ],\n"
+        "        },\n"
+        "      ],\n"
         "      '/guide/': [\n"
         "        {\n"
         "          text: '指南',\n"
-        "          children: ['/guide/README.md', '/guide/webconsole.md'],\n"
+          "          children: ['/guide/README.md', '/guide/webconsole.md'],\n"
         "        },\n"
         "      ],\n"
         "      '/api/': [\n"
         "        {\n"
-        "          text: '通用内容',\n"
+        "          text: '核心概念',\n"
         "          children: ['/api/README.md', '/api/basetypes.md', '/api/keywords.md'],\n"
         "        },\n"
-        f"{module_sidebar}\n"
+        "        {\n"
+        "          text: '客户端',\n"
+        "          children: ['/api/client/README.md', '/api/client/KBEngine.md', '/api/client/Entity.md', '/api/bots/README.md', '/api/bots/KBEngine.md', '/api/bots/Entity.md', '/api/bots/PyClientApp.md'],\n"
+        "        },\n"
+        f"{server_sidebar}"
         "      ],\n"
+        "      '/resources/': [\n"
+        "        {\n"
+        "          text: '资料',\n"
+        "          children: ['/resources/README.md'],\n"
+        "        },\n"
+        "      ],\n"
+        "      '/': [],\n"
         "    },\n"
         "  }),\n"
         "})\n"
@@ -784,48 +931,70 @@ def restore_logo_from_git(output_path: Path) -> None:
 
 
 def rebuild_docs() -> None:
-    ensure_clean_output(OUTPUT_DIR)
-    restore_logo_from_git(LOGO_OUTPUT)
+    temp_chm_root: Path | None = None
+    modules: list[ModuleInfo]
+    use_existing_api = False
 
-    temp_chm_root = extract_chm_to_temp(CHM_FILE)
     try:
+        temp_chm_root = extract_chm_to_temp(CHM_FILE)
+    except (FileNotFoundError, RuntimeError):
+        existing_api_root = OUTPUT_DIR / "api"
+        modules = discover_modules_from_output(existing_api_root)
+        if not modules:
+            raise
+        use_existing_api = True
+    else:
         modules = discover_modules(temp_chm_root)
-        source_to_output_map: dict[str, PurePosixPath] = {
-            "basetypes.html": PurePosixPath("basetypes.md"),
-            "keywords.html": PurePosixPath("keywords.md"),
-        }
-        for module in modules:
-            source_to_output_map[module.intro_source.lower()] = PurePosixPath(f"{module.name}/README.md")
-            if module.module_source:
-                source_to_output_map[module.module_source.lower()] = PurePosixPath(
-                    f"{module.name}/KBEngine.md"
-                )
-            for class_page in module.classes:
-                source_to_output_map[f"{module.name}/classes/{class_page.lower()}"] = PurePosixPath(
-                    f"{module.name}/{Path(class_page).stem}.md"
-                )
 
-        converter = HtmlConverter(temp_chm_root, OUTPUT_DIR / "api", source_to_output_map)
+    if not use_existing_api:
+        ensure_clean_output(OUTPUT_DIR)
+        restore_logo_from_git(LOGO_OUTPUT)
 
-        converter.convert_page("basetypes.html", "basetypes.md")
-        converter.convert_page("keywords.html", "keywords.md")
+        try:
+            source_to_output_map: dict[str, PurePosixPath] = {
+                "basetypes.html": PurePosixPath("basetypes.md"),
+                "keywords.html": PurePosixPath("keywords.md"),
+            }
+            for module in modules:
+                source_to_output_map[module.intro_source.lower()] = PurePosixPath(f"{module.name}/README.md")
+                if module.module_source:
+                    source_to_output_map[module.module_source.lower()] = PurePosixPath(
+                        f"{module.name}/KBEngine.md"
+                    )
+                for class_page in module.classes:
+                    source_to_output_map[f"{module.name}/classes/{class_page.lower()}"] = PurePosixPath(
+                        f"{module.name}/{Path(class_page).stem}.md"
+                    )
 
-        for module in modules:
-            converter.convert_page(module.intro_source, f"{module.name}/README.md")
-            if module.module_source:
-                converter.convert_page(module.module_source, f"{module.name}/KBEngine.md")
-            for class_page in module.classes:
-                converter.convert_page(
-                    f"{module.name}/Classes/{class_page}",
-                    f"{module.name}/{Path(class_page).stem}.md",
-                )
-    finally:
-        shutil.rmtree(temp_chm_root, ignore_errors=True)
+            converter = HtmlConverter(temp_chm_root, OUTPUT_DIR / "api", source_to_output_map)
+
+            converter.convert_page("basetypes.html", "basetypes.md")
+            converter.convert_page("keywords.html", "keywords.md")
+
+            for module in modules:
+                converter.convert_page(module.intro_source, f"{module.name}/README.md")
+                if module.module_source:
+                    converter.convert_page(module.module_source, f"{module.name}/KBEngine.md")
+                for class_page in module.classes:
+                    converter.convert_page(
+                        f"{module.name}/Classes/{class_page}",
+                        f"{module.name}/{Path(class_page).stem}.md",
+                    )
+        finally:
+            if temp_chm_root is not None:
+                shutil.rmtree(temp_chm_root, ignore_errors=True)
+    else:
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        restore_logo_from_git(LOGO_OUTPUT)
 
     write_text(OUTPUT_DIR / "README.md", build_homepage(modules))
     write_text(OUTPUT_DIR / "guide" / "README.md", build_guide_index())
     write_text(OUTPUT_DIR / "guide" / "webconsole.md", build_pdf_markdown(PDF_FILE))
+    write_text(OUTPUT_DIR / "architecture" / "README.md", build_architecture_index())
+    write_text(OUTPUT_DIR / "architecture" / "source-analysis.md", build_source_analysis_index())
+    write_text(OUTPUT_DIR / "architecture" / "bigworld.md", build_bigworld_index())
     write_text(OUTPUT_DIR / "api" / "README.md", build_api_index(modules))
+    write_text(OUTPUT_DIR / "resources" / "README.md", build_resources_index())
     write_text(OUTPUT_DIR / ".vuepress" / "config.ts", build_vuepress_config(modules))
 
 
