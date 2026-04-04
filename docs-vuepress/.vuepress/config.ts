@@ -52,6 +52,7 @@ export default defineUserConfig({
           text: '架构',
           children: [
             '/architecture/README.md',
+            '/architecture/redesign.md',
             '/architecture/source-analysis.md',
             '/architecture/bigworld.md',
           ],
@@ -80,7 +81,7 @@ export default defineUserConfig({
       '/resources/': [
         {
           text: '资料',
-          children: ['/resources/README.md'],
+          children: ['/resources/README.md', '/resources/provenance.md', '/resources/verification-status.md'],
         },
       ],
       '/': [],

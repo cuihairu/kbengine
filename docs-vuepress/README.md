@@ -26,6 +26,7 @@ footer: 文档来源为仓库内已有资料
 ### 架构
 
 - [架构总览](/architecture/)
+- [KBEngine 2.0 重设计方案](/architecture/redesign.md)
 - [源码分析](/architecture/source-analysis.md)
 - [BigWorld 对照](/architecture/bigworld.md)
 

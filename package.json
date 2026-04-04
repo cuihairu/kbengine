@@ -4,7 +4,8 @@
   "description": "KBEngine Documentation",
   "scripts": {
     "docs:dev": "vuepress dev docs-vuepress",
-    "docs:build": "vuepress build docs-vuepress"
+    "docs:build": "vuepress build docs-vuepress",
+    "docs:verify": "bash tools/setup_doc_verifier.sh && DYLD_LIBRARY_PATH=.tmp/build/chmlib-install/lib ./.venv-docs/bin/python tools/verify_authoritative_docs.py"
   },
   "devDependencies": {
     "@vuepress/bundler-vite": "2.0.0-rc.18",
