@@ -1,0 +1,453 @@
+# 6. Python 运行时与脚本桥接
+
+> 两个项目都用 Python 做业务脚本，但集成深度不同。这一章回答：Python 在引擎里处于什么位置？C++ 和 Python 怎么桥接？热重载到底能不能改 .def？为什么不用 Lua？
+
+## 6.1 本章核心问题
+
+- 为什么游戏服务器选 Python 做业务语言？
+- BigWorld 和 KBEngine 的 Python 集成有什么差异？
+- C++ Entity 怎么变成 Python 可操作的对象？
+- 远程方法调用怎么从 Python 表达式变成网络包？
+- 热重载的边界在哪里？
+
+## 6.2 为什么选 Python 而不是 Lua
+
+这不是一个"谁更快"的问题，而是一个工程决策。
+
+### 脚本层不是性能瓶颈
+
+- MMO 服务器热路径全在 C++：网络 I/O、AOI、序列化、寻路
+- Python 脚本只处理实体行为回调，tick 频率 10Hz（100ms 预算）
+- 即使 LuaJIT 比 CPython 快 30-50x，从 2ms 优化到 0.1ms 在 100ms 预算里无意义
+- 真正的性能约束：网络带宽、AOI 计算量、DB 写入延迟——都不是脚本层的事
+
+### Python 的表现力是生产力乘数
+
+MMO 脚本是几十万行业务代码，不是几百行嵌入式脚本：
+
+| 能力 | Python | Lua |
+|------|--------|-----|
+| 内置 class | ✓ | ✗（需手写元表） |
+| 装饰器 | ✓ | ✗ |
+| 生成器 / with | ✓ | ✗ |
+| 多重继承 | ✓ | 元表模拟 |
+| 标准库 | json/xml/re/logging/unittest/hashlib 全内置 | 极小，全需第三方 |
+
+### 其他因素
+
+- **Twisted Deferred**：BigWorld 的 PyDeferred 直接基于 Twisted，提供异步回调链式处理。Lua 没有 Twisted
+- **热重载**：CPython 内置 `PyImport_ReloadModule`。Lua 的 `require` 缓存模块，热重载需手动清 `package.loaded`
+- **团队门槛**：MMO 团队是"少数 C++ 引擎程序员 + 多数脚本程序员 + 策划"，Python 可读性更高
+- **历史时机**：BigWorld 架构设计于 2002-2004 年，Python 2.x 已成熟，LuaJIT 还不存在
+
+**一句话：Lua 是给 C++ 程序员嵌进去写小脚本的，Python 是给团队写大工程的。** BigWorld/KBEngine 的脚本层代码量是工程级别，不是脚本级别。
+
+## 6.3 Python 在两套项目里的核心位置
+
+```
+┌──────────────────────────────────────────────────┐
+│                 Python 脚本层                      │
+│   实体行为（onTick / onEnterSpace / onWitness）    │
+│   业务逻辑（背包 / 任务 / 社交 / 战斗结算）         │
+│   入口钩子（onInit / onBaseAppReady / onReadyForLogin）│
+├──────────────────────────────────────────────────┤
+│              C++ / Python 桥接层                   │
+│   PyTypeObject / tp_call / PyObject 持有           │
+│   属性拦截（setattr → C++ 类型检查 → 脏标记）       │
+│   远程方法（tp_call → MemoryStream → Bundle → 网络）│
+├──────────────────────────────────────────────────┤
+│              C++ 引擎层                            │
+│   EntityDef / Network / AOI / DB / Space           │
+└──────────────────────────────────────────────────┘
+```
+
+EntityDef 的 .def 文件描述结构，Python 文件定义行为。脚本层是引擎和游戏业务之间**唯一的扩展接口**。
+
+## 6.4 继承链的差异
+
+### KBEngine：两层
+
+```
+ServerApp
+  └── EntityApp<Entity>    ← Python 初始化在这里（installPyScript）
+        ├── Baseapp
+        └── Cellapp
+  └── PythonApp            ← 也有 Python 初始化
+        ├── Loginapp
+        └── Dbmgr
+```
+
+KBEngine 把 Python 运行时初始化合并进了 `EntityApp` 和 `PythonApp`。
+
+```cpp
+// 文件：kbe/src/lib/server/entity_app.h（简化）
+template<class E>
+class EntityApp : public ServerApp
+{
+    bool inInitialize() override
+    {
+        installPyScript();     // Python 解释器初始化
+        installPyModules();    // KBEngine 模块注册
+        installEntityDef();    // 加载 .def 实体定义
+    }
+};
+```
+
+### BigWorld：三层
+
+```
+ServerApp
+  └── ScriptApp              ← 多了一层：专门处理 Python 运行时
+        └── EntityApp        ← 加了 TimeQueue + BgTaskManager
+              ├── BaseApp
+              └── CellApp
+        └── DBApp
+```
+
+BigWorld 把 Python 运行时抽成了独立的 `ScriptApp` 层：
+
+```cpp
+// 文件：programming/bigworld/lib/server/script_app.cpp（简化）
+bool ScriptApp::initScript(const char* componentName,
+        const char* scriptPath1, const char* scriptPath2)
+{
+    PyImportPaths paths;
+    paths.addResPath(scriptPath1);
+    paths.addResPath(scriptPath2);
+    paths.addResPath(EntityDef::Constants::serverCommonPath());
+
+    Script::init(paths, componentName);   // Python 初始化
+
+    ScriptModule bigWorld = ScriptModule::getOrCreate("BigWorld");
+    bigWorld.setAttribute("serverMode", ...);
+
+    PyDeferred::staticInit();  // Twisted Deferred 初始化（BigWorld 独有）
+}
+```
+
+ScriptApp 多做了什么：
+- Python 路径初始化
+- 脚本模块注册
+- **PyDeferred 初始化**（Twisted Deferred 模式）
+- **Personality 模块**（`onInit` / `onFini` 脚本回调）
+- 脚本定时器系统
+
+## 6.5 C++ 与 Python 的桥接：Entity 就是 PyObject
+
+两个项目的核心设计相同：**C++ Entity 对象本身就是 PyObject**。
+
+### KBEngine：ScriptObject 继承链
+
+```cpp
+// 文件：kbe/src/lib/pyscript/scriptobject.h（简化）
+// BASE_SCRIPT_HREADER 宏展开后：
+class Entity : public script::ScriptObject   // ScriptObject 继承自 PyObject
+{
+    static void _tp_dealloc(PyObject* self) {
+        static_cast<Entity*>(self)->~Entity();
+        Entity::_scriptType.tp_free(self);
+    }
+    static PyObject* _tp_getattro(PyObject* self, PyObject* name) {
+        return static_cast<Entity*>(self)->onScriptGetAttribute(...);
+    }
+    static int _tp_setattro(PyObject* self, PyObject* name, PyObject* value) {
+        return static_cast<Entity*>(self)->onScriptSetAttribute(...);
+    }
+    static PyTypeObject _scriptType;
+    // ...
+};
+```
+
+### BigWorld：PyObjectPlus 继承链
+
+```cpp
+// 文件：programming/bigworld/lib/pyscript/pyobject_plus.hpp（简化）
+// Py_Header 宏展开后：
+class Base : public PyObjectPlus   // PyObjectPlus 继承自 PyObject
+{
+    static void _tp_dealloc(PyObject* pObj) {
+        static_cast<Base*>(pObj)->pyDel();
+        delete static_cast<Base*>(pObj);
+    }
+    static PyObject* _tp_getattro(PyObject* pObj, PyObject* name) {
+        return static_cast<Base*>(pObj)->pyGetAttribute(...);
+    }
+    static int _tp_setattro(PyObject* pObj, PyObject* name, PyObject* value) {
+        return static_cast<Base*>(pObj)->pySetAttribute(...);
+    }
+    static PyTypeObject s_type_;
+};
+```
+
+**核心原理**：Entity/Base 的内存布局以 `PyObject` 头部开始，C++ 对象和 Python 对象是**同一块内存**的两个视角。Python 层看到的是脚本类实例，C++ 层看到的是 Entity 对象。
+
+## 6.6 统一构造：Placement New 模式
+
+创建实体的关键步骤——先用 Python 类型分配内存，再用 placement new 构造 C++ 对象：
+
+### BigWorld EntityType::newEntityBase
+
+```cpp
+// 文件：programming/bigworld/server/baseapp/entity_type.cpp:547（简化）
+Base* EntityType::newEntityBase(EntityID id, DatabaseID dbID)
+{
+    // 1. 用 Python 类型的 tp_alloc 分配内存
+    PyObject* pObject = PyType_GenericAlloc(pClass_, 0);
+
+    // 静态断言：确保 Base/Proxy 没有虚函数（否则 vptr 会破坏内存布局）
+    BW_STATIC_ASSERT(std::tr1::is_polymorphic<Base>::value == false);
+    BW_STATIC_ASSERT(std::tr1::is_polymorphic<Proxy>::value == false);
+
+    // 2. Placement new：在 Python 分配的内存上构造 C++ 对象
+    if (this->isProxy())
+        pNewBase = new(pObject) Proxy(id, dbID, this);
+    else
+        pNewBase = new(pObject) Base(id, dbID, this);
+
+    return pNewBase;
+}
+```
+
+### KBEngine ScriptDefModule::createObject
+
+```cpp
+// 文件：kbe/src/lib/entitydef/scriptdef_module.cpp:283
+PyObject* ScriptDefModule::createObject(void)
+{
+    PyObject* pObject = PyType_GenericAlloc(scriptType_, 0);
+    // scriptType_ 是从 Python 脚本导入的实体类（如 Avatar.py 定义的类）
+    return pObject;
+}
+```
+
+然后在 `EntityApp::onCreateEntity` 中用类似的 placement new 模式构造 Entity。
+
+**没有虚函数**——两个项目都通过静态断言确保 Entity/Base/Proxy 没有虚函数，否则 vptr 会破坏 PyObject 头部的内存布局。这是 C++/Python 统一构造的核心约束。
+
+## 6.7 属性拦截：setattr 触发 C++ 逻辑
+
+当 Python 脚本执行 `entity.health = 100` 时，实际经过 C++ 拦截：
+
+```
+Python: entity.health = 100
+  │
+  ▼
+_tp_setattro(entity, "health", 100)
+  │
+  ▼
+Entity::onScriptSetAttribute("health", 100)
+  │
+  ├── 查找 PropertyDescription（类型检查）
+  ├── 如果是 CELL_PUBLIC：设置脏标记 → 触发属性同步
+  ├── 如果是 BASE：直接存储
+  └── 如果是 Persistent：标记需要写库
+```
+
+KBEngine 的 `onScriptSetAttribute` 做的事：
+
+1. 在 `pPropertyDescrs_` 中查找属性名
+2. 用 `DataType::isSameType()` 检查值类型
+3. 如果属性有 `detailLevel`，记录到脏属性列表
+4. 触发相关的同步/持久化逻辑
+
+## 6.8 远程方法调用：tp_call 变成网络包
+
+当 Python 脚本执行 `entity.cell.onDamage(100)` 时：
+
+```
+Python: entity.cell.onDamage(100)
+  │
+  ▼
+RemoteEntityMethod::tp_call(self, args=(100,))
+  │
+  ├── MethodDescription::checkArgs(args)    ← 类型检查
+  ├── MethodDescription::addToStream(args)  ← 序列化到 MemoryStream
+  ├── EntityCall::newCall(bundle)           ← 构造网络 Bundle
+  ├── Bundle::append(stream)                ← 追加参数数据
+  └── EntityCall::sendCall(bundle)          ← 通过网络发送
+```
+
+```cpp
+// 文件：kbe/src/lib/entitydef/remote_entity_method.cpp:45（简化）
+PyObject* RemoteEntityMethod::tp_call(PyObject* self, PyObject* args, PyObject* kwds)
+{
+    RemoteEntityMethod* rmethod = static_cast<RemoteEntityMethod*>(self);
+    MethodDescription* methodDesc = rmethod->getDescription();
+    EntityCallAbstract* entityCall = rmethod->getEntityCall();
+
+    if (methodDesc->checkArgs(args))
+    {
+        MemoryStream mstream;
+        methodDesc->addToStream(mstream, args);   // 序列化参数
+
+        Network::Bundle* pSendBundle = Network::Bundle::create();
+        entityCall->newCall(*pSendBundle);         // 构造消息头
+        pSendBundle->append(mstream.data(), mstream.wpos());  // 追加负载
+        entityCall->sendCall(pSendBundle);         // 发送
+    }
+    return Py_None;
+}
+```
+
+**一次 Python 函数调用 = 一次跨进程网络消息**。`tp_call` 是这个转换的核心。
+
+## 6.9 Twisted Deferred vs CallbackMgr
+
+### BigWorld PyDeferred
+
+```cpp
+// 文件：programming/bigworld/lib/entitydef/py_deferred.hpp（简化）
+class PyDeferred
+{
+    // 初始化：导入 twisted.internet.defer.Deferred
+    static bool staticInit()
+    {
+        PyObject* pModule = PyImport_ImportModule("twisted.internet.defer");
+        s_classDeferred = PyObject_GetAttrString(pModule, "Deferred");
+    }
+
+    // 构造：创建一个 Deferred 实例
+    PyDeferred() :
+        pObject_(PyObject_CallFunctionObjArgs(s_classDeferred.get(), NULL))
+    {}
+
+    // 添加回调
+    void addCallback(PyObject* callback);
+
+    // 触发回调
+    void callback(PyObject* result);
+};
+```
+
+BigWorld 用 Twisted Deferred 提供：
+- **异步链式处理**：`deferred.addCallback(f1).addCallback(f2).addErrback(errHandler)`
+- **TwoWay RPC 返回值**：远程调用返回 Deferred，结果回来时触发回调
+- **DB 查询异步**：`base.queryDB()` 返回 Deferred
+
+### KBEngine CallbackMgr
+
+```cpp
+// 文件：kbe/src/lib/server/callbackmgr.h（简化）
+// 模板化的回调管理器
+// 发起时：保存 callbackID → PyObject 回调函数
+// 结果回来时：take(callbackID) → 执行回调
+
+// 使用方式（伪代码）：
+int callbackID = callbackMgr_.save(pyCallback);
+// ... 发送请求 ...
+// 结果回来时：
+PyObject* pyCallback = callbackMgr_.take(callbackID);
+PyObject_CallFunction(pyCallback, ...);
+```
+
+KBEngine 选择更简单的 `CallbackMgr`：callbackID 映射，结果回来直接执行。牺牲了链式 then 的组合能力，但更简单直接。
+
+**本质区别**：BigWorld 的 Deferred 是**可组合的异步原语**（类似 Promise），KBEngine 的 CallbackMgr 是**简单的回调注册表**。
+
+## 6.10 热重载机制与边界
+
+### KBEngine 热重载
+
+```cpp
+// 文件：kbe/src/server/baseapp/baseapp.cpp（简化）
+void Baseapp::reloadScript(bool fullReload)
+{
+    // 遍历所有 Entity
+    Entities<Entity>::ENTITYS_MAP& entities = pEntities_->getEntities();
+    for (auto& eiter : entities)
+    {
+        eiter->second->reload(fullReload);  // 切换 Python 类
+    }
+    // 调用入口脚本的 onInit(1)（1 表示重载）
+    PyObject_CallMethod(getEntryScript().get(), "onInit", "i", 1);
+}
+```
+
+Entity::reload 的核心操作：
+
+```cpp
+// 通过替换 __class__ 属性实现类切换
+PyObject_SetAttrString(this, "__class__", newClass);
+```
+
+### BigWorld 热重载
+
+BigWorld 通过 `ScriptApp::triggerOnInit(isReload=true)` 触发，调用 `BWPersonality.onInit(True)`。
+
+`EntityType::reloadScript()` 重新导入 Python 类并更新 `pClass_`。
+
+### 热重载的边界
+
+| 能热更 | 不能热更 |
+|--------|---------|
+| 实体行为逻辑（Python 方法体） | EntityDef 定义（.def 文件的属性/方法签名） |
+| 全局脚本函数 | 已存在的实体对象的 C++ 侧状态 |
+| 脚本模块的顶层逻辑 | 网络协议中的 utype 分配 |
+| | 数据库表结构 |
+
+**.def 文件变更需要重启**。因为 .def 决定了三件事：Python 属性、网络协议 ID、数据库表列。运行时改 .def 意味着要同时改所有在线实体的内存布局、协议编解码、数据库结构——代价太大。
+
+### 灰区
+
+- **全局变量的重置语义**：热更后模块级全局变量会被重新初始化，已有的引用不受影响
+- **已创建的实体**：旧实例的 `__class__` 被替换为新类，但 `__dict__` 保持不变
+
+## 6.11 关键源码入口
+
+### KBEngine
+
+| 概念 | 文件 | 关键类/方法 |
+|------|------|------------|
+| Python 初始化 | `kbe/src/lib/pyscript/script.cpp` | `Script::install()` |
+| ScriptObject | `kbe/src/lib/pyscript/scriptobject.h` | `BASE_SCRIPT_HREADER` 宏 |
+| PythonApp | `kbe/src/lib/server/python_app.cpp` | `installPyScript()` / `installPyModules()` |
+| CallbackMgr | `kbe/src/lib/server/callbackmgr.h` | `save()` / `take()` |
+| ScriptTimers | `kbe/src/lib/server/script_timers.h` | `addTimer()` / `delTimer()` |
+| 远程方法 | `kbe/src/lib/entitydef/remote_entity_method.cpp` | `tp_call()` |
+| 热重载 | `kbe/src/server/baseapp/baseapp.cpp` | `reloadScript()` |
+
+### BigWorld
+
+| 概念 | 文件 | 关键类/方法 |
+|------|------|------------|
+| Script 初始化 | `lib/pyscript/script.cpp` | `Script::init()` |
+| PyObjectPlus | `lib/pyscript/pyobject_plus.hpp` | `Py_Header` 宏 |
+| ScriptApp | `lib/server/script_app.cpp` | `initScript()` |
+| PyDeferred | `lib/entitydef/py_deferred.hpp` | `staticInit()` / `addCallback()` |
+| PythonServer | `lib/server/python_server.cpp` | Telnet 调试服务 |
+| Personality | `lib/pyscript/personality.cpp` | `callOnInit()` |
+| 实体创建 | `server/baseapp/entity_type.cpp` | `newEntityBase()` |
+
+## 6.12 源码走读路径
+
+### 路径一：跟踪 Python 初始化
+
+1. KBEngine: `kbe/src/lib/pyscript/script.cpp` — `install()` → `Py_Initialize()`
+2. KBEngine: `kbe/src/lib/server/python_app.cpp` — `installPyScript()` 构建 Python 路径
+3. BigWorld: `lib/server/script_app.cpp` — `initScript()` → `Script::init()` + `PyDeferred::staticInit()`
+
+### 路径二：理解 Entity 与 PyObject 的统一构造
+
+1. BigWorld: `server/baseapp/entity_type.cpp:547` — `newEntityBase()` 的 placement new
+2. BigWorld: `server/baseapp/base.cpp:608` — 构造函数传 `pType->pClass()` 给 PyObjectPlus
+3. KBEngine: `kbe/src/lib/entitydef/scriptdef_module.cpp:283` — `createObject()`
+
+### 路径三：理解远程方法调用的桥接
+
+1. KBEngine: `kbe/src/lib/entitydef/remote_entity_method.cpp` — `tp_call()` 的完整链路
+2. 对比 BigWorld: MailBox 的 `PY_TYPEOBJECT_WITH_CALL` 实现
+
+### 路径四：理解热重载
+
+1. KBEngine: `kbe/src/server/baseapp/baseapp.cpp` — `reloadScript()` → Entity::reload()
+2. BigWorld: `lib/server/script_app.cpp` — `triggerOnInit(isReload=true)`
+
+## 6.13 小结
+
+- **Python 被选中是因为工程生产力，不是运行速度**——标准库、表现力、热重载、团队门槛
+- **Entity 就是 PyObject**：C++ 对象和 Python 对象共享同一块内存，用 placement new 统一构造
+- **BigWorld 多了 ScriptApp 层**和 **PyDeferred（Twisted Deferred）**——更完整的异步编程能力
+- **KBEngine 用 CallbackMgr 替代 Deferred**——更简单直接，但牺牲了组合能力
+- **远程方法调用的本质**：`tp_call` 把 Python 函数调用序列化成网络包
+- **热重载只改行为不改结构**：Python 方法体可以热更，.def 文件变更必须重启
+- **无虚函数约束**：Entity/Base/Proxy 不能有虚函数，否则 vptr 会破坏 PyObject 内存布局

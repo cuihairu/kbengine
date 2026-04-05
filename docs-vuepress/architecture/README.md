@@ -1,26 +1,56 @@
-# 架构总览
+# 架构与源码分析
 
-> 本栏目用于梳理 KBEngine 的核心进程模型、设计来源与后续重构思路。
+> 本目录服务于两个目标：理解 BigWorld 的设计思想，以及基于源码理解 KBEngine 的实现。
 
-## 阅读顺序
+## 目录定位
 
-1. [KBEngine 2.0 重设计方案](/architecture/redesign.md)
-2. [源码分析](/architecture/source-analysis.md)
-3. [BigWorld 对照](/architecture/bigworld.md)
+- `BigWorld` 用来建立概念模型，回答“这套架构为什么会这样设计”。
+- `KBEngine` 用来做源码分析，回答“当前代码到底怎么实现”。
+- `对照分析` 用来回答“哪些思想继承了 BigWorld，哪些地方变成了 KBEngine 自己的实现”。
+- `重设计方案` 是附录性质的工程草案，不作为源码分析主线。
 
-## 当前内容说明
+## 推荐阅读顺序
 
-- `重设计方案` 是人工整理的现代化重构草案，不属于 CHM/PDF 原文转写内容。
-- `源码分析` 用于后续补充实际代码路径、启动流程、实体链路和 Space/Cell 机制。
-- `BigWorld 对照` 用于整理术语映射与设计差异，帮助理解 KBEngine 的来源和边界。
+1. [BigWorld 学习入口](/architecture/bigworld/)
+2. [KBEngine 源码分析总览](/architecture/source-analysis/)
+3. [BigWorld / KBEngine 对照](/architecture/comparison/)
+4. [KBEngine 2.0 重设计方案](/architecture/redesign.md)
 
-## 阅读建议
+## 设计后的目录结构
 
-- 如果你想快速了解 KBEngine 的整体形态，先看 `重设计方案`。
-- 如果你想核对现有实现，再看 `源码分析`。
-- 如果你关心设计来源与演化脉络，再看 `BigWorld 对照`。
+```text
+architecture/
+├── README.md                         # 架构首页与阅读路线
+├── bigworld/                         # BigWorld 概念学习
+│   ├── README.md
+│   ├── concepts.md                   # 核心术语与基本对象
+│   ├── process-model.md              # Login/Base/Cell/DB 等进程模型
+│   └── entity-space.md               # Entity、Space、Cell、Witness
+├── source-analysis/                  # KBEngine 源码分析主目录
+│   ├── README.md
+│   ├── entry-and-bootstrap.md        # 启动入口、进程初始化、组件注册
+│   ├── process-model.md              # 多进程职责、组件协作、管理进程
+│   ├── entity-system.md              # Entity 定义、脚本绑定、生命周期
+│   ├── space-aoi.md                  # Space、Cell、AOI、Witness、Ghost
+│   ├── networking.md                 # 网络层、Bundle、Channel、消息分发
+│   ├── persistence.md                # DBMgr、数据库、序列化、恢复流程
+│   └── scripting.md                  # Python 运行时、脚本接口、热重载
+├── comparison/                       # BigWorld 与 KBEngine 的映射与差异
+│   ├── README.md
+│   ├── terminology.md                # 术语映射
+│   ├── architecture.md               # 架构对应关系
+│   └── implementation-differences.md # 实现差异与取舍
+└── redesign.md                       # 人工整理的重构草案
+```
+
+## 当前编写原则
+
+- `source-analysis` 目录优先，后续正文应以源码路径、调用链、关键类为中心展开。
+- `bigworld` 目录提供概念背景，不替代对 KBEngine 代码的实际阅读。
+- `comparison` 目录只写有依据的对应关系，不写想当然的“继承关系”。
+- `redesign` 明确属于工程草案，与原始资料转写分开。
 
 ## 资料边界
 
 - 当前 `architecture` 目录不属于 CHM/PDF 的逐页转写结果。
-- 该目录里的说明性内容需要单独标注来源，并与 API/指南原始资料分开看待。
+- 该目录中的分析结论应以仓库源码为主，BigWorld 仅作为参考框架。

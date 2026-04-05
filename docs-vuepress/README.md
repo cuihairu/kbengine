@@ -5,7 +5,7 @@ heroText: KBEngine 中文文档
 tagline: 基于仓库内 CHM 与 PDF 整理的中文文档入口
 actions:
   - text: 开始阅读
-    link: /guide/
+    link: /book/
     type: primary
   - text: 查看架构
     link: /architecture/
@@ -23,12 +23,22 @@ footer: 文档来源为仓库内已有资料
 - [阅读入口](/guide/)
 - [WebConsole 指南](/guide/webconsole.md)
 
+### 源码学习
+
+- [源码学习首页](/book/)
+- [导读：如何阅读这本书](/book/01-introduction-and-method.md)
+- [BigWorld：问题、模型与核心概念](/book/02-bigworld-problems-model-concepts.md)
+- [RPC、EntityCall 与通信模式](/book/11-rpc-entitycall-and-communication-patterns.md)
+- [序列化、Bundle 与网络消息](/book/10-serialization-bundle-and-messages.md)
+- [数据库、DBMgr 与持久化](/book/13-database-dbmgr-and-persistence.md)
+
 ### 架构
 
 - [架构总览](/architecture/)
+- [KBEngine 源码分析总览](/architecture/source-analysis/)
+- [BigWorld 学习入口](/architecture/bigworld/)
+- [BigWorld / KBEngine 对照](/architecture/comparison/)
 - [KBEngine 2.0 重设计方案](/architecture/redesign.md)
-- [源码分析](/architecture/source-analysis.md)
-- [BigWorld 对照](/architecture/bigworld.md)
 
 ### API 参考
 
