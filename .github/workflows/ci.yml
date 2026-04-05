@@ -3,13 +3,11 @@ name: CI
 on:
   push:
     branches:
-      - dev
       - master
       - chore/python-3.12-support
       - chore/cmake-bootstrap
   pull_request:
     branches:
-      - dev
       - master
       - chore/cmake-bootstrap
 
