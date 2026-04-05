@@ -3,7 +3,7 @@ name: Deploy Documentation
 on:
   push:
     branches:
-      - dev
+      - master
     paths:
       - 'docs-vuepress/**'
       - '.github/workflows/docs.yml'
@@ -11,7 +11,7 @@ on:
       - 'package-lock.json'
   pull_request:
     branches:
-      - dev
+      - master
     paths:
       - 'docs-vuepress/**'
       - '.github/workflows/docs.yml'
