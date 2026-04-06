@@ -316,8 +316,88 @@ BigWorld 用 vector（不是 map），消息 ID 直接作为索引。还多了�
 | Dispatcher 分层 | 无 | `attach`/`detach` 父子分层 |
 | 加密支持 | 无内置 | `BlockCipher` 加密接口 |
 | 回复处理 | 无内置请求-回复 | `ReplyMessageHandler` + 超时异常 |
+| 进程发现 | `Machine` 进程（UDP 广播） | `bwmachined` 守护进程（UDP 广播） |
 
-## 8.8 关键源码入口
+## 8.8 进程发现与协调：Machine 的角色
+
+两个项目都不是"DBMgr 集中协调"。**Machine 进程**才是组件发现和进程协调的核心。
+
+### KBEngine Machine
+
+```cpp
+// 文件：kbe/src/server/machine/machine.h（简化）
+class Machine : public ServerApp, public Singleton<Machine>
+{
+    // 组件广播地址 → 注册到本机 Machine
+    void onBroadcastInterface(Network::Channel* pChannel,
+        COMPONENT_TYPE componentType, COMPONENT_ID componentID, ...);
+
+    // 某进程想找另一类进程的地址
+    void onFindInterfaceAddr(Network::Channel* pChannel,
+        COMPONENT_TYPE findComponentType, ...);
+
+    // 查询所有组件信息
+    void onQueryAllInterfaceInfos(Network::Channel* pChannel, ...);
+
+    // 查询所有 Machine 进程
+    void onQueryMachines(Network::Channel* pChannel, ...);
+
+    // 远程启动/停止进程
+    void startserver(Network::Channel* pChannel, KBEngine::MemoryStream& s);
+    void stopserver(Network::Channel* pChannel, KBEngine::MemoryStream& s);
+};
+```
+
+**通信方式**：UDP 广播 + 单播。每台物理机运行一个 Machine 实例，各组件启动时向本机 Machine 广播自己的地址和类型（`onBroadcastInterface`），Machine 收集后供其他组件查询（`onFindInterfaceAddr`）。
+
+**职责**：
+
+| 职责 | 方法 | 说明 |
+|------|------|------|
+| 组件注册 | `onBroadcastInterface` | 收集本机所有组件的地址/类型/状态 |
+| 组件查找 | `onFindInterfaceAddr` | 按 componentType 查找目标进程地址 |
+| 全量查询 | `onQueryAllInterfaceInfos` | 返回所有已注册组件信息 |
+| 远程启停 | `startserver` / `stopserver` | 跨机器远程启动/停止进程 |
+| 进程创建 | `startLinuxProcess` / `startWindowsProcess` | fork 或 CreateProcess 新进程 |
+
+### BigWorld bwmachined
+
+```cpp
+// 文件：programming/bigworld/server/tools/bwmachined/（目录结构）
+bwmachined/
+  ├── bwmachined.cpp          ← 主入口
+  ├── cluster.hpp/cpp         ← 集群发现和协调
+  ├── machine_guard.hpp       ← 进程守护
+  ├── linux_machine_guard.cpp ← Linux 进程管理
+  └── daemon/                  ← 守护进程逻辑
+```
+
+BigWorld 的 `bwmachined` 职责类似但更重：
+
+| 职责 | KBEngine Machine | BigWorld bwmachined |
+|------|-----------------|-------------------|
+| 组件注册 | `onBroadcastInterface` | 类似的广播注册 |
+| 组件查找 | `onFindInterfaceAddr` | 类似的查找机制 |
+| 远程启停 | `startserver` / `stopserver` | Machine Guard 进程管理 |
+| 集群协调 | 无 | `Cluster` 类，机器发现与健康监控 |
+| 进程守护 | 无 | `MachineGuard`，SIGCHLD 处理和重启 |
+| 资源监控 | 无（Watcher 独立实现） | 内置 CPU/内存/磁盘监控 |
+| 跨平台进程创建 | `startLinuxProcess` / `startWindowsProcess` | `linux_machine_guard.cpp` |
+
+### 进程发现的时序
+
+```text
+1. Machine/bwmachined 先于所有组件启动
+2. 各组件启动时：
+   a. 向本机 Machine 广播自己的身份（componentType + componentID + 地址）
+   b. 通过 Machine 查找依赖的远程组件地址（如 Baseapp 查找 Dbmgr）
+3. Machine 维护本机组件注册表，响应查询请求
+4. 跨机器通信时：先查目标组件所在机器的 Machine，再建立直连
+```
+
+**关键区别**：KBEngine 的 Machine 是一个独立的 kbe 进程（`kbe/bin/server/machine`），BigWorld 的 bwmachined 是独立的系统守护进程。两者都不做业务逻辑，只做"进程发现和生命周期管理"。
+
+## 8.9 关键源码入口
 
 ### KBEngine
 
@@ -332,6 +412,8 @@ BigWorld 用 vector（不是 map），消息 ID 直接作为索引。还多了�
 | Endpoint | `kbe/src/lib/network/endpoint.h` |
 | Bundle | `kbe/src/lib/network/bundle.h` |
 | MessageHandler | `kbe/src/lib/network/message_handler.h` |
+| Machine（进程发现） | `kbe/src/server/machine/machine.h` |
+| Components（组件管理） | `kbe/src/lib/server/components.h` |
 
 ### BigWorld
 
@@ -345,8 +427,11 @@ BigWorld 用 vector（不是 map），消息 ID 直接作为索引。还多了�
 | Bundle | `lib/network/bundle.hpp` |
 | InterfaceTable | `lib/network/interface_table.hpp` |
 | 消息回调 | `lib/network/interfaces.hpp` |
+| bwmachined（进程发现） | `server/tools/bwmachined/` |
+| Cluster（集群协调） | `server/tools/bwmachined/cluster.hpp` |
+| MachineGuard（进程守护） | `server/tools/bwmachined/linux_machine_guard.cpp` |
 
-## 8.9 源码走读路径
+## 8.10 源码走读路径
 
 ### 路径一：理解 Reactor 模式的代码映射
 
@@ -368,7 +453,14 @@ BigWorld 用 vector（不是 map），消息 ID 直接作为索引。还多了�
 2. BigWorld: `lib/network/channel.hpp` — 抽象基类，有 `UDPChannel` 子类
 3. BigWorld: `lib/network/bundle.hpp` — `ReliableType` 四级可靠性
 
-## 8.10 小结
+### 路径四：理解进程发现与协调
+
+1. KBEngine: `kbe/src/server/machine/machine.h` — `onBroadcastInterface` 组件注册、`onFindInterfaceAddr` 组件查找
+2. KBEngine: `kbe/src/lib/server/components.h` — `Components` 单例，收集所有已知组件
+3. BigWorld: `server/tools/bwmachined/` — `cluster.hpp` 集群发现、`linux_machine_guard.cpp` 进程守护
+4. 对比：KBEngine Machine 只做发现和启停；BigWorld bwmachined 额外负责进程守护（崩溃重启）和资源监控
+
+## 8.11 小结
 
 - **Reactor 模式**是两套项目共同的 I/O 模型：EventDispatcher（反应器）→ EventPoller（多路分离器）→ Handler（回调）
 - **epoll** 是 Linux 上的最佳选择——O(1) 事件通知，不受连接数影响
@@ -376,3 +468,4 @@ BigWorld 用 vector（不是 map），消息 ID 直接作为索引。还多了�
 - **KBEngine 选 TCP**（简单可靠），**BigWorld 选 UDP + 自建可靠性**（低延迟可控）
 - BigWorld 的网络层更完善：Dispatcher 父子分层、消息可靠性分级、Bundle 事件回调、加密接口、请求-回复超时
 - BigWorld 用 `ReliableType` 实现"同一条通道内不同消息不同可靠性"——这是 TCP 做不到的
+- **进程发现不是 DBMgr 的职责**——两套项目都用独立的 Machine 进程（KBEngine `machine` / BigWorld `bwmachined`）通过 UDP 广播实现组件注册和查找
