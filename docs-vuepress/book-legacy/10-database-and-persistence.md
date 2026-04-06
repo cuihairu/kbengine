@@ -1,6 +1,6 @@
 # 10. 数据库、DBMgr 与持久化设计
 
-> 本文件是旧稿，已由 [`13-database-dbmgr-and-persistence.md`](./13-database-dbmgr-and-persistence.md) 取代。阅读主线请直接进入新稿。
+> 本文件是旧稿，已由 [`13-database-dbmgr-and-persistence.md`](/study/13-database-dbmgr-and-persistence.html) 取代。阅读主线请直接进入新稿。
 
 > 这是理解工程取舍的第三个关键章节。KBEngine 的数据库层不是“顺手加了个 DB 访问模块”，而是把在线实体系统和数据库世界显式隔开。
 

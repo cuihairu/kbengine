@@ -1,6 +1,6 @@
 # 5. EntityDef 与实体定义系统
 
-> 本文件是旧稿，已并入并由 [`05-entitydef-and-entity-definition.md`](./05-entitydef-and-entity-definition.md) 取代。下面内容仅保留作迁移参考，阅读主线请以新稿为准。
+> 本文件是旧稿，已并入并由 [`05-entitydef-and-entity-definition.md`](/study/05-entitydef-and-entity-definition.html) 取代。下面内容仅保留作迁移参考，阅读主线请以新稿为准。
 
 > 如果第 8 章讲的是“方法怎么调出去”，这一章讲的就是“这些方法、属性、组件定义最初从哪里来，又怎样变成一个真正可运行的实体对象”。
 

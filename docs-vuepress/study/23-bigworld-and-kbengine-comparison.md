@@ -17,8 +17,8 @@
 | AOI 模型 | 可插拔 aoi_update_schemes | 固定十字链表 | 可扩展 vs 固定 |
 | 持久化 | MySQL + XML + Primary/Secondary + 属性级映射 | MySQL + Redis + 表级映射 | 更完善 vs 更实用 |
 | 负载均衡 | CellAppGroup + MetaBalance + Rendezvous Hash | 简化分配 | 自动化 vs 手动 |
-| 容错 | Reviver + BackupSender + Archiver | EntityLog 恢复 | 三级保障 vs 基础 |
-| 网络层 | 内部 UDP + 自建可靠性 | 内部 TCP | 性能优先 vs 简单优先 |
+| 容错 | Reviver + BackupSender + Archiver | EntityLog + `rndUUID` 重连 + `Archiver`/`Backuper` | 完整灾备 vs 基础收束 |
+| 网络层 | 内部 UDP + 自建可靠性 | `Channel` 统一抽象，具体可挂 TCP/UDP/KCP | 高度定制 vs 统一封装 |
 | 脚本层 | Twisted Deferred + 完整绑定层 | 简化回调 + 精简绑定 | 表现力 vs 简洁 |
 | 可观测性 | ForwardingWatcher + 三级 Profiler + 结构化日志 | 单机 Watcher + ProfileVal + 集中日志 | 运维友好 vs 开发够用 |
 | 安全 | Login Challenge (Cuckoo Cycle PoW) + 可插拔加密 | Blowfish 加密 + rndUUID | 更完善 vs 基础 |
@@ -204,10 +204,7 @@ someEntity.method(args, callbackID)
          Cell1   Cell2   (手动或简单分配)
 ```
 
-KBEngine 没有实现 BSP 树，空间管理更简单：
-- 每个 Space 由一个或多个 Cell 管理
-- 没有动态的 Cell 边界调整
-- 负载均衡粒度更粗
+KBEngine 没有实现 BigWorld 这套 BSP 树。按当前 `SpaceMemory` 的实现，一个 space 运行时核心就是一个 `Cell* pCell_` 加一个 `CoordinateSystem`；重点是把单 space 的运行态做简单，而不是做 BigWorld 那种多 cell 动态拓扑。
 
 ### 对比
 
@@ -373,27 +370,35 @@ BigWorld 的负载均衡是**数据驱动**的：三层 Profiler（Entity → En
     → BaseApp 死亡时触发紧急归档
 ```
 
-### KBEngine：基础保障
+### KBEngine：基础收束
 
 ```
-唯一保障：EntityLog
+第一层：EntityLog
     → DBMgr 维护在线实体检出记录
-    → BaseApp 死亡后 EntityLog 标记为可恢复
-    → 玩家重连时从数据库重新加载实体
-    → rndUUID 做重连身份识别
+    → BaseApp 死亡后清理旧 componentID 的检出记录
+    → 后续登录重新走分配与加载链路
+
+第二层：rndUUID 重连
+    → Proxy 用 rndUUID + entityID 识别重连会话
+    → createClientProxies + onGetWitness 重建客户端控制权
+
+第三层：Archiver / Backuper
+    → Archiver 按周期触发 writeToDB
+    → Backuper 按周期触发 writeBackupData
+    → 但不等同于 BigWorld 的跨 BaseApp 灾备恢复
 ```
 
 ### 对比
 
 | 维度 | BigWorld | KBEngine |
 |------|----------|----------|
-| 进程守护 | Reviver 自动拉起 | 无（外部脚本） |
-| 实体备份 | BackupSender 跨进程备份 | 无 |
-| 实体归档 | Archiver 周期写入 | writeToDB 直写 |
+| 进程守护 | Reviver 自动拉起 | 无内建 Reviver，通常靠外部脚本 |
+| 实体备份 | BackupSender 跨进程备份 | `Backuper` / `writeBackupData`，但不是灾备恢复链 |
+| 实体归档 | Archiver 周期写入 | `writeToDB` + `Archiver` 周期触发 |
 | 恢复粒度 | 从备份 BaseApp 恢复（快） | 从数据库恢复（慢） |
 | 数据丢失风险 | 低（备份在内存中） | 中（未写库的数据会丢失） |
 
-**这是两套项目差距最大的领域**。BigWorld 的三级保障意味着 BaseApp 死亡后，大部分实体可以从备份 BaseApp 快速恢复，几乎不丢数据。KBEngine 只能依赖数据库恢复，未写入的数据会丢失。
+**这是两套项目差距最大的领域**。BigWorld 的强项是“进程守护 + 跨 BaseApp 备份恢复 + 数据库归档”形成完整闭环；KBEngine 虽然也有周期性收束机制，但缺少 BigWorld 那种成熟的跨进程热备恢复。
 
 ---
 
@@ -412,24 +417,24 @@ BigWorld 的负载均衡是**数据驱动**的：三层 Profiler（Entity → En
     → 客户端连接可以是 TCP 或 UDP
 ```
 
-### KBEngine：TCP 为主
+### KBEngine：`Channel` 统一抽象，常见部署偏 TCP
 
 ```
-内部通信：TCP
-    → 依赖操作系统 TCP 栈的可靠性
-    → 实现更简单
-    → 无需自建可靠性层
+内部通信：`Channel`
+    → 统一封装消息收发、序列化和连接状态
+    → 常见部署更多依赖 TCP
+    → 也保留 UDP/KCP 扩展路径
 
 外部通信：TCP / UDP / KCP
-    → 支持 KCP（可靠的 UDP 变体）
-    → 比 TCP 延迟更低
+    → 支持 KCP 封装
+    → 客户端/bots 侧可挂 KCP sender/receiver
 ```
 
 ### 对比
 
 | 维度 | BigWorld | KBEngine |
 |------|----------|----------|
-| 内部协议 | UDP + 自建可靠性 | TCP |
+| 内部协议 | UDP + 自建可靠性 | `Channel` 抽象，常见实现偏 TCP |
 | 可靠性实现 | 自研（重传 + Piggyback） | 操作系统 TCP |
 | 延迟 | 更低（无 TCP 拥塞控制） | 较高（TCP head-of-line blocking） |
 | 实现复杂度 | 高（需实现整个可靠性层） | 低（复用 TCP） |
@@ -438,7 +443,7 @@ BigWorld 的负载均衡是**数据驱动**的：三层 Profiler（Entity → En
 
 **BigWorld 选 UDP 的原因**：MMO 内部通信需要极致低延迟。TCP 的拥塞控制和 head-of-line blocking 在高并发游戏场景下会造成不必要的延迟。
 
-**KBEngine 选 TCP 的原因**：实现简单，开发成本低。KCP 作为外部协议选项提供了 UDP 低延迟的替代。
+**KBEngine 的取向**：把网络细节收进 `Channel`，优先保持实现和消息模型统一，再按客户端或 bots 场景挂接 KCP。
 
 ---
 
@@ -546,7 +551,7 @@ BigWorld 在安全方面投入更多——Cuckoo Cycle PoW 有效防止自动化
 | 子系统 | BigWorld 关键文件 | KBEngine 关键文件 |
 |--------|-------------------|-------------------|
 | 进程守护 | `server/reviver/reviver.hpp` | 无 |
-| 备份/归档 | `server/baseapp/backup_sender.hpp` / `archiver.hpp` | 无 |
+| 备份/归档 | `server/baseapp/backup_sender.hpp` / `archiver.hpp` | `kbe/src/server/baseapp/backuper.cpp` / `archiver.cpp` |
 | EntityLog | 无 | `kbe/src/server/dbmgr/dbtasks.h` |
 | 登录挑战 | `lib/connection/cuckoo_cycle_login_challenge_factory.hpp` | 无 |
 | 加密 | `lib/network/encryption_filter.hpp` | `kbe/src/lib/network/encryption_filter.h` |
@@ -568,7 +573,7 @@ BigWorld 在安全方面投入更多——Cuckoo Cycle PoW 有效防止自动化
 
 - 目标 **10 万+ CCU**，需要极致的性能和可扩展性
 - 需要 **无缝大世界**（BSP 树动态拓扑）
-- 需要 **高可用**（Reviver + Backup + Archive 三级保障）
+- 需要 **高可用**（Reviver + Backup + Archive 完整保障链）
 - 团队有 **资深 C++ 工程师**，能驾驭 UDP 自建可靠性
 - 可以接受 **闭源/商业授权**
 

@@ -394,7 +394,7 @@ PyObject* RemoteEntityMethod::tp_call(PyObject* self, PyObject* args,
         else
             pSendBundle = pChannel->createSendBundle();
 
-        // 4. 写入消息头（实体ID + ENTITYCALL_TYPE + 方法utype）
+        // 4. 写入调用头（实体ID + ENTITYCALL_TYPE + 组件属性占位）
         entityCall->newCall((*pSendBundle));
 
         // 5. 追加方法参数
@@ -409,6 +409,13 @@ PyObject* RemoteEntityMethod::tp_call(PyObject* self, PyObject* args,
     S_Return;   // 返回 None（纯单向，无返回值）
 }
 ```
+
+这里要分清两层：
+
+- `EntityCallAbstract::newCall_()` 负责决定“这次调用发往哪个接口消息”，并写入 `entityID`，必要时再写入 `ENTITYCALL_TYPE`
+- `EntityCall::newCall()` 在这层之上继续补一个组件属性占位字段；如果是普通实体方法，这个字段就是 0，表示“不是组件内方法”
+
+也就是说，方法自身的目标解析并不是全部塞在 `EntityCallAbstract::newCall_()` 一个函数里完成的。
 
 **完整链路**：
 

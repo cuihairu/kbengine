@@ -27,21 +27,26 @@
 
 ## 7.3 主线程模型：EventDispatcher 驱动一切
 
-```
+```text
 主线程单线程事件循环：
 
 EventDispatcher::processOnce()
   │
   ├── processTasks()           ← 异步任务回调（DB 结果、文件 IO 完成）
-  ├── processTimers()          ← 定时器（含 gameTick）
-  │     └── handleGameTick()
-  │           ├── handleTimers()          ← 脚本定时器
-  │           └── processChannels()       ← 处理网络消息
+  ├── processTimers()          ← 系统定时器
+  │     └── 某些组件把 game tick 挂在这里
   ├── processStats()           ← 空闲统计
   └── processNetwork()         ← epoll/select 网络 I/O
+
+EntityApp::handleGameTick()
+  │
+  ├── ++g_kbetime
+  ├── threadPool_.onMainThreadTick()
+  ├── handleTimers()           ← 脚本定时器
+  └── networkInterface().processChannels(...)
 ```
 
-每帧的执行顺序是固定的、可预测的。不会有"另一个线程正在修改这个 Entity 的属性"这种问题。
+要特别注意顺序边界：`processChannels()` 不是 `EventDispatcher::processOnce()` 统一直接调的，而是 `EntityApp` 在自己的 game tick 里主动处理主消息表。这也是“通用事件循环”和“实体型组件运行节拍”分层的地方。
 
 **瓶颈在哪**：如果 gameTick 执行时间超过 100ms（10Hz 预算），下一帧会被延迟。这就是为什么 C++ 层要做性能关键路径（AOI、序列化、寻路），Python 脚本只做业务回调。
 

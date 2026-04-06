@@ -1,6 +1,6 @@
 # 11. 钩子、回调、定时器与事件
 
-> 本文件是旧稿，已由 [`18-hooks-callbacks-timers-and-events.md`](./18-hooks-callbacks-timers-and-events.md) 取代。阅读主线请直接进入新稿。
+> 本文件是旧稿，已由 [`18-hooks-callbacks-timers-and-events.md`](/study/18-hooks-callbacks-timers-and-events.html) 取代。阅读主线请直接进入新稿。
 
 > 这是理解 KBEngine 脚本层行为的关键章节之一。要看懂这一章，必须先把“引擎主动调用你”和“你注册一个异步结果回调”彻底区分开。
 

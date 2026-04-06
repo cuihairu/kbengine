@@ -207,7 +207,7 @@ class Channel : public ReferenceCount
 };
 ```
 
-BigWorld 的 Channel 是抽象的——有 `UDPChannel`、`TCPChannel` 等子类。KBEngine 的 Channel 是具体类。
+BigWorld 的 Channel 是抽象的——有 `UDPChannel`、`TCPChannel` 等子类。KBEngine 的 `Channel` 则是一个具体实现类，但它并不等于“只有 TCP”：同一个类里还能挂 `ProtocolType`、`ProtocolSubType`、`ikcp` 和 `PacketFilter`，因此它更像“统一连接对象”，而不是只服务于单一传输协议。
 
 ## 8.5 TCP vs UDP：不同路径的不同选择
 
@@ -309,7 +309,7 @@ BigWorld 用 vector（不是 map），消息 ID 直接作为索引。还多了�
 | 内部传输 | TCP | UDP + 自建可靠性 |
 | 外部传输 | TCP / UDP / KCP | TCP |
 | EventPoller | Epoll / Select | EPoll / Poll / Select |
-| Channel | 具体类（TCP） | 抽象类（UDP/TCP 子类） |
+| Channel | 具体类（统一承载 TCP/UDP/KCP 连接态） | 抽象类（UDP/TCP 子类） |
 | 可靠性分级 | 无（TCP 天然可靠） | `ReliableType` 四级 |
 | 消息路由 | `MessageHandlers`（map） | `InterfaceTable`（vector） |
 | Bundle 事件 | 无 | `BundleEventHandler` 回调 |

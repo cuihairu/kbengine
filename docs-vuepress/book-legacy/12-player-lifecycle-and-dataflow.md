@@ -1,6 +1,6 @@
 # 12. 玩家完整生命周期
 
-> 本文件是旧稿，已由 [`22-player-complete-lifecycle.md`](./22-player-complete-lifecycle.md) 取代。阅读主线请直接进入新稿。
+> 本文件是旧稿，已由 [`22-player-complete-lifecycle.md`](/study/22-player-complete-lifecycle.html) 取代。阅读主线请直接进入新稿。
 
 > 这一章把前面分散的机制收束成一条完整主线：一个玩家从登录，到进入世界，到同步、写库、下线，数据究竟怎么走。
 

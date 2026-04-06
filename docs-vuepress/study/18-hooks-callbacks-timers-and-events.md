@@ -2,6 +2,12 @@
 
 > 这一章回答：引擎怎么驱动脚本行为？onInit / addTimer / writeToDB callback / registerEvent 四种机制各有什么不同？
 
+## 相关 API 回查
+
+- BaseApp 脚本接口：[KBEngine(baseapp)](/api/baseapp/KBEngine.md)、[Entity(baseapp)](/api/baseapp/Entity.md)、[Proxy(baseapp)](/api/baseapp/Proxy.md)
+- CellApp 脚本接口：[KBEngine(cellapp)](/api/cellapp/KBEngine.md)、[Entity(cellapp)](/api/cellapp/Entity.md)
+- 关键词补充：[关键词释义](/api/keywords.md)
+
 ## 18.1 本章核心问题
 
 - 引擎驱动脚本行为的四大类机制分别是什么？为什么必须严格区分？
@@ -20,7 +26,7 @@
 | **生命周期钩子** | 引擎主动调用 | onInit / onGetWitness / onWriteToDB | 引擎预定义 | 引擎在特定时机 | 否（固定调用） |
 | **定时器回调** | 脚本注册，引擎未来触发 | addTimer → onTimer | 脚本 | TimeQueue 到期 | 是 |
 | **异步结果回调** | 脚本发起异步操作 | writeToDB callback / createEntityFromDBID callback | 脚本（CallbackMgr） | 操作完成时 | 是 |
-| **事件注册/恢复** | 脚本注册事件响应 | registerEvent → fireEvent | 脚本 | fireEvent 调用时 | 是 |
+| **事件注册/恢复** | 脚本注册事件响应 | registerEvent → fireEvent | 脚本 | fireEvent 调用时 | 是（实体事件表会随流迁移） |
 
 ```
 时间线视图：
@@ -88,8 +94,8 @@ void Baseapp::onBaseAppReady()
 void Baseapp::onReadyForLogin()
 {
     // 轮询调用 KBEngine.onReadyForLogin()
-    // 返回值 > 0 表示准备好
-    // 返回值 == 0 表示还没准备好，下次继续轮询
+    // 返回 Py_True 表示准备好
+    // 返回 float 表示初始化进度，之后继续轮询
 }
 ```
 
@@ -138,17 +144,17 @@ void Baseapp::onReadyForLogin()
 Baseapp::onReadyForLogin()
   │
   ├── 第 1 次调用
-  │     Python: KBEngine.onReadyForLogin() → return 0（还没准备好）
+  │     Python: KBEngine.onReadyForLogin() → return 0.0（还没准备好）
   │     → 下次 tick 继续调用
   │
   ├── 第 2 次调用
-  │     Python: KBEngine.onReadyForLogin() → return 0
+  │     Python: KBEngine.onReadyForLogin() → return 35.0
   │     → 继续等待
   │
   ├── ...
   │
   └── 第 N 次调用
-        Python: KBEngine.onReadyForLogin() → return 1（准备好了）
+        Python: KBEngine.onReadyForLogin() → return True（准备好了）
         → 通知 LoginApp 可以接受玩家登录
 
 为什么是轮询：服务器启动时可能需要等待各种条件满足
@@ -424,7 +430,7 @@ inline void CallbackMgr<PyObjectPtr>::createFromStream(KBEngine::MemoryStream& s
 }
 ```
 
-**关键**：Python 回调对象（通常是 lambda 或方法引用）通过 `pickle` 序列化。这意味着回调对象必须是可 pickle 的——普通的函数和绑定方法可以，但闭包捕获了不可序列化对象时会失败。
+**关键**：Python 回调对象通过 `pickle` 序列化，所以这里只能安全地依赖那些实际可被 `Pickler` 处理的回调对象。不要把这等同于"任何 Python 可调用对象都能跨迁移恢复"。
 
 ### CallbackMgr 的使用场景
 

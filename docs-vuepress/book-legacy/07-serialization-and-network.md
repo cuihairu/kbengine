@@ -1,6 +1,6 @@
 # 7. 序列化、Bundle 与网络消息系统
 
-> 本文件是旧稿，内容已拆分并扩写到 [`10-serialization-bundle-and-messages.md`](./10-serialization-bundle-and-messages.md)。阅读主线请以新稿为准。
+> 本文件是旧稿，内容已拆分并扩写到 [`10-serialization-bundle-and-messages.md`](/study/10-serialization-bundle-and-messages.html)。阅读主线请以新稿为准。
 
 > 这是理解 KBEngine 设计取舍的第二个关键章节。很多机制最终都会落到这一层，所以这一章不是“网络实现细节”，而是“为什么上层会长成那样”。
 

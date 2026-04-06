@@ -1,6 +1,6 @@
 # 6. Python 运行时与脚本桥接
 
-> 本文件是旧提纲，正文已迁移到 [`06-python-runtime-and-script-bridge.md`](./06-python-runtime-and-script-bridge.md)。阅读主线请直接进入新稿。
+> 本文件是旧提纲，正文已迁移到 [`06-python-runtime-and-script-bridge.md`](/study/06-python-runtime-and-script-bridge.html)。阅读主线请直接进入新稿。
 
 ## 本章核心问题
 

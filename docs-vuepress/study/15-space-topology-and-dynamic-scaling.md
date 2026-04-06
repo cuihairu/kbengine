@@ -258,15 +258,17 @@ public:
 };
 ```
 
+这里的 `CellAppGroup` 不是任意一组 CellApp，而是能够通过 multi-cell space 相互均衡负载的一组 CellApp。
+
 ### 扩容：添加新 Cell
 
 ```
 新 CellApp 加入集群
   │
   ├── CellAppGroup::addCell()
-  │     → 在 BSP 树中找到负载最重的叶子节点
-  │     → 在该叶子节点处分割（新增 InternalNode + 新 LeafNode）
-  │     → 新 LeafNode 分配给新 CellApp
+  │     → 先 chooseConnectionSpace()
+  │     → 由 Space::addCell() 决定在哪个 space 上新增 cell
+  │     → 再由该 space 的 BSP 树完成具体分裂
   │
   └── BSP 树自动 re-balance
 ```
@@ -499,7 +501,7 @@ KBEngine 没有任何自动负载均衡机制：
 - 无 Offload 实体迁移
 - 无 CellApp 死亡恢复
 
-### 但有手动迁移（Teleport）
+### 但有脚本驱动的跨 CellApp 迁移（Teleport）
 
 ```cpp
 // Cellapp 中的 teleport 机制
@@ -511,7 +513,7 @@ void Cellapp::reqTeleportToCellApp(Network::Channel* pChannel,
 }
 ```
 
-开发者可以在脚本层实现自己的负载均衡策略——监控 CellApp 负载，手动 teleport 实体到较空闲的 CellApp。
+它更接近"业务显式迁移实体"，不是 BigWorld 那种由 BSP 边界变化自动驱动的负载均衡。
 
 ### 为什么简化？取舍分析
 

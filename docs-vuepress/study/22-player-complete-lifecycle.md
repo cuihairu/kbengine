@@ -4,6 +4,12 @@
 
 这一章把前面分散在登录、实体创建、空间、AOI、持久化各章的机制收束成一条完整主线。不是再讲一遍"登录流程"，而是从系统设计角度，把玩家生命周期的每一步还原成组件间协作的精确序列。
 
+## 相关 API 回查
+
+- 登录与会话入口：[KBEngine(loginapp)](/api/loginapp/KBEngine.md)、[KBEngine(baseapp)](/api/baseapp/KBEngine.md)、[Proxy(baseapp)](/api/baseapp/Proxy.md)
+- 实体侧接口：[Entity(baseapp)](/api/baseapp/Entity.md)、[Entity(cellapp)](/api/cellapp/Entity.md)
+- 客户端视角：[KBEngine(client)](/api/client/KBEngine.md)、[Entity(client)](/api/client/Entity.md)
+
 ## 22.1 七阶段主流程总览
 
 一个玩家从客户端发起登录到真正"看到世界"，依次经过七个阶段：
@@ -39,19 +45,17 @@
 // kbe/src/server/loginapp/loginapp.cpp
 
 void Loginapp::onLoginAccountQueryResultFromDbmgr(
-    NETWORK_ID socketID, ...
-    const std::string& loginName,
-    const std::string& accountName,
-    const std::string& password,
-    COMPONENT_ID componentID,
-    ENTITY_ID entityID,
-    DBID dbid,
-    uint32 flags,
-    uint64 deadline,
-    const std::string& datas)
+    Network::Channel* pChannel, MemoryStream& s)
 ```
 
-DBMgr 返回的内容远不止"密码对不对"——它包含 `componentID`（该账号是否已在某 BaseApp 上存活）、`entityID`（已有实体的 ID）、`dbid`（数据库 ID）、`flags`（账号标记）、`deadline`（有效期）。这些信息直接决定后续阶段走哪条分支。
+这个 handler 实际上是从 `MemoryStream` 里依次解出：
+
+- `retcode`
+- `loginName / accountName / password / needCheckPassword`
+- `componentID / entityID / dbid / flags / deadline`
+- `datas`
+
+其中 `componentID > 0` 表示该账号当前仍挂在某个 BaseApp 上；这会把后续分支切到 `registerPendingAccountToBaseappAddr`，而不是重新分配一个新的 BaseApp。
 
 ### 22.2.2 BigWorld 的实现
 
@@ -113,13 +117,12 @@ void DatabaseReplyHandler::handleMessage(...)
 
 LoginApp 不直接查数据库，而是通过 DBMgr。因为 DBMgr 掌握的不是数据库数据，而是**在线状态**。
 
-DBMgr 维护的 `KBEEntityLogTable`（KBEngine）或 `bigworldLogOns`（BigWorld）记录着：
+LoginApp 这一跳真正依赖的不是整张实体持久化表，而是“账号状态 + 在线检出信息”：
 
-- `dbid`：数据库 ID
+- `dbid`：账号或实体对应的数据库 ID
 - `componentID`：当前挂载的 BaseApp 组件 ID
 - `entityID`：在线实体 ID
-- `flags`：状态标记
-- `deadline`：有效期
+- `flags / deadline`：账号级别的锁定、激活、过期信息
 
 如果 `componentID > 0`，说明这个账号当前挂在一个活着的 BaseApp 上——登录不是"查库创建新实体"，而是"判断在线上下文是否存在并决定如何处理"。
 
@@ -286,7 +289,7 @@ BigWorld 的 `attachToClient` 比 KBEngine 的 `loginBaseapp` 多做了 NAT 检�
 
 ## 22.6 阶段五：Base 实体恢复
 
-如果账号还没有在线实体，BaseApp 会向 DBMgr 发送 `queryAccount`，然后通过回调恢复实体。
+如果账号还没有在线实体，BaseApp 会向 DBMgr 发送 `queryAccount`，然后在 `onQueryAccountCBFromDbmgr()` 里创建或恢复 Proxy。
 
 ### 22.6.1 KBEngine 的恢复链路
 
@@ -301,11 +304,12 @@ BaseApp::loginBaseapp
 
 `onQueryAccountCBFromDbmgr` 是关键落点：
 
-1. `createEntity()` 创建 Proxy
-2. 安装 `dbid`、客户端类型、登录附加数据
+1. `createEntity()` 创建账号实体类型对应的 Proxy
+2. 安装 `dbid`、客户端类型、登录附加数据和 `createDatas`
 3. `createDictDataFromPersistentStream()` 从持久化流恢复脚本属性
-4. `initializeEntity(pyDict)` 完成脚本对象初始化
-5. 若客户端连接还在，构造 `clientEntityCall` 并执行 `createClientProxies()`
+4. 注入 `__ACCOUNT_NAME__` 与 `__ACCOUNT_PASSWORD__`
+5. `initializeEntity(pyDict)` 完成脚本对象初始化
+6. 若客户端连接还在，构造 `clientEntityCall` 并执行 `createClientProxies()`
 
 ### 22.6.2 BigWorld 的恢复链路
 
@@ -416,7 +420,7 @@ void Proxy::onGetWitness()
 
 在 CellApp 侧，`Entity::onGetWitness(bool fromBase)` 被调用时：
 
-- 如果 `fromBase == true`，从 `baseEntityCall().client` 取回客户端引用
+- 如果 `fromBase == true`，通过 `controlledBy(baseEntityCall())` 把客户端控制关系重新绑回当前 Cell 实体
 - 主动把 `spaceID` 和客户端属性打包发给客户端
 - 如果还没有 Witness 就创建；如果已有，执行 `onAttach()` + `resetViewEntities()` 重建视野
 
@@ -476,14 +480,16 @@ BigWorld 的 Witness 内部维护了 `entityQueue_`（优先级队列）和 `aoi
 ### 会话主线：LoginApp -> BaseApp
 
 ```
-Client ──login──→ LoginApp ──query──→ DBMgr
-                LoginApp ←──result──── DBMgr
-                LoginApp ──request──→ BaseAppMgr
-                LoginApp ←──addr────── BaseAppMgr
-Client ←──addr── LoginApp
+Client ──login──→ LoginApp
+                LoginApp ──DbmgrInterface::onAccountLogin──→ DBMgr
+                LoginApp ←──onLoginAccountQueryResultFromDbmgr── DBMgr
+                LoginApp ──registerPendingAccountToBaseapp[Addr]──→ BaseAppMgr
+                BaseAppMgr ──registerPendingLogin──→ BaseApp
+                LoginApp ←──onLoginAccountQueryBaseappAddrFromBaseappmgr── BaseAppMgr
+Client ←──onLoginSuccessfully(baseapp addr)── LoginApp
 Client ──loginBaseapp──→ BaseApp
-                BaseApp ──queryAccount──→ DBMgr
-                BaseApp ←──entityData──── DBMgr
+                BaseApp ──DbmgrInterface::queryAccount──→ DBMgr
+                BaseApp ←──onQueryAccountCBFromDbmgr── DBMgr
                 BaseApp 创建/恢复 Proxy
 ```
 
@@ -507,8 +513,9 @@ Cell 实体状态变更
   → Cell 执行 onWriteToDB + backupCellData
   → Base 收到 Cell 数据后执行 onPreArchive
   → Base 调用 addPersistentsDataToStream 序列化
-  → DBMgr 执行 DBTaskWriteEntity
-  → 回调 Base::onWriteToDBCallback
+  → 发送 DbgmrInterface::writeEntity
+  → DBMgr 执行 DBTaskWriteEntity / EntityDBTask
+  → 回调 Entity::onWriteToDBCallback
 ```
 
 ---

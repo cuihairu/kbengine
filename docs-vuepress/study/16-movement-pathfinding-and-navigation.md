@@ -83,7 +83,7 @@ Recast 是导航网格生成的工业标准库（MIT 协议），Detour 是配�
 ### BigWorld 的 Recast 集成
 
 ```cpp
-// 文件：BigWorld-Engine-14.4.1/programming/bigworld/lib/chunk/chunk/navmesh_generator.hpp（简化）
+// 文件：BigWorld-Engine-14.4.1/programming/bigworld/lib/navigation_recast/recast_generator.hpp（简化）
 class RecastGenerator
 {
     struct RecastConfig
@@ -127,7 +127,7 @@ private:
 };
 ```
 
-KBEngine 不自己生成 NavMesh，而是加载外部工具（如 RecastDemo / Unity 导出）生成的 `.navmesh` 文件。加载在线程池中异步进行，不阻塞主线程。
+KBEngine 当前源码主线是加载现成的导航资源：`LoadNavmeshTask::process()` 在线程池里调用 `Navigation::loadNavigation()`，主线程再在 `presentMainThread()` 里把结果挂回 `SpaceMemory`。也就是说，这一侧重点是**异步加载和查询**，不是在 CellApp 内现场生成 NavMesh。
 
 ### A* 在导航多边形上的变体
 

@@ -34,10 +34,15 @@ ServerApp
   │     └── Cellapp            ← Cell Entity + Space + AOI + Witness + Ghost
   ├── PythonApp                ← 加了 Python 解释器初始化
   │     ├── Loginapp           ← 接入认证
-  │     └── Dbmgr              ← 持久化仲裁
+  │     ├── Dbmgr              ← 持久化仲裁
+  │     ├── Logger             ← 日志汇聚
+  │     └── Interfaces         ← 外围接口网关
   ├── Baseappmgr               ← BaseApp 调度
   ├── Cellappmgr               ← CellApp 调度
   └── Machine                  ← 服务注册中心
+
+ClientApp
+  └── Bots                     ← 压测客户端工具链
 ```
 
 源码层面的证据：
@@ -159,9 +164,9 @@ BigWorld 把这个拆成了 `DBApp`（实际操作）+ `DBAppMgr`（集群协调
 | BaseappMgr | ServerApp | BaseApp 调度：`findFreeBaseapp()` 分配最空闲的 BaseApp |
 | CellappMgr | ServerApp | CellApp 调度：`findFreeCellapp()` 分配最空闲的 CellApp |
 | Machine | ServerApp | 服务注册中心：UDP 广播发现、组件注册与查询 |
-| Logger | — | 集中日志收集 |
-| Interfaces | — | 外部接口网关（对接 billing 等） |
-| Bots | — | 压测机器人 |
+| Logger | PythonApp | 集中日志收集 |
+| Interfaces | PythonApp | 外部接口网关（对接 billing 等） |
+| Bots | ClientApp | 压测机器人，本质上是脚本化客户端而不是服务端组件 |
 
 ## 3.5 玩家主线：一条路径贯穿五类进程
 

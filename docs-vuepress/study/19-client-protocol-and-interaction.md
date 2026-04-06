@@ -2,6 +2,12 @@
 
 > 这一章回答：从客户端的视角看，实体是怎么被创建、更新、销毁的？服务器发来的字节流怎么变成 Python 对象？断线重连时世界状态怎么恢复？
 
+## 相关 API 回查
+
+- 客户端接口：[KBEngine(client)](/api/client/KBEngine.md)、[Entity(client)](/api/client/Entity.md)
+- 机器人客户端接口：[KBEngine(bots)](/api/bots/KBEngine.md)、[Entity(bots)](/api/bots/Entity.md)、[PyClientApp(bots)](/api/bots/PyClientApp.md)
+- 数据类型补充：[基本数据类型](/api/basetypes.md)
+
 ## 19.1 本章核心问题
 
 - 客户端 SDK 怎么收发消息？ClientInterface 定义了哪些消息？
@@ -29,6 +35,9 @@ NETWORK_INTERFACE_DECLARE_BEGIN(ClientInterface)
         uint64, rndUUID, ENTITY_ID, eid, std::string, entityType)
 
     // === 实体生命周期 ===
+    CLIENT_MESSAGE_DECLARE_STREAM(onEntityEnterWorld, NETWORK_VARIABLE_MESSAGE)
+    CLIENT_MESSAGE_DECLARE_ARGS1(onEntityLeaveWorld, NETWORK_FIXED_MESSAGE,
+        ENTITY_ID, eid)
     CLIENT_MESSAGE_DECLARE_STREAM(onEntityEnterSpace, NETWORK_VARIABLE_MESSAGE)
     CLIENT_MESSAGE_DECLARE_ARGS1(onEntityLeaveSpace, NETWORK_FIXED_MESSAGE,
         ENTITY_ID, eid)
@@ -127,23 +136,29 @@ END_STRUCT_MESSAGE()
   2. 创建玩家实体    │── onCreatedProxies ──────────→ │ 创建 Entity
                     │    (uuid, eid, entityType)      │ 初始化属性
                     │                                │
-  3. 进入空间        │── onEntityEnterSpace ────────→ │ entity.onEnterWorld()
-                    │    (spaceID, eid, ...)          │ 加入场景渲染
+  3. 进入世界        │── onEntityEnterWorld ────────→ │ entity.onEnterWorld()
+                    │    (eid, scriptType, ...)       │ 绑定 cellEntityCall
                     │                                │
-  4. 其他实体进入AOI │── onEntityEnterSpace ────────→ │ 创建其他 Entity
+  4. 进入空间        │── onEntityEnterSpace ────────→ │ entity.onEnterSpace()
+                    │    (eid, spaceID, ...)          │ 设置当前 spaceID
+                    │                                │
+  5. 其他实体进入AOI │── onEntityEnterWorld ────────→ │ 创建其他 Entity
                     │── onUpdatePropertys ──────────→ │ 设置初始属性
                     │                                │
-  5. 属性更新        │── onUpdatePropertys ──────────→ │ entity.onUpdatePropertys()
+  6. 属性更新        │── onUpdatePropertys ──────────→ │ entity.onUpdatePropertys()
                     │    (eid, prop1=val1, ...)       │ 更新显示
                     │                                │
-  6. 远程方法调用    │── onRemoteMethodCall ─────────→ │ entity.onMethod(args)
+  7. 远程方法调用    │── onRemoteMethodCall ─────────→ │ entity.onMethod(args)
                     │                                │
-  7. 实体离开AOI    │── onEntityDestroyed ──────────→ │ entity.onLeaveWorld()
-                    │    (eid)                       │ entity.onDestroy()
+  8. 实体离开世界    │── onEntityLeaveWorld ────────→ │ entity.onLeaveWorld()
+                    │    (eid)                       │ 非玩家实体通常随即销毁
                     │                                │
-  8. 玩家离开空间    │── onEntityLeaveSpace ────────→ │ entity.onLeaveWorld()
+  9. 玩家离开空间    │── onEntityLeaveSpace ────────→ │ entity.onLeaveSpace()
                     │    (eid)                       │
-  9. 玩家下线        │── 断开连接 ──────────────────→ │ 清理所有实体
+ 10. 预进入世界即销毁 │── onEntityDestroyed ──────────→ │ destroyEntity()
+                    │    (eid)                       │ 典型是尚未 enterWorld 的实体
+                    │                                │
+ 11. 玩家下线        │── 断开连接 ──────────────────→ │ 清理所有实体
 ```
 
 ### onCreatedProxies：玩家实体的创建
@@ -155,8 +170,9 @@ void ClientObjectBase::onCreatedProxies(Network::Channel* pChannel,
 {
     entityID_ = eid;
     rndUUID_ = rndUUID;
+    connectedBaseapp_ = true;
 
-    // 创建 Entity 实例
+    // 创建玩家的 baseEntityCall
     EntityCall* entityCall = new EntityCall(
         EntityDef::findScriptModule(entityType.c_str()),
         NULL, appID(), eid, ENTITYCALL_TYPE_BASE);
@@ -164,10 +180,9 @@ void ClientObjectBase::onCreatedProxies(Network::Channel* pChannel,
     client::Entity* pEntity = createEntity(entityType.c_str(), NULL,
         !hasBufferedMessage, eid, true, entityCall, NULL);
 
-    // 如果有缓冲的属性更新消息（在网络延迟期间到达的）
+    // 如果实体属性先于创建消息到达，则先回放属性流再初始化脚本对象
     if (hasBufferedMessage)
     {
-        // 先更新属性，再初始化
         this->onUpdatePropertys(pChannel, *iter->second.get());
         pEntity->initializeEntity(NULL);
         pEntity->isInited(true);
@@ -176,31 +191,24 @@ void ClientObjectBase::onCreatedProxies(Network::Channel* pChannel,
 }
 ```
 
-**缓冲消息问题**：在实体创建消息到达之前，可能已经有属性更新消息到达（网络延迟不确定）。客户端需要缓冲这些消息，等实体创建后再应用。
+这里的缓冲发生在 `ClientObjectBase::onUpdatePropertys_()`：如果目标实体还不存在，就把该实体的属性流放进 `bufferedCreateEntityMessage_`。等 `onCreatedProxies()` 或 `onEntityEnterWorld()` 真正创建出实体后，再回放这段流。
 
-### onEntityEnterSpace：进入空间
+### onEntityEnterWorld：进入世界
 
 ```cpp
 // 文件：kbe/src/lib/client_lib/clientobjectbase.cpp（简化）
-void ClientObjectBase::onEntityEnterSpace(Network::Channel* pChannel,
+void ClientObjectBase::onEntityEnterWorld(Network::Channel* pChannel,
     MemoryStream& s)
 {
-    SPACE_ID spaceID;
     ENTITY_ID eid;
-    s >> spaceID >> eid;
-
-    // 设置当前空间
-    spaceID_ = spaceID;
-
-    // 找到实体并标记为"在世界中"
-    client::Entity* pEntity = pEntities_->find(eid);
-    if (pEntity)
-    {
-        pEntity->enterWorld();
-        pEntity->inWorld(true);
-    }
+    ENTITY_SCRIPT_UID scriptType;
+    // 真实实现还会读取 alias/scriptType/isOnGround 等字段
+    // 如果实体不存在，会在这里创建其他玩家/NPC 的客户端实体
+    // 如果是玩家本人，则补齐 cellEntityCall 并触发 onBecomePlayer/onEnterWorld
 }
 ```
+
+对客户端来说，`onEntityEnterWorld()` 才是“进入世界对象集合”的关键事件；`onEntityEnterSpace()` 只是补充 `spaceID_`、位置缓存和 `onEnterSpace()` 回调。
 
 ### onEntityDestroyed：实体销毁
 
@@ -308,7 +316,7 @@ void Entity::onUpdatePropertys(MemoryStream& s)
 }
 ```
 
-**关键**：客户端的属性更新是**直接覆盖**——不像服务器端有 dirty 标记和 tick 末批量处理。客户端收到什么就立即应用。
+**关键**：客户端这一层没有服务器那种 dirty 收束逻辑。`ClientObjectBase::onUpdatePropertys_()` 找到实体后就直接调用 `entity->onUpdatePropertys(s)`；如果实体还没创建，只缓存流。
 
 ### 位置/朝向的插值与平滑
 
@@ -374,27 +382,22 @@ detailLevel=2（远处）：只有位置和朝向
 ```
 客户端检测到断线
   │
-  ├── 1. 保存状态
-  │     记录当前的 entityID_, spaceID_, rndUUID_
+  ├── 1. 使用上次 onLoginSuccessfully 保存的 baseappIP_ / baseappPort_
   │
-  ├── 2. 发起重连
-  │     → 向 LoginApp 请求 reloginBaseapp
-  │     → LoginApp 返回新的 BaseApp 地址
+  ├── 2. 重新连接 BaseApp
+  │     → 发送 BaseappInterface::reloginBaseapp
+  │     → 携带 name / password / rndUUID / entityID
   │
-  ├── 3. 连接新的 BaseApp
-  │     → 发送 reloginBaseapp 消息（带 rndUUID_）
-  │
-  ├── 4a. 重连成功
+  ├── 3a. 重连成功
   │     BaseApp 回复 onReloginBaseappSuccessfully
-  │       → 恢复网络连接
-  │       → 服务器重新推送完整世界状态
-  │         （onCreatedProxies + onUpdatePropertys + onEntityEnterSpace）
-  │       → 客户端重建所有实体
+  │       → createClientProxies(proxy, true)
+  │       → Proxy::onGetWitness()
+  │       → 重新推送 onCreatedProxies / 属性 / world / space 消息
+  │       → 客户端重建实体和视野
   │
-  └── 4b. 重连失败
+  └── 3b. 重连失败
         BaseApp 回复 onReloginBaseappFailed(failedcode)
-          → 超时 / 实体已被销毁 / 被挤号
-          → 客户端回到登录界面
+          → rndUUID 不匹配 / 实体不存在 / 会话非法
 ```
 
 ### 重连时客户端如何重建世界状态
@@ -403,21 +406,23 @@ detailLevel=2（远处）：只有位置和朝向
 重连成功后，服务器会重推完整状态：
 
 1. onCreatedProxies(uuid, eid, entityType)
-     → 重建玩家实体
+     → 重建玩家实体并拿回 baseEntityCall
 
 2. onUpdatePropertys(stream)
      → 填充玩家实体的所有属性
 
-3. onEntityEnterSpace(spaceID, eid, ...)
+3. onEntityEnterWorld(...)
+     → 重建 world / cell 侧状态
+
+4. onEntityEnterSpace(spaceID, eid, ...)
      → 玩家进入空间
 
-4. [对视野内每个实体]
-     onEntityEnterSpace → onUpdatePropertys
+5. [对视野内每个实体]
+     onEntityEnterWorld → onUpdatePropertys → onEntityEnterSpace
      → 重建所有可见实体
-
-客户端不需要"记住"断线前的状态——
-服务器会完整重推当前世界状态。
 ```
+
+客户端不依赖本地快照恢复世界；重连成功后的主路径是服务端重新推送当前状态。
 
 ### BigWorld 的重连
 
@@ -435,9 +440,11 @@ BigWorld 的重连类似，但有一个额外的**控制权恢复**步骤：
 
 ## 19.6 消息的顺序性与可靠性
 
-### TCP：天然有序可靠
+### Channel 语义：可靠有序，底层可切到 KCP
 
-KBEngine 默认使用 TCP。TCP 保证：
+KBEngine 客户端最终面对的是 `Channel` 提供的可靠有序消息流；默认常见部署是 TCP，也可以切到底层 KCP 封装。
+
+TCP 场景下：
 
 1. **可靠传输**：每个包都会被确认，丢失则重传
 2. **有序到达**：包按发送顺序到达
@@ -456,21 +463,18 @@ BaseApp 发送：
   → 逻辑正确
 ```
 
-### KCP：低延迟的可靠 UDP
+### KCP：低延迟的可靠传输实现
 
-KBEngine 支持可选的 KCP 协议。KCP 在 UDP 之上实现可靠性：
+KBEngine 也提供 KCP 的发送/接收实现，但这里不要把它和 BigWorld Mercury 混成一类：
 
 ```
-KCP 的优势：
-  1. 更低延迟——TCP 的重传等待时间（RTO）通常 200ms+，KCP 可以更短
-  2. 不需要内核缓冲——UDP 用户态处理，避免 Nagle 算法延迟
-  3. 可控的可靠性——可以按消息选择可靠或不可靠
+1. KCP 是在 UDP 之上提供“可靠、有序”交付，不是按消息级别选择可靠性。
+2. KBEngine 当前客户端协议语义不因为切到 KCP 就变成“不可靠属性同步”。
 
-KCP 的可靠性机制：
-  ├── 停止等待 ARQ：发送→等待 ACK→超时重传
-  ├── 快速重传：收到 3 个后续 ACK 后立即重传（不等超时）
-  ├── 选择性重传：只重传丢失的包，不是从丢失点开始全部重传
-  └── 拥塞控制：可选（游戏通常关闭拥塞控制，用固定速率）
+KCP 的价值主要在于：
+  1. 更积极的重传与 RTT 估计
+  2. 避开 TCP 某些额外等待
+  3. 保持业务消息的顺序交付
 
 KBEngine KCP 集成：
   kbe/src/lib/network/kcp_packet_sender.h
@@ -610,8 +614,8 @@ entity.cell.onMove(x, y, z)
 |------|----------|----------|
 | 传输协议 | TCP（默认）/ KCP（可选） | UDP（Mercury 自建可靠性） |
 | 消息定义 | ClientInterface 宏 | ClientInterface + MF_BEGIN_CLIENT_MSG |
-| 实体创建 | onCreatedProxies → createEntity | enterAoI → createEntity → onEnterWorld |
-| 实体销毁 | onEntityDestroyed | leaveAoI → onLeaveWorld → onDestroyed |
+| 实体创建 | onCreatedProxies / onEntityEnterWorld → createEntity | enterAoI → createEntity → onEnterWorld |
+| 实体销毁 | onEntityLeaveWorld / onEntityDestroyed | leaveAoI → onLeaveWorld → onDestroyed |
 | 属性更新 | onUpdatePropertys（流式） | entityProperty（按属性） |
 | 方法调用 | onRemoteMethodCall（流式） | entityMethod（按方法） |
 | 控制权 | controlledBy（脚本层） | controlEntity（协议层显式通知） |
@@ -625,7 +629,7 @@ entity.cell.onMove(x, y, z)
 
 1. **传输层**：KBEngine 默认 TCP（全可靠），BigWorld 用 UDP + 按消息可靠性选择。BigWorld 的方案延迟更低但实现更复杂
 
-2. **实体生命周期粒度**：KBEngine 用 `onEntityDestroyed` 统一处理销毁。BigWorld 区分 `enterAoI`/`leaveAoI`（AOI 级别）和 `createEntity`/`onDestroyed`（实体级别）
+2. **实体生命周期粒度**：KBEngine 同时有 `onEntityEnterWorld` / `onEntityLeaveWorld` / `onEntityDestroyed` 三层消息；其中 `onEntityDestroyed` 更像补偿路径。BigWorld 也明确区分 AOI 进入离开和实体最终销毁
 
 3. **控制权协议**：BigWorld 有显式的 `controlEntity` 消息通知客户端获得/失去控制权。KBEngine 在脚本层处理
 
@@ -662,7 +666,7 @@ entity.cell.onMove(x, y, z)
 ### 路径一：跟踪客户端实体的完整生命周期
 
 1. `kbe/src/lib/client_lib/client_interface.h` — ClientInterface 消息定义
-2. `kbe/src/lib/client_lib/clientobjectbase.cpp` — onCreatedProxies / onEntityDestroyed
+2. `kbe/src/lib/client_lib/clientobjectbase.cpp` — onCreatedProxies / onEntityEnterWorld / onEntityLeaveWorld / onEntityDestroyed
 3. `kbe/src/lib/client_lib/entity.cpp` — onUpdatePropertys / onRemoteMethodCall
 
 ### 路径二：对比 BigWorld 的 AOI 进入/离开
@@ -680,7 +684,7 @@ entity.cell.onMove(x, y, z)
 ## 19.11 小结
 
 - **ClientInterface 定义了客户端收发的所有消息**：创建/销毁/进入空间/属性更新/方法调用/重连
-- **实体生命周期是 创建→初始化→进入空间→更新→离开空间→销毁**：客户端的 Entity 对象严格按照这个顺序处理消息
+- **实体生命周期主线是 `onCreatedProxies` / `onEntityEnterWorld` / `onEntityEnterSpace` / 更新 / `onEntityLeaveWorld` / `onEntityLeaveSpace`**：`onEntityDestroyed` 更多是补偿性销毁路径
 - **客户端属性更新是直接覆盖**：收到新值立即应用到 Entity，不做 dirty 标记
 - **位置插值在客户端脚本层实现**：服务器每 tick 发一次位置，客户端在两次更新之间插值平滑
 - **detailLevel 在客户端是隐式的**：服务器已按距离过滤了属性，客户端只需渲染收到的属性

@@ -26,7 +26,7 @@
 
 ```cpp
 // 文件：kbe/src/server/dbmgr/dbmgr.h（简化）
-class Dbmgr : public ServerApp, public PythonApp
+class Dbmgr : public PythonApp, public Singleton<Dbmgr>
 {
 public:
     // 实体操作
@@ -79,25 +79,21 @@ KBEngine 合并为单个 DBMgr。BigWorld 拆分的好处：多 DBApp 可以水�
   === 第一段：BaseApp ===
   │
   ├── Base::writeToDB(callback)
+  │     ├── 先把 Python callback 存进 CallbackMgr
   │     ├── 如果实体有 Cell 部分
-  │     │     → 向 CellApp 请求 Cell 数据
-  │     │       CellappInterface::reqQueryEntitySync_writeToDB
-  │     │       CellApp 序列化 Cell 属性到 MemoryStream
-  │     │       回传给 BaseApp
+  │     │     → 先发 CellappInterface::reqWriteToDBFromBaseapp
+  │     │     → 等 Cell 把 cellData 回传给 Base
   │     │
-  │     ├── 序列化 Base 属性到 MemoryStream
-  │     │     EntityTable::addPersistentsDataToStream()
-  │     │
-  │     ├── 构造网络包，发送到 DBMgr
-  │     │     DbmgrInterface::writeEntity
-  │     │     包含：componentID + entityID + dbid + dbInterfaceIndex + 数据流
-  │     │
-  │     └── 等待回调
+  │     └── Entity::onCellWriteToDBCompleted(...)
+  │           ├── onPreArchive / onWriteToDB
+  │           ├── addPersistentsDataToStream() 序列化 Base 持久化属性
+  │           ├── 构造 DbmgrInterface::writeEntity
+  │           └── 发送：componentID + entityID + dbid + dbInterfaceIndex + sid/callback/autoLoad + 数据流
   │
   === 第二段：DBMgr ===
   │
   ├── Dbmgr::writeEntity(channel, stream)
-  │     ├── 解包：componentID + eid + dbid + dbInterfaceIndex
+  │     ├── 先解包：componentID + eid + dbid + dbInterfaceIndex
   │     ├── 投递到任务缓冲区
   │     │     bufferedDBTasks.addTask(new DBTaskWriteEntity(...))
   │     │
@@ -106,15 +102,15 @@ KBEngine 合并为单个 DBMgr。BigWorld 拆分的好处：多 DBApp 可以水�
   === 第三段：DB 线程池 ===
   │
   ├── DBTaskWriteEntity::db_thread_process()
-  │     ├── 获取 DBInterface（MySQL 或 Redis）
-  │     ├── EntityTable::writeTable()
-  │     │     如果 dbid == 0 → INSERT（新实体）
-  │     │     如果 dbid != 0 → UPDATE（已有实体）
-  │     ├── 构造 SQL：INSERT INTO tbl_Account (...) VALUES (...)
-  │     │           或 UPDATE tbl_Account SET ... WHERE id=...
-  │     ├── 执行 SQL
+  │     ├── 再从流里读取 sid / callbackID / shouldAutoLoad
+  │     ├── EntityTables::writeEntity(...)
+  │     │     dbid == 0  → 新建实体
+  │     │     dbid != 0  → 更新实体
+  │     ├── 如果是首次写库成功
+  │     │     → 额外写 KBEEntityLogTable
+  │     │       记录 componentID / entityID / ip / port / serverGroupID
   │     │
-  │     └── 返回结果（dbid）
+  │     └── 返回结果（dbid + success）
   │
   ├── DBTaskWriteEntity::presentMainThread()
   │     ├── 回到 DBMgr 主线程
@@ -158,7 +154,7 @@ KBEngine 合并为单个 DBMgr。BigWorld 拆分的好处：多 DBApp 可以水�
         → 触发 PyDeferred callback
 ```
 
-**BigWorld 用 TwoWay + Deferred**，KBEngine 用 CallbackMgr。本质相同——异步写库，结果回来回调脚本。
+BigWorld 和 KBEngine 的共同点是"异步写库后再回调脚本"，只是前者更偏 reply handler / Deferred 风格，后者直接靠 CallbackMgr 保存 Python 回调。
 
 ## 13.4 DBTask：线程池异步执行 + 主线程回调
 
@@ -167,35 +163,22 @@ KBEngine 合并为单个 DBMgr。BigWorld 拆分的好处：多 DBApp 可以水�
 数据库操作（SQL 查询）是阻塞 I/O。如果在 DBMgr 主线程执行，会阻塞消息处理。KBEngine 用线程池把 DB I/O 移到工作线程：
 
 ```cpp
-// 文件：kbe/src/lib/db_interface/db_tasks.h（简化）
+// 通用基类：kbe/src/lib/db_interface/db_tasks.h
 class DBTaskBase : public thread::TPTask
 {
 public:
     virtual bool process();
-    virtual bool db_thread_process() = 0;     // 在 DB 线程执行
-    virtual thread::TPTask::TPTaskState presentMainThread();  // 回到主线程
-
-protected:
-    DBInterface* pdbi_;    // 数据库连接（线程私有）
-    uint64 initTime_;
+    virtual bool db_thread_process() = 0;
+    virtual thread::TPTask::TPTaskState presentMainThread();
 };
 
-// 同步表结构到数据库
-class DBTaskSyncTable : public DBTaskBase
+// DBMgr 专用实体任务：kbe/src/server/dbmgr/dbtasks.h
+class EntityDBTask : public DBTaskBase
 {
-    bool db_thread_process();
-    TPTaskState presentMainThread();
+    // 额外带 entityID / dbid / 回包地址
 };
 
-// 写入实体
-class DBTaskWriteEntity : public DBTaskBase
-{
-    bool db_thread_process();
-    TPTaskState presentMainThread();
-};
-
-// 查询实体
-class DBTaskQueryEntity : public DBTaskBase
+class DBTaskWriteEntity : public EntityDBTask
 {
     bool db_thread_process();
     TPTaskState presentMainThread();
@@ -221,7 +204,7 @@ DBMgr 主线程
   └── 任务完成，销毁
 ```
 
-**Buffered_DBTasks**：DBMgr 不是直接把任务扔给线程池，而是先缓冲。多个同一实体的写入操作可以合并——只执行最后一次。
+**Buffered_DBTasks**：DBMgr 不是直接把任务扔给线程池，而是先按 `dbid` 或 `entityID` 把同一实体的任务串行化。前一个任务没完成时，后续任务先挂在 multimap 里，等 `tryGetNextTask()` 再继续投递。重点是"避免同一实体并发落库"，而不是在这里做值级合并。
 
 ### BigWorld 的对应机制
 
@@ -393,12 +376,13 @@ EntityLog 不是普通业务数据，而是"实体在线日志"——记录哪�
 ### KBEngine KBEEntityLogTable
 
 ```
-EntityLog 表结构：
-  dbid          → 数据库 ID
-  componentID   → 所在进程 ID
-  entityID      → 实体 ID
-  flags         → 状态标志
-  deadline      → 超时时间
+EntityLog 的核心字段：
+  entityDBID    → 数据库 ID
+  entityType    → 实体脚本类型 UID
+  entityID      → 在线实体 ID
+  componentID   → 当前承载它的 BaseApp
+  ip / port     → 对应进程地址
+  serverGroupID → 服务器组标识
 ```
 
 **用途**：
@@ -434,44 +418,22 @@ void EntityTable::queryAutoLoadEntities(DBInterface* pdbi,
     std::vector<DBID>& outs);
 ```
 
-.def 文件中可以标记实体为 `autoload = true`。服务器重启后，这些实体会被自动从数据库恢复到 BaseApp 上。典型用例：NPC、拍卖行、公会等跨重启需要保持的实体。
+这里不要和 `.def` 元信息混淆。当前实现真正持久化到数据库的是保留列 `sm_autoLoad`，`writeTable()` 在 `shouldAutoLoad > -1` 时更新它，`queryAutoLoadEntities()` 再按这列筛出要恢复的实体。也就是说，auto-load 是写库时带上的持久化状态，不是 `.def` 里的一个静态开关。
 
 BigWorld 的对应实现在 `entity_auto_loader.cpp`。
 
-## 13.9 Backup / Archive 机制
+## 13.9 本章边界：DB 持久化不等于完整容灾体系
 
-### BigWorld
+本章聚焦当前仓库里可以直接追踪的 `writeToDB / queryEntity / EntityLog / auto-load` 链路。  
+BigWorld 的 Backup / Archive、Cell 宕机恢复、Base 互备等机制属于更大的容灾主题，更适合放到后面的运维与容错章节统一展开，而不是在这里把"写数据库"和"跨进程备份"混成同一件事。
 
-BigWorld 区分 **Backup**（容灾备份）和 **Archive**（持久化归档）：
-
-- **Backup**：Cell 实体状态定期备份到 BaseApp。CellApp 宕机时，BaseApp 可以从 Backup 恢复
-- **Archive**：Base 实体状态定期写入数据库。BaseApp 宕机时，DBMgr 从数据库恢复
-
-```
-Archive 链路：
-  CellApp → BaseApp（cell data 备份到 base）
-  BaseApp → DBApp（base + cell data 持久化到数据库）
-
-频率：
-  Archive：可配置（如每 60 秒归档一次）
-  Backup：可配置（如每 10 秒备份一次）
-```
-
-### KBEngine
-
-KBEngine 的 Backup/Archive 在概念上类似但实现不同：
-
-- **Backup**：BaseApp 之间互为备份。一个 BaseApp 宕机，另一个接手
-- **Archive**：通过 `writeToDB` 持久化到 DBMgr
-- KBEngine 的 Base 属性同步给 Cell 的机制叫 "cellData"，Cell 属性同步给 Base 的机制叫 "cellDataToBase"
-
-### 定时归档 vs 即时写库
+### `writeToDB` 的语义
 
 | 模式 | 优势 | 劣势 |
 |------|------|------|
-| 定时归档（BigWorld） | I/O 批量化，性能好 | 宕机可能丢失最近 N 秒数据 |
-| 即时写库（KBE 可选） | 数据更安全 | 每次 setattr 都触发写库，性能差 |
-| Dirty 标记（KBE 默认） | 只写脏属性，平衡性能和安全 | 需要定期 flush |
+| 显式 `writeToDB` | 调用点清晰，语义明确 | 需要业务自己决定何时落库 |
+| 首次创建顺带写 EntityLog | 把"新建 + 在线检出"收束成一次完整流程 | 首次写库路径比普通 update 更重 |
+| `sm_autoLoad` 持久化标志 | 支持重启后自动拉起关键实体 | 需要业务显式维护开关 |
 
 ## 13.10 存储后端对比
 
@@ -490,9 +452,9 @@ class DBInterface
 | 后端 | 实现 | 用途 |
 |------|------|------|
 | MySQL | `lib/db_mysql/` | 实体持久化主存储（关系型、事务、复杂查询） |
-| Redis | `lib/db_redis/` | 缓存 + 会话数据 + globalData/baseAppData/cellAppData |
+| Redis | `lib/db_redis/` | 另一套实体持久化后端，实现与 MySQL 平行的 `DBInterface` / `EntityTable` |
 
-**Redis 的"表"**：没有 SQL 表，用 Hash 存实体属性，Sorted Set 做索引。Key 设计如 `tbl_Account:1 → {name, password, level, ...}`。
+**Redis 的"表"**：不是关系表，而是用 key/hash 组织实体数据；源码里也有对应的 `EntityTableRedis` 与 `KBEEntityLogTableRedis`。
 
 ### BigWorld：MySQL + XML 双后端（无 Redis）
 
@@ -501,7 +463,7 @@ class DBInterface
 | MySQL | `lib/db_storage_mysql/` | 生产环境主存储 |
 | XML | `lib/db_storage_xml/` | 开发/测试用轻量存储 |
 
-**BigWorld 不用 Redis 的原因**：用 SharedData（`globalData/baseAppData/cellAppData`）做内存级数据共享，存在 BaseAppMgr / CellAppMgr 进程内存中，不走数据库。架构选择不同——BigWorld 把高速数据放在管理进程内存，KBEngine 放在 Redis。
+BigWorld 这一节更安全的说法是：它的主线实现集中在 MySQL / XML 存储层，没有像 KBEngine 这样在同一抽象层里再提供一套 Redis `DBInterface`。
 
 ### BigWorld 主从支持
 

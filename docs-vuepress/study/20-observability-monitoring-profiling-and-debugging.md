@@ -591,7 +591,7 @@ Telnet 状态机的工作流程：
 1. **TELNET_STATE_PASSWD**：输入密码认证
 2. **TELNET_STATE_ROOT**：可执行 C++ 层命令（查看 watcher、查看 profile 等）
 3. **TELNET_STATE_PYTHON**：进入 Python 解释器，可直接操作实体、调用脚本方法
-4. **TELNET_STATE_READONLY**：只读模式，仅能查询不能修改
+4. **TELNET_STATE_READONLY**：会话中可切换的只读模式，仅能查询不能修改
 
 每个组件（CellApp、BaseApp、DBMgr 等）启动时都会创建 `TelnetServer`：
 
@@ -605,7 +605,7 @@ pTelnetServer_->start(g_kbeSrvConfig.getCellApp().telnet_passwd,
                        g_kbeSrvConfig.getCellApp().telnet_port);
 ```
 
-这是**在线调试**的核心工具——运维可以直接 telnet 到任意组件的端口，执行 Python 命令查看实体状态、调用脚本方法、排查问题。
+`telnet_deflayer` 在 `TelnetServer::start()` 里实际只识别 `"python"` 和默认的 `root`。`readonly`/`quit` 是会话内状态，不是启动默认层。它的价值主要是在线排查和临时 profile，不是对外的长期运维 API。
 
 ---
 
@@ -630,16 +630,16 @@ struct LOG_ITEM {
 class Logger {
 public:
     void writeLog(Network::Channel* pChannel, KBEngine::MemoryStream& s);
-    void registerLogWatcher(LogWatcher& logWatcher);
+    void registerLogWatcher(Network::Channel* pChannel, KBEngine::MemoryStream& s);
     void sendInitLogs(LogWatcher& logWatcher);
     size_t bufferedLogsSize();
 
 private:
-    std::vector<LOG_ITEM> buffered_logs_;  // 缓冲日志
+    std::deque<LOG_ITEM*> buffered_logs_;  // 缓冲最近一批日志指针
 };
 ```
 
-所有组件的日志通过 `writeLog()` 方法汇聚到 Logger 组件。Logger 支持 `LogWatcher` 机制——客户端可以注册过滤条件，只接收感兴趣的日志。
+所有组件的日志通过 `LoggerInterface::writeLog` 汇聚到 Logger 组件。`writeLog()` 会把日志格式化为统一字符串，先回调入口脚本的 `onLogWrote()`，再按需持久化，并广播给已注册的 `LogWatcher`。
 
 ### 20.6.2 BigWorld message_logger（更完整）
 
@@ -739,7 +739,7 @@ BaseApp (脚本调用 EntityCall)
 
 ## 20.9 OTel Metrics 接入的可能性
 
-Watcher 已经暴露了指标端点，写一个 OTel Collector receiver 即可接入。关键指标清单：
+更准确地说，Watcher 已经提供了可拉取的指标树，但它不是 Prometheus / OTel 原生协议，所以通常需要一个自定义 exporter 或 collector 适配层去查询 watcher tree，再转换成 Metrics。关键指标清单：
 
 | 指标 | 来源 | 告警阈值 |
 |------|------|---------|

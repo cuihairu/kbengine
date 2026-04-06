@@ -181,7 +181,7 @@ Ghost 消息不是直接发送的，而是通过 GhostManager 缓冲后批量发
 
 1. **一个 tick 内同一实体可能产生多条 ghost 消息**——多次属性变更只需最后一次
 2. **同一 CellApp 上可能有多个实体向同一个目标 CellApp 发送 ghost 消息**——合并到同一个 Bundle
-3. **批量发送减少网络包数量**
+3. **按目标 CellApp 聚合发送，减少包碎片**
 
 ```cpp
 // 文件：kbe/src/server/cellapp/ghost_manager.h（简化）
@@ -194,8 +194,8 @@ public:
     // 投递消息
     void pushMessage(COMPONENT_ID componentID, Network::Bundle* pBundle);
 
-    // tick 末 flush 所有缓冲消息
-    void flush();
+    // 定时同步消息与路由
+    void handleTimeout(TimerHandle, void* arg);
 
 private:
     // real 实体列表
@@ -224,10 +224,10 @@ Real Entity 属性变更
   ├── GhostManager::pushMessage(targetCellAppID, bundle)
   │     → 放入 messages_[targetCellAppID] 缓冲
   │
-  └── [tick 末] GhostManager::flush()
-        → 遍历 messages_
-        → 每个 COMPONENT_ID 的所有 Bundle 发送到对应 CellApp
-        → 清空缓冲
+  └── 定时器触发 GhostManager::handleTimeout()
+        → syncMessages() 发送 messages_
+        → syncGhosts() 维护 realEntities_
+        → checkRoute() 清理过期 ghost_route_
 ```
 
 ### BigWorld 的对应机制
@@ -286,24 +286,22 @@ private:
 ### 转接机制
 
 ```
-Ghost 上的 Python 调用: entity.real.onDamage(100)
+Ghost 上的 Python 调用: entity.onDamage(100)
   │
-  ├── Entity::onScriptGetAttribute("real")
+  ├── Entity::onScriptGetAttribute("onDamage")
   │     → 检查 isReal()
-  │     → 如果是 ghost：创建 RealEntityMethod(methodDesc, entityID, realCell)
+  │     → 如果是 ghost 且命中了 cell method：创建 RealEntityMethod(NULL, methodDesc, this)
   │
   ├── RealEntityMethod::tp_call(args=(100,))
   │     │
   │     ├── 创建 Bundle
   │     │     GhostManager::createSendBundle(realCell_)
   │     │
-  │     ├── 写入消息头
-  │     │     CellappInterface::onRemoteRealMethodCall
-  │     │     << ghostEntityID_          ← 发送 ghost 的实体 ID
-  │     │     << methodDescription_->getUType()  ← 方法类型 ID
-  │     │
-  │     ├── 序列化参数
-  │     │     methodDescription_->addToStream(mstream, args)
+  │     ├── 先往临时流写入组件属性 UID（没有组件则写 0）
+  │     ├── methodDescription_->addToStream(mstream, args)
+  │     ├── Bundle 写入 CellappInterface::onRemoteRealMethodCall
+  │     │     << ghostEntityID_
+  │     │     << [组件 UID + 方法参数流]
   │     │
   │     └── 发送到 real 所在的 CellApp
   │           GhostManager::pushMessage(realCell_, bundle)
@@ -392,8 +390,8 @@ private:
   LoginApp → BaseApp → CellApp
   │
   ├── 创建 Avatar 实体
-  ├── 设置 controlledBy = 客户端的 Proxy EntityCall
-  │     → 客户端的移动输入将驱动此实体的位置更新
+  ├── onGetWitness() 最后设置 controlledBy = baseEntityCall()
+  │     → cell 侧把"谁拥有控制权"锚定到对应 base mailbox
   └── 客户端断线
         → controlledBy = NULL
         → 实体变为无人控制状态
@@ -401,8 +399,8 @@ private:
 
 场景 2：NPC 被 AI 控制
   │
-  ├── controlledBy = 自身（或 NULL）
-  │     → 由服务器端 AI 脚本驱动
+  ├── controlledBy = NULL 或其他 base mailbox
+  │     → 由服务器端逻辑决定如何驱动
   └── 如果 NPC 被玩家"驯服"
         → controlledBy = 玩家的 EntityCall
         → 玩家的输入驱动 NPC 行为
@@ -410,7 +408,7 @@ private:
 场景 3：骑乘
   │
   ├── Mount 实体（坐骑）
-  │     controlledBy = Rider 的 EntityCall
+  │     controlledBy = Rider 对应的 base mailbox
   │     → Rider 的移动输入驱动 Mount 的位置
   └── Rider 下坐骑
         → Mount.controlledBy = NULL

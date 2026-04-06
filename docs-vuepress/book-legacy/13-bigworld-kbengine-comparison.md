@@ -1,6 +1,6 @@
 # 13. BigWorld 与 KBEngine 对照
 
-> 本文件是旧提纲，正文已迁移到 [`23-bigworld-and-kbengine-comparison.md`](./23-bigworld-and-kbengine-comparison.md)。阅读主线请直接进入新稿。
+> 本文件是旧提纲，正文已迁移到 [`23-bigworld-and-kbengine-comparison.md`](/study/23-bigworld-and-kbengine-comparison.html)。阅读主线请直接进入新稿。
 
 ## 本章核心问题
 

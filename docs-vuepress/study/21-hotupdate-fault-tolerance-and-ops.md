@@ -2,7 +2,13 @@
 
 > **核心问题**：一个线上 MMO 集群怎么做到不停机修 bug？进程挂了怎么办？怎么压测、迁移数据、防止作弊？
 
-## 21.1 脚本热重载：线上修 bug 的唯一途径
+## 相关 API 回查
+
+- BaseApp 管理接口：[KBEngine(baseapp)](/api/baseapp/KBEngine.md)、[Proxy(baseapp)](/api/baseapp/Proxy.md)
+- Login / DB / Interfaces / Logger：[KBEngine(loginapp)](/api/loginapp/KBEngine.md)、[KBEngine(dbmgr)](/api/dbmgr/KBEngine.md)、[KBEngine(interfaces)](/api/interfaces/KBEngine.md)、[KBEngine(logger)](/api/logger/KBEngine.md)
+- Bots 压测接口：[KBEngine(bots)](/api/bots/KBEngine.md)、[PyClientApp(bots)](/api/bots/PyClientApp.md)
+
+## 21.1 脚本热重载：不停服修改 Python 行为的主要入口
 
 ### 21.1.1 为什么热重载对 MMO 如此重要
 
@@ -297,7 +303,7 @@ private:
 
 ### 21.2.4 KBEngine 的容错处理
 
-KBEngine 没有独立的 Reviver 进程。容错依赖以下机制：
+KBEngine 没有 BigWorld 那种独立的 Reviver 进程，也没有 BigWorld 风格的跨 BaseApp 备份恢复链。源码里能看到的相关机制主要有三类：
 
 **1. EntityLog 检出机制**
 
@@ -323,10 +329,7 @@ protected:
 };
 ```
 
-当 BaseApp 死亡时：
-- DBMgr 检测到心跳超时，将该 BaseApp 的所有 EntityLog 标记为可恢复
-- 调用 `DBTaskEraseBaseappEntityLog` 清理旧的检出记录
-- 玩家重连时，DBMgr 将实体分配给新的 BaseApp
+`DBTaskEraseBaseappEntityLog` 本身做的事情很直接：按 `componentID` 清掉这台 BaseApp 的 `_entitylog` 检出记录。它不是“标记可恢复”的复杂状态机，恢复能力主要来自旧检出记录被擦除后，后续登录能重新走分配与加载链路。
 
 **2. Proxy 重连机制**
 
@@ -357,22 +360,32 @@ protected:
 
 ```
 重连流程:
-Client ──relogin(rndUUID)──→ LoginApp ──→ BaseApp
-  → BaseApp 查找 rndUUID 匹配的 Proxy
-  → 恢复会话，重建 Cell 连接
+Client ──reloginBaseapp(name, password, rndUUID, entityID)──→ BaseApp
+  → BaseApp 校验 Proxy 是否存在且 rndUUID 匹配
+  → createClientProxies(proxy, true)
+  → Proxy::onGetWitness() 重建客户端控制与视野
+
+**3. 周期性写库 / 备份采样**
+
+KBEngine 虽然没有 BigWorld 那种“另一台 BaseApp 保存你的可恢复副本”的 BackupSender，但 BaseApp 里确实有 `Archiver` 和 `Backuper`：
+
+- `Archiver::tick()` 会按 `baseapp/archivePeriod` 分批调用 `entity.writeToDB(NULL, NULL, NULL)`
+- `Backuper::tick()` 会按 `baseapp/backupPeriod` 分批调用 `entity.writeBackupData(&s)`
+
+这两者更多是“周期性收束实体状态”和“向 Base 收集备份流”的内部机制，不等同于 BigWorld 完整的跨进程灾备恢复方案。
 ```
 
 **3. 与 BigWorld 的对比**
 
 | 维度 | KBEngine | BigWorld |
 |------|----------|----------|
-| 进程守护 | 无（依赖外部脚本或 systemd） | Reviver 进程自动拉起 |
-| 实体备份 | 无 Backup 机制 | BackupSender 跨 BaseApp 备份 |
-| 实体归档 | writeToDB 直写 | Archiver 周期归档 + SecondaryDB |
+| 进程守护 | 无内建 Reviver，通常依赖外部进程管理 | Reviver 进程自动拉起 |
+| 实体备份 | 有 `Backuper` / `writeBackupData`，但不是 BigWorld 式跨 BaseApp 灾备 | BackupSender 跨 BaseApp 备份 |
+| 实体归档 | `writeToDB` + `Archiver` 周期触发 | Archiver 周期归档 + SecondaryDB |
 | 重连识别 | rndUUID | 类似机制 |
-| EntityLog | DBMgr 维护，用于检出/恢复 | 无（靠 Backup 恢复） |
+| EntityLog | DBMgr 维护在线检出记录 | 主要靠 Backup / checkout 链 |
 
-**KBEngine 的弱点**：没有 Reviver 意味着进程死亡后需要人工干预（或外部监控脚本）。没有 Backup 意味着 BaseApp 死亡时，未写入数据库的实体数据会丢失。
+**KBEngine 的弱点**：没有内建 Reviver，进程死亡后的拉起通常要交给 systemd、supervisor 或自研运维脚本；同时它缺少 BigWorld 那种成熟的跨 BaseApp 热备恢复路径，所以 BaseApp 非正常死亡时，更依赖最近一次写库/归档结果。
 
 ---
 

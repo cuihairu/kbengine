@@ -49,14 +49,17 @@ Dbmgr::onAccountLogin()
   │  kbe/src/server/dbmgr/dbmgr.cpp:708
   │  转发给 interfaces_handler 做账号验证
   ↓
-DBMgr → Loginapp: onLoginAccountQueryResult
-  │  返回：dbid, flags, entityID, entityDBID, ...
+DBMgr → Loginapp: onLoginAccountQueryResultFromDbmgr
+  │  返回：retcode, accountName, componentID, entityID, dbid, flags, deadline ...
   ↓
-Loginapp → BaseAppMgr: onReqLogin
-  │  消息：BaseappmgrInterface::onAccountLogin
-  │  请求分配 BaseApp
+Loginapp → BaseAppMgr: registerPendingAccountToBaseapp / registerPendingAccountToBaseappAddr
+  │  componentID > 0 走已有 BaseApp
+  │  componentID == 0 走新分配
   ↓
-BaseAppMgr → Loginapp: onLoginAccountQueryBaseappAddr
+BaseAppMgr → BaseApp: registerPendingLogin
+  │  先把待登录信息登记到目标 BaseApp
+  ↓
+BaseAppMgr → Loginapp: onLoginAccountQueryBaseappAddrFromBaseappmgr
   │  返回：分配的 BaseApp 地址 (ip, tcp_port, udp_port)
   ↓
 Loginapp → Client: onLoginSuccessfully(addr, port, ...)
@@ -67,7 +70,9 @@ Client → BaseApp: loginBaseapp(accountName, password)
   ↓
 BaseApp::loginBaseapp()
   │  kbe/src/server/baseapp/baseapp.cpp:3769
-  │  验证账号、创建或恢复 Proxy 实体
+  │  验证 PendingLogin、来源地址、密码、账号标记
+  │  entityID > 0 走“已有 Proxy”分支
+  │  entityID == 0 时向 DBMgr 发 queryAccount
   ↓
 BaseApp → Client: onCreatedProxies(rndUUID, entityID, entityType)
   │  kbe/src/server/baseapp/baseapp.cpp:3160
@@ -82,6 +87,7 @@ Proxy::onClientEnabled()
 | 状态 | 存储位置 | 说明 |
 |------|---------|------|
 | `PendingLoginMgr` | LoginApp 内存 | 等待 DBMgr/BaseAppMgr 回复的登录请求 |
+| `pending_logins_` | BaseAppMgr 内存 | LoginApp 与 BaseApp 之间的待分配映射 |
 | `EntityLog` | DBMgr 数据库 | 在线实体检出记录 |
 | `rndUUID` | Proxy 实体 | 64 位随机 UUID，用于重连 |
 | `clientEnabled_` | Proxy 实体 | 客户端是否已就绪 |
@@ -174,30 +180,20 @@ Python 脚本层
 Entity::__py_setattr(name, value)
   │  kbe/src/server/baseapp/entity.cpp / kbe/src/server/cellapp/entity.cpp
   │  1. 查找 PropertyDescription
-  │  2. 如果是客户端可见属性 → 标记脏
+  │  2. DataType::isSameType 做类型检查
+  │  3. PropertyDescription::onSetValue 写入脚本对象
   ↓
-PropertyDescription::addSmartWatchDir(value)
-  │  标记属性为脏，等待 tick 末同步
-  ↓
---- tick 末 ---
-  ↓
-Witness::update()
-  │  kbe/src/server/cellapp/witness.cpp
-  │  遍历所有 pending 的 enter/leave/property change
-  ↓
-Entity::buildBroadcastBundle()
-  │  1. 遍历所有脏属性
-  │  2. 检查 detailLevel（远/近不同策略）
-  │  3. 序列化属性值到 Bundle
-  │  4. 构造 payload（一次序列化，多客户端复用）
+Entity::onDefDataChanged(...)
+  │  kbe/src/server/cellapp/entity.cpp
+  │  1. real entity 才继续
+  │  2. 先同步给 ghost
+  │  3. 再遍历当前 witnesses_ 推送给可见客户端
+  │  4. 最后同步给实体自己的客户端
   ↓
 Bundle 发送
-  │  对每个有 Witness 的客户端：
-  │  1. 写入 header（entityID alias）
-  │  2. 复用 payload
-  │  3. 通过 Proxy → Channel → TCP 发送
+  │  通过 Proxy / client mailbox 发到客户端
   ↓
-Client: onUpdateProperties / onUpdateData_xz_ypr_...
+Client: onUpdatePropertys / onUpdateData_xz_ypr_...
   │  客户端 SDK 接收
   │  1. 查找对应实体
   │  2. 更新属性值
@@ -208,10 +204,10 @@ Client: onUpdateProperties / onUpdateData_xz_ypr_...
 
 ```
 实体首次进入客户端视野时：
-  → onEnterView: 分配 alias (短 ID)
-  → alias = 实体在视野列表中的索引
+  → onEnterView: 在 Witness 侧为 EntityRef 分配 alias
+  → alias 本质上是当前视野列表里的短编号
   → 后续同步用 alias 代替完整 entityID
-  → alias 仅 1-2 字节，entityID 需 4 字节
+  → 当前实现里发送给客户端时要求 aliasID <= 255
 ```
 
 ### BigWorld 对照
@@ -247,11 +243,11 @@ Base → Cell：同步 Cell 侧数据
 Base 整理完整数据
   │  Base 侧 persistent 属性 + Cell 侧 persistent 属性
   ↓
-Base → DBMgr: onWriteToDB
-  │  消息：DbmgrInterface::onWriteToDB
+Base → DBMgr: writeEntity
+  │  消息：DbmgrInterface::writeEntity
   │  内容：实体数据流 + entityDBID + callbackID + shouldAutoLoad
   ↓
-Dbmgr::onWriteToDB()
+Dbmgr::writeEntity()
   │  kbe/src/server/dbmgr/dbmgr.cpp
   │  创建 DBTaskWriteEntity 投递到线程池
   ↓
@@ -266,8 +262,8 @@ DBTaskWriteEntity::presentMainThread()
   │  回到主线程，将结果发送回 BaseApp
   ↓
 BaseApp 收到写库结果
-  │  触发 CallbackMgr 的回调
-  │  Python 脚本的 onWriteToDB callback 被调用
+  │  Entity::onWriteToDBCallback()
+  │  再触发 CallbackMgr 的回调
 ```
 
 ### 三段式写库
@@ -308,8 +304,9 @@ Python 脚本层
 Base → CellAppMgr: 请求创建 Cell 实体
   │  消息包含：entityID, spaceID, position, direction
   ↓
-CellAppMgr → CellApp: 创建实体
-  │  选择目标 CellApp（负载均衡）
+Base / Cell 路径落到目标 CellApp: 创建实体
+  │  是落到已有 Space 的 Cell，还是先为 Space 分配 Cell，
+  │  取决于当前 Space 运行态，而不是“每次 teleport 都重新负载均衡”
   ↓
 CellApp::onCreateEntityFromCellappmgr()
   │  在目标 CellApp 上创建 Cell 实体
@@ -334,7 +331,7 @@ Witness 建立
 客户端同步
   │  对视野内每个实体：
   │  → onEntityEnterWorld(entityID, entityType, ...)
-  │  → onUpdateProperties(所有初始属性)
+  │  → onUpdatePropertys(所有初始属性)
   │  → onUpdateBasePos / onUpdateBaseDir (位置朝向)
   ↓
 tick 开始后

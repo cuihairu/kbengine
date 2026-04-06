@@ -89,7 +89,6 @@ AOI 空间层（本章）              同步层（Ch12）
 优势：
   更新成本极低——移动时只需调整少量指针（冒泡排序式）
   实现简单——纯指针操作，无树节点分配/释放
-  缓存友好——链表遍历是顺序内存访问
   进出事件天然支持——节点互相越过时触发回调
 
 劣势：
@@ -269,7 +268,7 @@ void CoordinateSystem::moveNodeX(CoordinateNode* pNode, float px,
 }
 ```
 
-**这是整个 AOI 系统的核心算法**。每次冒泡交换一对节点，同时触发双方的 `onNodePassX` 回调。RangeTriggerNode 在回调中判断是否触发了进入/离开事件。
+这一步是 KBEngine AOI 链路里的关键连接点。每次冒泡交换一对节点，同时触发双方的 `onNodePassX` 回调；真正的进入/离开判定发生在 `RangeTriggerNode` / `RangeTrigger` 一侧。
 
 ## 14.5 BigWorld 的十字链表实现
 

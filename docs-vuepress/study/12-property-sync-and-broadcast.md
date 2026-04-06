@@ -14,65 +14,61 @@
 
 ## 12.2 心智模型：不是"改了就发"，而是"tick 内收集，tick 末批量发"
 
-这是理解属性同步的关键心智模型：
+这是理解属性同步时最容易混淆的地方：KBEngine 里“不是所有客户端相关数据都走同一条节拍”。
 
-```
+```text
 一个 tick（100ms）内的时序：
 
 ───────────────────────────────────────────────────
 │ 脚本逻辑执行                                    │ tick 末
 │                                                 │
 │ entity.health = 80                              │ Witness::update()
-│ entity.health = 75    ← 只记最终值 75           │   ├── 遍历所有 viewEntities
-│ entity.position = (10, 0, 20)                   │   ├── 收集每个实体的脏属性
-│ entity.mana = 50                                │   ├── 构造 Bundle
-│                                                 │   └── 批量发送给客户端
+│ entity.health = 75    ← 同一 tick 内可能多次改值 │   ├── 处理 enter / leave view
+│ entity.position = (10, 0, 20)                   │   ├── 处理位置 / 朝向等 volatile 更新
+│ entity.mana = 50                                │   └── flush 当前 tick 的客户端视野消息
+│                                                 │
+│ onDefDataChanged()                              │
+│   ├── ghost 同步：立即发                        │
+│   ├── own client：立即发                        │
+│   └── other clients：按当前 witnesses 立即发     │
 ───────────────────────────────────────────────────
 ```
 
 **为什么不改了就发**：
 
 1. **一个 tick 内属性可能变化多次**：战斗中血量可能在一帧内扣减 3 次，客户端只需要最终值
-2. **Bundle 合并更高效**：多条属性变更合并到一个 Bundle 里，减少网络包数量
-3. **带宽可预测**：每个 tick 的同步量有上限（N 个可见实体 × M 个脏属性），不会突发
+2. **Bundle 合并更高效**：即使是立即发送路径，也会优先复用 Channel 当前的 send bundle，减少碎包
+3. **视野与位置更新仍然按 tick 收束**：进入视野、离开视野、位置/朝向等高频基础同步，仍然主要由 `Witness::update()` 在 tick 节拍里处理
 
 ## 12.3 一条属性更新的完整链路
 
 ### KBEngine
 
-```
+```text
 Python: entity.health = 75
   │
   ├── Entity::_tp_setattro("health", 75)
   │     → Entity::onScriptSetAttribute("health", 75)
   │
   ├── PropertyDescription::isSameType() 类型检查
-  │     → 设置 Python 属性值
+  │     → PropertyDescription::onSetValue(...) 写入
   │
   ├── Entity::onDefDataChanged(propertyDescription, pyData)
   │     │
   │     ├── 检查 isReal() && !initing()     ← 只有 real entity 处理
-  │     │
   │     ├── if Persistent → setDirty()       ← 标记需要写库
-  │     │
   │     ├── 序列化属性值到 MemoryStream
-  │     │     propertyDescription->getDataType()->addToStream(mstream, pyData)
-  │     │
   │     ├── if CELL_PUBLIC && hasGhost
-  │     │     → 发送给所有 Ghost：CellappInterface::onUpdateGhostPropertys
-  │     │     Ghost 收到后更新本地副本
-  │     │
-  │     ├── if OWN_CLIENT
-  │     │     → 直接发给自己的客户端
-  │     │
-  │     └── if ALL_CLIENTS / OTHER_CLIENTS
-  │           → 记录到 changeDefDataLogs[detailLevel]
-  │           → 等 tick 末 Witness::update() 批量广播
+  │     │     → 发送给 Ghost：CellappInterface::onUpdateGhostPropertys
+  │     ├── if OTHER_CLIENTS
+  │     │     → 直接遍历当前 witnesses，立即发给可见客户端
+  │     └── if OWN_CLIENT
+  │           → 直接发给自己的客户端
   │
-  └── [tick 末] Witness::update()
-        → 遍历 viewEntities
-        → 收集每个实体的 changeDefDataLogs
-        → 构造 Bundle 发送给观察者客户端
+  └── Witness::update()
+        → 处理 enter/leave view
+        → 处理位置/朝向等 volatile 更新
+        → flush 当前 tick 的客户端视野消息
 ```
 
 ### 源码：onDefDataChanged
@@ -110,7 +106,8 @@ void Entity::onDefDataChanged(EntityComponent* pEntityComponent,
     // 广播给客户端
     if ((flags & ENTITY_BROADCAST_CLIENT_FLAGS) > 0)
     {
-        // 记录脏属性，等 Witness::update() 批量处理
+        // 按 witness / own-client 路径直接构造消息并发送
+        // Witness::update() 更多负责 enter/leave 与 volatile 数据刷新
         // ...
     }
 
@@ -245,7 +242,7 @@ void Witness::update()
 }
 ```
 
-**与 KBEngine 的关键区别**：BigWorld 使用**优先级队列 + 带宽预算**——如果带宽不够，低优先级的实体更新会被推迟到下一个 tick。KBEngine 没有带宽预算机制，每个 tick 尝试同步所有变更。
+**与 KBEngine 的关键区别**：BigWorld 使用**优先级队列 + 带宽预算**——如果带宽不够，低优先级的实体更新会被推迟到下一个 tick。KBEngine 没有这套优先级预算器；它更偏向“属性变化时直接按当前 witness 集合发送，tick 末再由 Witness 处理视野进出和位置/朝向等基础同步”。
 
 ## 12.5 EntityCache：BigWorld 的观察者-被观察者关系管理
 
@@ -324,7 +321,7 @@ else
 }
 ```
 
-**alias 分配算法**：`usePropertyDescrAlias()` 检查实体的广播属性总数是否小于 255。如果是，aliasID 从 0 开始顺序分配，用 1 字节传输。省下来的带宽在 2000 个可见实体 × 50 属性的场景下非常可观。
+**alias 分配算法**：`usePropertyDescrAlias()` 的启用不只是“数量小于 255”这么简单。源码里客户端属性 alias 还会从保留区间 `ENTITY_BASE_PROPERTY_ALIASID_MAX` 之后开始编号；客户端方法 alias 从 1 开始。也就是说它既受数量约束，也受预留 alias 区间影响。省下来的带宽在 2000 个可见实体 × 50 属性的场景下依然非常可观。
 
 ### BigWorld 的对应机制
 

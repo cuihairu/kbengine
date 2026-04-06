@@ -1,6 +1,6 @@
 # 9. Space、Cell、AOI 与 Witness
 
-> 本文件是旧稿，相关内容已拆分并扩写到 [`14-space-aoi-and-vision-system.md`](./14-space-aoi-and-vision-system.md) 与 [`17-ghost-system.md`](./17-ghost-system.md)。阅读主线请以新稿为准。
+> 本文件是旧稿，相关内容已拆分并扩写到 [`14-space-aoi-and-vision-system.md`](/study/14-space-aoi-and-vision-system.html) 与 [`17-ghost-system.md`](/study/17-ghost-system.html)。阅读主线请以新稿为准。
 
 > 这是 BigWorld 血统最强的一章。真正理解这一章，才会明白 KBEngine 为什么不是“场景里放个对象列表然后广播状态”。
 

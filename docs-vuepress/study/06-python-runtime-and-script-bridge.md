@@ -17,7 +17,7 @@
 ### 脚本层不是性能瓶颈
 
 - MMO 服务器热路径全在 C++：网络 I/O、AOI、序列化、寻路
-- Python 脚本只处理实体行为回调，tick 频率 10Hz（100ms 预算）
+- Python 脚本主要承接实体行为、入口回调和业务编排；常见更新频率由 `gameUpdateHertz` 控制，默认配置通常是双位数 Hz 量级
 - 即使 LuaJIT 比 CPython 快 30-50x，从 2ms 优化到 0.1ms 在 100ms 预算里无意义
 - 真正的性能约束：网络带宽、AOI 计算量、DB 写入延迟——都不是脚本层的事
 
@@ -63,6 +63,8 @@ MMO 脚本是几十万行业务代码，不是几百行嵌入式脚本：
 
 EntityDef 的 .def 文件描述结构，Python 文件定义行为。脚本层是引擎和游戏业务之间**唯一的扩展接口**。
 
+这里要特别澄清一个常见误解：Python 文件不是由 `.def` 自动生成的。KBEngine 的实际做法是先解析 `entities.xml + .def` 建立 `ScriptDefModule`，然后在 `loadAllEntityScriptModules()` 里按实体名 `PyImport_ImportModule(moduleName)` 去加载脚本模块，再要求模块内存在同名类。
+
 ## 6.4 继承链的差异
 
 ### KBEngine：两支继承链
@@ -74,7 +76,11 @@ ServerApp
         └── Cellapp
   └── PythonApp            ← 也有 Python 初始化
         ├── Loginapp
-        └── Dbmgr
+        ├── Dbmgr
+        ├── Logger
+        └── Interfaces
+ClientApp
+  └── Bots
 ```
 
 KBEngine 把 Python 运行时初始化合并进了 `EntityApp` 和 `PythonApp`。
@@ -92,6 +98,12 @@ class EntityApp : public ServerApp
     }
 };
 ```
+
+因此“定义”和“脚本”的职责边界是：
+
+- `.def`：手写，描述属性、方法、持久化、组件关系
+- Python 模块：手写，描述实体行为
+- 引擎不会替你生成 `Avatar.py`、`Monster.py` 这种业务脚本，只会在启动时校验它们是否存在且是否与 `.def` 对齐
 
 ### BigWorld：EntityApp 之上再加 ScriptApp
 
@@ -222,7 +234,12 @@ PyObject* ScriptDefModule::createObject(void)
 
 然后在 `EntityApp::onCreateEntity` 中用类似的 placement new 模式构造 Entity。
 
-**没有虚函数**——两个项目都通过静态断言确保 Entity/Base/Proxy 没有虚函数，否则 vptr 会破坏 PyObject 头部的内存布局。这是 C++/Python 统一构造的核心约束。
+这里要把两边分开说：
+
+- BigWorld 在 `entity_type.cpp` 里明确用 `BW_STATIC_ASSERT` 检查 `Base/Proxy` 不是多态类型。
+- KBEngine 的源码里我没有找到对应的静态断言，但它同样依赖“先 `PyType_GenericAlloc`，再 placement new 构造 C++ 外壳”这套内存模型；`BASE_SCRIPT_HREADER` 里的 `_tp_dealloc` 也明确按这种对象布局回收。
+
+所以更稳妥的结论是：两边都依赖同一种对象布局约束，但只有 BigWorld 在这里把“无多态”写成了显式静态断言。
 
 ## 6.7 属性拦截：setattr 触发 C++ 逻辑
 
@@ -237,18 +254,20 @@ _tp_setattro(entity, "health", 100)
   ▼
 Entity::onScriptSetAttribute("health", 100)
   │
-  ├── 查找 PropertyDescription（类型检查）
-  ├── 如果是 CELL_PUBLIC：设置脏标记 → 触发属性同步
-  ├── 如果是 BASE：直接存储
-  └── 如果是 Persistent：标记需要写库
+  ├── 查找 PropertyDescription
+  ├── DataType::isSameType(value) 做类型检查
+  ├── PropertyDescription::onSetValue(...) 写入实际值
+  └── onDefDataChanged(...) 把“属性已变化”继续传给后续链路
 ```
 
 KBEngine 的 `onScriptSetAttribute` 做的事：
 
 1. 在 `pPropertyDescrs_` 中查找属性名
 2. 用 `DataType::isSameType()` 检查值类型
-3. 如果属性有 `detailLevel`，记录到脏属性列表
-4. 触发相关的同步/持久化逻辑
+3. 调 `propertyDescription->onSetValue(this, value)` 真正写入
+4. 如果成功，再通过 `onDefDataChanged(...)` 把变化向同步 / 持久化链路传播
+
+也就是说，`onScriptSetAttribute` 本身更像“入口拦截器 + 类型闸门”，脏标记、广播粒度和是否写库，不是都直接硬编码在这一个函数里。
 
 ## 6.8 远程方法调用：tp_call 变成网络包
 

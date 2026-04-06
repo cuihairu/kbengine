@@ -16,17 +16,22 @@
 
 每个组件进程启动时需要一个唯一的 `componentID`。
 
-**KBEngine**：由 Machine 分配或本地计算。
+**KBEngine**：不是统一一种来源，而是分组件处理。
 
 ```cpp
 // 文件：kbe/src/lib/server/kbemain.h（简化）
 // checkComponentID 的逻辑：
 // 如果 g_componentID 未设置：
-//   向 Machine 进程查询分配（UDP 广播）
-//   或本地计算：uid * COMPONENT_ID_MULTIPLE + macMD5 * 10000 + componentType * 100 + 1
+//   machine/logger：本地按 uid + macMD5 + componentType 计算
+//   其他组件：通过 IDComponentQuerier 请求可用 componentID
 ```
 
-componentID 不是随机数，而是基于 uid + MAC 地址 + 组件类型的确定性计算。同一台机器上同类型组件的 ID 可预测。
+所以 `componentID` 不是“一律本地确定性计算”。更准确地说：
+
+- `machine` / `logger` 这类基础组件允许本地推导
+- 大多数业务组件在默认路径下会走 `IDComponentQuerier` 获取可用 ID
+
+这一点很重要，因为它决定了 KBEngine 并不是完全无中心地生成组件身份。
 
 **BigWorld**：由 bwmachined 分配。组件启动时通过 `MachineDaemon::registerWithMachined` 向 bwmachined 注册，bwmachined 返回分配的 ID。
 
@@ -136,17 +141,17 @@ class Machine : public ServerApp, public Singleton<Machine>
 
 **注册流程**：
 
-```
+```text
 新组件启动
   │
-  ├── 向 Machine 广播 onBroadcastInterface
-  │     携带：componentType / componentID / 内网地址 / 外网地址
+  ├── Components::broadcastSelf()
+  │     └── 通过 machine 协议发送 onBroadcastInterface
+  │           携带 componentType / componentID / 地址 / PID / 负载信息
   │
-  ├── Machine 收录到组件表
-  │     cidMap_: componentID → ComponentInfos
-  │     pidMD5Map_: uid → ComponentInfos
+  ├── Machine 收录到自己的组件视图
+  │     cidMap_ / pidMD5Map_
   │
-  └── 其他组件通过 onFindInterfaceAddr 查询到新组件
+  └── 其他组件按需调用 onFindInterfaceAddr / onQueryAllInterfaceInfos 查询
 ```
 
 ### BigWorld bwmachined
@@ -173,6 +178,8 @@ class Machine : public ServerApp, public Singleton<Machine>
 //    - save()：注册表写入磁盘
 //    - load()：重启后恢复集群视图
 ```
+
+这里也要收紧一个说法：`Machine` 本身主要负责“机器层发现 + 组件地址收录 + 查询”，真正让业务组件彼此建立协作关系的，往往还要靠后续的 `onRegisterNewApp`、manager 侧注册和 `Components` 自己维护的运行时视图。
 
 ### 两者对比
 

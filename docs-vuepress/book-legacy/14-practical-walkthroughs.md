@@ -1,6 +1,6 @@
 # 14. 实战源码走读
 
-> 本文件是旧稿，已由 [`24-practical-source-walkthroughs.md`](./24-practical-source-walkthroughs.md) 取代。阅读主线请直接进入新稿。
+> 本文件是旧稿，已由 [`24-practical-source-walkthroughs.md`](/study/24-practical-source-walkthroughs.html) 取代。阅读主线请直接进入新稿。
 
 > 这一章不再重复概念，而是给出几条可以拿着 IDE 直接跟的路径。
 

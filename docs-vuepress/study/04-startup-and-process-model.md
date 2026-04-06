@@ -243,11 +243,15 @@ ServerApp                     ← 信号/线程池/配置/Watcher/主循环
         └── Cellapp           ← + Space + AOI + Witness + Ghost + Telnet
   └── PythonApp               ← + Python 解释器
         ├── Loginapp          ← + 认证逻辑
-        └── Dbmgr             ← + DB操作 + globalData
+        ├── Dbmgr             ← + DB操作 + globalData
+        ├── Logger            ← + 日志汇聚
+        └── Interfaces        ← + 外部接口网关
   └── ServerApp               ←（无额外能力）
         ├── Baseappmgr        ← 调度
         ├── Cellappmgr        ← 调度
         └── Machine           ← 注册中心
+ClientApp                     ← 客户端 SDK 骨架
+  └── Bots                    ← 压测机器人
 ```
 
 ### BigWorld
