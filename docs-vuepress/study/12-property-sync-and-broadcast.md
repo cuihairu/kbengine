@@ -314,12 +314,12 @@ class PropertyDescription
 // 在属性同步时
 if (pScriptModule_->usePropertyDescrAlias())
 {
-    // 属性总数 < 255 → 用 1 字节 aliasID
+    // alias 已在定义加载阶段判定可用 → 用 1 字节 aliasID
     (*pSendBundle) << propertyDescription->aliasIDAsUint8();
 }
 else
 {
-    // 属性总数 >= 255 → 用 2 字节 utype
+    // alias 不可用 → 回退到完整 utype
     (*pSendBundle) << propertyDescription->getUType();
 }
 ```
@@ -689,7 +689,7 @@ N = 1000 个客户端
 - **属性同步是 tick 末批量发的**：一个 tick 内多次修改只同步最终值，减少网络包数量
 - **onDefDataChanged 是变更入口**：判断是否 real、是否持久化、广播给 ghost 和客户端
 - **Witness 是观察者驱动的广播引擎**：每 tick 末收集所有可见实体的脏属性，构造 Bundle 批量发送
-- **alias 机制把属性 ID 从 2 字节压到 1 字节**：属性总数 < 255 时启用
+- **alias 机制会在满足条件时把属性 ID 从 `utype` 压成 1 字节 alias**：它受 alias 开关、保留区间和客户端可见属性数量共同约束
 - **detailLevel/LOD 实现按距离分级同步**：远处实体只同步位置朝向，近处实体同步全部
 - **Volatile 属性有独立的更新频率阈值**：位置和朝向变化超过阈值才发
 - **BigWorld 有带宽预算和优先级队列**：带宽不够时低优先级更新被延迟

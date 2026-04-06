@@ -2,59 +2,35 @@
 home: true
 heroImage: /logo.png
 heroText: KBEngine 中文文档
-tagline: 基于仓库内 CHM 与 PDF 整理的中文文档入口
+tagline: 以源码学习为主线，覆盖 BigWorld 背景、KBEngine 实现、架构专题与 API 参考
 actions:
   - text: 开始阅读
-    link: /book/
+    link: /study/
     type: primary
-  - text: 查看架构
+  - text: 详细目录
+    link: /study/table-of-contents.html
+    type: secondary
+  - text: 查看架构专题
     link: /architecture/
     type: secondary
-  - text: 查阅 API
+features:
+  - title: 先走主线
+    details: 24 章书式路径是本站主入口。从 BigWorld 问题背景、KBEngine 进程模型，到序列化、RPC、AOI、持久化、玩家生命周期与实战走读，按依赖顺序展开。
+    link: /study/
+  - title: 架构深度解析
+    details: 架构专题用于按主题回看系统，不替代主线阅读。适合已经走过书式路径后，按组件或机制做二次归纳。
+    link: /architecture/
+  - title: BigWorld / KBEngine 对照
+    details: 十维度全景对照：进程模型、实体模型、RPC 模式、空间拓扑、AOI 策略、持久化、负载均衡、容错、网络层、脚本层。用于收束两套系统的继承与分歧。
+    link: /study/23-bigworld-and-kbengine-comparison.html
+  - title: 完整 API 参考
+    details: API 是工具书入口，不是学习主线。适合在源码阅读过程中回查脚本接口、数据类型和组件能力。
     link: /api/
-    type: secondary
-footer: 文档来源为仓库内已有资料
+  - title: 关键算法速查
+    details: 十字链表空间索引、AOI RangeTrigger、Hysteresis 防抖、BSP 树动态拓扑、NavMesh+A* 寻路、Rendezvous Hash、alias 消息压缩、Bundle payload 复用等核心算法独立参考。
+    link: /study/appendix-key-algorithms.html
+  - title: 外部系统对比
+    details: 与 gRPC/Protobuf、nng、Aeron、Twisted Deferred 的设计对比，理解游戏服务器为什么需要自建通信层而不是复用通用框架。
+    link: /study/appendix-external-reference-systems.html
+footer: 文档来源为仓库内已有资料，持续更新中
 ---
-
-## 文档导航
-
-### 指南
-
-- [阅读入口](/guide/)
-- [WebConsole 指南](/guide/webconsole.md)
-
-### 源码学习
-
-- [源码学习首页](/book/)
-- [导读：如何阅读这本书](/book/01-introduction-and-method.md)
-- [BigWorld：问题、模型与核心概念](/book/02-bigworld-problems-model-concepts.md)
-- [RPC、EntityCall 与通信模式](/book/11-rpc-entitycall-and-communication-patterns.md)
-- [序列化、Bundle 与网络消息](/book/10-serialization-bundle-and-messages.md)
-- [数据库、DBMgr 与持久化](/book/13-database-dbmgr-and-persistence.md)
-
-### 架构
-
-- [架构总览](/architecture/)
-- [KBEngine 源码分析总览](/architecture/source-analysis/)
-- [BigWorld 学习入口](/architecture/bigworld/)
-- [BigWorld / KBEngine 对照](/architecture/comparison/)
-- [KBEngine 2.0 重设计方案](/architecture/redesign.md)
-
-### API 参考
-
-- [API 总览](/api/)
-- [基本数据类型](/api/basetypes.md)
-- [关键词释义](/api/keywords.md)
-
-- [client API](/api/client/)
-- [cellapp API](/api/cellapp/)
-- [baseapp API](/api/baseapp/)
-- [loginapp API](/api/loginapp/)
-- [dbmgr API](/api/dbmgr/)
-- [interfaces API](/api/interfaces/)
-- [logger API](/api/logger/)
-- [bots API](/api/bots/)
-
-### 资料
-
-- [资料与说明](/resources/)

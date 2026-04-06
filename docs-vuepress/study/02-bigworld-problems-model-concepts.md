@@ -402,7 +402,7 @@ BaseApp
   ├── Proxy（客户端会话锚点）
   ├── Base Entity（长期逻辑：背包/任务/社交）
   │     │
-  │     │ EntityCall（创建 Cell Entity）
+  │     │ 组件消息（创建 Cell Entity）
   │     ▼
   └──▶ CellApp
         ├── Cell Entity（实时空间：位置/移动/战斗）

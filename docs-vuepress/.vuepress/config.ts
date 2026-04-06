@@ -2,6 +2,7 @@ import { defaultTheme } from '@vuepress/theme-default'
 import { defineUserConfig } from 'vuepress/cli'
 import { viteBundler } from '@vuepress/bundler-vite'
 import { searchPlugin } from '@vuepress/plugin-search'
+import { markdownChartPlugin } from '@vuepress/plugin-markdown-chart'
 
 export default defineUserConfig({
   base: '/kbengine/',
@@ -33,6 +34,9 @@ export default defineUserConfig({
       maxSuggestions: 10,
       isSearchable: (page) => !page.path.startsWith('/404'),
     }),
+    markdownChartPlugin({
+      mermaid: true,
+    }),
   ],
   theme: defaultTheme({
     logo: '/logo.png',
@@ -42,90 +46,99 @@ export default defineUserConfig({
     lastUpdated: false,
     navbar: [
       { text: '首页', link: '/' },
-      { text: '源码学习', link: '/book/' },
-      { text: '指南', link: '/guide/' },
+      { text: '源码学习', link: '/study/' },
       { text: '架构', link: '/architecture/' },
       { text: 'API', link: '/api/' },
       { text: '资料', link: '/resources/' },
+      { text: '指南', link: '/guide/' },
     ],
     sidebar: {
-      '/book/': [
+      '/study/': [
         {
           text: 'Part I 为什么长这样',
           children: [
-            '/book/README.md',
-            '/book/01-introduction-and-method.md',
-            '/book/02-bigworld-problems-model-concepts.md',
-            '/book/03-kbengine-system-panorama.md',
+            {
+              text: '源码学习首页',
+              link: '/study/',
+            },
+            '/study/01-introduction-and-method.md',
+            '/study/02-bigworld-problems-model-concepts.md',
+            '/study/03-kbengine-system-panorama.md',
           ],
         },
         {
           text: 'Part II 运行骨架',
           children: [
-            '/book/04-startup-and-process-model.md',
-            '/book/05-entitydef-and-entity-definition.md',
-            '/book/06-python-runtime-and-script-bridge.md',
+            '/study/04-startup-and-process-model.md',
+            '/study/05-entitydef-and-entity-definition.md',
+            '/study/06-python-runtime-and-script-bridge.md',
           ],
         },
         {
           text: 'Part III 基础设施层',
           children: [
-            '/book/07-concurrency-threads-and-memory.md',
-            '/book/08-network-infrastructure.md',
-            '/book/09-distributed-foundation.md',
+            '/study/07-concurrency-threads-and-memory.md',
+            '/study/08-network-infrastructure.md',
+            '/study/09-distributed-foundation.md',
           ],
         },
         {
           text: 'Part IV 通信与协作',
           children: [
-            '/book/10-serialization-bundle-and-messages.md',
-            '/book/11-rpc-entitycall-and-communication-patterns.md',
-            '/book/12-property-sync-and-broadcast.md',
-            '/book/13-database-dbmgr-and-persistence.md',
+            '/study/10-serialization-bundle-and-messages.md',
+            '/study/11-rpc-entitycall-and-communication-patterns.md',
+            '/study/12-property-sync-and-broadcast.md',
+            '/study/13-database-dbmgr-and-persistence.md',
           ],
         },
         {
           text: 'Part V 空间、运动与拓扑',
           children: [
-            '/book/14-space-aoi-and-vision-system.md',
-            '/book/15-space-topology-and-dynamic-scaling.md',
-            '/book/16-movement-pathfinding-and-navigation.md',
-            '/book/17-ghost-system.md',
+            '/study/14-space-aoi-and-vision-system.md',
+            '/study/15-space-topology-and-dynamic-scaling.md',
+            '/study/16-movement-pathfinding-and-navigation.md',
+            '/study/17-ghost-system.md',
           ],
         },
         {
           text: 'Part VI 脚本层行为',
           children: [
-            '/book/18-hooks-callbacks-timers-and-events.md',
+            '/study/18-hooks-callbacks-timers-and-events.md',
           ],
         },
         {
           text: 'Part VII 前后端交互',
           children: [
-            '/book/19-client-protocol-and-interaction.md',
+            '/study/19-client-protocol-and-interaction.md',
           ],
         },
         {
           text: 'Part VIII 运维、调试与稳定性',
           children: [
-            '/book/20-observability-monitoring-profiling-and-debugging.md',
-            '/book/21-hotupdate-fault-tolerance-and-ops.md',
+            '/study/20-observability-monitoring-profiling-and-debugging.md',
+            '/study/21-hotupdate-fault-tolerance-and-ops.md',
           ],
         },
         {
           text: 'Part IX 串联与实战',
           children: [
-            '/book/22-player-complete-lifecycle.md',
-            '/book/23-bigworld-and-kbengine-comparison.md',
-            '/book/24-practical-source-walkthroughs.md',
+            '/study/22-player-complete-lifecycle.md',
+            '/study/23-bigworld-and-kbengine-comparison.md',
+            '/study/24-practical-source-walkthroughs.md',
+          ],
+        },
+        {
+          text: '阅读辅助',
+          children: [
+            '/study/table-of-contents.md',
           ],
         },
         {
           text: 'Appendix',
           children: [
-            '/book/appendix-reading-map-and-next-steps.md',
-            '/book/appendix-key-algorithms.md',
-            '/book/appendix-external-reference-systems.md',
+            '/study/appendix-reading-map-and-next-steps.md',
+            '/study/appendix-key-algorithms.md',
+            '/study/appendix-external-reference-systems.md',
           ],
         },
       ],

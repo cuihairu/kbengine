@@ -38,7 +38,7 @@ Python 脚本 → 返回 (accountName, password, error, ...)
   │
   ↓ (脚本允许登录)
 PendingLoginMgr::add()
-  │  kbe/src/server/loginapp/pending_loginmgr.h
+  │  kbe/src/lib/server/pendingLoginmgr.h
   │  创建 PLInfos，等待后续流程
   ↓
 Loginapp → DBMgr: onAccountLogin
@@ -103,9 +103,9 @@ BigWorld 的登录流程类似，但多了：
 Python 脚本层
   │  someEntity.remoteMethod(args)
   ↓
-EntityRemoteMethod::__py_call()  /  ClientEntityMethod::tp_call()
-  │  kbe/src/lib/entitydef/entity_remote_method.cpp
-  │  kbe/src/lib/entitydef/entity_client_method.cpp
+EntityRemoteMethod::tp_call()  /  ClientEntityMethod::tp_call()
+  │  kbe/src/server/baseapp/entity_remotemethod.cpp
+  │  kbe/src/server/cellapp/client_entity_method.cpp
   │  1. 从 MethodDescription 获取 utype (方法 ID)
   │  2. 创建 Bundle
   ↓
@@ -128,8 +128,9 @@ EntityCall::sendCall(bundle)
   │  MessageHandlers::handle(msgID, ...)
   │  通过 msgID 查找注册的 handler
   ↓
-Entity::onRemoteMethodCall(channel, stream)
-  │  kbe/src/lib/entitydef/entity.cpp
+Base/Cell Entity::onRemoteMethodCall(channel, stream)
+  │  kbe/src/server/baseapp/entity.cpp
+  │  kbe/src/server/cellapp/entity.cpp
   │  1. 从 stream 读取 entityID → 查找实体
   │  2. 从 stream 读取 methodUtype → 查找 MethodDescription
   │  3. MethodDescription::createFromStream(stream) 反序列化参数
@@ -171,7 +172,7 @@ Python 脚本层
   │  entity.someProp = newValue
   ↓
 Entity::__py_setattr(name, value)
-  │  kbe/src/lib/entitydef/entity.cpp
+  │  kbe/src/server/baseapp/entity.cpp / kbe/src/server/cellapp/entity.cpp
   │  1. 查找 PropertyDescription
   │  2. 如果是客户端可见属性 → 标记脏
   ↓
@@ -235,7 +236,7 @@ Python 脚本层
   │  entity.writeToDB(callback, shouldAutoLoad)
   ↓
 Entity::writeToDB()
-  │  kbe/src/lib/entitydef/entity.cpp
+  │  kbe/src/server/baseapp/entity.cpp
   │  1. 收集所有 persistent 属性
   │  2. addPersistentsDataToStream() 序列化到 MemoryStream
   ↓

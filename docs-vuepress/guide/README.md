@@ -4,7 +4,7 @@
 
 ## 阅读入口
 
-- [源码学习首页](/book/)
+- [源码学习首页](/study/)
 - [WebConsole 指南](/guide/webconsole.md)
 - [架构总览](/architecture/)
 - [KBEngine 源码分析总览](/architecture/source-analysis/)

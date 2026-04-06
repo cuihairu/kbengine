@@ -8,11 +8,13 @@
     "docs:verify": "bash tools/setup_doc_verifier.sh && DYLD_LIBRARY_PATH=.tmp/build/chmlib-install/lib ./.venv-docs/bin/python tools/verify_authoritative_docs.py"
   },
   "devDependencies": {
-    "@vuepress/bundler-vite": "2.0.0-rc.18",
-    "@vuepress/plugin-search": "^2.0.0-rc.54",
-    "@vuepress/theme-default": "2.0.0-rc.54",
+    "@vuepress/bundler-vite": "2.0.0-rc.26",
+    "@vuepress/plugin-markdown-chart": "2.0.0-rc.121",
+    "@vuepress/plugin-search": "2.0.0-rc.121",
+    "@vuepress/theme-default": "2.0.0-rc.121",
+    "mermaid": "^11.12.0",
     "sass-embedded": "^1.98.0",
-    "vuepress": "2.0.0-rc.18"
+    "vuepress": "2.0.0-rc.26"
   },
   "keywords": [
     "kbengine",

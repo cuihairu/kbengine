@@ -65,7 +65,7 @@ EntityDef 的 .def 文件描述结构，Python 文件定义行为。脚本层是
 
 ## 6.4 继承链的差异
 
-### KBEngine：两层
+### KBEngine：两支继承链
 
 ```
 ServerApp
@@ -93,15 +93,15 @@ class EntityApp : public ServerApp
 };
 ```
 
-### BigWorld：三层
+### BigWorld：EntityApp 之上再加 ScriptApp
 
 ```
 ServerApp
-  └── ScriptApp              ← 多了一层：专门处理 Python 运行时
-        └── EntityApp        ← 加了 TimeQueue + BgTaskManager
+  └── EntityApp              ← 实体运行骨架
+        └── ScriptApp        ← 多了一层：专门处理 Python 运行时
               ├── BaseApp
-              └── CellApp
-        └── DBApp
+              ├── CellApp
+              └── DBApp
 ```
 
 BigWorld 把 Python 运行时抽成了独立的 `ScriptApp` 层：

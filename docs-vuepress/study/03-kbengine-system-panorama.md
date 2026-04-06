@@ -165,6 +165,11 @@ BigWorld 把这个拆成了 `DBApp`（实际操作）+ `DBAppMgr`（集群协调
 
 ## 3.5 玩家主线：一条路径贯穿五类进程
 
+这里要刻意区分两个视角：
+
+- 玩家主线图只强调 `Client → LoginApp → BaseApp → CellApp → DBMgr` 这条业务闭环。
+- 系统全景还必须额外补上 `Interfaces`、`Bots`、`Logger`、`Machine`、`BaseAppMgr`、`CellAppMgr` 这些外围与基础设施进程，否则读者会误以为它们不存在。
+
 最实用的系统图：记住这一条玩家主线。
 
 ```
