@@ -36,6 +36,23 @@ Ghost A 在 Cell 2 上拥有部分只读状态
 
 **Ghost 不是 Cache**：Ghost 不只是为了加速查询。Ghost 是 AOI 系统的必要组件——没有 Ghost，跨 Cell 边界的 AOI 事件无法触发。
 
+### 重要纠偏：KBEngine 里的 Ghost 不只用于“多 Cell AOI”
+
+上面的解释更接近 BigWorld 的多 Cell 空间分割语境。  
+在 KBEngine 中，即使一个 Space 通常只有一个 Cell，Ghost 仍有关键职责：实体跨 CellApp 迁移（teleport）期间的消息保序与路由中转。
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+// 如果期间有base的消息发送过来， entity的ghost机制能够转到real上去...
+```
+
+```cpp
+// 文件：kbe/src/server/cellapp/ghost_manager.h
+// ...需要向ghost_route_临时设置一个路由地址， 路由在最后一次收包超过一定时间擦除。
+```
+
+可以把它理解成：KBEngine 的 Ghost 既是“分布式可见性副本机制”，也是“迁移窗口的可靠转发机制”。
+
 ## 17.3 real / ghost 的区分
 
 ### KBEngine
@@ -672,14 +689,14 @@ void Entity::changeToReal(COMPONENT_ID ghostCell, KBEngine::MemoryStream& s)
 | Ghost 创建 | 无独立类（Entity 状态切换） | EntityGhostMaintainer 定期检查 |
 | 控制权 | EntityCall* controlledBy_ | EntityMailBoxRef controlledBy_ |
 | 状态转换 | changeToGhost / changeToReal | Offload 机制 |
-| Haunt 管理 | 无（单 Cell 不需要） | RealEntity::addHaunt / delHaunt |
+| Haunt 管理 | 无 Haunt 列表（但有迁移期 ghost 路由） | RealEntity::addHaunt / delHaunt |
 | 消息缓冲 | per-CellApp Bundle 缓冲 | BufferedGhostMessages 序列缓冲 |
 
 **核心差异**：
 
-1. **BigWorld 的 Haunt 列表**：RealEntity 维护所有 Ghost 的通道列表，可以直接向每个 Ghost 推送数据。KBEngine 没有 Haunt 概念（因为一个 Space 只有一个 Cell，Ghost 跨 CellApp 的需求有限）
+1. **BigWorld 的 Haunt 列表**：RealEntity 维护所有 Ghost 的通道列表，可以直接向每个 Ghost 推送数据。KBEngine 没有 Haunt 概念，但通过 `GhostManager::ghost_route_` 处理迁移窗口的临时路由。
 
-2. **BigWorld 的 EntityGhostMaintainer**：定期检查 Ghost 集合是否与 AOI 覆盖一致。KBEngine 没有这层（单 Cell 不需要动态 Ghost 管理）
+2. **BigWorld 的 EntityGhostMaintainer**：定期检查 Ghost 集合是否与 AOI 覆盖一致。KBEngine 没有这层 AOI 一致性巡检，主要依赖迁移流程中的 `changeToGhost / changeToReal` 与路由超时清理。
 
 3. **消息缓冲策略**：KBEngine 按 CellApp 分组缓冲 Bundle，BigWorld 按消息序列缓冲并保证顺序
 
@@ -731,6 +748,7 @@ void Entity::changeToReal(COMPONENT_ID ghostCell, KBEngine::MemoryStream& s)
 ## 17.14 小结
 
 - **Ghost 是跨 Cell 边界 AOI 的必要组件**：没有 Ghost，跨 Cell 的实体进出视野事件无法触发
+- **对 KBEngine 来说，Ghost 还承担迁移窗口的路由中转职责**：实体跨 CellApp 传送时，消息可经 ghost 机制转发到 real
 - **real 拥有完整状态和写权限，ghost 只有部分只读副本**：所有写操作必须经过 real
 - **isReal() 检查遍布代码**：属性变更、方法调用、控制器操作都先检查 isReal()
 - **GhostManager 缓冲 ghost 消息并批量发送**：按 CellApp 分组，复用 Bundle

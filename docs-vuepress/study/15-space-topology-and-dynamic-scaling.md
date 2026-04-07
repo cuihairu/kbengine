@@ -515,6 +515,37 @@ void Cellapp::reqTeleportToCellApp(Network::Channel* pChannel,
 
 它更接近"业务显式迁移实体"，不是 BigWorld 那种由 BSP 边界变化自动驱动的负载均衡。
 
+### 多 CellApp 与单 Space 分片：不要混为一谈
+
+`KBEngine` 支持多 `CellApp` 进程，但这和“单个 Space 自动切成多个 Cell”是两件事。
+
+```cpp
+// 文件：kbe/src/server/cellapp/spacememory.h
+// 每个space最多只有一个cell
+Cell* pCell_;
+```
+
+```cpp
+// 文件：kbe/src/server/cellapp/witness.cpp
+// 当前这么做能解决问题，但是在space多cell分割的情况下将会出现问题
+```
+
+`Cellappmgr` 仍会维护多个 `CellApp`（加入/移除/负载更新），并在创建新 Space 实体时选择目标进程：
+
+- `addCellappComponentID(...)`
+- `removeCellapp(...)`
+- `updateCellapp(...)`
+- `reqCreateCellEntityInNewSpace(...)`（内部更新 `bestCellappID_`）
+
+这说明 KBEngine 的扩展单位更偏向“组件级扩展 + 业务显式迁移”，而不是 BigWorld 的“一个 Space 内自动分裂/重平衡”。
+
+### 回到实践问题：多 CellApp 项目如何理解
+
+1. 支持多 CellApp：是，KBEngine 组件层面支持。
+2. 自动扩容/自动分片：否，默认不是 BSP 自动切分模式。
+3. CellApp 数量是否固定：启动配置给出初始值，可运维增减，但不会自动做空间重分片。
+4. 无缝地图如何实现：常见做法是“多 Space 分区 + 业务触发 teleport/迁移 + 客户端流式加载”，不是引擎内建的单 Space BSP 无缝切片。
+
 ### 为什么简化？取舍分析
 
 | 维度 | BigWorld（完整 BSP） | KBEngine（简化） |
@@ -556,6 +587,7 @@ void Cellapp::reqTeleportToCellApp(Network::Channel* pChannel,
 | SpaceMemorys | `kbe/src/server/cellapp/spacememorys.h` |
 | Cell | `kbe/src/server/cellapp/cell.h` |
 | Teleport | `kbe/src/server/cellapp/cellapp.cpp`（reqTeleportToCellApp） |
+| CellApp 选择与注册 | `kbe/src/server/cellappmgr/cellappmgr.cpp` |
 
 ### BigWorld
 
@@ -601,4 +633,5 @@ void Cellapp::reqTeleportToCellApp(Network::Channel* pChannel,
 - **EntityBoundLevels 确保分割线不穿过实体**：记录实体分布，限制分割线移动范围
 - **CellAppGroup 管理扩容/缩容**：addCell() 添加新 Cell，checkForUnderloaded() 移除空闲 Cell
 - **KBEngine 不做动态负载均衡**：一个 Space 只有一个 Cell，简化了实现但牺牲了单 Space 水平扩展能力
+- **KBEngine 支持多 CellApp，但不支持单 Space 自动分片**：更接近“多进程部署 + 业务显式迁移”，不是 BigWorld 的 BSP 自动重平衡
 - **取舍的核心**：BigWorld 面向超大世界（同 Space 数万实体），KBEngine 面向中等规模（多 Space 分治）
