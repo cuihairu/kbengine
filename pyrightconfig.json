@@ -1,0 +1,139 @@
+{
+  "include": [
+    "kbe/res/sdk_templates/server/python_assets/scripts",
+    "typings/examples"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    ".tmp",
+    "BigWorld-Engine-14.4.1",
+    "build",
+    "node_modules",
+    "vcpkg"
+  ],
+  "stubPath": "typings/stubs",
+  "executionEnvironments": [
+    {
+      "root": "kbe/res/sdk_templates/server/python_assets/scripts/base",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/base",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "kbe/res/sdk_templates/server/python_assets/scripts/common",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "kbe/res/sdk_templates/server/python_assets/scripts/cell",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/cell",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "kbe/res/sdk_templates/server/python_assets/scripts/interface",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/interface",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "kbe/res/sdk_templates/server/python_assets/scripts/login",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/login",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "kbe/res/sdk_templates/server/python_assets/scripts/db",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/db",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "kbe/res/sdk_templates/server/python_assets/scripts/logger",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/logger",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "kbe/res/sdk_templates/server/python_assets/scripts/bots",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/bots",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "typings/examples/cellapp",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/cell",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "typings/examples/interfaceapp",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/interface",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "typings/examples/loginapp",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/login",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "typings/examples/dbmgr",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/db",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "typings/examples/logger",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/logger",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "typings/examples/bots",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/bots",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    },
+    {
+      "root": "typings/examples",
+      "extraPaths": [
+        "kbe/res/sdk_templates/server/python_assets/scripts/base",
+        "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "typings"
+      ]
+    }
+  ],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic",
+  "reportMissingModuleSource": "none"
+}
