@@ -73,6 +73,28 @@ Logger            → 日志聚合
 | BigWorld 细粒度 | 可水平扩展（DBApp）、独立守护（Reviver） | 运维复杂度高，进程多 |
 | KBEngine 粗粒度 | 部署简单，进程少，上手快 | 数据库层单点，容错靠人工 |
 
+### 23.2.1 组件身份分配：`bwmachined` vs `checkComponentID()`
+
+两套系统都需要回答同一个问题：组件进程启动后，如何拿到**可路由、可运维、可收敛**的稳定身份。
+
+| 维度 | BigWorld | KBEngine |
+|------|----------|----------|
+| 身份分配入口 | `bwmachined` 统一管理和分配 | `checkComponentID()` 收束 |
+| 显式指定 | 主要通过管理链路/启动控制面编排 | 可直接 `--cid=...` |
+| 自动分配 | 由 `bwmachined` 体系完成 | `IDComponentQuerier -> machine.queryComponentID` |
+| 自举处理 | 注册中心先行，组件后挂载 | `machine/logger` 支持本地公式分配，避免循环依赖 |
+| 运维侧重点 | 注册中心一致性与进程编排 | 关键组件固定 CID + 弹性组件自动兜底 |
+
+避免误读：两者都不是“纯硬件指纹生成身份”的设计。  
+在云/虚拟化环境中，重建实例、热迁移、模板克隆、容器网络重建都可能让网卡标识漂移或重复；如果只靠硬件编码，容易出现身份漂移或冲突。
+
+实务建议（两者通用）：
+
+1. 关键组件身份要可预测、可审计（固定映射或固定参数）
+2. 弹性工作组件允许自动分配，但必须有冲突消解机制
+3. 把身份变更纳入发布与回滚流程，避免“隐式漂移”
+4. 监控身份冲突/重复注册/异常重连，把问题前置到运维告警
+
 ---
 
 ## 23.3 实体模型对照
@@ -131,6 +153,8 @@ deferred.addErrback(onError)
 - **PyDeferred**：callback/errback 链式处理，可以组合多个异步操作
 - **ReturnValuesHandler**：C++ 层处理 TwoWay 的回复路由
 
+> 避免误读：BigWorld 的 Mailbox 模型同样显式区分 Cell/Base/Client 执行域，不是把这层架构隐藏起来；这点与 KBEngine 的 `entity.base/entity.cell` 属于同源设计。
+
 ### KBEngine：纯单向 + CallbackMgr
 
 ```
@@ -160,6 +184,7 @@ someEntity.method(args, callbackID)
 | 维度 | BigWorld TwoWay + Deferred | KBEngine 单向 + CallbackMgr |
 |------|---------------------------|---------------------------|
 | 编程模型 | 异步链式调用 | 手动回调注册 |
+| 执行域感知 | 显式（Cell/Base/Client Mailbox） | 显式（base/cell EntityCall） |
 | 组合能力 | `deferred.addCallback().addCallback()` | 无 |
 | 错误处理 | 内置 errback 链 | 需手动处理 |
 | 学习曲线 | 较陡（需理解 Deferred） | 平缓 |
@@ -167,6 +192,8 @@ someEntity.method(args, callbackID)
 | 适用场景 | 复杂异步编排 | 简单回调 |
 
 **KBEngine 为什么砍掉 TwoWay**：简化实现。MMO 中大多数 RPC 是 fire-and-forget（属性同步、EntityCall 触发），只有少数场景（DB 查询、跨进程验证）需要"等回复"，这些用 CallbackMgr 够用。
+
+避免误读：两者的核心差异在“是否内建 TwoWay/Deferred”与接口设计，不在“是否让客户端理解 Base/Cell 执行域”。
 
 ---
 
@@ -592,6 +619,7 @@ BigWorld 在安全方面投入更多——Cuckoo Cycle PoW 有效防止自动化
 3. **选择合适的网络层**：内部用 TCP 简化开发（KBEngine 的选择），外部用 KCP 或 QUIC 降低延迟
 4. **实现 Reviver**：即使不用 BigWorld，也应该有自动进程守护
 5. **实现 Backup 机制**：BaseApp 级别的实体备份是防止数据丢失的关键
+6. **云环境治理组件身份**：不要仅依赖硬件指纹，关键组件使用稳定身份映射，弹性组件保留自动分配兜底
 
 ---
 

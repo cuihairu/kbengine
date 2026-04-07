@@ -139,6 +139,7 @@ export default defineUserConfig({
             '/study/appendix-reading-map-and-next-steps.md',
             '/study/appendix-key-algorithms.md',
             '/study/appendix-external-reference-systems.md',
+            '/study/appendix-terminology-quick-reference.md',
           ],
         },
       ],

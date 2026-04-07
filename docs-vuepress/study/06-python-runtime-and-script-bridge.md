@@ -312,7 +312,24 @@ PyObject* RemoteEntityMethod::tp_call(PyObject* self, PyObject* args, PyObject* 
 
 ## 6.9 Twisted Deferred vs CallbackMgr
 
-### BigWorld PyDeferred
+### 先把概念说清楚：Deferred 到底是什么
+
+Deferred 不是线程，不是协程，它更像 JavaScript 的 Promise：
+
+- 一个“未来结果容器”
+- 一个“回调链调度器”
+
+最小心智模型：
+
+```text
+PENDING（等待中）
+   ├── callback(result)  -> SUCCESS 分支，按 addCallback 链执行
+   └── errback(error)    -> FAILURE 分支，按 addErrback 链执行
+```
+
+也就是说，调用方现在拿不到结果，只先拿到一个 Deferred；结果未来到达时，由 Deferred 统一触发对应分支。
+
+### BigWorld 的 PyDeferred 是怎么接上 Twisted 的
 
 ```cpp
 // 文件：programming/bigworld/lib/entitydef/py_deferred.hpp（简化）
@@ -330,38 +347,93 @@ class PyDeferred
         pObject_(PyObject_CallFunctionObjArgs(s_classDeferred.get(), NULL))
     {}
 
-    // 添加回调
     void addCallback(PyObject* callback);
-
-    // 触发回调
+    void addErrback(PyObject* errback);
     void callback(PyObject* result);
+    void errback(PyObject* error);
 };
 ```
 
-BigWorld 用 Twisted Deferred 提供：
-- **异步链式处理**：`deferred.addCallback(f1).addCallback(f2).addErrback(errHandler)`
-- **TwoWay RPC 返回值**：远程调用返回 Deferred，结果回来时触发回调
-- **DB 查询异步**：`base.queryDB()` 返回 Deferred
+BigWorld 的 TwoWay RPC/异步查询本质是：
 
-### KBEngine CallbackMgr
+1. 脚本发起调用，先返回 `Deferred`
+2. 脚本注册 `addCallback/addErrback`
+3. C++ 收到远端回复后，触发 `callback(...)` 或 `errback(...)`
+4. Deferred 执行整条回调链
+
+示意代码：
+
+```python
+# BigWorld 脚本层（示意）
+d = self.base.someMethod.twoWay(arg)
+d.addCallback(self.onSuccess)
+d.addErrback(self.onError)
+```
+
+### 为什么 Deferred 会比“单个回调”更强
+
+Deferred 的关键价值不是“能回调”，而是“可组合”：
+
+- 可以串联多个异步步骤：`A -> B -> C`
+- 可以把错误当作一等流程处理（errback 链）
+- 一个回调返回新 Deferred 时，后续链会等待它完成再继续（扁平化异步嵌套）
+
+如果只用普通 callback，很容易退化成“回调套回调”。
+
+### KBEngine CallbackMgr（对照）
 
 ```cpp
 // 文件：kbe/src/lib/server/callbackmgr.h（简化）
-// 模板化的回调管理器
-// 发起时：保存 callbackID → PyObject 回调函数
-// 结果回来时：take(callbackID) → 执行回调
+// 发起时：save(callbackID -> pyCallback)
+// 回来时：take(callbackID) 并执行
 
-// 使用方式（伪代码）：
 int callbackID = callbackMgr_.save(pyCallback);
 // ... 发送请求 ...
-// 结果回来时：
 PyObject* pyCallback = callbackMgr_.take(callbackID);
 PyObject_CallFunction(pyCallback, ...);
 ```
 
-KBEngine 选择更简单的 `CallbackMgr`：callbackID 映射，结果回来直接执行。牺牲了链式 then 的组合能力，但更简单直接。
+CallbackMgr 是“ID 到函数”的映射表，优点是直观、低心智负担；缺点是缺少 Deferred 那种链式组合和统一错误通道。
 
-**本质区别**：BigWorld 的 Deferred 是**可组合的异步原语**（类似 Promise），KBEngine 的 CallbackMgr 是**简单的回调注册表**。
+### 优缺点对比（你阅读时最该抓这张表）
+
+| 维度 | Twisted Deferred（BigWorld） | CallbackMgr（KBEngine） |
+|------|------------------------------|-------------------------|
+| 编程模型 | 链式异步原语（类似 Promise） | 一次性回调登记 |
+| 异步组合 | 强（可串联、可扁平化） | 弱（需手工拼装） |
+| 错误处理 | 内建 errback 链 | 业务层自行分支处理 |
+| 可读性（简单场景） | 一般 | 好 |
+| 可读性（复杂场景） | 好（结构化） | 易碎（回调分散） |
+| 学习成本 | 高（状态机/链语义） | 低 |
+| 调试复杂度 | 中到高 | 低到中 |
+
+### KBEngine CallbackMgr 的优缺点（单独看）
+
+优点：
+
+- **实现简单**：`save/take` 两步就能跑通异步回调，代码路径短
+- **运行时开销低**：不需要维护 Deferred 状态机和回调链调度
+- **定位直接**：按 `callbackID` 查链路，问题面比较收敛
+- **上手成本低**：脚本开发者不必理解 Twisted 的语义细节
+
+缺点：
+
+- **组合能力弱**：多阶段异步流程需要手工编排，容易出现“回调地狱”
+- **错误通道不统一**：成功/失败常靠业务层约定，规范容易漂移
+- **生命周期管理更脆弱**：超时、重复回调、丢回调等边界要自行兜底
+- **可维护性随复杂度下降**：流程一长，回调散落在多处，重构成本上升
+
+一个实用判断标准：
+
+- “一次请求一次响应”的短链路，用 CallbackMgr 性价比高
+- “多步编排 + 失败恢复 + 重试”的长链路，建议抽象成更结构化的异步模型
+
+### 实践建议
+
+- 调用链短、场景简单：CallbackMgr 够用，维护成本更低
+- 调用链长、有失败恢复/重试编排：Deferred 更合适
+
+这也是两套引擎的典型取舍：BigWorld 追求异步表达力，KBEngine 追求实现和使用成本更低。
 
 ## 6.10 热重载机制与边界
 

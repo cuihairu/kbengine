@@ -77,6 +77,8 @@ PyEntityMailBox（Python 脚本层 Mailbox）
               └── BaseEntityMailBox    ← 调用 Base 侧实体
 ```
 
+> 避免误读：这说明 BigWorld 也显式区分 Cell/Base 执行域，不是把这层架构“隐藏掉”。KBEngine 的 `entity.base/entity.cell` 与 BigWorld 的 Mailbox 分域在模型上是同源设计。
+
 ### Mailbox 的 getStream：单向 vs TwoWay 的分叉点
 
 ```cpp
@@ -658,6 +660,31 @@ def onError(self, error):
 | 适用场景 | DB 查询、延迟操作 | DB 查询、远程调用、异步编排 |
 | 超时处理 | 无内置 | RequestManager 内置超时 |
 
+### KBEngine CallbackMgr 的优缺点
+
+优点：
+
+- 实现简单：`save/take` 模式直观，改动面小
+- 运行时开销低：不需要维护 Deferred 状态机与链调度
+- 工程落地快：短链路请求（一次请求一次回调）接入成本低
+- 排障直接：可按 `callbackID` 快速定位一次调用闭环
+
+缺点：
+
+- 组合能力弱：多阶段异步流程需要手工串接，易出现回调嵌套
+- 错误通道不统一：成功/失败依赖业务约定，规范容易漂移
+- 生命周期风险高：超时、重复回调、未回调都要脚本层自行兜底
+- 随复杂度恶化：流程一长，回调分散，维护和重构成本明显上升
+
+### 选型决策清单
+
+| 场景特征 | 更推荐 |
+|---------|--------|
+| 一次请求一次结果、链路短 | CallbackMgr |
+| 需要统一错误链与超时管理 | Deferred/TwoWay |
+| 多步异步编排（A→B→C） | Deferred/TwoWay |
+| 团队优先追求低学习成本与快速交付 | CallbackMgr |
+
 **一句话**：BigWorld 的 Deferred 是可组合的异步原语（类似 Promise），KBEngine 的 CallbackMgr 是简单的回调注册表。
 
 ## 11.11 与 gRPC / Protobuf / HTTP 的设计对比
@@ -698,6 +725,8 @@ def onError(self, error):
 | CellApp TwoWay | 不支持（无此功能） | 不支持（显式报错） |
 | Ghost 转接 | RealEntityMethod → onRemoteRealMethodCall | RealEntity::Haunt |
 | 暴露方法 | EXPOSED_TYPE 三级 | Exposed 标签 + ExposedMessageRange |
+
+避免误读：`KBEngine 暴露 base/cell` 不是“只有 KBEngine 这样做”。BigWorld 同样要求理解 Cell/Base/Client 执行域；主要差异在 RPC 能力与接口细节（KBEngine `ENTITYCALL_TYPE` 路由变体 vs BigWorld TwoWay/Deferred）以及配套工具链。
 
 ## 11.13 关键源码入口
 

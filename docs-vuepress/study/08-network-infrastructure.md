@@ -4,28 +4,37 @@
 
 ## 8.1 本章核心问题
 
-- I/O 多路复用（select / poll / epoll / kqueue）各自的特点和选择依据？
-- Reactor 模式的四个参与者在代码里怎么对应？
+- I/O 事件模型（select / poll / epoll / kqueue / io_uring）各自的特点和选择依据？
+- Reactor / Proactor 的关键参与者在代码里怎么对应？
 - Channel 与 Endpoint 的职责划分？
 - TCP vs UDP：两套项目为什么做了不同选择？
 - InterfaceTable / MessageHandlers：消息路由怎么实现？
 
 ## 8.2 I/O 多路复用：为什么游戏服务器选 epoll
 
-### select / poll / epoll / kqueue 对比
+### select / poll / epoll / kqueue / io_uring 对比
 
-| 维度 | select | poll | epoll | kqueue |
-|------|--------|------|-------|--------|
-| 最大 FD 数 | 1024（FD_SETSIZE） | 无限制 | 无限制 | 无限制 |
-| 时间复杂度 | O(n) 遍历 | O(n) 遍历 | O(1) 事件通知 | O(1) 事件通知 |
-| 每次调用 | 全量传 fd_set | 全量传 pollfd | 只返回就绪 fd | 只返回就绪 fd |
-| 触发模式 | 水平触发 | 水平触发 | 水平/边缘 | 水平/边缘 |
-| 适用场景 | 少量连接 | 中等连接 | 大量连接（Linux） | 大量连接（BSD/Mac） |
+| 维度 | select | poll | epoll | kqueue | io_uring |
+|------|--------|------|-------|--------|----------|
+| 核心模型 | 同步就绪通知 | 同步就绪通知 | 同步就绪通知 | 同步就绪通知 | 异步提交 + 完成队列 |
+| 最大 FD 数 | 1024（FD_SETSIZE） | 无限制 | 无限制 | 无限制 | 无固定上限（受 ring/资源限制） |
+| 事件获取开销 | O(n) 遍历 | O(n) 遍历 | O(1) 近似事件通知 | O(1) 近似事件通知 | 批量提交/批量完成，系统调用可更少 |
+| 每次调用 | 全量传 fd_set | 全量传 pollfd | 只返回就绪 fd | 只返回就绪事件 | 取完成队列 CQE（完成事件） |
+| 触发语义 | Readiness | Readiness | Readiness | Readiness | Completion（更接近 Proactor） |
+| 主平台 | 全平台 | 全平台 | Linux | BSD/macOS | Linux（较新内核） |
+| 适用场景 | 少量连接 | 中等连接 | Linux 大量长连接 | BSD/macOS 大量连接 | 极高并发 + 异步 I/O 深度优化 |
+
+补充说明：
+
+- `kqueue` 不是缺失项，它是 BSD/macOS 生态里的 `epoll` 对等方案；本章之前写得偏薄，这里补齐。
+- `io_uring` 不只是“新一代 epoll”，它把模型从“就绪通知”推进到“完成通知”，设计上更接近 Proactor。
 
 **游戏服务器为什么选 epoll**：
 - CellApp / BaseApp 每个进程维护数百到数千个 Channel（客户端 + 内部进程）
 - select 每次传全部 fd_set 内核 ↔ 用户态拷贝开销大
 - epoll 只返回就绪事件，O(1) 通知，不受总连接数影响
+- Linux 是两套引擎的主部署平台，`kqueue` 在该平台不可用
+- 对既有 Reactor 架构而言，切到 `io_uring` 意味着重写 I/O 生命周期与回调收束方式，迁移成本高
 
 ### KBEngine EventPoller
 
@@ -112,36 +121,98 @@ int EPoller::processPendingEvents(double maxWait)
 
 KBEngine 的 `EpollPoller::processPendingEvents` 逻辑相同。
 
-## 8.3 Reactor 模式：四个参与者的代码映射
+## 8.3 Reactor vs Proactor：设计思想、组成部件与取舍
 
-Reactor 模式的四个参与者：
+### 8.3.1 先看设计思想（两句话抓住本质）
 
-| Reactor 参与者 | 代码对应 |
-|---------------|---------|
-| **Handle**（资源句柄） | `int fd`（socket 文件描述符） |
-| **Sync Demultiplexer**（同步多路分离器） | `EventPoller`（封装 epoll_wait / select） |
-| **Event Handler**（事件处理器） | `InputNotificationHandler` / `OutputNotificationHandler` |
-| **Reactor**（反应器） | `EventDispatcher`（注册/注销/事件循环） |
+- **Reactor（就绪通知）**：内核只告诉你“这个 fd 现在可读/可写”，真正的 `recv/send` 由应用线程执行。
+- **Proactor（完成通知）**：应用先提交异步 I/O，请求完成后内核/运行时再通知“读写已经完成”。
+
+核心差别是：**通知的是“可以做”还是“已经做完”**。
+
+| 维度 | Reactor | Proactor |
+|------|---------|----------|
+| 通知语义 | Readiness（就绪） | Completion（完成） |
+| 谁执行真正读写 | 应用线程 | 内核/异步运行时 + 完成队列 |
+| 代码主循环 | `poll -> dispatch -> read/write` | `submit -> complete -> callback` |
+| 典型实现 | epoll/kqueue + 事件循环 | IOCP / io_uring（完成队列） |
+
+### 8.3.2 Reactor 的关键组成与职责（含本项目映射）
+
+| 组件 | 作用 | KBEngine / BigWorld 映射 |
+|------|------|--------------------------|
+| Handle（资源句柄） | 标识 I/O 资源 | `fd`（socket） |
+| Sync Demultiplexer（同步多路分离器） | 阻塞等待就绪事件并批量返回 | `EventPoller`（`epoll_wait/select`） |
+| Reactor（反应器） | 注册/注销 handler，驱动事件循环 | `EventDispatcher` |
+| Event Handler（事件处理器） | 真正处理读写事件 | `InputNotificationHandler` / `OutputNotificationHandler` |
+| Acceptor（接入处理器） | 接受新连接并创建会话对象 | `ListenerTcpReceiver` / `ListenerUdpReceiver` |
+| Concrete Handler（具体业务处理） | 拆包、路由、发送、超时控制 | `PacketReceiver` / `PacketSender` / `Channel` |
+
+在这套设计里，职责边界非常清晰：
+
+1. `EventPoller` 只负责“等事件”，不做业务。
+2. `EventDispatcher` 只负责“调度”，不直接读写协议。
+3. `Channel/Packet*` 负责消息边界和连接生命周期。
+
+这就是 Reactor 的核心设计思想：**事件循环和业务处理解耦**，并通过统一调度点保持系统可观测。
+
+### 8.3.3 Reactor 控制流（为什么容易调试）
 
 ```
 EventDispatcher::processOnce()
   │
-  ├── processTasks()          ← 非网络异步任务
-  ├── processTimers()         ← 定时器
-  ├── processStats()          ← 统计
+  ├── processTasks()            ← 非网络异步任务
+  ├── processTimers()           ← 定时器
+  ├── processStats()            ← 统计
   └── processNetwork()
         │
         └── EventPoller::processPendingEvents(maxWait)
               │
-              └── epoll_wait(fd, events, ...)     ← Sync Demultiplexer
+              └── epoll_wait/select
                     │
-                    ├── triggerRead(fd)           ← 找到 Handler 并调用
+                    ├── triggerRead(fd)
                     │     └── handler->handleInputNotification(fd)
                     └── triggerWrite(fd)
                           └── handler->handleOutputNotification(fd)
 ```
 
-**为什么不是 Proactor**：Proactor 需要异步 I/O（Windows IOCP / Linux io_uring）。两个项目设计于 2002-2008 年，Linux 异步 I/O（AIO）不成熟，epoll 是最佳选择。Proactor 模型的编程复杂度也更高——回调嵌套、错误处理、缓冲区管理都比 Reactor 复杂。
+优势在于：网络事件、定时器、任务队列在同一主循环中可统一观测和限流。
+
+### 8.3.4 Proactor 的关键组成与职责（概念对照）
+
+当前两套引擎未采用 Proactor，但要理解它的组件才能看清取舍：
+
+| 组件 | 作用 | 常见实现语义 |
+|------|------|-------------|
+| Asynchronous Operation Processor | 提交异步读写请求 | `async read/write/accept` |
+| Completion Queue | 收集完成事件 | IOCP Completion Port / io_uring CQ |
+| Proactor（完成事件分发器） | 从完成队列取结果并分发 | `get completion -> dispatch` |
+| Completion Handler | 处理“已完成”结果 | `onReadDone/onWriteDone` |
+| Buffer/Context Manager | 管理缓冲区和请求上下文生命周期 | request context、引用计数、取消控制 |
+
+Proactor 的设计思想是：**把 I/O 执行外包给异步引擎，应用主要处理完成事件**。
+
+### 8.3.5 优缺点对照（工程视角）
+
+| 维度 | Reactor | Proactor |
+|------|---------|----------|
+| 复杂度 | 低到中，模型直观 | 中到高，状态机/上下文管理更重 |
+| 可移植性 | 高（epoll/kqueue/select 通用） | 中（强依赖 IOCP/io_uring 等能力） |
+| 调试可见性 | 好（主循环统一） | 一般（提交点与完成点分离） |
+| 缓冲区管理 | 简单（读写点集中） | 复杂（异步期间生命周期难控） |
+| 高并发吞吐潜力 | 高 | 很高（成熟实现下） |
+| 时序确定性（游戏 tick） | 好（容易与主循环对齐） | 需要额外收束（完成回调可能分散） |
+
+### 8.3.6 为什么本书这两套引擎都选 Reactor
+
+不是“Proactor 不好”，而是当时与场景下 Reactor 成本收益更优：
+
+1. **时代约束**：两项目设计年代（约 2002-2008）Linux 侧缺少成熟通用的网络 Proactor 方案。
+2. **业务约束**：MMO 服务器重视 tick 时序可控，Reactor 更容易把网络、定时器、逻辑帧收敛到同一循环。
+3. **工程约束**：Reactor 更容易做故障定位、压测回放、运维观测（统一入口）。
+4. **团队约束**：Proactor 对缓冲区生命周期、取消语义、异常传播要求更高，维护门槛更高。
+
+一句话结论：**在这两套代码基线里，Reactor 是“可控性优先”的架构选择。**
 
 ## 8.4 Channel 与 Endpoint
 
@@ -449,7 +520,7 @@ BigWorld 的 `bwmachined` 职责类似但更重：
 
 ### 路径三：对比 TCP vs UDP 架构
 
-1. KBEngine: Channel 是具体类，只有 TCP 实现
+1. KBEngine: Channel 是具体类，内部路径以 TCP 为主，也可挂 UDP/KCP 扩展
 2. BigWorld: `lib/network/channel.hpp` — 抽象基类，有 `UDPChannel` 子类
 3. BigWorld: `lib/network/bundle.hpp` — `ReliableType` 四级可靠性
 
@@ -463,6 +534,7 @@ BigWorld 的 `bwmachined` 职责类似但更重：
 ## 8.11 小结
 
 - **Reactor 模式**是两套项目共同的 I/O 模型：EventDispatcher（反应器）→ EventPoller（多路分离器）→ Handler（回调）
+- **Reactor vs Proactor 的关键差别**是“就绪通知”与“完成通知”；本书这两套引擎选 Reactor 是可控性优先
 - **epoll** 是 Linux 上的最佳选择——O(1) 事件通知，不受连接数影响
 - **Channel = Endpoint + PacketReader + Bundle + Handlers**，不只是 socket 封装
 - **KBEngine 选 TCP**（简单可靠），**BigWorld 选 UDP + 自建可靠性**（低延迟可控）

@@ -28,12 +28,12 @@ features:
   - title: "\u277B 双引擎对照"
     details: BigWorld vs KBEngine 十维度对比——"完整方案 vs 最小可行方案"的设计取舍。
     link: /study/23-bigworld-and-kbengine-comparison.html
-footer: 24 章 · 9 个 Part · 3 个附录 · 覆盖从基础设施到运维实战的完整技术栈
+footer: 24 章 · 9 个 Part · 4 个附录 · 覆盖从基础设施到运维实战的完整技术栈
 ---
 
 > 这是本站唯一的源码学习主线。建议先按章节顺序读完整本书，再回到 `architecture` 或 `api` 做专题回查。
 
-> 入口关系：这里是主首页；[详细目录](./table-of-contents.md) 用来按 Part 浏览；3 个附录放在正文之后，作为查表和延伸阅读。
+> 入口关系：这里是主首页；[详细目录](./table-of-contents.md) 用来按 Part 浏览；4 个附录放在正文之后，作为查表和延伸阅读。
 
 ## 系统架构总览
 

@@ -1980,6 +1980,72 @@ entity_defs/interfaces/<InterfaceName>.def
 
 这也是为什么 `loadInterfaces(...)` 的实现核心是继续调用 `loadAllDefDescriptions(...)`，而 `loadComponents(...)` 则会额外创建/查找组件 `ScriptDefModule`、补组件属性、登记 `ComponentDescription`。
 
+### 设计视角：`Interface` / `Parent` / `Component` 三分法
+
+这一组机制不是同一个问题的不同写法，而是三种不同的建模关系：
+
+| 机制 | 关系语义 | 定义加载效果 | 运行时对象形态 | 适用场景 |
+|------|----------|--------------|----------------|----------|
+| `Interfaces` | 横向拼装（mixin 风格） | 定义被摊平合并进宿主 | 无独立组件实例 | 复用一组属性/方法声明 |
+| `Parent` | 纵向继承（is-a） | 父定义链继续加载到当前实体 | 仍是一个实体类型层级 | 共享主干实体能力与约束 |
+| `Components` | 组合（has-a） | 宿主增加组件属性并关联组件模块 | 有独立组件描述/模块 | 可插拔业务模块（战斗、背包等） |
+
+因此，这里不应理解为“mixin 和继承二选一”，而应理解为：
+
+- `Interfaces` 解决“定义复用”的横切问题
+- `Parent` 解决“类型层级”的纵向问题
+- `Components` 解决“功能拆分与组装”的模块化问题
+
+### `Mixin` 与组合：在实体定义系统里如何取舍
+
+在这个系统里，可以按下面的工程标准做选择：
+
+| 维度 | `Mixin`（`Interfaces`） | 组合（`Components`） |
+|------|-------------------------|----------------------|
+| 身份 | 不是独立对象 | 是独立组件模块 |
+| 边界 | 摊平进宿主，边界弱 | 通过组件名隔离，边界清晰 |
+| 状态归属 | 状态天然属于宿主 | 状态可按组件组织与演进 |
+| 可替换性 | 较弱（改动影响宿主面） | 较强（可插拔） |
+| 进程实现 | 无独立 `base/cell` 脚本要求 | 通常需要 `base/components`、`cell/components` 对应实现 |
+
+经验上，若只是抽取一组公共定义并且不需要独立生命周期，用 `Interfaces`；若需要长期演进、分工开发、按模块插拔，用 `Components`。
+
+### Python 动态能力与可维护性：`typing` 可以做什么
+
+很多人读到这里会不适应：类里明明看不到某个方法定义，却可以直接调用。  
+这在 KBEngine 里是“定义系统 + 运行时绑定”共同导致的正常现象，不等同于 C# 的分部类（partial class）。
+
+常见来源有三类：
+
+- `.def` 与脚本类在初始化阶段做一致性校验并绑定
+- 引擎层（C++ 扩展）在运行时给实体对象提供额外能力
+- 代理对象或转发机制（如 `EntityCall`）让调用点与实现点分离
+
+这类动态能力可以保留，但建议用静态约束收敛“魔法调用面”：
+
+1. 为引擎对象补充 `.pyi` stub（最优先）
+2. 用 `Protocol` 描述动态对象最小接口
+3. 在业务入口使用 `cast(...)` 与薄封装，避免全局散落动态调用
+4. 在 CI 中启用 `pyright` 或 `mypy` 做增量校验（先核心目录，后全量）
+5. 关键路径加 `hasattr` / `assert` 作为运行时兜底
+
+最小示例：
+
+```python
+from typing import Protocol, cast
+
+class CellCombatAPI(Protocol):
+    def onDamage(self, amount: int, reason: str) -> None: ...
+
+def cell_combat(self) -> CellCombatAPI:
+    return cast(CellCombatAPI, self.cell)
+
+def apply_fire_damage(self, amount: int) -> None:
+    cell_combat(self).onDamage(amount, "fire")
+```
+
+这不是要把 Python 变成静态语言，而是给动态系统增加“可导航、可重构、可校验”的边界。
+
 ### `Interfaces` 为什么容易被忽略
 
 因为它不像 `Components` 那样在概念上很显眼。组件有独立名字、独立 `.def`、独立描述对象；而接口的效果是“合并后看起来像原本就写在实体里”。但从源码阅读角度，它非常关键：
@@ -2147,7 +2213,7 @@ EntityTable::createDictDataFromPersistentStream()  ← 从库恢复
 
 三合一设计也带来了显著的耦合问题：
 
-**客户端必须了解服务端架构**。这是被讨论最多的问题。当客户端脚本写 `entity.base.login()` 或 `entity.cell.useItem()` 时，客户端开发者必须知道：
+**客户端必须了解服务端架构**。这是被讨论最多的问题。这里不是“KBEngine 的特例”，而是 **Base/Cell 分离模型本身** 的特征（BigWorld 同样如此）。当客户端脚本写 `entity.base.login()` 或 `entity.cell.useItem()` 时，客户端开发者必须知道：
 
 - `base` 和 `cell` 是什么
 - 某个方法是在 BaseApp 还是 CellApp 上执行
@@ -2161,13 +2227,15 @@ entity.cell.move(position)              # → 经 BaseApp 中转到 CellApp
 
 对比 Unity 的 RPC 设计，客户端只标注 `[Command]`（发给服务端）和 `[ClientRpc]`（服务端发到客户端），不需要知道服务端内部有几种进程类型。
 
-**为什么 KBEngine 选择了暴露架构**：
+**为什么会暴露这层架构（KBEngine/BigWorld 都一样）**：
 
 这是一个有意的工程决策，不是设计缺陷。原因有三：
 
 1. **延迟敏感**：Base 方法（登录、背包操作）和 Cell 方法（移动、战斗）的延迟特征完全不同。让客户端区分两者，可以在关键路径上选择更短的网络路径
 2. **EntityCall 有状态**：客户端持有的不是无状态 RPC stub，而是带 `ENTITYCALL_TYPE` 的远端引用。`ENTITYCALL_TYPE_CELL_VIA_BASE`（经 BaseApp 中转到 CellApp）和 `ENTITYCALL_TYPE_BASE`（直连 BaseApp）走的网络路径不同，客户端必须知道这一点
 3. **MMO 的特殊性**：普通游戏的客户端-服务端模型是 1:1，但 MMO 的客户端同时和 BaseApp、CellApp 交互。隐藏这种多进程架构反而会增加调试难度
+
+> 补充说明：BigWorld 在部分客户端工作流中会通过工具链/代码生成降低“手写 Base/Cell 调用”的频率，但底层依然是 Mailbox + Cell/Base/Client 执行域，不是把这层架构消除了。
 
 ### 与其他引擎的设计对比
 
@@ -2179,6 +2247,8 @@ entity.cell.move(position)              # → 经 BaseApp 中转到 CellApp
 | 客户端感知架构 | 感知（base/cell） | 不感知 | 部分感知 | 感知（Cell/Base/Client） |
 | 安全边界 | Exposed 三级 | [Command] 标记 | 服务端权威 | Exposed + ExposedMessageRange |
 | 热更新 | 支持改 .def 重加载 | 不支持 | 部分支持 | 支持改 .def 重加载 |
+
+避免误读：这里“KBEngine 暴露 base/cell”不是对 BigWorld 的反差描述；两者都继承了这套执行域模型。差别主要在脚本接口细节（如 KBEngine 的 `ENTITYCALL_TYPE` 变体、BigWorld 的 TwoWay/Deferred）和配套工具链上。
 
 ### Exposed 设计的安全模型
 

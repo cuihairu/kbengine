@@ -385,6 +385,54 @@ class EntityCall : public EntityCallAbstract
 
 核心差异：BigWorld 有 TwoWay RPC（带返回值的 Mailbox 调用），KBEngine 只有单向 EntityCall + CallbackMgr。这在 Ch11 详述。
 
+### Actor vs RPC 心智模型（读源码时最容易混淆的点）
+
+你的直觉是对的：BigWorld 在语义表达上更偏 Actor，KBEngine 在接口外观上更偏 RPC。
+
+| 观察维度 | BigWorld（Mailbox） | KBEngine（EntityCall） |
+|----------|----------------------|------------------------|
+| 第一心智 | 给“远端实体地址”投递消息 | 调用“远端实体方法” |
+| 默认调用感受 | 消息投递（fire-and-forget） | 远程方法调用（仍是异步） |
+| 返回值语义 | `TwoWay + Deferred` 补充 | 无内建返回，靠 CallbackMgr 旁路 |
+| 地址抽象 | Mailbox 本身强调“收件箱地址” | EntityCall 更强调“方法入口” |
+
+但本质上两者都不是“纯 Actor”或“纯 RPC”，而是**有状态分布式实体消息系统**：
+
+1. 调用目标是实体实例（有 ID、有驻留侧），不是无状态服务
+2. 传输层以异步消息为主，不是本地函数语义
+3. Base/Cell/Client 执行域是路由模型的一部分，不是实现细节
+
+实践上建议统一团队心智：**把它当“异步消息投递 + 可选回复通道”，不要当成本地函数调用。**
+
+### TwoWay 是什么（在 2.8 先建立直觉）
+
+TwoWay 可以理解为：**带回复通道的远程调用**。  
+它不是同步阻塞，而是“先发请求，再异步收到结果或错误”。
+
+和 OneWay 的区别：
+
+| 模式 | 调用后拿到什么 | 是否等待结果 | 常见用途 |
+|------|----------------|--------------|---------|
+| OneWay | 无返回句柄 | 否 | 高频状态同步、普通实体消息 |
+| TwoWay | 一个 Deferred（未来结果） | 异步等待 | 需要结果的查询/校验链路 |
+
+BigWorld 脚本层示意：
+
+```python
+d = someEntity.someMethod.twoWay(args)
+d.addCallback(on_ok)
+d.addErrback(on_err)
+```
+
+典型流程：
+
+1. 发起调用时创建请求跟踪项（replyID / handler / timeout）
+2. 远端处理完成后回包（成功值或错误）
+3. 收到回包后命中请求跟踪项
+4. 触发 Deferred 的 callback 或 errback
+
+对照 KBEngine：没有内建 TwoWay，通常是“单向 EntityCall + callbackID（CallbackMgr）”来模拟一次请求一次响应。
+
 ## 2.9 统一运行模型
 
 把前面的对象放回一张统一模型图：

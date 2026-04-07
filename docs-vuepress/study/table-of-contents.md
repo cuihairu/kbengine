@@ -211,3 +211,8 @@
 ### [C 外部参考系统速查](appendix-external-reference-systems.md)
 
 - gRPC / nng / Aeron / Twisted Deferred 与游戏服务器的对比
+
+### [D 专业术语速查](appendix-terminology-quick-reference.md)
+
+- 实体、通信、分布式、持久化核心术语的一句话定义
+- Mailbox / EntityCall、TwoWay / Deferred、CID 等高频易混概念速查
