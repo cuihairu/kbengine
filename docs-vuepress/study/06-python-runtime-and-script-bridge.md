@@ -8,6 +8,26 @@
 - BigWorld 和 KBEngine 的 Python 集成有什么差异？
 - C++ Entity 怎么变成 Python 可操作的对象？
 - 远程方法调用怎么从 Python 表达式变成网络包？
+
+### 6.1.1 先统一版本基线（避免跨章节语义漂移）
+
+这一章如果不先写清 Python 版本，后面很多结论会被误读（语法、标准库、初始化 API、第三方库可用性都会受影响）。
+
+| 项目 | 脚本运行时版本基线 | 依据 |
+|------|--------------------|------|
+| BigWorld 14.4.1 | **Python 2.7.7（内嵌源码）** | `BigWorld-Engine-14.4.1/programming/bigworld/third_party/python/Include/patchlevel.h` 中 `PY_VERSION = "2.7.7"` |
+| KBEngine（当前仓库） | **Python 3（由构建环境提供，不固定小版本）** | CMake 通过 `find_package(Python3 REQUIRED COMPONENTS Development)`，并链接 `Python3::Python` |
+
+对 KBEngine 再补一条关键实现细节：
+
+- `kbe/src/lib/pyscript/script.cpp` 对 **`PY_VERSION_HEX >= 0x030B0000`（Python 3.11+）**走 `PyConfig + Py_InitializeFromConfig` 路径
+- 低于该阈值走兼容初始化路径（仍是 Python 3 API 体系）
+
+这意味着：
+
+1. BigWorld 的脚本示例默认按 Python 2.7 语义理解（例如旧式字符串/部分标准库行为）
+2. 当前 KBEngine 文档与示例应优先按 Python 3 语义编写
+3. 涉及第三方库（如 Twisted）时，必须结合对应 Python 大版本讨论可用性
 - 热重载的边界在哪里？
 
 ## 6.2 为什么选 Python 而不是 Lua
