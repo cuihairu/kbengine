@@ -1255,6 +1255,145 @@ base/ 或 cell/ 或 client/ ...
 - `isSameType(obj) -> bool`
   - 告诉引擎“这个对象是不是你这套包装类型”
 
+这里最容易误解的其实就是 `isSameType`。
+
+它**不是**在判断：
+
+- 两个对象的字段值是不是相等
+- 两个对象是不是同一个实例
+- “这个对象和那个对象是不是同一种业务含义”
+
+它真正判断的是：
+
+- **当前传进来的这一个 Python 对象，能不能被引擎当成这个 `implementedBy` 包装类型来处理**
+
+所以它的语义更接近：
+
+```python
+isinstance(obj, AvatarBaseInfo)
+```
+
+而不是：
+
+```python
+obj1 == obj2
+```
+
+引擎里至少有两个关键位置会用到它：
+
+1. `createObjFromDict()` 返回对象之后  
+   引擎会立刻再调用一次 `isSameType(pyRet)`，确认你返回的确实是声明的包装对象，而不是随便一个别的对象。
+2. 脚本给属性赋值时  
+   如果你传入的不是底层 `FixedDict` / 原始 `dict`，那引擎就要靠 `isSameType(pyValue)` 判断：这个对象能不能当成该 `FIXED_DICT` 的包装对象接受。
+
+可以把它压缩成一句话：
+
+- `isSameType` 负责回答“**这个对象是不是我这套包装类型的实例**”
+- 它不负责回答“**这个对象和另一个对象的数据是否相等**”
+
+##### 一个完整例子
+
+下面用一个最小但完整的例子，把三组钩子串起来看。
+
+先在 `types.xml` 里定义一个 `FIXED_DICT`：
+
+```xml
+<root>
+    <AVATAR_BASE_INFO>
+        <Properties>
+            <name>
+                <Type> STRING </Type>
+            </name>
+            <level>
+                <Type> UINT32 </Type>
+            </level>
+        </Properties>
+        <implementedBy> avatar_types.AvatarBaseInfo </implementedBy>
+    </AVATAR_BASE_INFO>
+</root>
+```
+
+然后在 `user_type/avatar_types.py` 里放包装类：
+
+```python
+class AvatarBaseInfo:
+    def __init__(self, name, level):
+        self.name = name
+        self.level = level
+
+    @staticmethod
+    def createObjFromDict(dictData):
+        return AvatarBaseInfo(
+            name=dictData["name"],
+            level=dictData["level"],
+        )
+
+    @staticmethod
+    def getDictFromObj(obj):
+        return {
+            "name": obj.name,
+            "level": obj.level,
+        }
+
+    @staticmethod
+    def isSameType(obj):
+        return isinstance(obj, AvatarBaseInfo)
+```
+
+这里三者各自的职责非常明确：
+
+- `createObjFromDict`
+  - 引擎拿到底层固定字典后，负责把它包装成 `AvatarBaseInfo`
+- `getDictFromObj`
+  - 引擎准备写入网络流 / 数据库流时，负责把 `AvatarBaseInfo` 还原成字典
+- `isSameType`
+  - 告诉引擎“这个对象是不是 `AvatarBaseInfo`”
+
+注意这里 `isSameType` 的判断对象永远只有**当前传入的一个对象**。
+
+例如：
+
+```python
+info = AvatarBaseInfo("Tom", 10)
+AvatarBaseInfo.isSameType(info)  # True
+
+AvatarBaseInfo.isSameType({"name": "Tom", "level": 10})  # False
+AvatarBaseInfo.isSameType("Tom")  # False
+```
+
+这正是它和“对象相等比较”最大的区别。
+
+这里 `dict` 返回 `False` 是正常的，因为它不是 `implementedBy` 包装对象。原始 `dict` 如果键集合和子类型都合法，走的是 `FIXED_DICT` 自己的校验分支，不依赖 `implementedBy.isSameType()`。
+
+如果你写成下面这种思路，就是错位的：
+
+```python
+# 这是错误理解：它不是拿来比较两个对象内容是否相等的
+def isSameType(obj):
+    return obj.name == "Tom" and obj.level == 10
+```
+
+这种写法的问题在于：它判断的是“值像不像某个特定数据”，而不是“对象是不是这个包装类型”。引擎真正需要的是后者。
+
+##### 这个例子在运行时怎么流转
+
+假设某个实体属性类型就是 `AVATAR_BASE_INFO`，那么运行过程大致是：
+
+1. 引擎从网络流或数据库流里读出一个底层 `FIXED_DICT`
+2. 调用 `createObjFromDict(dictData)`，把它包装成 `AvatarBaseInfo`
+3. 立刻调用 `isSameType(obj)`，确认返回值确实是 `AvatarBaseInfo`
+4. 脚本层拿到的是 `AvatarBaseInfo` 对象，而不是裸字典
+5. 当脚本再次把这个属性写回去时，引擎会先检查：
+   - 如果传入的是 `AvatarBaseInfo`，就靠 `isSameType` 判定合法
+6. 通过校验后，再调用 `getDictFromObj(obj)` 把对象转回固定字典
+7. 最终再按 `FIXED_DICT` 的协议格式写进流
+
+所以 `implementedBy` 这套机制，本质上是在做：
+
+- 协议层使用固定字典
+- 脚本层使用自定义对象
+- 中间靠 `createObjFromDict` / `getDictFromObj` / `isSameType` 三个钩子做桥接
+
 换句话说，`implementedBy` 真正做的事情不是“起别名”，而是：
 
 1. 引擎内部依然持有一套确定键集合的 `FIXED_DICT`
