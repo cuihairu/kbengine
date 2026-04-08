@@ -1,7 +1,7 @@
 {
   "include": [
     "kbe/res/sdk_templates/server/python_assets/scripts",
-    "typings/examples"
+    "typings"
   ],
   "exclude": [
     "**/__pycache__",
@@ -14,10 +14,17 @@
   "stubPath": "typings/stubs",
   "executionEnvironments": [
     {
+      "root": "typings",
+      "extraPaths": [
+        "typings"
+      ]
+    },
+    {
       "root": "kbe/res/sdk_templates/server/python_assets/scripts/base",
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/base",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -25,6 +32,7 @@
       "root": "kbe/res/sdk_templates/server/python_assets/scripts/common",
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -33,6 +41,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/cell",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -41,6 +50,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/interface",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -49,6 +59,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/login",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -57,6 +68,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/db",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -65,6 +77,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/logger",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -73,6 +86,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/bots",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -81,6 +95,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/cell",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -89,6 +104,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/interface",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -97,6 +113,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/login",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -105,6 +122,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/db",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -113,6 +131,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/logger",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -121,6 +140,7 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/bots",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     },
@@ -129,11 +149,12 @@
       "extraPaths": [
         "kbe/res/sdk_templates/server/python_assets/scripts/base",
         "kbe/res/sdk_templates/server/python_assets/scripts/common",
+        "kbe/res/sdk_templates/server/python_assets/scripts",
         "typings"
       ]
     }
   ],
-  "pythonVersion": "3.12",
+  "pythonVersion": "3.7",
   "typeCheckingMode": "basic",
   "reportMissingModuleSource": "none"
 }
