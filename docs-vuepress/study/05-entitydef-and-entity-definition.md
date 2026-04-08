@@ -1089,6 +1089,59 @@ if(!DataTypes::initialize(defFilePath + "types.xml"))
 
 这里的核心不是“名字叫 `ITEM_LIST`”，而是它最终会生成一个 `FixedArrayType`，内部元素类型由 `<of>` 指向。
 
+这里还要补两个容易误解的点：
+
+- `ARRAY` 的结构定义入口只有 `<of>`
+- 它没有 `FIXED_DICT` 那种 `<Properties>` / `implementedBy` 双层结构
+- 官方在线文档《自定义类型》明确强调：只有 `FIXED_DICT` 支持“用户重定义”，`ARRAY` 不在这个能力范围内
+
+因此不要把 `ARRAY` 想成“也能挂一个 Python 包装类的可变容器”。在引擎实现里：
+
+- `ARRAY` 对应 `FixedArrayType`
+- 脚本层运行时对象是 `FixedArray`
+- 元素赋值由 `Sequence::seq_ass_item()` 拦截
+- 实体属性写入时，`ArrayDescription::onSetValue()` 会把传入序列重新包装成新的 `FixedArray`
+
+##### `ARRAY` 在协议更新上的坑
+
+`ARRAY` 改动最容易被低估的地方，不在 Python 语法，而在**客户端导入类型定义的协议**。
+
+从 `Baseapp::onImportClientEntityDef` 的序列化逻辑可以直接看到：
+
+- `FIXED_DICT` 会下发
+  - key 数量
+  - `implementedBy` 模块名
+  - 每个 key 的名字和类型 ID
+- `ARRAY` 只下发
+  - 元素类型 ID
+
+所以只要你改了下面任意一项，本质上都在改客户端看到的 `DataType` 图：
+
+- `<of>` 指向的元素类型
+- `ARRAY` 的嵌套层级
+- `<of>` 指向的别名，而这个别名又改绑到了别的真实类型
+
+这不是“只改服务端内部声明”，而是会直接改变客户端如何解释后续网络流。
+
+客户端导入定义时，对 `ARRAY` 的解析也印证了这一点：
+
+- 收到 `ARRAY` 后，只读取一个 `uitemtype`
+- 然后构造 `DATATYPE_ARRAY.type = uitemtype`
+
+因此一旦服务端更新了 `types.xml` 中某个 `ARRAY` 的 `of` / 嵌套结构，至少要同步刷新：
+
+- 客户端 SDK 导出的自定义类型定义
+- 客户端缓存的实体定义
+- 与之耦合的脚本/TS/JS 类型层
+
+从这套协议结构可以直接推导出：如果服务端和客户端仍使用不同版本的数组定义，结果通常不会只是“某个地方泛泛报错”，更常见的是：
+
+- 某一层元素反序列化失败
+- 嵌套数组长度和元素解释错位
+- 后续字段被按错误类型继续读取
+
+`ARRAY` 之所以容易埋坑，是因为协议里没有像 `FIXED_DICT` 那样把字段名一并下发，排查时你看到的往往只有“元素类型 ID 对不上”。
+
 #### 3. `FIXED_DICT`
 
 ```xml
@@ -1107,6 +1160,45 @@ if(!DataTypes::initialize(defFilePath + "types.xml"))
 ```
 
 它最终会生成一个 `FixedDictType`，每个键都有固定名字、固定顺序和固定子类型。这也是 KBEngine 在网络包和持久化流里保持结构稳定的关键前提。
+
+这里要先分清两层：
+
+- `<Properties>` 是 `FIXED_DICT` 的**结构定义层**
+  - 没有它，`FixedDictType::initialize()` 会直接报错并终止加载
+- `<implementedBy>` 是 `FIXED_DICT` 的**Python 包装层**
+  - 它不是必填
+  - 它存在时，表示这个固定结构除了底层字典形态之外，还允许再映射成一个用户自定义 Python 对象
+
+也就是说：
+
+- `Properties` 负责定义“这个类型在协议和持久化层长什么样”
+- `implementedBy` 负责定义“这个类型在 Python 脚本层想包装成什么对象”
+
+一个更完整的心智模型更接近：
+
+```xml
+<root>
+    <AVATAR_BASE_INFO>
+        <Properties>
+            <name>
+                <Type> STRING </Type>
+            </name>
+            <level>
+                <Type> UINT32 </Type>
+            </level>
+        </Properties>
+        <implementedBy> avatar_types.AvatarBaseInfo </implementedBy>
+    </AVATAR_BASE_INFO>
+</root>
+```
+
+其中：
+
+- `Properties`
+  - 仍然定义真实传输/落库结构
+- `implementedBy`
+  - 只是在 Python 侧增加一个“对象包装/解包”的入口
+  - 不会替代 `Properties`
 
 ### 命名规则和失败条件
 
@@ -1144,6 +1236,150 @@ base/ 或 cell/ 或 client/ ...
 - `user_type/` 负责承载这类类型在 Python 侧的辅助实现或包装
 
 不要把它和 `base/Avatar.py`、`cell/Avatar.py` 这种实体行为脚本混为一谈。
+
+### `implementedBy` 不是一个名字，而是一组转换钩子
+
+如果只看 XML，很容易把 `implementedBy` 理解成“给 `FIXED_DICT` 起一个 Python 类名”。源码里真实要求更严格：
+
+- 这个实现对象必须同时提供
+  - `createObjFromDict`
+  - `getDictFromObj`
+  - `isSameType`
+
+也就是说，`implementedBy` 背后其实是一套**双向转换契约**：
+
+- `createObjFromDict(dict) -> obj`
+  - 把引擎内部的固定字典结构包装成用户对象
+- `getDictFromObj(obj) -> dict`
+  - 把用户对象还原回固定字典结构，便于序列化、持久化、网络传输
+- `isSameType(obj) -> bool`
+  - 告诉引擎“这个对象是不是你这套包装类型”
+
+换句话说，`implementedBy` 真正做的事情不是“起别名”，而是：
+
+1. 引擎内部依然持有一套确定键集合的 `FIXED_DICT`
+2. Python 脚本层可以把这套结构包装成更顺手的对象
+3. 在写回网络流/数据库流之前，再通过钩子还原成字典形态
+
+这也是为什么 `user_type/` 更像“类型包装实现目录”，而不是实体行为脚本目录。
+
+源码对应关系：
+
+- `py_entitydef.cpp`
+  - 只有同时检测到 `createObjFromDict` / `getDictFromObj` / `isSameType`，才会把它登记成 `implementedBy`
+- `datatype.cpp`
+  - `impl_createObjFromDict()`：字典 -> 用户对象
+  - `impl_getDictFromObj()`：用户对象 -> 字典
+  - `impl_isSameType()`：运行时类型检查
+
+如果缺少其中任一钩子，就不是一个完整的 `implementedBy` 实现。
+
+### 不要把 `globalData` 的广播规则和 `FIXED_DICT` 包装机制混为一谈
+
+官方 API 文档里有一条非常重要的注意事项：
+
+- `baseAppData`
+- `globalData`
+- `cellAppData`
+
+这三类“类字典同步对象”只有**顶层 key 对应的 value** 被重写或删除时，变更才会广播。
+
+例如下面这种写法，官方明确说不会把内部元素变更广播出去：
+
+```python
+KBEngine.globalData["list"] = [1, 2, 3]
+KBEngine.globalData["list"][1] = 7
+```
+
+结果会变成：
+
+- 本地看到 `[1, 7, 3]`
+- 远端仍然是 `[1, 2, 3]`
+
+这条规则的根源不在 `FIXED_DICT`，而在 `globalData/baseAppData/cellAppData` 这类对象底层是一个 `Map`：
+
+- 顶层 `obj[key] = value`
+  - 会触发 `Map::mp_ass_subscript()`
+  - 进而触发 `onDataChanged()`
+  - 最终广播整个顶层 value
+- 但 `obj[key]` 取出来之后，如果它本身是一个普通 Python `list`/`dict`
+  - 你后续修改的是这个内部对象
+  - 外层 `Map` 根本感知不到
+
+这也是官方文档为什么反复强调“只有顶层的值才会被广播”。
+
+这里要特别避免一个误解：
+
+- **官方 API 的这条注意事项，针对的是 `globalData/baseAppData/cellAppData`**
+- **它不能直接偷换成“所有 `ARRAY` / `FIXED_DICT` 内部修改都不会同步”**
+
+原因是 `FIXED_ARRAY` / `FIXED_DICT` 在引擎里不是普通 `list` / `dict`，而是专门的脚本包装对象：
+
+- `FixedArray`
+  - 通过 `Sequence::seq_ass_item()` 拦截元素赋值
+- `FixedDict`
+  - 通过 `FixedDict::mp_ass_subscript()` 拦截键赋值
+
+所以在源码层面，二者的“内部元素修改是否能被感知”与 `globalData` 这类普通顶层 map 是两套机制，不应该写成同一条规则。
+
+### `baseAppData` / `globalData` / `cellAppData` 分别是什么
+
+如果只看 API 名字，很容易把这三者都当成“某种全局字典”。实际上它们的**可见范围**不同：
+
+| 对象 | 可见范围 | 脚本回调 |
+|------|----------|----------|
+| `baseAppData` | 所有 `BaseApp` | `onBaseAppData` / `onBaseAppDataDel` |
+| `globalData` | 所有 `BaseApp` + `CellApp` | `onGlobalData` / `onGlobalDataDel` |
+| `cellAppData` | 所有 `CellApp` | `onCellAppData` / `onCellAppDataDel` |
+
+更准确地说，运行时的权威副本在 `dbmgr`：
+
+- `Dbmgr::initializeEnd()` 会创建三个 `GlobalDataServer`
+- `globalData` 关注 `BaseApp` + `CellApp`
+- `baseAppData` 只关注 `BaseApp`
+- `cellAppData` 只关注 `CellApp`
+
+### 使用方式
+
+脚本侧用法都是同一套 map 风格 API：
+
+```python
+KBEngine.globalData["notice"] = "hello"
+del KBEngine.globalData["notice"]
+```
+
+对应回调分别是：
+
+- `onGlobalData` / `onGlobalDataDel`
+- `onBaseAppData` / `onBaseAppDataDel`
+- `onCellAppData` / `onCellAppDataDel`
+
+这里还有两个前提：
+
+- key 和 value 必须能被目标组件共同 pickle / unpickle
+- 广播单位是“顶层 key 对应的整个 value”，不是 value 内部某个普通 Python 子对象
+
+### 源码同步链路
+
+1. `Baseapp` / `Cellapp` 启动时，把对应对象注册进 `KBEngine` 模块。
+2. 脚本执行 `KBEngine.xxx[key] = value` 或 `del KBEngine.xxx[key]`。
+3. `Map::mp_ass_subscript()` 触发 `GlobalDataClient::onDataChanged()`。
+4. `GlobalDataClient` 把 key/value pickle 后，通过 `DbmgrInterface::onBroadcastGlobalDataChanged` 发给 `dbmgr`。
+5. `Dbmgr::onBroadcastGlobalDataChanged()` 按 `dataType` 路由到对应 `GlobalDataServer`。
+6. `GlobalDataServer::write()` / `del()` 更新权威 `dict_`，并只向关心该数据的组件广播。
+7. 接收侧 `EntityApp::onBroadcastGlobalDataChanged()` / `Baseapp::onBroadcastBaseAppDataChanged()` / `Cellapp::onBroadcastCellAppDataChanged()` 反序列化后更新本地 map，并调用对应 Python 回调。
+
+### 新进程加入时怎么同步
+
+这三者不是“只有后续增量广播”，新加入的 `BaseApp` / `CellApp` 还会收到一份当前全量快照。
+
+启动阶段 `SyncAppDatasHandler` 会调用 `Dbmgr::onGlobalDataClientLogon()`，后者再调用 `GlobalDataServer::onGlobalDataClientLogon()`，把当前 `dict_` 里的所有键值逐条重放给新连接的组件。
+
+所以它们的同步模型可以概括成：
+
+- `dbmgr` 持有权威副本
+- 组件启动时先做一次现有数据回放
+- 之后再接收增量广播
 
 ### `types.xml`、`.def`、Python 的依赖关系
 
