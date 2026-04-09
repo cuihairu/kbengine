@@ -94,11 +94,16 @@ c#插件: entity.cellCall("xxx", new object[]{roleType, name});
 ### def isPlayer(self):
 
 功能说明：
-这个函数返回这个Entity是否为当前客户端所控制的Player。
+这个函数返回当前这个Entity是否为本次客户端连接对应的Player实体。
+它本质上比较的是当前实体的 `id` 与客户端运行时记录的 `entity_id`，不是检查该实体当前是否处于 `controlled` 状态。
+
+源码解析：
+
+- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/architecture/source-analysis/networking.html#client-entity-isplayer-control)
 
 返回：
 
-- bool， 如果是当前客户端所控制的Player返回True，否则返回False。
+- bool，如果该实体就是当前连接对应的Player实体返回True，否则返回False。
 
 <a id="getComponent"></a>
 

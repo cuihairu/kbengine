@@ -261,6 +261,242 @@ Baseapp
 
 所以 KBEngine 的“客户端 SDK”并不是另一门协议，而是同一消息系统在客户端侧的镜像实现。
 
+<a id="client-entity-isplayer-control"></a>
+## `isPlayer()`、`player()` 和 `controlledBy()` 其实不是一回事
+
+客户端 API 里最容易让人误读的一条就是 `Entity.isPlayer()`。
+
+如果只看接口名，很容易把它理解成：
+
+- 这个实体现在是不是“被当前客户端控制”
+- 这个实体是不是“当前客户端拥有操作权”
+
+源码说明这两个理解都不精确。
+
+### 第一层：`isPlayer()` 只是“身份判断”，不是“控制权判断”
+
+在客户端 SDK 里，`isPlayer()` 的实现非常直接：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/Entity.cs
+public bool isPlayer()
+{
+    return id == KBEngineApp.app.entity_id;
+}
+```
+
+```cpp
+// 文件：kbe/res/sdk_templates/client/ue4/Source/KBEnginePlugins/Engine/Entity.cpp
+bool Entity::isPlayer()
+{
+    return id() == KBEngineApp::getSingleton().entity_id();
+}
+```
+
+也就是说，它只判断一件事：
+
+- **当前这个实体的 `id`，是不是本次客户端连接记录下来的 `entity_id`**
+
+这本质上是一个“身份比对”，而不是“控制状态比对”。
+
+### 第二层：`entity_id` 是在哪里来的
+
+这个 `entity_id` 不是随便填进去的，它是在服务端通知“你这个连接对应的玩家代理实体创建好了”时写入的。
+
+Unity 客户端里这条链路很清楚：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/KBEngine.cs
+public void Client_onCreatedProxies(UInt64 rndUUID, Int32 eid, string entityType)
+{
+    entity_uuid = rndUUID;
+    entity_id = eid;
+    entity_type = entityType;
+    ...
+}
+```
+
+随后 `player()` 也只是按这个 `entity_id` 去实体表里查：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/KBEngine.cs
+public Entity player()
+{
+    Entity e;
+    if(entities.TryGetValue(entity_id, out e))
+        return e;
+
+    return null;
+}
+```
+
+因此客户端语义上：
+
+- `player()` = 当前连接对应的玩家实体
+- `isPlayer()` = “我是不是这个玩家实体”
+
+它们都不直接回答“当前是不是我在控制移动”。
+
+### 第三层：真正的“控制”来自 `controlledBy()`
+
+“控制”这件事在源码里是另一条链，源头在 CellApp 侧实体的 `controlledBy_`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.inl
+INLINE EntityCall* Entity::controlledBy() const
+{
+    return controlledBy_;
+}
+```
+
+CellApp API 文档里 `controlledBy` 也写得很明确：
+
+- 它表示该实体由哪个客户端关联的服务端实体来控制移动
+- 如果为 `None`，则实体由服务端移动
+
+所以这里的“控制”，更准确地说是：
+
+- **移动/驱动权限**
+- 而不是“这个实体是不是当前连接自己的 player 身份”
+
+### 第四层：服务端如何把“控制状态变化”通知给客户端
+
+CellApp 改变控制者时，走的是 `Entity::setControlledBy()`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+bool Entity::setControlledBy(EntityCall* controllerBaseEntityCall)
+{
+    ...
+    controlledBy(controllerBaseEntityCall);
+    ...
+    sendControlledByStatusMessage(controllerBaseEntityCall, 1 or 0);
+}
+```
+
+真正发给客户端的是 `ClientInterface::onControlEntity`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+void Entity::sendControlledByStatusMessage(EntityCall* baseEntityCall, int8 isControlled)
+{
+    ...
+    (*pForwardBundle).newMessage(ClientInterface::onControlEntity);
+    (*pForwardBundle) << id();
+    (*pForwardBundle) << isControlled;
+    ...
+}
+```
+
+客户端收到后，再把这个状态写到实体对象上：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/KBEngine.cs
+public void Client_onControlEntity(Int32 eid, sbyte isControlled)
+{
+    ...
+    var isCont = isControlled != 0;
+    ...
+    entity.isControlled = isCont;
+    entity.onControlled(isCont);
+}
+```
+
+所以“控制权”在客户端真正对应的是：
+
+- `entity.isControlled`
+- `entity.onControlled(...)`
+- 以及客户端内部的 `_controlledEntities`
+
+而不是 `isPlayer()`。
+
+### 第五层：为什么这两个概念一定要分开
+
+客户端实现里专门把这两种状态拆开了。
+
+当收到 `Client_onControlEntity()` 时，如果目标实体不是当前玩家自身，才会进入 `_controlledEntities`：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/KBEngine.cs
+if (isCont)
+{
+    // 如果被控制者是玩家自己，那表示玩家自己被其它人控制了
+    // 所以玩家自己不应该进入这个被控制列表
+    if (player().id != entity.id)
+    {
+        _controlledEntities.Add(entity);
+    }
+}
+```
+
+这段代码直接说明了两件事：
+
+1. **玩家自己也可能处于 `isControlled == true`**
+   这表示“我这个 player 实体现在被别人控制”
+2. **`isPlayer()` 仍然可能为 `true`**
+   因为它只看 `id == entity_id`
+
+所以至少会有这几种不同状态：
+
+| 状态 | `isPlayer()` | `isControlled` | 含义 |
+|------|--------------|----------------|------|
+| 自己的玩家实体，自己正常操作 | `true` | `false` | 当前连接的 player，本地自己驱动 |
+| 自己的玩家实体，被别人接管控制 | `true` | `true` | 仍然是自己的 player，但移动控制权不在本地 |
+| 不是自己的玩家实体，但被我控制 | `false` | `true` | 当前连接额外控制了另一个可见实体 |
+| 普通旁观实体 | `false` | `false` | 只是视野中的普通实体 |
+
+也就是说：
+
+- `isPlayer()` 回答“**这是不是我的 player 身份实体**”
+- `isControlled` 回答“**这个实体当前是否处于 controlEntity 控制态**”
+
+它们是两个维度，不是同一个维度。
+
+### 第六层：为什么引擎需要 `isPlayer()`
+
+`isPlayer()` 在客户端不只是一个便利函数，它还影响 `ownerOnly` 客户端属性的处理。
+
+`kbcmd` 生成客户端代码时，会明确生成类似判断：
+
+```cpp
+if (pProp_xxx->isOwnerOnly() && !entity->isPlayer())
+{
+}
+else
+{
+    onXxxChanged(oldVal);
+}
+```
+
+这说明引擎需要先知道：
+
+- 这个实体是不是“当前连接自己的 player 实体”
+
+只有这样，客户端才能正确区分：
+
+- 哪些属性只有 owner/player 自己能看到
+- 哪些属性所有观察者都能看到
+
+因此 `isPlayer()` 的意义首先是**身份识别**，其次才是给业务层提供一个便捷 API。
+
+### 结论：如何正确理解 API 文档里的“当前客户端的 Player”
+
+对 `Entity.isPlayer()` 最准确的理解应该是：
+
+- **它返回当前实体是否就是本次客户端连接对应的 player 实体**
+
+而不是：
+
+- “当前客户端正在控制的实体”
+- “当前客户端拥有移动控制权的实体”
+
+如果你要继续追“控制权”这条链，最短源码路径是：
+
+1. `kbe/src/server/cellapp/entity.h` / `entity.inl` → `controlledBy()`
+2. `kbe/src/server/cellapp/entity.cpp` → `setControlledBy()` / `sendControlledByStatusMessage()`
+3. `kbe/res/sdk_templates/client/unity/KBEngine.cs` 或 `ue4/KBEngine.cpp` → `Client_onControlEntity()`
+4. `kbe/res/sdk_templates/client/unity/Entity.cs` 或 `ue4/Entity.cpp` → `isPlayer()`
+
 ## 内部通信和外部通信的共同点与差异
 
 共同点：

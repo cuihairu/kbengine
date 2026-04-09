@@ -939,6 +939,7 @@ controlledBy
 其他参考：
 
 - Entity.[onLoseControlledBy](./Entity.md#onLoseControlledBy)
+- [源码解析：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/architecture/source-analysis/networking.html#client-entity-isplayer-control)
 
 类型：
 
