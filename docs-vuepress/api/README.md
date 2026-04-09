@@ -20,3 +20,8 @@
 - [dbmgr](/api/dbmgr/)
 - [interfaces](/api/interfaces/)
 - [logger](/api/logger/)
+
+## 核对与源码解析
+
+- [API 分类与核对清单](/api/audit-checklist.md)
+- [源码解析专题](/architecture/source-analysis/)

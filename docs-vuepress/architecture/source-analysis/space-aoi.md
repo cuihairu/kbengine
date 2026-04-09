@@ -156,6 +156,209 @@ SpaceMemory
 因此“实体有客户端”和“实体已经开始同步给客户端”不是完全同一时刻；
 真正切入客户端可见链的是 `onGetWitness()`。
 
+<a id="proxy-give-client-to"></a>
+## `Proxy.giveClientTo()` 转移的其实是客户端绑定与 Witness 链路
+
+`giveClientTo()` 如果只看名字，很容易被理解成“把客户端控制权字段改到另一个 Proxy”。
+
+源码实际做的事情比这大得多，它切换的是一整条链路：
+
+```text
+旧 Proxy
+  ├── clientEntityCall / Network::Channel
+  ├── Client 上的旧代理实体
+  └── Cell 上的 Witness / controlledBy
+
+            ↓ giveClientTo()
+
+新 Proxy
+  ├── 接手同一条客户端通道
+  ├── 重新向客户端创建新的代理实体
+  └── 若已有 cell，再重建 Witness 与控制关系
+```
+
+### 第一层：Base 层会先做一轮严格前置校验
+
+直接看 `kbe/src/server/baseapp/proxy.cpp`：
+
+```cpp
+// 文件：kbe/src/server/baseapp/proxy.cpp
+void Proxy::giveClientTo(Proxy* proxy)
+{
+    if(isDestroyed()) ...
+    if(clientEntityCall_ == NULL || clientEntityCall_->getChannel() == NULL) ...
+
+    if(proxy)
+    {
+        if(proxy->isDestroyed()) ...
+        if(proxy->id() == this->id()) ...
+        if(proxy->clientEntityCall() != NULL) ...
+        ...
+    }
+}
+```
+
+这里能直接得出几个实际限制：
+
+- 当前 Proxy 必须活着，而且已经绑定客户端通道
+- 目标 Proxy 不能销毁、不能是自己、不能已经绑定客户端
+- Python 包装层虽然允许把 `None` 传进来，但 `giveClientTo(NULL)` 不会继续执行任何迁移逻辑，实际使用必须传有效目标 Proxy
+
+### 第二层：旧 Proxy 会先拆掉旧的客户端表现链
+
+真正进入迁移分支后，旧 Proxy 首先做的是“拆链”：
+
+```cpp
+// 文件：kbe/src/server/baseapp/proxy.cpp
+if(cellEntityCall())
+{
+    (*pBundle).newMessage(CellappInterface::onLoseWitness);
+    (*pBundle) << this->id();
+    sendToCellapp(pBundle);
+}
+
+(*pBundle).newMessage(ClientInterface::onEntityDestroyed);
+(*pBundle) << this->id();
+sendToClient(ClientInterface::onEntityDestroyed, pBundle);
+```
+
+这两步非常关键：
+
+- 如果旧 Proxy 已经有 cell，会先通知 Cell 侧丢失 Witness
+- 客户端会先收到 `onEntityDestroyed`，把旧的受控代理实体销毁
+
+也就是说，`giveClientTo()` 不是“让客户端同时拥有两个主 Proxy”，而是明确先清掉旧链路，再接新链路。
+
+### 第三层：客户端通道本身会被交给新 Proxy
+
+后续还是在 `proxy.cpp`：
+
+```cpp
+// 文件：kbe/src/server/baseapp/proxy.cpp
+Network::Channel* lpChannel = clientEntityCall_->getChannel();
+
+clientEnabled_ = false;
+clientEntityCall()->addr(Network::Address::NONE);
+Py_DECREF(clientEntityCall());
+proxy->setClientType(this->getClientType());
+proxy->setLoginDatas(this->getLoginDatas());
+this->setClientType(UNKNOWN_CLIENT_COMPONENT_TYPE);
+this->setLoginDatas("");
+clientEntityCall(NULL);
+proxy->onGiveClientTo(lpChannel);
+```
+
+这里转移的不是抽象概念，而是同一条真实客户端通道 `lpChannel`。
+
+同时还能看到：
+
+- 客户端类型和登录附带数据会一起迁移到目标 Proxy
+- 旧 Proxy 会失去 `clientEntityCall`
+- 目标 Proxy 通过 `onGiveClientTo(lpChannel)` 接手这条通道
+
+### 第四层：新 Proxy 会重新创建客户端代理实体
+
+`onGiveClientTo()` 的实现很短，但非常关键：
+
+```cpp
+// 文件：kbe/src/server/baseapp/proxy.cpp
+void Proxy::onGiveClientTo(Network::Channel* lpChannel)
+{
+    clientEntityCall(new EntityCall(this->pScriptModule_,
+        &lpChannel->addr(), 0, id_, ENTITYCALL_TYPE_CLIENT));
+
+    addr(lpChannel->addr());
+    Baseapp::getSingleton().createClientProxies(this);
+    onGetWitness();
+}
+```
+
+而 `createClientProxies()` 会重新把当前 Proxy 注册为该通道的代理实体，并重新下发 `onCreatedProxies`：
+
+```cpp
+// 文件：kbe/src/server/baseapp/baseapp.cpp
+bool Baseapp::createClientProxies(Proxy* pEntity, bool reload)
+{
+    Network::Channel* pChannel = pEntity->clientEntityCall()->getChannel();
+    pChannel->proxyID(pEntity->id());
+    ...
+    (*pBundle).newMessage(ClientInterface::onCreatedProxies);
+    (*pBundle) << pEntity->rndUUID();
+    (*pBundle) << pEntity->id();
+    (*pBundle) << pEntity->ob_type->tp_name;
+    pEntity->sendToClient(ClientInterface::onCreatedProxies, pBundle);
+
+    pEntity->onClientEnabled();
+}
+```
+
+所以 `giveClientTo()` 成功后，目标 Proxy 一侧通常会发生两件可见事情：
+
+- 客户端重新收到一条 `onCreatedProxies`
+- 目标 Proxy 的 `onClientEnabled()` 也会再次触发
+
+### 第五层：如果目标 Proxy 已经有 cell，Cell 侧还会补一轮 Witness 与控制恢复
+
+`Proxy::onGetWitness()` 并不是无条件成功，它只在目标 Proxy 已经有 `cellEntityCall()` 时继续往 Cell 侧发消息：
+
+```cpp
+// 文件：kbe/src/server/baseapp/proxy.cpp
+void Proxy::onGetWitness()
+{
+    if(cellEntityCall())
+    {
+        (*pBundle).newMessage(CellappInterface::onGetWitnessFromBase);
+        (*pBundle) << this->id();
+        sendToCellapp(pBundle);
+    }
+}
+```
+
+Cell 侧接到 `onGetWitnessFromBase` 后，会走到 `Entity::onGetWitness(true)`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+void Entity::onGetWitness(bool fromBase)
+{
+    ...
+    if(fromBase)
+    {
+        if(clientEntityCall() == NULL)
+        {
+            PyObject* clientMB = PyObject_GetAttrString(baseEntityCall(), "client");
+            ...
+            clientEntityCall(client);
+        }
+
+        ... // 向客户端补发 spaceID 与客户端属性
+
+        if(pWitness_ == NULL)
+            setWitness(Witness::createPoolObject(OBJECTPOOL_POINT));
+        else
+            pWitness_->resetViewEntities();
+    }
+
+    controlledBy(baseEntityCall());
+}
+```
+
+这里说明 `giveClientTo()` 成功后，若目标已经有 cell：
+
+- Cell 会重新把 `clientEntityCall` 接回来
+- 会向客户端补发当前空间与客户端属性
+- 会新建或复用 Witness，并重置视野同步状态
+- 最后把 `controlledBy` 重新绑到目标 Proxy 自己的 `baseEntityCall`
+
+### 结论：应该怎样准确理解 `giveClientTo()`
+
+最准确的说法是：
+
+- **它把一个客户端连接从旧 Proxy 迁移到新 Proxy**
+- **迁移过程同时会拆旧的客户端实体/Witness 链路，再重建新的 Base/Cell 同步链路**
+- **如果目标 Proxy 还没有 cell，这次迁移先完成的是 Base 侧客户端绑定；Cell 侧视野与控制恢复要等目标后续拿到 cell**
+
+所以它不是“把两个 Proxy 的业务状态合并”，也不是“简单改一下控制者字段”，而是一个完整的客户端归属切换入口。
+
 ## 视野同步不是一次性快照，而是持续更新
 
 这也是很多人第一次读会误会的地方。
@@ -222,6 +425,236 @@ SpaceMemory
 - 还是“迁移期间的消息连续性机制”
 
 没有这层路由，跨 Cell 传送时就很容易出现旧消息直接丢失、链路断裂的情况。
+
+<a id="cell-entity-move-controllers"></a>
+## Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链
+
+CellApp API 里的移动接口很容易被看成三个彼此独立的方法：
+
+- `moveToPoint()` 负责直线移动
+- `navigate()` 负责寻路移动
+- `cancelController()` 负责删某个控制器
+
+源码实际把它们串成了一条统一控制链。
+
+### 第一层：移动前都会先执行 `stopMove()`，所以同一时刻只有一条移动链
+
+入口在：
+
+- `kbe/src/server/cellapp/entity.cpp`
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+bool Entity::stopMove()
+{
+    if(pMoveController_)
+    {
+        cancelController(pMoveController_->id());
+        pMoveController_->destroy();
+        pMoveController_.reset();
+    }
+
+    if(pTurnController_)
+    {
+        cancelController(pTurnController_->id());
+        pTurnController_->destroy();
+        pTurnController_.reset();
+    }
+}
+```
+
+而 `moveToPoint()` / `navigate()` 都先调用它：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+uint32 Entity::moveToPoint(...)
+{
+    stopMove();
+    ...
+}
+
+uint32 Entity::navigate(...)
+{
+    ...
+    stopMove();
+    ...
+}
+```
+
+这说明：
+
+- 新的移动请求会先清掉当前移动控制器
+- 同时也会清掉当前转向控制器
+- 这不是“允许多个 Movement controller 并存，再按优先级调度”的模型
+
+### 第二层：`moveToPoint()` 和 `navigate()` 共享同一个 `MoveController`
+
+`moveToPoint()` 的创建链：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+KBEShared_ptr<Controller> p(new MoveController(this, NULL));
+new MoveToPointHandler(p, layer(), destination, velocity, distance, faceMovement, moveVertically, userData);
+...
+pMoveController_ = p;
+```
+
+`navigate()` 的创建链：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+KBEShared_ptr<Controller> p(new MoveController(this, NULL));
+new NavigateHandler(p, destination, velocity, distance, faceMovement, maxMoveDistance, paths_ptr, userData);
+...
+pMoveController_ = p;
+```
+
+`MoveController` 本身再决定挂的是哪种 handler：
+
+```cpp
+// 文件：kbe/src/server/cellapp/move_controller.cpp
+if(utype == MoveToPointHandler::MOVE_TYPE_NAV)
+    pMoveToPointHandler_ = new NavigateHandler();
+else if(utype == MoveToPointHandler::MOVE_TYPE_ENTITY)
+    pMoveToPointHandler_ = new MoveToEntityHandler();
+else if(utype == MoveToPointHandler::MOVE_TYPE_POINT)
+    pMoveToPointHandler_ = new MoveToPointHandler();
+```
+
+所以更准确的理解是：
+
+- `MoveController` 是统一的“移动控制器壳”
+- `moveToPoint()` / `navigate()` / `moveToEntity()` 的区别，主要落在内部 handler 类型不同
+
+### 第三层：`navigate()` 不是直接开跑，而是先算路径，算不出来就返回 `0`
+
+`navigate()` 先走 `navigatePathPoints()`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+VECTOR_POS3D_PTR paths_ptr(new std::vector<Position3D>());
+navigatePathPoints(*paths_ptr, destination, maxSearchDistance, layer);
+if (paths_ptr->size() <= 0)
+{
+    return 0;
+}
+```
+
+而 `navigatePathPoints()` 会去当前空间的导航句柄上算路径：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+NavigationHandlePtr pNavHandle = pSpace->pNavHandle();
+...
+if (pNavHandle->findStraightPath(layer, position_, destination, outPaths) < 0)
+{
+    return false;
+}
+```
+
+这说明 `navigate()` 的真实边界是：
+
+- 当前实体必须已经有有效 `space`
+- 该空间必须已经挂上导航句柄
+- 路径点为空时，它不会创建任何控制器，而是直接返回 `0`
+
+### 第四层：`NavigateHandler` 本质上是“多段 MoveToPoint”
+
+`NavigateHandler` 直接继承 `MoveToPointHandler`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/navigate_handler.cpp
+NavigateHandler::NavigateHandler(...)
+    : MoveToPointHandler(...),
+      destPosIdx_(0),
+      paths_(paths_ptr)
+{
+    destPos_ = (*paths_)[destPosIdx_++];
+}
+```
+
+走到一个路径点后，它不会立刻结束，而是切到下一个路径点：
+
+```cpp
+// 文件：kbe/src/server/cellapp/navigate_handler.cpp
+bool NavigateHandler::requestMoveOver(const Position3D& oldPos)
+{
+    if(destPosIdx_ == ((int)paths_->size()))
+        return MoveToPointHandler::requestMoveOver(oldPos);
+    else
+        destPos_ = (*paths_)[destPosIdx_++];
+}
+```
+
+所以 `navigate()` 更准确地说是：
+
+- 先算一组路径点
+- 再让同一套移动控制器沿这些路径点逐段推进
+
+它不是另一套完全独立于 `moveToPoint()` 的运动系统。
+
+### 第五层：`cancelController()` 对移动控制器有一层特殊语义
+
+脚本入口里有一段很关键的特殊处理：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+if(PyUnicode_Check(pyargobj))
+{
+    if (strcmp(PyUnicode_AsUTF8AndSize(pyargobj, NULL), "Movement") == 0)
+    {
+        pobj->stopMove();
+    }
+}
+...
+if ((pobj->pMoveController_ && pobj->pMoveController_->id() == id) ||
+    (pobj->pTurnController_ && pobj->pTurnController_->id() == id))
+{
+    pobj->stopMove();
+}
+else
+{
+    pobj->cancelController(id);
+}
+```
+
+这说明：
+
+- 传 `"Movement"` 时，不是删某一个对象，而是直接停整条当前移动/转向链
+- 就算你传的是当前 `pMoveController_` 或 `pTurnController_` 的数值 ID，底层也会统一走 `stopMove()`
+- 只有其它控制器（例如 proximity 一类）才会走通用的 `pControllers_->remove(id)`
+
+所以 API 文档里如果只写“按 ID 删除控制器”，是不够准确的。
+
+### 第六层：移动控制器本身也参与实体迁移/恢复
+
+Cell 实体在序列化时会把控制器一并写入流：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+void Entity::addControllersToStream(KBEngine::MemoryStream& s)
+{
+    if(pControllers_)
+    {
+        // 必须先清理移动相关的Controllers
+        stopMove();
+        pControllers_->addToStream(s);
+    }
+}
+```
+
+恢复时再重建：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+void Entity::createControllersFromStream(KBEngine::MemoryStream& s)
+{
+    ...
+    pControllers_->createFromStream(s);
+}
+```
+
+这说明移动/控制器语义不是一次性的脚本辅助对象，而是 Cell 实体运行时的一部分状态。
 
 ## 谁决定客户端该看到哪些实体
 

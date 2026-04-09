@@ -149,6 +149,194 @@ Base 和 Cell 都继承 `EntityApp<Entity>`，但并不意味着它们承载同�
 
 所以“Base Entity”和“Cell Entity”不是两个完全独立的体系，而是建立在同一创建骨架上的两种运行时语义。
 
+<a id="base-entity-create-cell"></a>
+## `Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接
+
+Base 侧 API 里的 `createCellEntity()` 很容易让人脑补成：
+
+- Base 进程里直接 new 一个 Cell 实体
+- 然后本地把 `cell` 属性补上
+
+源码实际走的是一条明确的跨组件消息链。
+
+### 第一层：脚本入口先校验“当前 Base 实体是否允许发起创建”
+
+入口在：
+
+- `kbe/src/server/baseapp/entity.cpp`
+
+关键实现：
+
+```cpp
+// 文件：kbe/src/server/baseapp/entity.cpp
+PyObject* Entity::createCellEntity(PyObject* pyobj)
+{
+    if(isDestroyed()) ...
+    if(Baseapp::getSingleton().findEntity(id()) == NULL) ...
+    if(creatingCell_ || this->cellEntityCall()) ...
+    if(!PyObject_TypeCheck(pyobj, EntityCall::getScriptType())) ...
+
+    EntityCallAbstract* cellEntityCall = static_cast<EntityCallAbstract*>(pyobj);
+    if(cellEntityCall->type() != ENTITYCALL_TYPE_CELL) ...
+
+    creatingCell_ = true;
+    Baseapp::getSingleton().createCellEntity(cellEntityCall, this);
+}
+```
+
+这段代码把几个真实限制写得很清楚：
+
+- 当前实体必须还活着，而且仍然注册在本 BaseApp 上
+- 不能在“正在创建 cell”或“已经有 cell”时重复调用
+- 参数必须是**直接的** `ENTITYCALL_TYPE_CELL`
+
+这也是为什么文档里一直强调：
+
+- 可以传“直接的 CellEntityCall”
+- 不能把 `baseEntityCall.cell` 这种间接路径直接拿来用
+
+### 第二层：Base 侧真正做的是把 Cell 启动数据打包发给目标 CellApp
+
+真正发消息的实现不在 `Entity`，而在：
+
+- `kbe/src/server/baseapp/baseapp.cpp`
+
+```cpp
+// 文件：kbe/src/server/baseapp/baseapp.cpp
+void Baseapp::createCellEntity(EntityCallAbstract* createToCellEntityCall, Entity* pEntity)
+{
+    (*pBundle).newMessage(CellappInterface::onCreateCellEntityFromBaseapp);
+
+    (*pBundle) << createToCellEntityCall->id();
+    (*pBundle) << entityType;
+    (*pBundle) << id;
+    (*pBundle) << componentID_;
+    (*pBundle) << hasClient;
+    (*pBundle) << pEntity->inRestore();
+
+    pEntity->addCellDataToStream(CELLAPP_TYPE, ED_FLAG_ALL, s);
+    (*pBundle).append(*s);
+    ...
+    createToCellEntityCall->getChannel()->send(pBundle);
+}
+```
+
+这里最关键的结论是：
+
+- `createCellEntity()` 本质上是一次 **Base -> Cell 的异步创建请求**
+- `cellData` 不是共享引用，而是被序列化成一份启动快照发往对端
+- 消息里除了属性快照，还明确带了 `entityType`、Base 侧 `componentID`、`hasClient`、`inRestore`
+
+因此 Base 侧发起创建时做的不是“建对象”，而是“准备建模数据并发起远程创建”。
+
+### 第三层：Cell 侧会按目标 CellEntityCall 所在空间真正创建实体
+
+Cell 侧入口在：
+
+- `kbe/src/server/cellapp/cellapp.cpp`
+
+```cpp
+// 文件：kbe/src/server/cellapp/cellapp.cpp
+void Cellapp::onCreateCellEntityFromBaseapp(Network::Channel* pChannel, KBEngine::MemoryStream& s)
+{
+    s >> createToEntityID;
+    s >> entityType;
+    s >> entityID;
+    s >> componentID;
+    s >> hasClient;
+    s >> inRescore;
+    ...
+}
+```
+
+继续往下看 `_onCreateCellEntityFromBaseapp()`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/cellapp.cpp
+Entity* pCreateToEntity = pEntities_->find(createToEntityID);
+spaceID = pCreateToEntity->spaceID();
+SpaceMemory* space = SpaceMemorys::findSpace(spaceID);
+...
+Entity* e = createEntity(entityType.c_str(), cellData, false, entityID, false);
+e->baseEntityCall(new EntityCall(..., componentID, entityID, ENTITYCALL_TYPE_BASE));
+cellData = e->createCellDataFromStream(pCellData);
+e->createNamespace(cellData, true);
+```
+
+这说明 `createCellEntity(cellEntityCall)` 的真正语义是：
+
+- 先找到你传入的那个 `CellEntityCall` 对应的目标实体
+- 取它所在的 `spaceID`
+- 再在那个空间里创建当前 Base 实体对应的 Cell 实体
+
+也就是说，参数真正承担的是“提供目标空间锚点”的职责。
+
+### 第四层：带客户端的实体还会继续接上 Witness/进入世界流程
+
+同一段 Cell 侧代码里，`hasClient` 会直接影响后续链路：
+
+```cpp
+// 文件：kbe/src/server/cellapp/cellapp.cpp
+if(hasClient)
+{
+    e->clientEntityCall(client);
+    e->setWitness(Witness::createPoolObject(OBJECTPOOL_POINT));
+}
+
+space->addEntity(e);
+...
+space->addEntityToNode(e);
+
+if(hasClient)
+{
+    e->onGetWitness();
+}
+else
+{
+    space->onEnterWorld(e);
+}
+```
+
+所以 `createCellEntity()` 不只是“创建出一个 cell 实例”：
+
+- 对普通实体，它会把 Cell 实体加入空间并进入世界
+- 对带客户端的实体，它还会继续补上 `clientEntityCall`、`Witness`，再进入后续客户端同步链
+
+### 第五层：Base 侧拿到 `cell` 的真正时机在 `onGetCell()`
+
+Base 侧的完成回调在：
+
+- `kbe/src/server/baseapp/entity.cpp`
+
+```cpp
+// 文件：kbe/src/server/baseapp/entity.cpp
+void Entity::onGetCell(Network::Channel* pChannel, COMPONENT_ID componentID)
+{
+    creatingCell_ = false;
+    destroyCellData();
+
+    if(cellEntityCall_ == NULL)
+        cellEntityCall_ = new EntityCall(pScriptModule_, NULL, componentID, id_, ENTITYCALL_TYPE_CELL);
+
+    if (!inRestore_)
+    {
+        CALL_ENTITY_AND_COMPONENTS_METHOD(this, ..., "onGetCell", ...);
+    }
+}
+```
+
+这里说明：
+
+- `creatingCell_` 直到收到 Base 回调才会结束
+- `cellData` 只是创建期的启动数据，成功后会被销毁
+- 从这一刻开始，Base 脚本层才真正拿到可用的直接 `cellEntityCall`
+- `restoreCell()` 路径不会回调脚本侧 `onGetCell()`
+
+所以脚本里最稳妥的理解是：
+
+- `createCellEntity()` = 发起异步创建请求
+- `onGetCell()` = Base 侧已经拿到可用的 `cell` mailbox
+
 ## 属性、方法、持久化为什么都依赖实体定义
 
 实体系统最容易被低估的点是：它不只是创建对象，也定义了协议。

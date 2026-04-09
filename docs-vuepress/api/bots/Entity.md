@@ -29,14 +29,14 @@ import KBEngine
 
 | [base](#base) | 只读ENTITYCALL |
 | --- | --- |
-| [cell](#client) | 只读ENTITYCALL |
+| [cell](#cell) | 只读ENTITYCALL |
 | [className](#className) | 只读string |
 | [clientapp](#clientapp) | 只读PyClientApp |
 | [direction](#direction) | Tuple of 3 floats as (roll, pitch, yaw) |
 | [id](#id) | 只读 Integer |
 | [position](#position) | Vector3 |
 | [spaceID](#spaceID) | 只读 uint32 |
-| [isOnGround](#isOnGround) | 只读 bool |
+| [isOnGround](#isOnGround) | bool |
 
 <a id="detailed_description"></a>
 
@@ -53,9 +53,9 @@ import KBEngine
 ### def moveToPoint(self, destination, velocity, distance, userData, faceMovement, moveVertically):
 
 功能说明：
-直线移动Entity到给定的坐标点，成功或失败会调用回调函数。
-任何[实体](./Entity.md)，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
-返回一个可以用于取消这次移动的控制器ID。
+在 bots 客户端本地创建一个直线移动控制器，使该实体朝给定坐标点持续推进。
+任何[实体](./Entity.md)在任意时刻只能有一个本地移动控制器，重复调用任何移动函数会终止之前的本地移动控制器。
+返回一个可用于取消这次本地移动的控制器ID。
 例如：
 Entity.[cancelController](./Entity.md#cancelController)( movementID )。
 移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController)( "Movement" )。当移动被取消之后通知方法将
@@ -71,6 +71,10 @@ Entity.[cancelController](./Entity.md#cancelController)( movementID )。
 参看：
 
 - Entity.[cancelController](./Entity.md#cancelController)
+
+源码解析：
+
+- [网络与消息系统：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/architecture/source-analysis/networking.html#client-entity-move-ground-sync)
 
 参数：
 
@@ -91,11 +95,16 @@ Entity.[cancelController](./Entity.md#cancelController)( movementID )。
 ### def cancelController(self, controllerID):
 
 功能说明：
-函数cancelController停止一个控制器对Entity的影响。它只能在一个real实体上被调用。
+停止一个 bots 客户端本地控制器对该实体的影响。
+当前客户端侧主要对应的是本地移动控制器，支持传入控制器ID，也支持传入字符串 `"Movement"` 取消当前移动。
+
+源码解析：
+
+- [网络与消息系统：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/architecture/source-analysis/networking.html#client-entity-move-ground-sync)
 
 参数：
 
-| controllerID | controllerID是要取消的控制器的索引，它是一个整型。一个专用的控制器类型的字符串也可以作为它的类型。 例如，一次只有一个移动/导航控制器可以被激活，这可以用entity.cancelController( "Movement" )取消。 |
+| controllerID | 要取消的本地控制器ID。也可以传入专用控制器类型字符串 `"Movement"`，用于取消当前 bots 客户端上的本地移动控制器。 |
 | --- | --- |
 
 <a id="isPlayer"></a>
@@ -172,27 +181,45 @@ Entity.[cancelController](./Entity.md#cancelController)( movementID )。
 
 ### def onEnterWorld(self):
 
-如果实体非客户端控制实体，则表明实体进入了服务端上客户端控制的实体的View范围，此时客户端可以看见这个实体了。
-如果实体是客户端控制的实体则表明该实体已经在服务端创建了cell并进入了space。
+如果当前实体不是本次连接对应的Player实体，则表示该实体进入了当前 bots 客户端维护的世界对象集合，通常也就是进入了玩家的 AOI / View，可开始对 bots 客户端可见。
+如果当前实体就是本次连接对应的Player实体，则表示该玩家实体的 cell 侧已经就绪并进入了当前 bots 客户端的世界对象集合；底层会先补齐 `cellEntityCall`，然后再触发该回调。
+
+源码解析：
+
+- [网络与消息系统：客户端实体进入/离开世界与空间回调](/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)
 
 <a id="onLeaveWorld"></a>
 
 ### def onLeaveWorld(self):
 
-如果实体非客户端控制实体，则表明实体离开了服务端上客户端控制的实体的View范围，此时客户端看不见这个实体了。
-如果实体是客户端控制的实体则表明该实体已经在服务端销毁了cell并离开了space。
+如果当前实体不是本次连接对应的Player实体，则表示该实体离开了当前 bots 客户端维护的世界对象集合，通常意味着离开 AOI / View；底层通常会在该回调后继续销毁这个客户端实体。
+如果当前实体就是本次连接对应的Player实体，则表示客户端将清理当前空间上下文，并移除该实体对应的 `cellEntityCall`。
+
+源码解析：
+
+- [网络与消息系统：客户端实体进入/离开世界与空间回调](/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)
 
 <a id="onEnterSpace"></a>
 
 ### def onEnterSpace(self):
 
-客户端控制的实体进入了一个新的space。
+当前连接对应的Player实体进入了一个新的 space。
+这个回调对应的是客户端收到 `onEntityEnterSpace` 消息后的处理，重点是更新当前空间上下文，而不是普通可见实体进入 AOI。
+
+源码解析：
+
+- [网络与消息系统：客户端实体进入/离开世界与空间回调](/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)
 
 <a id="onLeaveSpace"></a>
 
 ### def onLeaveSpace(self):
 
-客户端控制的实体离开了当前的space。
+当前连接对应的Player实体离开了当前 space。
+底层会在该回调后清理当前客户端的空间上下文。
+
+源码解析：
+
+- [网络与消息系统：客户端实体进入/离开世界与空间回调](/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)
 
 ## 属性文档
 
@@ -200,7 +227,13 @@ Entity.[cancelController](./Entity.md#cancelController)( movementID )。
 
 base
 
-base是用于联系Entity实体的entityCall。这个属性是只读的，且如果这个实体没有关联的Entity实体时属性是None。
+说明：
+base 是当前 bots 客户端实体持有的 `base entityCall`。它是否存在，取决于 bots 运行时是否已经为该实体建立了 base 侧句柄。
+常规流程下通常只有当前连接对应的Player实体会在 `onCreatedProxies()` 后拿到它，普通可见实体通常为 `None`。
+
+源码解析：
+
+- [网络与消息系统：客户端的句柄表与实体容器语义](/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 其他参考：
 
@@ -215,7 +248,12 @@ base是用于联系Entity实体的entityCall。这个属性是只读的，且如
 cell
 
 说明：
-cell是用于联系cell实体的ENTITYCALL。这个属性是只读的，且如果这个base实体没有关联的cell时属性是None。
+cell 是当前 bots 客户端实体持有的 `cell entityCall`。它通常在实体进入 bots 客户端世界对象集合时建立，因此并不保证在实体创建后立即可用。
+当当前连接对应的Player实体离开世界时，该句柄也会被移除。
+
+源码解析：
+
+- [网络与消息系统：客户端的句柄表与实体容器语义](/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 类型：
 
@@ -250,11 +288,27 @@ className
 clientapp
 
 说明：
-当前实体所属的客户端（对象）。
+当前实体所属的 bots 客户端运行时对象。
+这个属性指向拥有该实体实例的本地客户端上下文对象，而不是某个“玩家实体”。
+
+源码解析：
+
+- [网络与消息系统：客户端的句柄表与实体容器语义](/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 类型：
 
 - 只读，PyClientApp
+
+<a id="id"></a>
+
+id
+
+说明：
+实体对象ID。这个ID在 base、cell、client 三侧关联的同一实体之间保持一致。
+
+类型：
+
+- 只读，int32
 
 <a id="position"></a>
 
@@ -280,9 +334,26 @@ direction
 
 isOnGround
 
-如果这个属性的值为True，Entity在地面上，否则为False。
-如果是客户端控制的实体该属性将会在改变时同步到服务端，其他实体则由服务端同步到客户端，客户端可以判断这个值来强制贴地避免精度带来的影响。
+如果这个属性的值为True，表示引擎当前认为该实体在地面上，否则为False。
+这个属性既可能由服务端同步到 bots 客户端，也可能在本地移动控制时被 bots 客户端改写；真正决定它是否会上行到服务端的，是当前这个实体是否由当前 bots 客户端持有移动控制权。
+例如本地 `moveToPoint()` 一类非导航式移动过程中，底层会主动把它设为 `false`。
+
+源码解析：
+
+- [网络与消息系统：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/architecture/source-analysis/networking.html#client-entity-move-ground-sync)
 
 类型：
 
-- 可读写， bool
+- bool
+
+<a id="spaceID"></a>
+
+spaceID
+
+说明：
+实体当前已知的空间ID。
+对当前连接对应的Player实体来说，这个值会跟随进入/离开空间或离开世界被更新；当 bots 客户端清理当前空间上下文时，该值可能被置为 `0`。
+
+类型：
+
+- 只读，uint32

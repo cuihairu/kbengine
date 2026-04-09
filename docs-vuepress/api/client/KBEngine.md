@@ -69,11 +69,16 @@
 ### def player():
 
 功能说明：
-获得当前客户端所控制的实体。
+获得本次客户端连接对应的Player实体。
+它本质上是按客户端运行时记录的 `entity_id` 从 `entities` 字典中取回实体，不表示该实体当前一定由本地客户端持有移动控制权。
+
+源码解析：
+
+- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/architecture/source-analysis/networking.html#client-entity-isplayer-control)
 
 返回：
 
-- Entity，返回控制的实体, 如果不存在(如：未能连接到服务端)则返回空。
+- Entity，返回当前连接对应的Player实体；如果该实体尚未创建或当前未连接到服务端则返回空。
 
 <a id="resetPassword"></a>
 
@@ -117,12 +122,17 @@
 ### def findEntity(entityID):
 
 功能说明：
-通过实体的ID查找实体的实例对象。
+通过实体ID在客户端运行时维护的实体表中查找实体实例。
+这个查找直接针对 `entities` 容器本身，不额外要求目标实体当前已经 `inWorld`；因此“能查到实体”和“实体已经进入客户端世界对象集合”是两件不同的事。
 
 参数：
 
 | entityID | int32，实体ID。 |
 | --- | --- |
+
+源码解析：
+
+- [网络与消息系统：客户端的句柄表与实体容器语义](/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 返回：
 
@@ -161,7 +171,12 @@ component
 entities
 
 说明：
-entities是一个字典对象，包含当前进程上所有的实体。
+entities 是客户端运行时维护的实体实例表。
+它包含当前客户端仍然保留的实体对象，不等于“当前 AOI 可见实体列表”：例如当前连接对应的Player实体可能在收到 `onCreatedProxies()` 后就已经存在于表里，但要等进入世界后 `inWorld` 才会变为 `True`；清理当前空间时，客户端通常还会保留Player实体本身。
+
+源码解析：
+
+- [网络与消息系统：客户端的句柄表与实体容器语义](/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 类型：
 
@@ -179,11 +194,23 @@ entity_uuid
 entity_id
 
 说明：
-当前客户端所控制的实体的ID。
+当前连接对应的 Player 实体 ID。
+它是在服务端下发 `onCreatedProxies()` 时写入客户端运行时的连接级身份标记，`player()` 和 `Entity.isPlayer()` 都围绕它判断。
+它不等于“当前由本客户端持有移动控制权的实体”。
+
+源码解析：
+
+- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/architecture/source-analysis/networking.html#client-entity-isplayer-control)
 
 <a id="spaceID"></a>
 
 spaceID
 
 说明：
-当前客户端控制的实体所在的空间ID(也可以理解为所在对应的场景、房间、副本)。
+当前客户端记录的玩家空间上下文 ID。
+它会在当前玩家收到 `onEntityEnterSpace()` 或初始化 spaceData 时更新，在离开当前空间或执行 `clearSpace(false)` 后回到 `0`。
+它描述的是“当前连接对应玩家现在处于哪个空间”，不等于 `KBEngine.entities` 中所有实体共享的过滤条件，也不等于任意一个实体对象自己的 `spaceID`。
+
+源码解析：
+
+- [网络与消息系统：客户端的 `onEnterWorld()` / `onLeaveWorld()` / `onEnterSpace()` / `onLeaveSpace()` 也不是同一层事件](/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)

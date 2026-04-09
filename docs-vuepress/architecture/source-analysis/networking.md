@@ -497,6 +497,1145 @@ else
 3. `kbe/res/sdk_templates/client/unity/KBEngine.cs` 或 `ue4/KBEngine.cpp` → `Client_onControlEntity()`
 4. `kbe/res/sdk_templates/client/unity/Entity.cs` 或 `ue4/Entity.cpp` → `isPlayer()`
 
+<a id="client-entity-world-space-callbacks"></a>
+## 客户端的 `onEnterWorld()` / `onLeaveWorld()` / `onEnterSpace()` / `onLeaveSpace()` 也不是同一层事件
+
+这四个回调名字很像，但源码里它们分属两条不同语义：
+
+- `World`：实体是否进入了当前客户端维护的“世界对象集合”
+- `Space`：当前连接对应的玩家实体是否进入或离开了当前空间
+
+如果把这两个层次混在一起，API 文档就很容易把“AOI 可见性”写成“进入空间”，或者把“玩家空间切换”写成“所有实体都能触发”。
+
+### 第一层：`onEntityEnterWorld` 才是“进入客户端世界对象集合”
+
+客户端主链在：
+
+- `kbe/src/lib/client_lib/clientobjectbase.cpp`
+
+关键代码是：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+void ClientObjectBase::onEntityEnterWorld(Network::Channel * pChannel, MemoryStream& s)
+{
+    ...
+    if(entityID_ == eid)
+    {
+        entity->onBecomePlayer();
+    }
+
+    entity->onEnterWorld();
+}
+```
+
+这说明：
+
+- 无论是玩家实体还是普通可见实体，真正触发 `Entity::onEnterWorld()` 的入口都是 `onEntityEnterWorld`
+- 对非玩家实体来说，它的含义通常是“进入当前客户端的 AOI / View 可见集合”
+- 对玩家实体来说，它表示“这个连接对应的玩家实体已经进入客户端当前世界对象集合”，并且在回调前会先补齐 `cellEntityCall`
+
+所以 `onEnterWorld()` 更准确的解释是：
+
+- **实体进入了当前客户端正在维护的世界对象集合**
+
+而不是简单地说“进入了 space”。
+
+### 第二层：玩家进入世界时，客户端会先补齐运行时状态
+
+对当前连接对应的玩家实体，`onEntityEnterWorld()` 里还会做几件额外的事：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+if(!entity->inWorld())
+{
+    spaceID_ = entity->spaceID();
+    entity->isOnGround(isOnGround > 0);
+    entity->clientPos(entity->position());
+    entity->clientDir(entity->direction());
+    entity->serverPosition(entity->position());
+
+    EntityCall* entityCall = new EntityCall(entity->pScriptModule(),
+        NULL, appID(), eid, ENTITYCALL_TYPE_CELL);
+
+    entity->cellEntityCall(entityCall);
+    ...
+}
+```
+
+因此玩家自己的 `onEnterWorld()` 不只是“我能看见自己了”，它还意味着：
+
+- 当前客户端已经拿到了这个玩家实体对应的 `cellEntityCall`
+- 客户端当前位置、朝向、服务端位置基线已经初始化
+- 随后会触发 `onBecomePlayer()`，再触发 `onEnterWorld()`
+
+### 第三层：`onEntityEnterSpace` 是“当前玩家进入空间”，不是普通实体 AOI 事件
+
+同一个文件里，`onEntityEnterSpace()` 是另一条链：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+void ClientObjectBase::onEntityEnterSpace(Network::Channel * pChannel, MemoryStream& s)
+{
+    s >> eid;
+    s >> spaceID_;
+    ...
+    entity->onEnterSpace();
+}
+```
+
+这条消息会直接更新客户端全局 `spaceID_`，然后再调用 `entity->onEnterSpace()`。
+
+这里最关键的一点是：
+
+- 它描述的是**当前连接对应的玩家实体进入了一个新的空间**
+- 它不是“某个普通可见实体进入了我的视野”
+
+普通可见实体进入/离开视野，走的是 `onEntityEnterWorld` / `onEntityLeaveWorld`，不是 `onEntityEnterSpace`。
+
+### 第四层：`onEntityLeaveWorld` 后，非玩家实体通常会立刻销毁
+
+离开世界的链路同样在 `clientobjectbase.cpp`：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+void ClientObjectBase::onEntityLeaveWorld(Network::Channel * pChannel, ENTITY_ID eid)
+{
+    ...
+    entity->onLeaveWorld();
+
+    if(entityID_ != eid)
+    {
+        destroyEntity(eid, false);
+    }
+    else
+    {
+        clearSpace(false);
+        Py_DECREF(entity->cellEntityCall());
+        entity->cellEntityCall(NULL);
+    }
+}
+```
+
+这段代码把两个语义分得很清楚：
+
+- 非玩家实体：`onLeaveWorld()` 之后通常会被客户端立刻销毁
+- 玩家实体：`onLeaveWorld()` 之后不会马上销毁，而是清空当前空间状态并移除 `cellEntityCall`
+
+所以 API 文档里如果写“实体离开了 space”，就不够准确。
+
+更精确的说法应该是：
+
+- **非玩家实体离开了当前客户端世界对象集合，通常意味着离开 AOI/可见范围**
+- **玩家实体离开了当前客户端世界对象集合，客户端会清理当前空间上下文**
+
+### 第五层：`onLeaveSpace()` 是当前玩家离开空间时的单独通知
+
+`onEntityLeaveSpace()` 也不是普通实体通用事件：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+void ClientObjectBase::onEntityLeaveSpace(Network::Channel * pChannel, ENTITY_ID eid)
+{
+    ...
+    entity->onLeaveSpace();
+    clearSpace(false);
+}
+```
+
+可以看到：
+
+- 它发生在当前客户端空间上下文将被清空的时候
+- 回调后会直接 `clearSpace(false)`
+- 语义仍然是“当前玩家离开当前空间”
+
+### 第六层：全局 `spaceID_` 看的是当前玩家空间上下文，不是任意实体的共享状态
+
+如果继续往下看客户端运行时对象，会发现 `KBEngine.spaceID` 对应的并不是某个实体字段，而是 `ClientObjectBase` 自己维护的全局运行时状态：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+void ClientObjectBase::onEntityEnterSpace(Network::Channel * pChannel, MemoryStream& s)
+{
+    s >> eid;
+    s >> spaceID_;
+    ...
+}
+```
+
+离开当前空间或清理空间时，它也会被直接重置：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+void ClientObjectBase::clearSpace(bool isAll)
+{
+    ...
+    spaceID_ = 0;
+    ...
+}
+```
+
+初始化空间数据时，这个全局状态还会先被重建，再同步到当前玩家实体：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+void ClientObjectBase::initSpaceData(Network::Channel* pChannel, MemoryStream& s)
+{
+    clearSpace(false);
+
+    s >> spaceID_;
+
+    client::Entity* player = pPlayer();
+    if(player)
+    {
+        player->spaceID(spaceID_);
+    }
+    ...
+}
+```
+
+这说明 `KBEngine.spaceID` 更准确的语义是：
+
+- **当前连接对应玩家的空间上下文 ID**
+- 它由玩家空间进入/离开流程和 `spaceData` 初始化流程维护
+- 它不是“实体表里所有实体当前都处在这个空间”的断言
+
+### 第七层：脚本侧的真正状态变化在哪里
+
+`Entity` 自身的实现更直接：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/entity.cpp
+void Entity::onEnterWorld()
+{
+    enterworld_ = true;
+    ...
+}
+
+void Entity::onLeaveWorld()
+{
+    enterworld_ = false;
+    spaceID(0);
+    ...
+}
+
+void Entity::onLeaveSpace()
+{
+    spaceID(0);
+    ...
+    this->stopMove();
+}
+```
+
+这说明：
+
+- `onEnterWorld()` 对应的是 `enterworld_ = true`
+- `onLeaveWorld()` 会把实体标记为不在世界中，并清空 `spaceID`
+- `onLeaveSpace()` 也会清空 `spaceID`，并停止移动
+
+因此：
+
+- `World` 更偏向“实体是否处于客户端世界对象集合中”
+- `Space` 更偏向“当前玩家所在空间上下文变化”
+
+### 结论：这四个回调应该怎么读
+
+最稳妥的理解方式如下：
+
+| 回调 | 更准确的语义 |
+| --- | --- |
+| `onEnterWorld()` | 实体进入当前客户端的世界对象集合；非玩家多半表示进入 AOI，可见；玩家则表示玩家实体 world/cell 侧已经就绪 |
+| `onLeaveWorld()` | 实体离开当前客户端的世界对象集合；非玩家通常随后销毁，玩家则清理当前空间上下文 |
+| `onEnterSpace()` | 当前连接对应的玩家实体进入一个新的空间 |
+| `onLeaveSpace()` | 当前连接对应的玩家实体离开当前空间 |
+
+如果只想记一句话：
+
+- **`World` 看“实体是否在客户端世界对象集合里”**
+- **`Space` 看“当前玩家是否进入/离开当前空间”**
+
+<a id="client-entity-remote-calls"></a>
+## `baseCall()` / `cellCall()` 真正依赖的是 `EntityCall`，不是接口名字本身
+
+客户端 API 里还有一组很容易被一句“只有玩家实体可以调”带偏的接口：
+
+- `Entity.baseCall(...)`
+- `Entity.cellCall(...)`
+
+源码表明，这两个接口的真实限制条件不是“名字上看起来像玩家”，而是：
+
+- 当前实体有没有拿到对应的 `base entityCall`
+- 当前实体有没有拿到对应的 `cell entityCall`
+- `.def` 里有没有声明对应的客户端可调用方法
+
+### 第一层：`baseCall()` 本身并不检查 `isPlayer()`
+
+Unity 客户端模板里的实现非常直接：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/Entity.cs
+public void baseCall(string methodname, params object[] arguments)
+{
+    ...
+    Method method = module.base_methods[methodname];
+    ...
+    EntityCall baseEntityCall = getBaseEntityCall();
+    baseEntityCall.newCall();
+    ...
+    baseEntityCall.sendCall(null);
+}
+```
+
+它做的检查是：
+
+- 当前不在 `loginapp` 连接阶段
+- 当前实体类能在 `EntityDef.moduledefs` 里找到
+- `base_methods` 里存在该方法
+- 参数个数和参数类型匹配
+
+它**没有**直接判断：
+
+- `entity.isPlayer()`
+
+所以 `baseCall()` 的真正前提是：
+
+- **当前实体确实持有 `base entityCall`**
+
+### 第二层：为什么 `baseCall()` 通常只有当前玩家实体能成功
+
+因为客户端拿到 `base entityCall` 的入口通常只有 `onCreatedProxies()`。
+
+Unity 模板里：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/KBEngine.cs
+public void Client_onCreatedProxies(UInt64 rndUUID, Int32 eid, string entityType)
+{
+    ...
+    entity.onGetBase();
+}
+```
+
+也就是说，常规流程下：
+
+- 当前连接对应的 Player 实体在 `onCreatedProxies()` 时拿到 `base entityCall`
+- 普通 AOI 可见实体不会走这条链，因此通常没有 `base`
+
+所以文档里把它简化成“通常只有当前玩家实体能调”是可以的，但更准确的表述应该是：
+
+- **通常只有当前连接对应的 Player 实体持有 `base entityCall`，因此通常只有它能成功调用 `baseCall()`**
+
+### 第三层：`cellCall()` 的限制比 `baseCall()` 宽
+
+`cellCall()` 走的是另一条获取链。
+
+Unity 模板：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/Entity.cs
+public void cellCall(string methodname, params object[] arguments)
+{
+    ...
+    EntityCall cellEntityCall = getCellEntityCall();
+    if(cellEntityCall == null)
+    {
+        ...
+    }
+    ...
+    cellEntityCall.sendCall(null);
+}
+```
+
+它要求的是：
+
+- 当前实体存在 `cell entityCall`
+
+而 `cell entityCall` 是在实体 `enterWorld` 时建立的：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/KBEngine.cs
+public void Client_onEntityEnterWorld(MemoryStream stream)
+{
+    ...
+    entity.onGetCell();
+    ...
+}
+```
+
+这意味着：
+
+- 当前玩家实体进入世界后会拿到 `cell entityCall`
+- 普通可见实体进入当前客户端世界对象集合后，通常也会拿到 `cell entityCall`
+
+所以 `cellCall()` 的语义更准确地说是：
+
+- **只要该客户端实体当前持有 `cell entityCall`，并且 `.def` 里声明了客户端可调用的 cell 方法，就可以调用**
+
+它并不天然等价于“只有玩家实体能调”。
+
+### 第四层：`cellCall()` 仍然不是“客户端直连 CellApp”
+
+即使名字叫 `cellCall()`，客户端也不是直接和 CellApp 通信。
+
+JS 模板里 `EntityCall.newCall()` 很清楚：
+
+```javascript
+// 文件：kbe/res/sdk_templates/client/js/kbengine.js
+if(this.type == KBEngine.ENTITYCALL_TYPE_CELL)
+    this.bundle.newMessage(KBEngine.messages.Baseapp_onRemoteCallCellMethodFromClient);
+else
+    this.bundle.newMessage(KBEngine.messages.Entity_onRemoteMethodCall);
+```
+
+也就是说：
+
+- `baseCall()` 走的是面向 Base 的远程调用消息
+- `cellCall()` 先发给 Base，再由 Base 转发到 Cell
+
+所以真正的安全边界仍在服务端：
+
+- 是否是 `.def` 中允许客户端调用的方法
+- 当前 channel 是否有权限调用这个实体
+- 是否需要 `EXPOSED_AND_CALLER_CHECK`
+
+### 第五层：为什么 API 文档里必须写“依赖 `.def` 方法表”
+
+模板里不只是查方法名，还会做参数个数和参数类型校验：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/Entity.cs
+if(arguments.Length != method.args.Count)
+{
+    ...
+}
+
+if(method.args[i].isSameType(arguments[i]))
+{
+    method.args[i].addToStream(...);
+}
+```
+
+所以 `baseCall()` / `cellCall()` 不是“任意字符串 RPC”。
+
+它们依赖的是：
+
+- `kbcmd` 根据 `.def` 生成的客户端方法表
+- 每个参数类型的 `isSameType()` 与 `addToStream()` 序列化逻辑
+
+这也是为什么文档里必须明确写：
+
+- 方法必须在 `.def` 里声明为客户端可调用
+- 参数个数、顺序、类型都按生成后的方法表校验
+
+### 结论：该怎么理解这两个 API
+
+最准确的读法如下：
+
+| API | 更准确的语义 |
+| --- | --- |
+| `baseCall()` | 调用当前实体持有的 `base entityCall` 对应的服务端 base 方法；常规流程下通常只有当前连接对应的 Player 实体持有它 |
+| `cellCall()` | 调用当前实体持有的 `cell entityCall` 对应的服务端 cell 方法；只要实体已经拿到 `cell entityCall`，通常不限于 Player 实体 |
+
+两者共同点：
+
+- 都依赖 `.def` 生成出来的方法表
+- 都会校验方法名、参数个数、参数类型
+- 都是单向发送，不阻塞等待返回
+
+<a id="client-entity-move-ground-sync"></a>
+## `moveToPoint()` / `cancelController()` / `isOnGround` 在客户端侧其实是一套本地控制器
+
+`bots/Entity.moveToPoint()`、`cancelController()` 和客户端侧的 `isOnGround` 也容易被 CHM 里的服务端表述误导。
+
+在客户端/ bots 侧，它们不是 CellApp 的 real controller，而是一套本地运动与同步机制。
+
+### 第一层：`moveToPoint()` 在客户端创建的是本地回调处理器
+
+`client_lib` 里真正的实现是：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/entity.cpp
+uint32 Entity::moveToPoint(const Position3D& destination, float velocity, float distance,
+                           PyObject* userData, bool faceMovement, bool moveVertically)
+{
+    stopMove();
+    ...
+    pMoveHandlerID_ = pClientApp_->scriptCallbacks().addCallback(
+        0.0f, 0.1f,
+        new MoveToPointHandler(...));
+    return pMoveHandlerID_;
+}
+```
+
+这说明：
+
+- 它先取消已有的本地移动 handler
+- 再注册一个新的 `MoveToPointHandler`
+- 返回的是**客户端本地控制器 ID**
+
+所以客户端/bots 里的 `moveToPoint()` 更准确地说是：
+
+- **在本地模拟一个持续更新位置/朝向的移动控制器**
+
+而不是服务端 CellApp 上那种 real entity controller。
+
+### 第二层：`cancelController()` 在客户端实际只取消本地移动 handler
+
+客户端实现也很直接：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/entity.cpp
+void Entity::cancelController(uint32 id)
+{
+    if(id == (uint32)pMoveHandlerID_)
+        this->stopMove();
+}
+```
+
+以及：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/entity.cpp
+if(strcmp(PyUnicode_AsUTF8AndSize(pyargobj, NULL), "Movement") == 0)
+{
+    pobj->stopMove();
+}
+```
+
+所以客户端侧 `cancelController()` 的真实语义是：
+
+- 支持按本地 controller ID 取消
+- 也支持用 `"Movement"` 取消当前本地移动
+- 当前主要对应的就是客户端本地移动 handler
+
+它不是服务端 cell controller 管理入口。
+
+### 第三层：本地 `moveToPoint()` 过程中会主动把 `isOnGround` 置为 `false`
+
+`MoveToPointHandler` 的更新逻辑里有一条非常关键：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/moveto_point_handler.cpp
+pEntity_->clientPos(currpos);
+pEntity_->clientDir(direction);
+
+// 非navigate都不能确定其在地面上
+pEntity_->isOnGround(false);
+```
+
+这说明：
+
+- 客户端本地 `moveToPoint()` 推进位置时，会同时推进本地 `clientPos/clientDir`
+- 由于这类本地移动无法保证实体一定贴地，底层会把 `isOnGround` 设为 `false`
+
+所以 `isOnGround` 不是一个“纯展示属性”。
+
+它会被客户端运动逻辑直接改写。
+
+### 第四层：`isOnGround` 是否会上行，取决于“本客户端是否持有移动控制权”
+
+客户端把位置、朝向和 `isOnGround` 上行到服务端的逻辑在：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+if(pEntity == NULL || !connectedBaseapp_ ||
+   pServerChannel_ == NULL || pEntity->cellEntityCall() == NULL || pEntity->isControlled())
+    return;
+
+...
+(*pBundle) << pEntity->isOnGround();
+```
+
+以及对额外 controlled entity 的同步：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+(*tempBundle) << entity->isOnGround();
+```
+
+这几段代码说明：
+
+- 当前玩家实体只有在“本地仍然持有控制权”时，位置/朝向/`isOnGround` 才会上行
+- 如果当前玩家实体已经处于 `isControlled == true`，则本地不会再上行自己的运动状态
+- 对当前客户端额外控制的那些实体，客户端也会同步它们的位置/朝向/`isOnGround`
+
+因此真正决定 `isOnGround` 同步方向的不是：
+
+- “它是不是 Player 实体”
+
+而是：
+
+- **当前这个实体的移动是否由本客户端驱动**
+
+### 第五层：不由本客户端驱动时，`isOnGround` 是服务端下行状态
+
+同一个客户端内核里，`isOnGround` 也会在这些时机被服务端消息更新：
+
+- `onEntityEnterWorld`
+- `onEntityEnterSpace`
+- 易变属性位置同步 `_updateVolatileData(...)`
+
+例如：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+entity->isOnGround(isOnGround > 0);
+```
+
+所以大体上可以这样理解：
+
+- 本地驱动时：`isOnGround` 可能被本地移动逻辑修改，并随同步包上行
+- 非本地驱动时：`isOnGround` 主要由服务端同步下行
+
+### 结论：客户端侧这三个概念要一起看
+
+最稳妥的理解方式如下：
+
+| API/属性 | 更准确的语义 |
+| --- | --- |
+| `moveToPoint()` | 创建一个客户端/ bots 本地移动控制器，按 tick 推进位置与朝向 |
+| `cancelController()` | 取消当前客户端本地移动控制器，不是服务端 cell controller 管理接口 |
+| `isOnGround` | 表示引擎当前认为实体是否贴地；本地是否会上行，取决于该实体当前是否由本客户端驱动 |
+
+<a id="client-entity-handles-table"></a>
+## `base` / `cell` / `clientapp` / `entities` / `findEntity()` 本质上是一套客户端运行时句柄表
+
+客户端 API 里还有一组名字看起来很“直白”，但实际很容易误读的成员：
+
+- `Entity.base`
+- `Entity.cell`
+- `Entity.clientapp`
+- `Entity.inWorld`
+- `KBEngine.findEntity()`
+- `KBEngine.entities`
+- `PyClientApp.entities`
+
+如果只看名字，很容易误以为：
+
+- `entities` 就是“当前场景里可见的实体”
+- `findEntity()` 找到的一定是已经 `inWorld` 的实体
+- `base` / `cell` 是实体天然一直都有的两个固定句柄
+
+源码实际并不是这样。
+
+### 第一层：`base` 是在 `onCreatedProxies()` 时接上的
+
+客户端真正拿到 `base entityCall` 的入口在：
+
+- `kbe/src/lib/client_lib/clientobjectbase.cpp`
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+void ClientObjectBase::onCreatedProxies(..., ENTITY_ID eid, std::string& entityType)
+{
+    ...
+    EntityCall* entityCall = new EntityCall(
+        EntityDef::findScriptModule(entityType.c_str()),
+        NULL, appID(), eid, ENTITYCALL_TYPE_BASE);
+
+    client::Entity* pEntity = createEntity(
+        entityType.c_str(), NULL, !hasBufferedMessage, eid, true, entityCall, NULL);
+    ...
+}
+```
+
+也就是说：
+
+- `base` 不是实体天生就有的
+- 它是客户端在收到 `onCreatedProxies()` 后，为当前连接对应的玩家代理实体接上的 `base entityCall`
+
+因此常规流程下：
+
+- **当前 Player 实体通常有 `base`**
+- **普通 AOI 可见实体通常没有 `base`**
+
+### 第二层：`cell` 是在 `onEntityEnterWorld()` 时接上的
+
+`cell entityCall` 的接入点是另一条链：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+void ClientObjectBase::onEntityEnterWorld(Network::Channel * pChannel, MemoryStream& s)
+{
+    ...
+    EntityCall* entityCall = new EntityCall(..., ENTITYCALL_TYPE_CELL);
+    entity = createEntity(..., NULL, entityCall);
+    ...
+}
+```
+
+对于当前 Player 实体，则是在已存在实体上补齐：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+if(!entity->inWorld())
+{
+    ...
+    EntityCall* entityCall = new EntityCall(entity->pScriptModule(),
+        NULL, appID(), eid, ENTITYCALL_TYPE_CELL);
+
+    entity->cellEntityCall(entityCall);
+    ...
+}
+```
+
+所以：
+
+- `cell` 对应的是“该客户端当前是否已经拿到了这个实体的 `cell entityCall`”
+- 它通常发生在实体进入客户端世界对象集合时，而不是登录一开始就有
+
+同时它也会在玩家离开世界时被移除：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+Py_DECREF(entity->cellEntityCall());
+entity->cellEntityCall(NULL);
+```
+
+因此 `cell` 是**运行时可变句柄**，不是恒定存在的固定属性。
+
+### 第三层：`clientapp` 指向拥有该实体的客户端运行时对象
+
+实体创建时，客户端内核会把所属 `ClientObjectBase` 记录到实体上：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+client::Entity* ClientObjectBase::createEntity(...)
+{
+    ...
+    entity->pClientApp(this);
+    ...
+}
+```
+
+而 `Entity.clientapp` 只是把这个指针暴露给脚本层：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/entity.cpp
+PyObject* Entity::pyGetClientApp()
+{
+    ClientObjectBase* app = pClientApp();
+    ...
+    return app;
+}
+```
+
+所以 `clientapp` 的语义不是“拥有这个实体的玩家”，而是：
+
+- **拥有这个客户端实体实例的本地客户端运行时对象**
+
+在 bots 侧，这个对象就是对应的 `PyClientApp`。
+
+### 第四层：`player()` / `findEntity()` / `entities` 其实都围绕同一张实体表
+
+客户端底层真正保存实体实例的是 `pEntities_`：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.h
+Entities<client::Entity>* pEntities() const{ return pEntities_; }
+```
+
+`player()` 本质上只是按 `entityID_` 去这张表里查：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+client::Entity* ClientObjectBase::pPlayer()
+{
+    return pEntities_->find(entityID_);
+}
+```
+
+模板客户端里的 `findEntity()` 也是同一个语义：
+
+```csharp
+// 文件：kbe/res/sdk_templates/client/unity/KBEngine.cs
+public Entity findEntity(Int32 entityID)
+{
+    Entity entity = null;
+    if(!entities.TryGetValue(entityID, out entity))
+        return null;
+    return entity;
+}
+```
+
+所以：
+
+- `player()` = 按当前连接记录的 `entity_id` 查实体表
+- `findEntity()` = 按传入 `entityID` 查实体表
+- `entities` = 客户端当前维护的实体实例表
+
+它们的区别不在“底层查不同容器”，而只在查找键不同。
+
+### 第五层：实体“在表里”不等于“已经 `inWorld`”
+
+这是最容易误读的一点。
+
+Player 实体在 `onCreatedProxies()` 时就可能先被创建并放进实体表：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+client::Entity* pEntity = createEntity(..., entityCall, NULL);
+```
+
+但真正把 `enterworld_` 置为 `true` 的，是后面的 `onEnterWorld()`：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/entity.cpp
+void Entity::onEnterWorld()
+{
+    enterworld_ = true;
+    ...
+}
+```
+
+因此会存在这种状态：
+
+- 实体已经能被 `findEntity()` 或 `entities[entityID]` 找到
+- 但 `entity.inWorld` 仍然是 `false`
+
+最典型的就是：
+
+- 当前连接对应的 Player 实体刚收到 `onCreatedProxies()`，但还没收到 `onEntityEnterWorld()`
+
+所以：
+
+- **“实体存在于实体表”** 和 **“实体已经进入客户端世界对象集合”** 是两件不同的事
+
+### 第六层：`inWorld` 看的是 world 状态，不是容器存在性
+
+Python 客户端内核里，`inWorld()` 本质上直接读 `enterworld_`：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/entity.h
+bool inWorld() const{ return enterworld_; }
+```
+
+而这个标志只在 world 相关回调里切换：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/entity.cpp
+void Entity::onEnterWorld()
+{
+    enterworld_ = true;
+}
+
+void Entity::onLeaveWorld()
+{
+    enterworld_ = false;
+    spaceID(0);
+}
+```
+
+所以最准确的理解是：
+
+- `inWorld` 表示该实体当前是否属于客户端维护的世界对象集合
+- 它不是“这个实体对象现在是否还存在于 `entities` 映射里”
+
+### 第七层：`clearSpace(false)` 会保留 Player 实体，但清掉其他实体
+
+这也是容器语义里特别重要的一点：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientobjectbase.cpp
+void ClientObjectBase::clearSpace(bool isAll)
+{
+    ...
+    std::vector<ENTITY_ID> excludes;
+    excludes.push_back(entityID_);
+    pEntities_->clear(true, excludes);
+    ...
+}
+```
+
+这意味着在常规“清当前空间”场景下：
+
+- 当前 Player 实体会被保留在实体表中
+- 其他实体会被移出实体表
+- Player 的 `spaceID` 会被置回 `0`
+
+所以 `entities` 也不是单纯的“当前 AOI 快照”。
+
+它更像：
+
+- **客户端当前保留的实体运行时对象表**
+
+### 第八层：`Entities` 自己还有一层 `garbages`
+
+客户端底层 `Entities<T>` 不是普通 `dict`，还有一层已移出映射但尚未析构的暂存区：
+
+```cpp
+// 文件：kbe/src/lib/entitydef/entities.h
+PyObjectPtr Entities<T>::erase(ENTITY_ID id)
+{
+    ...
+    _pGarbages->add(id, entity);
+    _entities.erase(iter);
+    return entity;
+}
+```
+
+以及：
+
+```cpp
+// 文件：kbe/src/lib/client_lib/clientapp.cpp
+registerPyObjectToScript("entities", pEntities_);
+```
+
+这说明：
+
+- `entities` 暴露给脚本层的是“当前实体表”
+- 某个实体从 `entities` 里移除后，不一定代表其脚本对象已经立即析构
+- 如果脚本层还有引用，它可能先进入 `garbages` 暂存
+
+这也是为什么“从表里删掉”和“对象生命周期真正结束”要区分开看。
+
+### 结论：这些 API 应该怎么读
+
+最稳妥的理解方式如下：
+
+| 成员 | 更准确的语义 |
+| --- | --- |
+| `Entity.base` | 当前实体持有的 `base entityCall`；常规流程下通常只有当前 Player 实体会有 |
+| `Entity.cell` | 当前实体持有的 `cell entityCall`；在实体进入客户端世界对象集合后通常才建立，离开时可能移除 |
+| `Entity.clientapp` | 拥有该客户端实体实例的本地客户端运行时对象 |
+| `Entity.inWorld` | 该实体当前是否属于客户端世界对象集合 |
+| `KBEngine.findEntity()` | 直接按 `entityID` 在客户端实体表里查实例，不额外保证其已 `inWorld` |
+| `KBEngine.entities` / `PyClientApp.entities` | 客户端当前维护的实体实例表，不等于“当前 AOI 可见实体列表” |
+
+<a id="global-data-dicts-sync"></a>
+## `baseAppData` / `globalData` / `cellAppData` 的同步链
+
+这三个名字看上去像普通 `dict`，但源码里它们不是“多个进程共享一份 Python 对象”，而是 `GlobalDataClient` / `GlobalDataServer` 这套跨进程同步通道。
+
+### 第一层：三者分别同步到谁
+
+源码把这三类数据拆得很明确：
+
+| 名称 | 暴露位置 | 权威副本 | 同步到谁 |
+| --- | --- | --- | --- |
+| `globalData` | `EntityApp<E>::installPyModules()` | `dbmgr` 的 `GlobalDataServer::GLOBAL_DATA` | 所有 `BaseApp` + `CellApp` |
+| `baseAppData` | `Baseapp::onInstallPyModules()` | `dbmgr` 的 `GlobalDataServer::BASEAPP_DATA` | 所有 `BaseApp` |
+| `cellAppData` | `Cellapp::onInstallPyModules()` | `dbmgr` 的 `GlobalDataServer::CELLAPP_DATA` | 所有 `CellApp` |
+
+对应注册点分别在：
+
+- `kbe/src/lib/server/entity_app.h`
+- `kbe/src/server/baseapp/baseapp.cpp`
+- `kbe/src/server/cellapp/cellapp.cpp`
+
+也就是说：
+
+- `globalData` 是 `BaseApp` 和 `CellApp` 共同关注的进程级共享字典
+- `baseAppData` 只在 `BaseApp` 集群内同步
+- `cellAppData` 只在 `CellApp` 集群内同步
+
+### 第二层：本地脚本写入后，真正的广播链怎么走
+
+先看脚本侧入口：
+
+```cpp
+// 文件：kbe/src/lib/pyscript/map.cpp
+int Map::mp_ass_subscript(PyObject* self, PyObject* key, PyObject* value)
+{
+    Map* lpScriptData = static_cast<Map*>(self);
+
+    if (value == NULL)
+    {
+        lpScriptData->onDataChanged(key, value, true);
+        return PyDict_DelItem(lpScriptData->pyDict_, key);
+    }
+
+    lpScriptData->onDataChanged(key, value);
+    return PyDict_SetItem(lpScriptData->pyDict_, key, value);
+}
+```
+
+所以脚本执行：
+
+```python
+KBEngine.globalData[key] = value
+del KBEngine.baseAppData[key]
+```
+
+并不是某个后台线程自动扫描变化，而是直接走 `Map::mp_ass_subscript()` 这条赋值/删除路径。
+
+对这三个字典来说，`onDataChanged()` 被 `GlobalDataClient` 重写：
+
+```cpp
+// 文件：kbe/src/lib/server/globaldata_client.cpp
+void GlobalDataClient::onDataChanged(PyObject* key, PyObject* value, bool isDelete)
+{
+    std::string skey = script::Pickler::pickle(key, 0);
+    std::string sval = "";
+    ...
+    (*pBundle).newMessage(DbmgrInterface::onBroadcastGlobalDataChanged);
+    (*pBundle) << dataType;
+    (*pBundle) << isDelete;
+    ...
+    (*pBundle) << g_componentType;
+    lpChannel->send(pBundle);
+}
+```
+
+也就是说，本地进程会把顶层 `key/value` pickle 后发给 `dbmgr`，并显式带上：
+
+- 当前是哪一类数据：`GLOBAL_DATA` / `BASEAPP_DATA` / `CELLAPP_DATA`
+- 当前写入方是哪种组件：`BaseApp` 或 `CellApp`
+
+`dbmgr` 收到后按 `dataType` 路由到对应的权威副本：
+
+```cpp
+// 文件：kbe/src/server/dbmgr/dbmgr.cpp
+switch(dataType)
+{
+case GlobalDataServer::GLOBAL_DATA:
+    ...
+case GlobalDataServer::BASEAPP_DATA:
+    ...
+case GlobalDataServer::CELLAPP_DATA:
+    ...
+}
+```
+
+然后 `GlobalDataServer::write()` / `del()` 会在 `dbmgr` 侧维护权威 `dict_`，并把变化广播给关注该数据类型的组件。
+这里还要注意一个实现细节：`write()` 的代码顺序是“先广播、再写入 `dict_`”，而 `del()` 是“先删除、再广播”，所以更稳妥的概括方式不是强调顺序，而是强调这一步由 `dbmgr` 统一裁决并扩散。
+
+```cpp
+// 文件：kbe/src/lib/server/globaldata_server.cpp
+bool GlobalDataServer::write(...)
+{
+    broadcastDataChanged(...);
+    ...
+    dict_[key] = value;
+}
+```
+
+广播时还有一个很关键的细节：
+
+```cpp
+if(pChannel == lpChannel)
+    continue;
+```
+
+这意味着：
+
+- **写入方不会再收到一次“回环广播”**
+- 写入方本地字典会在这次脚本赋值/删除流程里完成更新
+- 其他进程才通过 `dbmgr` 的广播把状态跟上
+
+### 第三层：接收方如何落地并触发 Python 回调
+
+接收侧不是直接把原始字节塞回脚本，而是分别进入三条组件回调：
+
+- `EntityApp<E>::onBroadcastGlobalDataChanged()`
+- `Baseapp::onBroadcastBaseAppDataChanged()`
+- `Cellapp::onBroadcastCellAppDataChanged()`
+
+它们的模式完全一致：
+
+1. 从消息里取出 `isDelete`、pickle 后的 `key`、`value`
+2. 反序列化成 Python 对象
+3. 更新本地 `GlobalDataClient` 持有的 map
+4. 调入口脚本里的对应回调
+
+例如 `BaseApp` 侧：
+
+```cpp
+// 文件：kbe/src/server/baseapp/baseapp.cpp
+if(pBaseAppData_->write(pyKey, pyValue))
+{
+    SCRIPT_OBJECT_CALL_ARGS2(getEntryScript().get(), "onBaseAppData",
+        "OO", pyKey, pyValue, false);
+}
+```
+
+`CellApp` 侧和 `globalData` 侧分别对应：
+
+- `onCellAppData()` / `onCellAppDataDel()`
+- `onGlobalData()` / `onGlobalDataDel()`
+
+所以这些 Python 回调的真实语义是：
+
+- 当前进程收到别的进程广播后的“同步通知”
+- 或者启动阶段收到历史快照后的“回放通知”
+
+而不是“我自己刚执行了 `KBEngine.xxx[key] = value`，于是本进程再额外回调一次”。
+
+### 第四层：新进程加入时，不是只收增量，而是先补一份快照
+
+这三个数据字典不是“只对已经在线的进程做后续广播”。
+
+当新的 `BaseApp` / `CellApp` 完成初始化时，`SyncAppDatasHandler` 会调用：
+
+```cpp
+// 文件：kbe/src/server/dbmgr/sync_app_datas_handler.cpp
+Dbmgr::getSingleton().onGlobalDataClientLogon(cinfos->pChannel, BASEAPP_TYPE);
+Dbmgr::getSingleton().onGlobalDataClientLogon(cinfos->pChannel, CELLAPP_TYPE);
+```
+
+然后 `Dbmgr::onGlobalDataClientLogon()` 再把请求分发给对应 `GlobalDataServer`：
+
+```cpp
+// 文件：kbe/src/server/dbmgr/dbmgr.cpp
+if(BASEAPP_TYPE == componentType)
+{
+    pBaseAppData_->onGlobalDataClientLogon(...);
+    pGlobalData_->onGlobalDataClientLogon(...);
+}
+else if(CELLAPP_TYPE == componentType)
+{
+    pGlobalData_->onGlobalDataClientLogon(...);
+    pCellAppData_->onGlobalDataClientLogon(...);
+}
+```
+
+`GlobalDataServer::onGlobalDataClientLogon()` 会把当前 `dict_` 里的所有键值逐条重放给新连接组件。
+
+所以这三类数据的同步模型应该读成：
+
+- `dbmgr` 持有权威副本
+- 新进程启动时先收一份当前快照
+- 之后再接收增量广播
+
+### 第五层：为什么“只改列表里的一个元素”不会同步
+
+这条规则的根源不是 `FIXED_DICT`，也不是文档层面的约定，而是写入入口本身决定的。
+
+`GlobalDataClient` 只能感知 `Map::mp_ass_subscript()` 这一层，也就是：
+
+- `KBEngine.xxx[key] = newValue`
+- `del KBEngine.xxx[key]`
+
+它并不能感知 `value` 内部的局部原地修改。
+
+例如：
+
+```python
+KBEngine.globalData["list"] = [1, 2, 3]
+KBEngine.globalData["list"][1] = 7
+```
+
+第二行改的是列表对象内部元素，不会再次经过 `KBEngine.globalData` 这层 `Map::mp_ass_subscript()`，因此不会触发 `GlobalDataClient::onDataChanged()`，也就不会发广播。
+
+正确做法是整体重写顶层值：
+
+```python
+items = list(KBEngine.globalData["list"])
+items[1] = 7
+KBEngine.globalData["list"] = items
+```
+
+### 结论：这三个 API 应该怎么理解
+
+最稳妥的读法如下：
+
+| API | 更准确的语义 |
+| --- | --- |
+| `KBEngine.baseAppData` | 只在 `BaseApp` 集群内同步的顶层 map，权威副本在 `dbmgr` |
+| `KBEngine.globalData` | 在 `BaseApp` 与 `CellApp` 间同步的顶层 map，权威副本在 `dbmgr` |
+| `KBEngine.cellAppData` | 只在 `CellApp` 集群内同步的顶层 map，权威副本在 `dbmgr` |
+| `onBaseAppData*` / `onCellAppData*` / `onGlobalData*` | 接收侧在“广播落地或启动快照回放完成后”的脚本通知，不是写入方本地自触发 |
+
 ## 内部通信和外部通信的共同点与差异
 
 共同点：

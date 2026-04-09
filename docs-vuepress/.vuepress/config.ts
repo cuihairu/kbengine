@@ -197,7 +197,7 @@ export default defineUserConfig({
       '/api/': [
         {
           text: '核心概念',
-          children: ['/api/README.md', '/api/basetypes.md', '/api/keywords.md'],
+          children: ['/api/README.md', '/api/audit-checklist.md', '/api/basetypes.md', '/api/keywords.md'],
         },
         {
           text: '客户端',

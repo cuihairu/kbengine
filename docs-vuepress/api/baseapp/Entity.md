@@ -117,9 +117,13 @@ Entity
 ### def createCellEntity(self, cellEntityCall):
 
 功能说明：
-请求在一个cell里面创建一个关联的实体。
-用于创建cell实体的信息被存储在该实体的属性cellData里。这个属性是一个字典，对应实体的.def文件里的默认值，同时还包括用于表示
-实体位置和方向(roll, pitch, yaw)的"position", "direction" 和 "spaceID"。
+请求在指定 `CellEntityCall` 所在的空间里创建当前 Base 实体对应的 cell 实体。
+它不是在 Base 进程里本地直接构造一个 cell 对象，而是由 Base 把 `entityType`、`baseapp componentID`、是否带客户端以及 `cellData` 序列化后发给目标 CellApp，再由对端完成真正的 Cell 实例创建。
+创建成功前 `cell` 属性仍不可用；Base 侧真正拿到直接 `cellEntityCall` 的时机，是后续收到回调并触发 [onGetCell](#onGetCell) 的时候。
+
+源码解析：
+
+- [实体系统：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/architecture/source-analysis/entity-system.html#base-entity-create-cell)
 
 参数：
 
@@ -265,7 +269,13 @@ destroyCellEntity请求销毁关联的cell实体。如果没有关联的cell实�
 ### def onGetCell(self):
 
 功能说明：
-如果这个函数在脚本中有实现，这个函数在它获得cell实体的时候被调用。
+如果这个函数在脚本中有实现，这个函数会在 Base 侧收到 cell 创建成功回调、并补齐当前实体的直接 `cellEntityCall` 后被调用。
+底层会先结束 `creatingCell` 状态并销毁一次性的 `cellData` 启动数据，然后才进入这个脚本回调；恢复路径 `restoreCell()` 不会触发它。
+
+源码解析：
+
+- [实体系统：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/architecture/source-analysis/entity-system.html#base-entity-create-cell)
+
 这个函数没有参数。
 
 <a id="onLoseCell"></a>

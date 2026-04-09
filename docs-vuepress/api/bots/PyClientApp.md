@@ -49,18 +49,43 @@ space数据由用户在服务端通过setSpaceData设置。
 ### def player():
 
 功能说明：
-获得当前客户端所控制的实体。
+获得当前这个 bots 客户端连接对应的Player实体。
+
+源码解析：
+
+- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/architecture/source-analysis/networking.html#client-entity-isplayer-control)
+
+返回：
+
+- Entity，返回当前连接对应的Player实体；如果该实体尚未创建则返回空。
 
 ## 回调函数文档
 
 ## 属性文档
+
+<a id="id"></a>
+
+id
+
+说明：
+当前这个 bots 客户端运行时对象的ID。
+它表示本地客户端上下文本身，不是玩家实体ID。
+
+类型：
+
+- 只读，Integer
 
 <a id="entities"></a>
 
 entities
 
 说明：
-entities是一个字典对象，包含当前进程上所有的实体。
+entities 是当前这个 bots 客户端运行时维护的实体实例表。
+它包含当前 bots 客户端仍然保留的实体对象，不等于“当前 AOI 可见实体列表”：当前连接对应的Player实体可能先进入实体表，再在后续世界/空间消息里更新自己的 `inWorld` 与 `spaceID` 状态。
+
+源码解析：
+
+- [网络与消息系统：客户端的句柄表与实体容器语义](/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 类型：
 

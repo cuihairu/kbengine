@@ -191,6 +191,11 @@ cellApp上新的Entity可以使用KBEngine.createEntity创建。一个实体还�
 功能说明：
 注册一个定时器，定时器由回调函数[onTimer](#onTimer)触发，回调函数将在"initialOffset"秒后被执行第1次，而后将每间隔"repeatOffset"秒执行1次，可设定一个用户参数"userArg"（仅限integer类型）。
 [onTimer](#onTimer)函数必须在entity的cell部分被定义，且带有2个参数，第1个integer类型的是timer的id（可用于移除timer的"[delTimer](#delTimer)"函数），第2个是用户参数"userArg"。
+这里返回的是脚本层 `timerID`，不是底层 `TimerHandle`；Cell 实体迁移或恢复时，引擎会按这个 `timerID` 重新建立底层定时器映射，因此脚本层看到的 ID 可以保持不变。
+
+源码解析：
+
+- [脚本运行时与热重载：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/architecture/source-analysis/scripting.html#cell-entity-script-timers)
 例子:
 
 ```python
@@ -244,6 +249,11 @@ Entity
 
 功能说明：
 函数cancelController停止一个控制器对Entity的影响。它只能在一个real实体上被调用。
+需要注意，字符串 `"Movement"` 是一个特殊入口，它会直接停止当前移动/转向控制链；如果传入的数值 ID 恰好就是当前移动控制器或转向控制器的 ID，底层也会走同样的 `stopMove()` 逻辑，而不是只删除单个对象。
+
+源码解析：
+
+- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers)
 
 参数：
 
@@ -305,7 +315,11 @@ debugView输出Entity的View的详细信息到cell的调试日志。
 
 功能说明：
 函数delTimer用于移除一个注册的定时器，移除后的定时器不再执行。只执行1次的定时器在执行回调后自动移除，不必要使用delTimer移除。
-如果delTimer函数使用一个无效的id（例如已经移除），将会产生错误。
+除了传入数值 `timerID` 之外，底层还支持传入字符串 `"All"` 一次性清空当前实体的所有脚本定时器。
+
+源码解析：
+
+- [脚本运行时与热重载：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/architecture/source-analysis/scripting.html#cell-entity-script-timers)
 
 参数：
 
@@ -426,6 +440,7 @@ debugView输出Entity的View的详细信息到cell的调试日志。
 功能说明：
 直线移动Entity到给定的坐标点，成功或失败会调用回调函数。
 任何[实体](./Entity.md)，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
+底层会先停止当前移动/转向控制链，再创建一个新的 `MoveController + MoveToPointHandler` 组合，由 CellApp 在后续 tick 中持续推进位置与朝向。
 返回一个可以用于取消这次移动的控制器ID。
 例如：
 Entity.[cancelController](./Entity.md#cancelController)( movementID )。
@@ -442,6 +457,10 @@ Entity.[cancelController](./Entity.md#cancelController)( movementID )。
 参看：
 
 - Entity.[cancelController](./Entity.md#cancelController)
+
+源码解析：
+
+- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers)
 
 参数：
 
@@ -508,6 +527,7 @@ Entity.[cancelController](./Entity.md#cancelController)( movementID )。
 使用导航系统来使这个Entity向一个目标点移动，成功或失败会调用回调函数。
 KBEngine可以有数个预先生成好的导航网格，不同的网格大小（会导致不同的导航路径）。
 任何[实体](./Entity.md)，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
+它会先根据当前 `space` 的导航句柄计算路径点；如果路径为空，则直接返回 `0`，不会创建控制器。
 返回一个可以用于取消这次移动的控制器ID。
 例如：
 Entity.[cancelController](./Entity.md#cancelController)( movementID )。
@@ -525,6 +545,10 @@ Entity.[cancelController](./Entity.md#cancelController)( movementID )。
 
 - Entity.[cancelController](./Entity.md#cancelController)
 
+源码解析：
+
+- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers)
+
 参数：
 
 | destination | Vector3，Entity移向的目标点。 |
@@ -539,7 +563,7 @@ Entity.[cancelController](./Entity.md#cancelController)( movementID )。
 
 返回：
 
-- int，新创建的控制器ID。
+- int，成功时返回新创建的控制器ID；如果导航层没有得到可用路径则返回 `0`。
 
 <a id="navigatePathPoints"></a>
 
@@ -820,6 +844,11 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 功能说明：
 这个函数当一个与此实体关联的定时器触发的时候被调用。
 一个定时器可以使用Entity.[addTimer](#addTimer)函数添加。
+这里的 `timerHandle` 实际上是脚本层 `timerID`，不是底层调度器里的原生 `TimerHandle`。
+
+源码解析：
+
+- [脚本运行时与热重载：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/architecture/source-analysis/scripting.html#cell-entity-script-timers)
 
 参数：
 

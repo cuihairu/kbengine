@@ -84,7 +84,19 @@ import KBEngine
 ### def giveClientTo(self, proxy):
 
 功能说明：
-将客户端的控制器转交给另一个Proxy，当前的Proxy必须有一个客户端而目标Proxy则必须没有关联客户端，否则将会提示错误。
+将当前 Proxy 绑定的客户端连接转交给另一个 Proxy。
+它转移的不只是一个“控制标记”，而是整条客户端绑定链：旧 Proxy 会失去 `clientEntityCall`；如果旧 Proxy 已经有 cell，还会通知 cell 侧丢失 Witness；客户端随后销毁旧控制实体；目标 Proxy 接手同一条客户端通道并重新下发 `onCreatedProxies()`，如果目标已经有 cell，则继续重建 Witness、可见集和客户端控制链路。
+
+注意：
+
+- 当前 Proxy 必须已经绑定客户端。
+- 目标 Proxy 不能为空、不能是自身、不能已经绑定客户端。
+- 如果目标 Proxy 还没有 cell，迁移完成后只会先完成 Base 侧绑定，后续仍要等它获得 cell 才会恢复视野同步。
+- 源码里虽然接受 `None` 并转成 `NULL`，但该路径不会真正执行迁移，实际使用应传有效目标 Proxy。
+
+源码解析：
+
+- [空间、AOI 与视野同步：`Proxy.giveClientTo()` 转移的其实是客户端绑定与 Witness 链路](/architecture/source-analysis/space-aoi.html#proxy-give-client-to)
 
 参看：
 
@@ -164,7 +176,7 @@ import KBEngine
 
 ### def onGiveClientToFailure(self):
 
-如果在脚本中实现了此回调，当实体调用[giveClientTo](#onStreamComplete)失败时，该回调被调用。这个方法没有参数。
+如果在脚本中实现了此回调，当实体调用[giveClientTo](#giveClientTo)失败时，该回调被调用。这个方法没有参数。
 
 <a id="onLogOnAttempt"></a>
 

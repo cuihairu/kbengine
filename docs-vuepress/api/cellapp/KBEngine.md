@@ -648,8 +648,17 @@ space数据可以通过[getSpaceData](#getSpaceData)获取。
 ### def onCellAppData(key, value):
 
 功能说明：
-KBEngine.cellAppData有改变时回调此函数。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+当前 `CellApp` 在收到其他 `CellApp` 对 `KBEngine.cellAppData` 的广播，或在启动阶段从 `dbmgr` 回放已有键值时，如果某个顶层 `key` 被新增或覆盖，就会回调此函数。
+当前进程自己直接执行 `KBEngine.cellAppData[key] = value` 时，不会额外再回调一次本函数。
+
+注意：
+
+- 该回调接口必须实现在入口模块(`kbengine_defaults.xml -> entryScriptFile`)中。
+- 只有顶层 `key -> value` 的新增或整体改写会触发；`value` 内部可变对象的局部修改不会触发。
+
+源码解析：
+
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -662,8 +671,17 @@ KBEngine.cellAppData有改变时回调此函数。
 ### def onCellAppDataDel(key):
 
 功能说明：
-KBEngine.cellAppData有删除的时候回调此函数。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+当前 `CellApp` 在收到其他 `CellApp` 对 `KBEngine.cellAppData` 的删除广播时，会在对应顶层 `key` 从本地字典移除后回调此函数。
+当前进程自己直接执行 `del KBEngine.cellAppData[key]` 时，不会额外再回调一次本函数。
+
+注意：
+
+- 该回调接口必须实现在入口模块(`kbengine_defaults.xml -> entryScriptFile`)中。
+- 只对应顶层 `key` 的删除同步。
+
+源码解析：
+
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -675,8 +693,17 @@ KBEngine.cellAppData有删除的时候回调此函数。
 ### def onGlobalData(key, value):
 
 功能说明：
-KBEngine.globalData有改变的时候回调此函数。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+当前 `CellApp` 在收到其他 `BaseApp` 或 `CellApp` 对 `KBEngine.globalData` 的广播，或在启动阶段从 `dbmgr` 回放已有键值时，如果某个顶层 `key` 被新增或覆盖，就会回调此函数。
+当前进程自己直接执行 `KBEngine.globalData[key] = value` 时，不会额外再回调一次本函数。
+
+注意：
+
+- 该回调接口必须实现在入口模块(`kbengine_defaults.xml -> entryScriptFile`)中。
+- 只有顶层 `key -> value` 的新增或整体改写会触发；`value` 内部可变对象的局部修改不会触发。
+
+源码解析：
+
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -689,8 +716,17 @@ KBEngine.globalData有改变的时候回调此函数。
 ### def onGlobalDataDel(key):
 
 功能说明：
-KBEngine.globalData有删除的时候回调此函数。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+当前 `CellApp` 在收到其他 `BaseApp` 或 `CellApp` 对 `KBEngine.globalData` 的删除广播时，会在对应顶层 `key` 从本地字典移除后回调此函数。
+当前进程自己直接执行 `del KBEngine.globalData[key]` 时，不会额外再回调一次本函数。
+
+注意：
+
+- 该回调接口必须实现在入口模块(`kbengine_defaults.xml -> entryScriptFile`)中。
+- 只对应顶层 `key` 的删除同步。
+
+源码解析：
+
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -825,46 +861,43 @@ NEXT_ONLY
 cellAppData
 
 说明：
-这个属性包含一个类字典的对象，这个对象会在所有的CellApps之间自动同步。
-当字典的一个值被修改，这个修改会广播到所有的CellApps。
+`CellApp` 进程级共享字典，只在所有 `CellApp` 之间同步。
+脚本执行 `KBEngine.cellAppData[key] = value` 或 `del KBEngine.cellAppData[key]` 时，请求会先发往 `dbmgr` 持有的权威副本，再广播给其他 `CellApp`。
+写入方本地值会在本次脚本赋值/删除流程中直接更新，不会再收到一次自己的回环广播；其他 `CellApp` 收到广播后，才会触发 [onCellAppData](./KBEngine.md#onCellAppData) 或 [onCellAppDataDel](./KBEngine.md#onCellAppDataDel)。
+新启动的 `CellApp` 在登录 `dbmgr` 时，还会收到当前全量快照，不只是后续增量。
+键和值都必须能在目标组件上完成 `pickle/unpickle`。
+
+源码解析：
+
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/architecture/source-analysis/networking.html#global-data-dicts-sync)
+
 例子：
 
 ```python
-KBEngine
-.
-cellAppData
-[ "hello" ] = "there"
+KBEngine.cellAppData["hello"] = "there"
 ```
 
-其余CellApp可以访问下面的：
+其余 `CellApp` 可以读取：
 
 ```python
-print 
-KBEngine
-.
-cellAppData
-[ "hello" ]
+print(KBEngine.cellAppData["hello"])
 ```
 
-键和值可以是任意类型，但这些类型必须在所有目标组件上能够被封装和被拆封。
-当一个值被改变或被删除，一个回调函数会在所有组件被调用。
-参看：[KBEngine](./KBEngine.md).[onCellAppData](./KBEngine.md#onCellAppData)和[KBEngine](./KBEngine.md).[onDelCellAppData](./KBEngine.md#onDelCellAppData)。
-注意：只有顶层的值才会被广播，如果你有一个值（比如一个列表），它改变了内部的值（比如只是改变一个数），这个信息不会被广播。
-不要进行下面的操作：
+参看：[KBEngine](./KBEngine.md).[onCellAppData](./KBEngine.md#onCellAppData) 和 [KBEngine](./KBEngine.md).[onCellAppDataDel](./KBEngine.md#onCellAppDataDel)。
+
+注意：
+
+- 同步粒度是顶层 `key -> value`；只改 `value` 内部元素不会广播。
+- 它不会同步到 `BaseApp`。
+- 不要做下面这种“局部改列表元素”的写法：
 
 ```python
-KBEngine
-.
-cellAppData
-[ "list" ] = [1, 2, 3]
+KBEngine.cellAppData["list"] = [1, 2, 3]
 
-KBEngine
-.
-cellAppData
-[ "list" ][1] = 7
+KBEngine.cellAppData["list"][1] = 7
 ```
 
-这样，本地访问是[1, 7, 3]，远程访问是[1, 2, 3]。
+这样本地看到的是 `[1, 7, 3]`，其他 `CellApp` 仍然是 `[1, 2, 3]`。
 
 <a id="component"></a>
 
@@ -905,43 +938,41 @@ entities是一个字典对象，包含当前进程上所有的实体，包括gho
 globalData
 
 说明：
-这个属性包含一个类字典的对象，这个对象会在所有的BaseApps和CellApps之间自动复制。
-当字典的一个值被修改，这个修改会广播到所有的BaseApps和CellApps。CellAppMgr解决竞争条件，保证信息复制的权威性。
+`BaseApp` 与 `CellApp` 共享的进程级字典。
+脚本执行 `KBEngine.globalData[key] = value` 或 `del KBEngine.globalData[key]` 时，请求会先进入 `dbmgr` 持有的权威副本，再由 `dbmgr` 广播给所有其他 `BaseApp` 和 `CellApp`。
+这里的权威方是 `dbmgr`，不是 `CellAppMgr`。
+写入方本地不会收到一遍自己的同步回调；其他组件在完成反序列化和本地落地后，才会触发 [onGlobalData](./KBEngine.md#onGlobalData) 或 [onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
+新启动的 `BaseApp` 或 `CellApp` 也会在登录 `dbmgr` 后收到当前全量快照。
+键和值都必须能在目标组件上完成 `pickle/unpickle`。
+
+源码解析：
+
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/architecture/source-analysis/networking.html#global-data-dicts-sync)
+
 例子：
 
 ```python
-KBEngine
-.
-globalData
-[ "hello" ] = "there"
+KBEngine.globalData["hello"] = "there"
 ```
 
-其余Cellapp或者Baseapp可以访问下面的：
+其余 `CellApp` 或 `BaseApp` 可以读取：
 
 ```python
-print 
-KBEngine
-.
-globalData
-[ "hello" ]
+print(KBEngine.globalData["hello"])
 ```
 
-键和值可以是任意类型，但这些类型必须在所有目标组件上能够被封装和被拆封。
-当一个值被改变或被删除，一个回调函数会在所有组件被调用。
-参看：[KBEngine](./KBEngine.md).[onGlobalData](./KBEngine.md#onGlobalData)和[KBEngine](./KBEngine.md).[onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
-注意：只有顶层的值才会被广播，如果你有一个易变的值（比如一个列表），它改变了内部的值（比如只是改变一个数），这个信息不会被广播。
-不要进行下面的操作：
+参看：[KBEngine](./KBEngine.md).[onGlobalData](./KBEngine.md#onGlobalData) 和 [KBEngine](./KBEngine.md).[onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
+
+注意：
+
+- 同步粒度是顶层 `key -> value`；只改 `value` 内部元素不会广播。
+- 它同步给所有 `BaseApp` 和 `CellApp`，但不会同步到 `loginapp`、`interfaces` 这类其他组件。
+- 不要做下面这种“局部改列表元素”的写法：
 
 ```python
-KBEngine
-.
-globalData
-[ "list" ] = [1, 2, 3]
+KBEngine.globalData["list"] = [1, 2, 3]
 
-KBEngine
-.
-globalData
-[ "list" ][1] = 7
+KBEngine.globalData["list"][1] = 7
 ```
 
-这样，本地访问是[1, 7, 3]，远程访问是[1, 2, 3]。
+这样本地看到的是 `[1, 7, 3]`，远端组件仍然是 `[1, 2, 3]`。
