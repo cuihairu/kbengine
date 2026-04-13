@@ -140,6 +140,8 @@ export default defineUserConfig({
             '/study/appendix-key-algorithms.md',
             '/study/appendix-external-reference-systems.md',
             '/study/appendix-terminology-quick-reference.md',
+            '/study/appendix-engine-suitability-and-game-types.md',
+            '/study/appendix-coordinate-system-conventions.md',
           ],
         },
       ],
