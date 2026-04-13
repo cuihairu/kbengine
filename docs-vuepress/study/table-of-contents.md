@@ -216,3 +216,19 @@
 
 - 实体、通信、分布式、持久化核心术语的一句话定义
 - Mailbox / EntityCall、TwoWay / Deferred、CID 等高频易混概念速查
+
+### [E 引擎适用场景与游戏类型选型指南](appendix-engine-suitability-and-game-types.md)
+
+- 四类游戏类型的引擎匹配分析（房间制 / MOBA / 中型 MMO / 大型 MMO）
+- 决策流程：从项目特征到引擎选择
+- 常见误区澄清与替代方案推荐
+- 与 Ch23 选型建议的交叉参考
+
+### [F 坐标系约定：BigWorld 与 KBEngine](appendix-coordinate-system-conventions.md)
+
+- 轴约定（Y-up、XZ 地平面）、Y 轴开关的设计取舍
+- 旋转表示：Direction3D（Euler 角弧度制）与角度压缩（angle2int8）
+- 坐标压缩：PackXZ/PackY/PackXYZ 的范围、精度与带宽节省
+- 同步协议中的坐标传输（更新标志位组合）
+- 客户端接入的坐标变换（Unity/Unreal/Godot）
+- 数学库选择（D3DX vs G3D）
