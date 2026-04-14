@@ -15,13 +15,15 @@ jobs:
   linux:
     name: Linux CMake
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
+        timeout-minutes: 3
         uses: actions/checkout@v4
 
       - name: Install system dependencies
+        timeout-minutes: 5
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -39,16 +41,19 @@ jobs:
             curl
 
       - name: Bootstrap vcpkg
+        timeout-minutes: 5
         run: |
           git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
           "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
 
       - name: Configure
+        timeout-minutes: 5
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: cmake --preset vcpkg
 
       - name: Build
+        timeout-minutes: 15
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: >
@@ -68,6 +73,7 @@ jobs:
           kbe_smoke_tests
 
       - name: Test
+        timeout-minutes: 10
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: ctest --preset vcpkg --output-on-failure -E "_NOT_BUILT$"
@@ -75,13 +81,15 @@ jobs:
   coverage:
     name: Code Coverage
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
+        timeout-minutes: 3
         uses: actions/checkout@v4
 
       - name: Install system dependencies
+        timeout-minutes: 5
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -104,11 +112,13 @@ jobs:
           lcov --version
 
       - name: Bootstrap vcpkg
+        timeout-minutes: 5
         run: |
           git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
           "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
 
       - name: Configure with Coverage
+        timeout-minutes: 5
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: |
@@ -117,6 +127,7 @@ jobs:
             -DKBE_ENABLE_CODE_COVERAGE=ON
 
       - name: Verify Coverage Flags
+        timeout-minutes: 2
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: |
@@ -130,6 +141,7 @@ jobs:
           find build/presets/vcpkg -name "kbe_smoke_tests" -type f -ls
 
       - name: Build with Coverage
+        timeout-minutes: 15
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: >
@@ -138,6 +150,7 @@ jobs:
           kbe_smoke_tests
 
       - name: Run Tests with Coverage
+        timeout-minutes: 10
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
           GCOV_ERROR_STDERR: 1
@@ -154,6 +167,7 @@ jobs:
           find . -name "*.gcno" -type f | wc -l
 
       - name: Generate Coverage Report
+        timeout-minutes: 10
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         working-directory: ${{ github.workspace }}
@@ -199,6 +213,7 @@ jobs:
           fi
 
       - name: Upload to Codecov
+        timeout-minutes: 3
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage.info
@@ -210,31 +225,37 @@ jobs:
   windows:
     name: Windows CMake
     runs-on: windows-2022
-    timeout-minutes: 120
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
+        timeout-minutes: 3
         uses: actions/checkout@v4
 
       - name: Setup MSVC environment
+        timeout-minutes: 3
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Setup Ninja
+        timeout-minutes: 3
         uses: seanmiddleditch/gha-setup-ninja@v5
 
       - name: Bootstrap vcpkg
+        timeout-minutes: 5
         shell: pwsh
         run: |
           git clone https://github.com/microsoft/vcpkg.git "$env:GITHUB_WORKSPACE/vcpkg"
           & "$env:GITHUB_WORKSPACE/vcpkg/bootstrap-vcpkg.bat" -disableMetrics
 
       - name: Configure
+        timeout-minutes: 5
         shell: pwsh
         env:
           VCPKG_ROOT: ${{ github.workspace }}\vcpkg
         run: cmake --preset vcpkg
 
       - name: Build
+        timeout-minutes: 15
         shell: pwsh
         env:
           VCPKG_ROOT: ${{ github.workspace }}\vcpkg
@@ -255,6 +276,7 @@ jobs:
           kbe_smoke_tests
 
       - name: Test
+        timeout-minutes: 10
         shell: pwsh
         env:
           VCPKG_ROOT: ${{ github.workspace }}\vcpkg
@@ -263,19 +285,22 @@ jobs:
   macos:
     name: macOS CMake
     runs-on: macos-14
-    timeout-minutes: 120
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
+        timeout-minutes: 3
         uses: actions/checkout@v4
 
       - name: Verify toolchain
+        timeout-minutes: 2
         run: |
           cmake --version
           ninja --version
           clang++ --version
 
       - name: Install autotools dependencies
+        timeout-minutes: 5
         run: |
           brew install \
             autoconf \
@@ -284,16 +309,19 @@ jobs:
             libtool
 
       - name: Bootstrap vcpkg
+        timeout-minutes: 5
         run: |
           git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
           "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
 
       - name: Configure
+        timeout-minutes: 5
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: cmake --preset vcpkg
 
       - name: Build
+        timeout-minutes: 15
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: >
@@ -313,6 +341,7 @@ jobs:
           kbe_smoke_tests
 
       - name: Test
+        timeout-minutes: 10
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: ctest --preset vcpkg --output-on-failure -E "_NOT_BUILT$"
