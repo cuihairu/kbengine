@@ -11,19 +11,42 @@ on:
       - master
       - chore/cmake-bootstrap
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  VCPKG_BASELINE: cb2981c4e03d421fa03b9bb5044cd1986180e7e4
+  CTEST_TIMEOUT_SECONDS: 120
+
 jobs:
   linux:
     name: Linux CMake
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 65
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DOWNLOADS: ${{ github.workspace }}/.cache/vcpkg/downloads
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.cache/vcpkg/archives,readwrite
 
     steps:
       - name: Checkout
-        timeout-minutes: 3
+        timeout-minutes: 2
         uses: actions/checkout@v4
 
-      - name: Install system dependencies
+      - name: Restore vcpkg cache
         timeout-minutes: 5
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cache/vcpkg/downloads
+            ${{ github.workspace }}/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-
+
+      - name: Install system dependencies
+        timeout-minutes: 8
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -41,21 +64,18 @@ jobs:
             curl
 
       - name: Bootstrap vcpkg
-        timeout-minutes: 5
+        timeout-minutes: 8
         run: |
-          git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
-          "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          git clone https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}"
+          git -C "${VCPKG_ROOT}" checkout "${VCPKG_BASELINE}"
+          "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
 
       - name: Configure
-        timeout-minutes: 5
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        timeout-minutes: 10
         run: cmake --preset vcpkg
 
       - name: Build
-        timeout-minutes: 15
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        timeout-minutes: 18
         run: >
           cmake --build --preset vcpkg --parallel
           --target
@@ -73,23 +93,39 @@ jobs:
           kbe_smoke_tests
 
       - name: Test
-        timeout-minutes: 10
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-        run: ctest --preset vcpkg --output-on-failure -E "_NOT_BUILT$"
+        timeout-minutes: 8
+        run: >
+          ctest --preset vcpkg --output-on-failure
+          --timeout "${CTEST_TIMEOUT_SECONDS}"
+          -E "_NOT_BUILT$"
 
   coverage:
     name: Code Coverage
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 85
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DOWNLOADS: ${{ github.workspace }}/.cache/vcpkg/downloads
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.cache/vcpkg/archives,readwrite
 
     steps:
       - name: Checkout
-        timeout-minutes: 3
+        timeout-minutes: 2
         uses: actions/checkout@v4
 
-      - name: Install system dependencies
+      - name: Restore vcpkg cache
         timeout-minutes: 5
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cache/vcpkg/downloads
+            ${{ github.workspace }}/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-
+
+      - name: Install system dependencies
+        timeout-minutes: 8
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -112,24 +148,21 @@ jobs:
           lcov --version
 
       - name: Bootstrap vcpkg
-        timeout-minutes: 5
+        timeout-minutes: 8
         run: |
-          git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
-          "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          git clone https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}"
+          git -C "${VCPKG_ROOT}" checkout "${VCPKG_BASELINE}"
+          "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
 
       - name: Configure with Coverage
-        timeout-minutes: 5
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        timeout-minutes: 10
         run: |
           cmake --preset vcpkg \
             -DCMAKE_BUILD_TYPE=Debug \
             -DKBE_ENABLE_CODE_COVERAGE=ON
 
       - name: Verify Coverage Flags
-        timeout-minutes: 2
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        timeout-minutes: 3
         run: |
           echo "=== Checking CMake configuration for coverage ==="
           grep -i "coverage\|ftest-coverage\|fprofile-arcs" build/presets/vcpkg/CMakeCache.txt || echo "No coverage flags in CMakeCache.txt"
@@ -141,9 +174,7 @@ jobs:
           find build/presets/vcpkg -name "kbe_smoke_tests" -type f -ls
 
       - name: Build with Coverage
-        timeout-minutes: 15
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        timeout-minutes: 18
         run: >
           cmake --build --preset vcpkg --parallel
           --target
@@ -152,13 +183,12 @@ jobs:
       - name: Run Tests with Coverage
         timeout-minutes: 10
         env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
           GCOV_ERROR_STDERR: 1
         working-directory: build/presets/vcpkg
         run: |
           # Run tests to generate .gcda files
           echo "=== Running tests with coverage ==="
-          ctest --output-on-failure || true
+          ctest --output-on-failure --timeout "${CTEST_TIMEOUT_SECONDS}" || true
 
           echo "=== Checking for .gcda files after test execution ==="
           find . -name "*.gcda" -type f -ls | head -20 || echo "No .gcda files found"
@@ -167,9 +197,7 @@ jobs:
           find . -name "*.gcno" -type f | wc -l
 
       - name: Generate Coverage Report
-        timeout-minutes: 10
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        timeout-minutes: 8
         working-directory: ${{ github.workspace }}
         run: |
           # Find where .gcda files are actually located
@@ -225,40 +253,52 @@ jobs:
   windows:
     name: Windows CMake
     runs-on: windows-2022
-    timeout-minutes: 30
+    timeout-minutes: 65
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DOWNLOADS: ${{ github.workspace }}/.cache/vcpkg/downloads
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.cache/vcpkg/archives,readwrite
 
     steps:
       - name: Checkout
-        timeout-minutes: 3
+        timeout-minutes: 2
         uses: actions/checkout@v4
+
+      - name: Restore vcpkg cache
+        timeout-minutes: 5
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cache/vcpkg/downloads
+            ${{ github.workspace }}/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-
 
       - name: Setup MSVC environment
         timeout-minutes: 3
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Setup Ninja
-        timeout-minutes: 3
+        timeout-minutes: 2
         uses: seanmiddleditch/gha-setup-ninja@v5
 
       - name: Bootstrap vcpkg
-        timeout-minutes: 5
+        timeout-minutes: 8
         shell: pwsh
         run: |
-          git clone https://github.com/microsoft/vcpkg.git "$env:GITHUB_WORKSPACE/vcpkg"
-          & "$env:GITHUB_WORKSPACE/vcpkg/bootstrap-vcpkg.bat" -disableMetrics
+          git clone https://github.com/microsoft/vcpkg.git "$env:VCPKG_ROOT"
+          git -C "$env:VCPKG_ROOT" checkout "$env:VCPKG_BASELINE"
+          & "$env:VCPKG_ROOT/bootstrap-vcpkg.bat" -disableMetrics
 
       - name: Configure
-        timeout-minutes: 5
+        timeout-minutes: 8
         shell: pwsh
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
         run: cmake --preset vcpkg
 
       - name: Build
-        timeout-minutes: 15
+        timeout-minutes: 20
         shell: pwsh
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
         run: >
           cmake --build --preset vcpkg --parallel
           --target
@@ -276,21 +316,38 @@ jobs:
           kbe_smoke_tests
 
       - name: Test
-        timeout-minutes: 10
+        timeout-minutes: 8
         shell: pwsh
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}\vcpkg
-        run: ctest --preset vcpkg --output-on-failure -E "_NOT_BUILT$"
+        run: >
+          ctest --preset vcpkg --output-on-failure
+          --timeout "$env:CTEST_TIMEOUT_SECONDS"
+          -E "_NOT_BUILT$"
 
   macos:
     name: macOS CMake
     runs-on: macos-14
-    timeout-minutes: 30
+    timeout-minutes: 70
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DOWNLOADS: ${{ github.workspace }}/.cache/vcpkg/downloads
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.cache/vcpkg/archives,readwrite
 
     steps:
       - name: Checkout
-        timeout-minutes: 3
+        timeout-minutes: 2
         uses: actions/checkout@v4
+
+      - name: Restore vcpkg cache
+        timeout-minutes: 5
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cache/vcpkg/downloads
+            ${{ github.workspace }}/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-
 
       - name: Verify toolchain
         timeout-minutes: 2
@@ -300,7 +357,7 @@ jobs:
           clang++ --version
 
       - name: Install autotools dependencies
-        timeout-minutes: 5
+        timeout-minutes: 8
         run: |
           brew install \
             autoconf \
@@ -309,21 +366,18 @@ jobs:
             libtool
 
       - name: Bootstrap vcpkg
-        timeout-minutes: 5
+        timeout-minutes: 8
         run: |
-          git clone https://github.com/microsoft/vcpkg.git "${GITHUB_WORKSPACE}/vcpkg"
-          "${GITHUB_WORKSPACE}/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          git clone https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}"
+          git -C "${VCPKG_ROOT}" checkout "${VCPKG_BASELINE}"
+          "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
 
       - name: Configure
-        timeout-minutes: 5
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        timeout-minutes: 8
         run: cmake --preset vcpkg
 
       - name: Build
-        timeout-minutes: 15
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        timeout-minutes: 20
         run: >
           cmake --build --preset vcpkg --parallel
           --target
@@ -341,7 +395,8 @@ jobs:
           kbe_smoke_tests
 
       - name: Test
-        timeout-minutes: 10
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-        run: ctest --preset vcpkg --output-on-failure -E "_NOT_BUILT$"
+        timeout-minutes: 8
+        run: >
+          ctest --preset vcpkg --output-on-failure
+          --timeout "${CTEST_TIMEOUT_SECONDS}"
+          -E "_NOT_BUILT$"

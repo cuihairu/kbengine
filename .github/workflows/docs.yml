@@ -25,33 +25,33 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: docs-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout
-        timeout-minutes: 3
+        timeout-minutes: 2
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        timeout-minutes: 5
+        timeout-minutes: 4
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        timeout-minutes: 5
+        timeout-minutes: 8
         run: npm ci
 
       - name: Build VuePress
-        timeout-minutes: 15
+        timeout-minutes: 12
         run: npm run docs:build
 
       - name: Upload artifact
@@ -65,7 +65,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     needs: build
     if: github.event_name != 'pull_request'
     steps:
