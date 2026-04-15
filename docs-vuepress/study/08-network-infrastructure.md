@@ -316,7 +316,255 @@ Aeron 也是 "UDP + 自建可靠性"，和 BigWorld 的思路类似：
 - Aeron 提供**背压感知**（back-pressure awareness）——消费者来不及处理时通知生产者减速
 - BigWorld 没有显式背压机制，通过 Channel 缓冲和超时丢弃处理
 
-## 8.6 InterfaceTable / MessageHandlers：消息路由表
+## 8.6 进程间通信深度对比：Mercury vs KBEngine
+
+> 这一节回答：BigWorld 的进程间通信到底有没有用共享内存？Mercury 的 UDP 可靠性层怎么实现的？同机进程通信有没有特殊优化？
+
+### 8.6.1 澄清：BigWorld 开源版没有使用共享内存
+
+社区中流传"BigWorld 在同机进程间使用共享内存优化通信"的说法，但对 `BigWorld-Engine-14.4.1` 全量源码的扫描结果如下：
+
+| 搜索范围 | 搜索关键词 | 结果 |
+|----------|-----------|------|
+| `lib/network/` | `shared_memory`, `SharedMem`, `shm_`, `mmap` | **无匹配** |
+| `server/` | 同上 | **无匹配**（匹配项均为 boost::interprocess 第三方库） |
+| `lib/network/` | `isLocalMachine`, `sameMachine` | **无匹配** |
+| `docs/pdf/` | `shared memory`, `IPC` | **无匹配** |
+
+Mercury 网络层的 `NetworkInterface` 构造函数明确使用 UDP socket：
+
+```cpp
+// 文件：lib/network/network_interface.cpp:335
+udpSocket_.socket( SOCK_DGRAM );  // 所有内部通信走 UDP
+```
+
+**可能的原因**：
+
+1. **Wargaming 内部版本**在收购 BigWorld 后可能增加了共享内存优化，但这不在开源版本（OSE 14.4.1）中
+2. UDP 在 `loopback`（127.0.0.1）上不经网卡，内核直接在 socket 缓冲区间拷贝数据，延迟极低，实际性能损失不大
+3. 共享内存需要自建序列化/反序列化和同步机制，复杂度远高于 socket 通信，对于 MMO 场景收益有限
+
+### 8.6.2 Mercury 的 UDP 可靠性层架构
+
+BigWorld 在 UDP 之上构建了完整的可靠性传输层，核心类是 `UDPChannel`：
+
+```
+                    Mercury 网络层架构
+
+┌─────────────────────────────────────────────────┐
+│                  NetworkInterface                │
+│  ┌──────────┐  ┌──────────────┐  ┌───────────┐ │
+│  │ Endpoint │  │ ChannelMap   │  │ Packet    │ │
+│  │ (UDP)    │  │ (addr→chan)  │  │ Receiver  │ │
+│  └──────────┘  └──────────────┘  └───────────┘ │
+│  ┌──────────────────────────────────────────────┐│
+│  │           UDPChannel（每个远程地址一个）       ││
+│  │  ┌───────────┐ ┌─────────┐ ┌──────────────┐ ││
+│  │  │ SendWindow│ │RecvWin  │ │ IrregularCh  │ ││
+│  │  │ (unacked) │ │(buffer) │ │ (resend mgr) │ ││
+│  │  └───────────┘ └─────────┘ └──────────────┘ ││
+│  │  ┌───────────┐ ┌─────────┐ ┌──────────────┐ ││
+│  │  │SeqNumAlloc│ │RTT est  │ │Bundle + Frag │ ││
+│  │  │ (seq_id)  │ │(round-  │ │(消息打包)    │ ││
+│  │  │           │ │ trip)   │ │              │ ││
+│  │  └───────────┘ └─────────┘ └──────────────┘ ││
+│  └──────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────┘
+```
+
+**关键机制详解**：
+
+**a) 序列号与 ACK**
+
+```cpp
+// 文件：lib/network/udp_channel.hpp
+SeqNum       smallOutSeqAt_;       // 下一个发送序列号
+SeqNum       oldestUnackedSeq_;    // 最老未确认序列号
+uint32       highestAck_;          // 收到的最高 ACK
+Acks         acksToSend_;          // 待发送的 ACK 集合
+```
+
+每个发出的 Packet 带递增序列号，接收方通过累积 ACK（cumulative ack）确认。未确认的 Packet 存放在 `unackedPackets_` 环形数组中等待重传。
+
+**b) 发送窗口控制**
+
+```cpp
+// 文件：lib/network/udp_channel.hpp
+uint32          windowSize_;           // 基础窗口大小
+CircularArray<UnackedPacket*> unackedPackets_;  // 已发未确认
+static uint     s_maxOverflowPackets_[3];       // 溢出上限（按类型区分）
+
+int sendWindowUsage() const {
+    return this->hasUnackedPackets() ?
+        seqMask(largeOutSeqAt_ - oldestUnackedSeq_) : 0;
+}
+```
+
+窗口满后进入 overflow 状态，超过上限会触发 dev assert——这是生产环境的保护机制。
+
+**c) 分片与重组**
+
+大于 MTU 的 Bundle 会被拆分为多个 Packet 分片发送，接收端通过 `FragmentedBundle` 重组：
+
+```cpp
+// 文件：lib/network/udp_channel.hpp
+FragmentedBundlePtr pFragments_;  // 正在重组的分片链
+```
+
+**d) 四级可靠性控制**
+
+Mercury 的 `ReliableType` 允许同一通道内不同消息有不同可靠性：
+
+| 级别 | 含义 | 重传 | 典型用途 |
+|------|------|------|----------|
+| `RELIABLE_NO` | 不需要可靠传输 | 否 | 高频位置更新 |
+| `RELIABLE_DRIVER` | 可靠驱动消息 | 是 | RPC 调用 |
+| `RELIABLE_PASSENGER` | 搭便车 | 随驱动消息 | 普通属性同步 |
+| `RELIABLE_CRITICAL` | 关键消息，必须可靠 | 是+紧急重传 | 实体创建/销毁 |
+
+**这是 TCP 做不到的**——TCP 要么全可靠，要么全不可靠（换 UDP），不能在同一连接内混用。
+
+### 8.6.3 isLocalRegular / isRemoteRegular：Mercury 的发送优化
+
+Mercury 没有通过共享内存优化同机通信，而是用 **`isLocalRegular`** 标志实现了一种"发送节奏感知"优化：
+
+```cpp
+// 文件：lib/network/udp_channel.hpp
+bool isLocalRegular_;    // 本端是否定期发送
+bool isRemoteRegular_;   // 对端是否定期发送
+```
+
+**含义**：
+
+- `isLocalRegular = true`：本端会**周期性主动发送数据**（如 CellApp 的 tick 驱动），因此 ACK 可以"捎带"在正常发送的数据包上，无需额外的超时重传驱动
+- `isLocalRegular = false`：本端不定期发送，必须加入 `IrregularChannels` 集合，由全局定时器周期性检查未确认包并触发重传
+
+```cpp
+// 文件：lib/network/udp_channel.cpp:1702-1708
+void UDPChannel::isLocalRegular( bool isLocalRegular ) {
+    isLocalRegular_ = isLocalRegular;
+    // 不定期发送的通道加入 irregular 集合做周期性重发检查
+    pNetworkInterface_->irregularChannels().addIfNecessary( *this );
+}
+```
+
+**延迟发送优化**：
+
+```cpp
+// 文件：lib/network/udp_channel.cpp:785-791
+void UDPChannel::delayedSend() {
+    if (!this->isLocalRegular()) {
+        // 不定期发送的通道立即投递到延迟队列
+        this->networkInterface().delayedSend( *this );
+    }
+    // 定期发送的通道不需要 delayedSend——下次 tick 自然会发
+}
+```
+
+**服务器间通道的默认配置**：
+
+```cpp
+// 文件：server/cellapp/cell_app_channel.cpp
+CellAppChannel::CellAppChannel( const Mercury::Address & addr ) :
+    Mercury::ChannelOwner( CellApp::instance().interface(), addr )
+{
+    this->channel().isLocalRegular( true );    // 我会定期发
+    this->channel().isRemoteRegular( false );  // 对方不一定会定期发
+}
+```
+
+这个设计的精髓是：**避免不必要的定时器开销**。服务器间通道本身就是 tick 驱动的（每个 tick 都有数据要发），所以不需要额外的重传定时器——ACK 自然会随下一次发送捎带出去。
+
+### 8.6.4 进程发现：bwmachined 与同机注册
+
+BigWorld 的进程发现通过 `bwmachined` 守护进程实现，使用 UDP 通信：
+
+```cpp
+// 文件：lib/network/machined_utils.cpp:50-84
+Reason registerWithMachined( const Address & srcAddr,
+        const BW::string & name, int id, bool isRegister )
+{
+    ProcessMessage pm;
+    pm.param_ = (isRegister ? pm.REGISTER : pm.DEREGISTER) | pm.PARAM_IS_MSGTYPE;
+    pm.category_ = ProcessMessage::SERVER_COMPONENT;
+    pm.port_ = srcAddr.port;
+    pm.name_ = name;
+    pm.id_ = id;
+    // ...
+    const uint32 destAddr = LOCALHOST;  // 127.0.0.1
+    return pm.sendAndRecv( srcAddr.ip, destAddr, &pmh );
+}
+```
+
+**同机识别机制**：
+
+- `bwmachined` 在每台物理机上运行，绑定 `LOCALHOST`（127.0.0.1）
+- 各组件进程启动时通过 UDP 向 `LOCALHOST:PORT_MACHINED` 注册
+- 跨机器发现通过 **广播（BROADCAST）**：`pm.sendAndRecv(0, BROADCAST, pHandler)`
+
+```cpp
+// 文件：lib/network/machined_utils.cpp:339-410
+Reason findInterface( const char * name, int id,
+        Address & addr, int retries, ... )
+{
+    // ...
+    Reason reason = pm.sendAndRecv( 0, BROADCAST, pHandler );  // 广播查找
+    // ...
+}
+```
+
+**注意**：BigWorld **没有**"检测是否同机然后切换到共享内存"的逻辑。同机和跨机通信走的是同一条 UDP 路径，区别只是目的 IP 是 `LOCALHOST` 还是远程地址。
+
+### 8.6.5 KBEngine 的进程间通信：TCP 直连
+
+KBEngine 的进程间通信更直接：
+
+```
+┌──────────────┐         TCP          ┌──────────────┐
+│   CellApp    │◄────────────────────►│   BaseApp    │
+│  (Channel)   │                      │  (Channel)   │
+└──────────────┘                      └──────────────┘
+        │                                     │
+        │ UDP broadcast                       │ UDP broadcast
+        ▼                                     ▼
+┌──────────────┐                      ┌──────────────┐
+│   Machine    │                      │   Machine    │
+│  (发现注册)   │                      │  (发现注册)   │
+└──────────────┘                      └──────────────┘
+```
+
+- **发现阶段**：UDP 广播，各组件向本机 Machine 注册（类似 bwmachined）
+- **通信阶段**：找到目标进程地址后，建立 TCP 直连 Channel
+- **无同机优化**：无论同机还是跨机，都走 TCP socket
+
+KBEngine 的 `Channel` 区分 `INTERNAL`（进程间）和 `EXTERNAL`（客户端），但协议层没有差异化——都是 TCP（或可选 KCP）。
+
+### 8.6.6 两种方案的取舍分析
+
+| 维度 | BigWorld Mercury (UDP) | KBEngine (TCP) |
+|------|----------------------|----------------|
+| 延迟 | 低（无 TCP 握手/拥塞控制/HOL blocking） | 较高（TCP 固有开销） |
+| 可靠性 | 分级可控（四级 ReliableType） | 全可靠（TCP 天然保证） |
+| 带宽效率 | 高（Piggyback 捎带 ACK、不重传不可靠消息） | 中（TCP 重传所有丢失数据） |
+| 实现复杂度 | 高（自建序列号/ACK/窗口/重传/分片） | 低（操作系统 TCP 栈处理一切） |
+| 调试难度 | 高（需自建丢包/重传统计和观测工具） | 低（系统级 tcpdump/ss 可用） |
+| 同机性能 | UDP loopback 性能优异 | TCP loopback 性能也优异 |
+| 扩展性 | 可在同一通道混用可靠/不可靠消息 | 必须全可靠或另开 UDP 连接 |
+
+**为什么 MMO 内部通信偏好 UDP**：
+
+CellApp ↔ BaseApp 之间每秒可能有数千条位置更新消息（`RELIABLE_NO`），这些消息：
+- 丢失一两条无所谓（下一帧会覆盖）
+- TCP 会因为重传丢失的包而阻塞后续所有包（HOL blocking）
+- Mercury 可以直接丢弃过期的位置更新，只保留最新的
+
+**为什么 KBEngine 选 TCP 也能用**：
+
+- 目标规模千级 CCU，内部消息量相对可控
+- TCP 的调试和运维便利性是巨大的工程优势
+- 现代 Linux 内核的 TCP 栈已经高度优化，loopback 性能非常好
+
+## 8.7 InterfaceTable / MessageHandlers：消息路由表
 
 ### KBEngine MessageHandlers
 
@@ -373,7 +621,7 @@ BigWorld 用 vector（不是 map），消息 ID 直接作为索引。还多了�
 - **统计定时器**：定期收集每个消息的收发统计
 - **与 bwmachined 集成**：`registerWithMachined` 向注册中心宣告接口
 
-## 8.7 两套项目的网络层架构对比
+## 8.8 两套项目的网络层架构对比
 
 | 维度 | KBEngine | BigWorld |
 |------|----------|----------|
@@ -389,7 +637,7 @@ BigWorld 用 vector（不是 map），消息 ID 直接作为索引。还多了�
 | 回复处理 | 无内置请求-回复 | `ReplyMessageHandler` + 超时异常 |
 | 进程发现 | `Machine` 进程（UDP 广播） | `bwmachined` 守护进程（UDP 广播） |
 
-## 8.8 进程发现与协调：Machine 的角色
+## 8.9 进程发现与协调：Machine 的角色
 
 两个项目都不是"DBMgr 集中协调"。**Machine 进程**才是组件发现和进程协调的核心。
 
@@ -468,7 +716,7 @@ BigWorld 的 `bwmachined` 职责类似但更重：
 
 **关键区别**：KBEngine 的 Machine 是一个独立的 kbe 进程（`kbe/bin/server/machine`），BigWorld 的 bwmachined 是独立的系统守护进程。两者都不做业务逻辑，只做"进程发现和生命周期管理"。
 
-## 8.9 关键源码入口
+## 8.10 关键源码入口
 
 ### KBEngine
 
@@ -502,7 +750,7 @@ BigWorld 的 `bwmachined` 职责类似但更重：
 | Cluster（集群协调） | `server/tools/bwmachined/cluster.hpp` |
 | MachineGuard（进程守护） | `server/tools/bwmachined/linux_machine_guard.cpp` |
 
-## 8.10 源码走读路径
+## 8.11 源码走读路径
 
 ### 路径一：理解 Reactor 模式的代码映射
 
@@ -524,20 +772,31 @@ BigWorld 的 `bwmachined` 职责类似但更重：
 2. BigWorld: `lib/network/channel.hpp` — 抽象基类，有 `UDPChannel` 子类
 3. BigWorld: `lib/network/bundle.hpp` — `ReliableType` 四级可靠性
 
-### 路径四：理解进程发现与协调
+### 路径四：深入 Mercury UDP 可靠性层
+
+1. BigWorld: `lib/network/udp_channel.hpp` — `isLocalRegular_`/`isRemoteRegular_` 发送节奏优化
+2. BigWorld: `lib/network/udp_channel.cpp:1702` — `isLocalRegular()` 切换时加入 `IrregularChannels`
+3. BigWorld: `lib/network/irregular_channels.cpp` — 全局定时器管理不定期通道的重传检查
+4. BigWorld: `lib/network/machined_utils.cpp:80` — `LOCALHOST` 注册到 bwmachined
+5. BigWorld: `server/cellapp/cell_app_channel.cpp` — 服务器间通道的 regular 配置示例
+6. 对比 KBEngine: `kbe/src/lib/network/channel.h` — 无 regular 机制，TCP 天然保证
+
+### 路径五：理解进程发现与协调
 
 1. KBEngine: `kbe/src/server/machine/machine.h` — `onBroadcastInterface` 组件注册、`onFindInterfaceAddr` 组件查找
 2. KBEngine: `kbe/src/lib/server/components.h` — `Components` 单例，收集所有已知组件
 3. BigWorld: `server/tools/bwmachined/` — `cluster.hpp` 集群发现、`linux_machine_guard.cpp` 进程守护
 4. 对比：KBEngine Machine 只做发现和启停；BigWorld bwmachined 额外负责进程守护（崩溃重启）和资源监控
 
-## 8.11 小结
+## 8.12 小结
 
 - **Reactor 模式**是两套项目共同的 I/O 模型：EventDispatcher（反应器）→ EventPoller（多路分离器）→ Handler（回调）
-- **Reactor vs Proactor 的关键差别**是“就绪通知”与“完成通知”；本书这两套引擎选 Reactor 是可控性优先
+- **Reactor vs Proactor 的关键差别**是”就绪通知”与”完成通知”；本书这两套引擎选 Reactor 是可控性优先
 - **epoll** 是 Linux 上的最佳选择——O(1) 事件通知，不受连接数影响
 - **Channel = Endpoint + PacketReader + Bundle + Handlers**，不只是 socket 封装
 - **KBEngine 选 TCP**（简单可靠），**BigWorld 选 UDP + 自建可靠性**（低延迟可控）
 - BigWorld 的网络层更完善：Dispatcher 父子分层、消息可靠性分级、Bundle 事件回调、加密接口、请求-回复超时
-- BigWorld 用 `ReliableType` 实现"同一条通道内不同消息不同可靠性"——这是 TCP 做不到的
+- BigWorld 用 `ReliableType` 实现”同一条通道内不同消息不同可靠性”——这是 TCP 做不到的
 - **进程发现不是 DBMgr 的职责**——两套项目都用独立的 Machine 进程（KBEngine `machine` / BigWorld `bwmachined`）通过 UDP 广播实现组件注册和查找
+- **BigWorld 开源版没有使用共享内存**——同机和跨机通信走同一条 UDP 路径，Mercury 通过 `isLocalRegular` 机制优化发送节奏而非切换传输方式
+- **Mercury 的核心优化**是”发送节奏感知”：定期发送的通道无需额外重传定时器，ACK 捎带在正常数据包上；不定期发送的通道加入 `IrregularChannels` 由全局定时器管理

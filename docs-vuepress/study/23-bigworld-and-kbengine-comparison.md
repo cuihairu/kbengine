@@ -18,7 +18,7 @@
 | 持久化 | MySQL + XML + Primary/Secondary + 属性级映射 | MySQL + Redis + 表级映射 | 更完善 vs 更实用 |
 | 负载均衡 | CellAppGroup + MetaBalance + Rendezvous Hash | 简化分配 | 自动化 vs 手动 |
 | 容错 | Reviver + BackupSender + Archiver | EntityLog + `rndUUID` 重连 + `Archiver`/`Backuper` | 完整灾备 vs 基础收束 |
-| 网络层 | 内部 UDP + 自建可靠性 | `Channel` 统一抽象，具体可挂 TCP/UDP/KCP | 高度定制 vs 统一封装 |
+| 网络层 | 内部 UDP + 自建可靠性（Mercury），四级 ReliableType，isLocalRegular 节奏优化 | `Channel` 统一抽象，具体可挂 TCP/UDP/KCP，无共享内存 | 高度定制 vs 统一封装 |
 | 脚本层 | Twisted Deferred + 完整绑定层 | 简化回调 + 精简绑定 | 表现力 vs 简洁 |
 | 可观测性 | ForwardingWatcher + 三级 Profiler + 结构化日志 | 单机 Watcher + ProfileVal + 集中日志 | 运维友好 vs 开发够用 |
 | 安全 | Login Challenge (Cuckoo Cycle PoW) + 可插拔加密 | Blowfish 加密 + rndUUID | 更完善 vs 基础 |
@@ -431,18 +431,25 @@ BigWorld 的负载均衡是**数据驱动**的：三层 Profiler（Entity → En
 
 ## 23.10 网络层对照
 
-### BigWorld：UDP 为主 + 自建可靠性
+### BigWorld：UDP 为主 + 自建可靠性（Mercury）
 
 ```
 内部通信：UDP（Mercury）
-    → 自建可靠传输层
-    → 支持 Bundle 重传、Piggyback
+    → 自建可靠传输层（序列号/ACK/发送窗口/重传/分片重组）
+    → 四级可靠性（RELIABLE_NO / DRIVER / PASSENGER / CRITICAL）
+    → isLocalRegular 发送节奏优化（避免不必要的重传定时器）
+    → Piggyback 捎带 ACK
     → SendingStats 追踪 bps/pps/mps
-    → 更低的延迟（无需 TCP 握手和拥塞控制）
 
 外部通信：TCP + UDP
     → 客户端连接可以是 TCP 或 UDP
 ```
+
+**关于"共享内存"的澄清**：对 `BigWorld-Engine-14.4.1` 全量源码的扫描证实，**开源版没有使用共享内存进行进程间通信**。同机和跨机通信走同一条 UDP 路径，区别只是目的 IP 是 `LOCALHOST`（127.0.0.1）还是远程地址。UDP 在 loopback 上不经网卡，内核直接在 socket 缓冲区间拷贝数据，性能已经很好。Wargaming 内部版本可能有额外优化，但不在 OSE 中。
+
+**Mercury 的发送节奏优化**（`isLocalRegular`）：
+
+服务器间通道（如 CellAppChannel）默认 `isLocalRegular(true)`——本端会周期性 tick 驱动发送，ACK 自然捎带在下次发送中，无需额外重传定时器。不定期发送的通道（如匿名通道）设 `isLocalRegular(false)`，加入 `IrregularChannels` 集合由全局定时器管理重传。
 
 ### KBEngine：`Channel` 统一抽象，常见部署偏 TCP
 
@@ -457,20 +464,26 @@ BigWorld 的负载均衡是**数据驱动**的：三层 Profiler（Entity → En
     → 客户端/bots 侧可挂 KCP sender/receiver
 ```
 
+KBEngine 无 `isLocalRegular` 机制——TCP 天然保证可靠交付，不需要应用层管理重传节奏。
+
 ### 对比
 
 | 维度 | BigWorld | KBEngine |
 |------|----------|----------|
-| 内部协议 | UDP + 自建可靠性 | `Channel` 抽象，常见实现偏 TCP |
-| 可靠性实现 | 自研（重传 + Piggyback） | 操作系统 TCP |
-| 延迟 | 更低（无 TCP 拥塞控制） | 较高（TCP head-of-line blocking） |
+| 内部协议 | UDP + 自建可靠性（Mercury） | `Channel` 抽象，常见实现偏 TCP |
+| 可靠性实现 | 自研（序列号 + ACK + 窗口 + 重传 + Piggyback） | 操作系统 TCP |
+| 可靠性分级 | 四级 `ReliableType`（同一通道内混用） | 无（TCP 全可靠） |
+| 延迟 | 更低（无 TCP 拥塞控制/HOL blocking） | 较高（TCP 固有开销） |
 | 实现复杂度 | 高（需实现整个可靠性层） | 低（复用 TCP） |
+| 发送优化 | `isLocalRegular` 节奏感知，避免无效定时器 | 无（TCP 栈自行管理） |
+| 同机优化 | 无（同机仍走 UDP loopback） | 无（同机仍走 TCP loopback） |
+| 共享内存 | **未使用** | **未使用** |
 | 外部协议 | TCP/UDP | TCP/UDP/KCP |
-| 带宽效率 | Piggyback 优化 | 标准打包 |
+| 带宽效率 | Piggyback 优化，不重传不可靠消息 | 标准打包，TCP 重传所有数据 |
 
-**BigWorld 选 UDP 的原因**：MMO 内部通信需要极致低延迟。TCP 的拥塞控制和 head-of-line blocking 在高并发游戏场景下会造成不必要的延迟。
+**BigWorld 选 UDP 的原因**：MMO 内部通信需要极致低延迟。TCP 的拥塞控制和 head-of-line blocking 在高并发游戏场景下会造成不必要的延迟。更重要的是，Mercury 允许在同一通道内混用可靠/不可靠消息——位置更新（`RELIABLE_NO`）丢了就丢了，下一帧覆盖；而实体创建（`RELIABLE_CRITICAL`）必须可靠送达。
 
-**KBEngine 的取向**：把网络细节收进 `Channel`，优先保持实现和消息模型统一，再按客户端或 bots 场景挂接 KCP。
+**KBEngine 的取向**：把网络细节收进 `Channel`，优先保持实现和消息模型统一，再按客户端或 bots 场景挂接 KCP。TCP 的实现和调试便利性在千级 CCU 场景下是巨大的工程优势。
 
 ---
 
