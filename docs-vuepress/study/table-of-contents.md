@@ -232,3 +232,11 @@
 - 同步协议中的坐标传输（更新标志位组合）
 - 客户端接入的坐标变换（Unity/Unreal/Godot）
 - 数学库选择（D3DX vs G3D）
+
+### [G 服务器时间管理与世界时钟](appendix-server-time-management-and-world-clock.md)
+
+- 物理时间、逻辑 tick、集群世界时钟三层模型
+- KBEngine 的 `timestamp() / EventDispatcher / g_kbetime / ScriptTimers`
+- BigWorld 的 `advanceTime / ScriptTimeQueue / TimeKeeper / gameTime` 持久化
+- 为什么 MMO 不能直接用 wall clock 驱动世界逻辑
+- 如果自己设计一套世界时钟，应该怎样分层实现

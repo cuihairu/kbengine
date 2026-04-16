@@ -142,6 +142,7 @@ export default defineUserConfig({
             '/study/appendix-terminology-quick-reference.md',
             '/study/appendix-engine-suitability-and-game-types.md',
             '/study/appendix-coordinate-system-conventions.md',
+            '/study/appendix-server-time-management-and-world-clock.md',
           ],
         },
       ],
