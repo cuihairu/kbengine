@@ -48,6 +48,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_event_dispatcher.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_endpoint.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_fixed_messages.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_errors_xml.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_machine_infos.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_serverconfig.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_server_shutdowner.cpp"

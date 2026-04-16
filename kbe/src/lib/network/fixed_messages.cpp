@@ -1,9 +1,9 @@
 // Copyright 2008-2018 Yolo Technologies, Inc. All Rights Reserved. https://www.comblockengine.com
 #include "fixed_messages.h"
-#include "xml/xml.h"	
-#include "resmgr/resmgr.h"	
+#include "resmgr/resmgr.h"
+#include <tinyxml2.h>
 
-namespace KBEngine { 
+namespace KBEngine {
 
 KBE_SINGLETON_INIT(Network::FixedMessages);
 
@@ -11,9 +11,9 @@ namespace Network
 {
 
 //-------------------------------------------------------------------------------------
-FixedMessages::FixedMessages():
-_infomap(),
-_loaded(false)
+FixedMessages::FixedMessages() :
+	_infomap(),
+	_loadedFiles()
 {
 	new Resmgr();
 	Resmgr::getSingleton().initialize();
@@ -28,16 +28,13 @@ FixedMessages::~FixedMessages()
 //-------------------------------------------------------------------------------------
 bool FixedMessages::loadConfig(std::string fileName, bool notFoundError)
 {
-	if(_loaded)
+	const std::string path = Resmgr::getSingleton().matchRes(fileName);
+	if (_loadedFiles.find(path) != _loadedFiles.end())
 		return true;
 
-	_loaded = true;
+	tinyxml2::XMLDocument document;
 
-	tinyxml2::XMLNode* node = NULL, *rootNode = NULL;
-
-	SmartPointer<XML> xml(new XML(Resmgr::getSingleton().matchRes(fileName).c_str()));
-
-	if(!xml->isGood())
+	if (document.LoadFile(path.c_str()) != tinyxml2::XML_SUCCESS)
 	{
 		if (notFoundError)
 		{
@@ -53,25 +50,28 @@ bool FixedMessages::loadConfig(std::string fileName, bool notFoundError)
 
 		return false;
 	}
-	
-	rootNode = xml->getRootNode();
-	if(rootNode == NULL)
+
+	_loadedFiles.insert(path);
+
+	tinyxml2::XMLElement* root = document.RootElement();
+	if (root == NULL || root->FirstChildElement() == NULL)
 	{
-		// root节点下没有子节点了
+		// root鑺傜偣涓嬫病鏈夊瓙鑺傜偣浜?
 		return true;
 	}
 
-	XML_FOR_BEGIN(rootNode)
+	for (tinyxml2::XMLElement* element = root->FirstChildElement();
+		element != nullptr;
+		element = element->NextSiblingElement())
 	{
-		node = xml->enterNode(rootNode->FirstChild(), "id");
+		tinyxml2::XMLElement* idElement = element->FirstChildElement("id");
 
 		FixedMessages::MSGInfo info;
-		info.msgid = xml->getValInt(node);
-		info.msgname = xml->getKey(rootNode);
+		info.msgid = idElement ? idElement->IntText() : 0;
+		info.msgname = element->Value() ? element->Value() : "";
 
 		_infomap[info.msgname] = info;
 	}
-	XML_FOR_END(rootNode);
 
 	return true;
 }
@@ -80,12 +80,12 @@ bool FixedMessages::loadConfig(std::string fileName, bool notFoundError)
 FixedMessages::MSGInfo* FixedMessages::isFixed(const char* msgName)
 {
 	MSGINFO_MAP::iterator iter = _infomap.find(msgName);
-	if(iter != _infomap.end())
+	if (iter != _infomap.end())
 	{
 		MSGInfo* infos = &iter->second;
 		return infos;
 	}
-	
+
 	return NULL;
 }
 
@@ -96,7 +96,7 @@ bool FixedMessages::isFixed(MessageID msgid)
 	while (iter != _infomap.end())
 	{
 		FixedMessages::MSGInfo& infos = iter->second;
-		if(infos.msgid == msgid)
+		if (infos.msgid == msgid)
 			return true;
 
 		++iter;

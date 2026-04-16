@@ -7,6 +7,7 @@
 #include "common/singleton.h"
 #include "helper/debug_helper.h"
 #include "network/common.h"
+#include <set>
 
 namespace KBEngine {
 namespace Network
@@ -41,7 +42,7 @@ public:
 
 private:
 	MSGINFO_MAP _infomap;
-	bool _loaded;
+	std::set<std::string> _loadedFiles;
 };
 
 }

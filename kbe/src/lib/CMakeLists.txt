@@ -652,6 +652,7 @@ target_link_libraries(kbe_network_message_handler
   PUBLIC
     KBEngine::build_config
   PRIVATE
+    KBEngine::tinyxml
     KBEngine::common_md5
     KBEngine::common_memorystream
     KBEngine::network_common
@@ -659,7 +660,6 @@ target_link_libraries(kbe_network_message_handler
     KBEngine::network_packet_receiver
     KBEngine::network_fixed_messages
     KBEngine::helper_watcher
-    KBEngine::xml
     KBEngine::resmgr
 )
 
@@ -798,12 +798,12 @@ target_link_libraries(kbe_resmgr
   PUBLIC
     KBEngine::build_config
   PRIVATE
+    KBEngine::tinyxml
     KBEngine::common_smartpointer
     KBEngine::common_timer
     KBEngine::helper_debug_option
     KBEngine::helper_watcher
     KBEngine::thread_primitives
-    KBEngine::xml
 )
 
 target_include_directories(kbe_resmgr
@@ -933,9 +933,9 @@ target_link_libraries(kbe_network_fixed_messages
   PUBLIC
     KBEngine::build_config
   PRIVATE
+    KBEngine::tinyxml
     KBEngine::network_common
     KBEngine::resmgr
-    KBEngine::xml
 )
 
 target_include_directories(kbe_network_fixed_messages
@@ -982,12 +982,12 @@ target_link_libraries(kbe_server_serverconfig
   PUBLIC
     KBEngine::build_config
   PRIVATE
+    KBEngine::tinyxml
     KBEngine::network_common
     KBEngine::network_address
     KBEngine::resmgr
     KBEngine::common_kbekey
     KBEngine::common_version
-    KBEngine::xml
     KBEngine::common_timer
     KBEngine::common_tasks
     KBEngine::thread_primitives
