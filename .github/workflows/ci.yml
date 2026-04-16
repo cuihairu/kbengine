@@ -100,9 +100,15 @@ jobs:
           cache-key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
           cache-restore-key: ${{ runner.os }}-vcpkg-
 
+      - name: Install vcpkg dependencies
+        timeout-minutes: 40
+        run: vcpkg install
+
       - name: Configure
-        timeout-minutes: 10
-        run: cmake --preset vcpkg
+        timeout-minutes: 12
+        run: >
+          cmake --preset vcpkg
+          -DVCPKG_MANIFEST_MODE=OFF
 
       - name: Build
         timeout-minutes: 20
@@ -170,12 +176,17 @@ jobs:
           cache-key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
           cache-restore-key: ${{ runner.os }}-vcpkg-
 
+      - name: Install vcpkg dependencies
+        timeout-minutes: 40
+        run: vcpkg install
+
       - name: Configure with Coverage
-        timeout-minutes: 10
+        timeout-minutes: 12
         run: |
           cmake --preset vcpkg \
             -DCMAKE_BUILD_TYPE=Debug \
-            -DKBE_ENABLE_CODE_COVERAGE=ON
+            -DKBE_ENABLE_CODE_COVERAGE=ON \
+            -DVCPKG_MANIFEST_MODE=OFF
 
       - name: Verify Coverage Flags
         timeout-minutes: 3
