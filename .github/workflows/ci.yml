@@ -20,32 +20,31 @@ env:
   CTEST_TIMEOUT_SECONDS: 120
 
 jobs:
-  linux:
-    name: Linux CMake
-    runs-on: ubuntu-24.04
-    timeout-minutes: 65
-    env:
-      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-      VCPKG_DOWNLOADS: ${{ github.workspace }}/.cache/vcpkg/downloads
-      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.cache/vcpkg/archives,readwrite
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ matrix.timeout }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux CMake
+            os: ubuntu-24.04
+            timeout: 65
+          - name: Windows CMake
+            os: windows-2022
+            timeout: 65
+          - name: macOS CMake
+            os: macos-14
+            timeout: 70
 
     steps:
       - name: Checkout
         timeout-minutes: 2
         uses: actions/checkout@v4
 
-      - name: Restore vcpkg cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ github.workspace }}/.cache/vcpkg/downloads
-            ${{ github.workspace }}/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-
-
-      - name: Install system dependencies
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
         timeout-minutes: 8
         run: |
           sudo apt-get update
@@ -63,19 +62,50 @@ jobs:
             tar \
             curl
 
-      - name: Bootstrap vcpkg
-        timeout-minutes: 8
+      - name: Setup MSVC environment
+        if: runner.os == 'Windows'
+        timeout-minutes: 3
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup Ninja
+        if: runner.os == 'Windows'
+        timeout-minutes: 2
+        uses: seanmiddleditch/gha-setup-ninja@v5
+
+      - name: Verify macOS toolchain
+        if: runner.os == 'macOS'
+        timeout-minutes: 2
         run: |
-          git clone https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}"
-          git -C "${VCPKG_ROOT}" checkout "${VCPKG_BASELINE}"
-          "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
+          cmake --version
+          ninja --version
+          clang++ --version
+
+      - name: Install macOS autotools dependencies
+        if: runner.os == 'macOS'
+        timeout-minutes: 8
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+        run: |
+          brew install \
+            autoconf \
+            autoconf-archive \
+            automake \
+            libtool
+
+      - name: Setup vcpkg
+        timeout-minutes: 10
+        uses: ./.github/actions/setup-vcpkg
+        with:
+          baseline: ${{ env.VCPKG_BASELINE }}
+          cache-key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
+          cache-restore-key: ${{ runner.os }}-vcpkg-
 
       - name: Configure
         timeout-minutes: 10
         run: cmake --preset vcpkg
 
       - name: Build
-        timeout-minutes: 18
+        timeout-minutes: 20
         run: >
           cmake --build --preset vcpkg --parallel
           --target
@@ -96,35 +126,20 @@ jobs:
         timeout-minutes: 8
         run: >
           ctest --preset vcpkg --output-on-failure
-          --timeout "${CTEST_TIMEOUT_SECONDS}"
+          --timeout "${{ env.CTEST_TIMEOUT_SECONDS }}"
           -E "_NOT_BUILT$"
 
   coverage:
     name: Code Coverage
     runs-on: ubuntu-24.04
     timeout-minutes: 85
-    env:
-      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-      VCPKG_DOWNLOADS: ${{ github.workspace }}/.cache/vcpkg/downloads
-      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.cache/vcpkg/archives,readwrite
 
     steps:
       - name: Checkout
         timeout-minutes: 2
         uses: actions/checkout@v4
 
-      - name: Restore vcpkg cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ github.workspace }}/.cache/vcpkg/downloads
-            ${{ github.workspace }}/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-
-
-      - name: Install system dependencies
+      - name: Install Linux coverage dependencies
         timeout-minutes: 8
         run: |
           sudo apt-get update
@@ -147,12 +162,13 @@ jobs:
           gcov --version
           lcov --version
 
-      - name: Bootstrap vcpkg
-        timeout-minutes: 8
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}"
-          git -C "${VCPKG_ROOT}" checkout "${VCPKG_BASELINE}"
-          "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
+      - name: Setup vcpkg
+        timeout-minutes: 10
+        uses: ./.github/actions/setup-vcpkg
+        with:
+          baseline: ${{ env.VCPKG_BASELINE }}
+          cache-key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
+          cache-restore-key: ${{ runner.os }}-vcpkg-
 
       - name: Configure with Coverage
         timeout-minutes: 10
@@ -249,154 +265,3 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
-
-  windows:
-    name: Windows CMake
-    runs-on: windows-2022
-    timeout-minutes: 65
-    env:
-      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-      VCPKG_DOWNLOADS: ${{ github.workspace }}/.cache/vcpkg/downloads
-      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.cache/vcpkg/archives,readwrite
-
-    steps:
-      - name: Checkout
-        timeout-minutes: 2
-        uses: actions/checkout@v4
-
-      - name: Restore vcpkg cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ github.workspace }}/.cache/vcpkg/downloads
-            ${{ github.workspace }}/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-
-
-      - name: Setup MSVC environment
-        timeout-minutes: 3
-        uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Setup Ninja
-        timeout-minutes: 2
-        uses: seanmiddleditch/gha-setup-ninja@v5
-
-      - name: Bootstrap vcpkg
-        timeout-minutes: 8
-        shell: pwsh
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git "$env:VCPKG_ROOT"
-          git -C "$env:VCPKG_ROOT" checkout "$env:VCPKG_BASELINE"
-          & "$env:VCPKG_ROOT/bootstrap-vcpkg.bat" -disableMetrics
-
-      - name: Configure
-        timeout-minutes: 8
-        shell: pwsh
-        run: cmake --preset vcpkg
-
-      - name: Build
-        timeout-minutes: 20
-        shell: pwsh
-        run: >
-          cmake --build --preset vcpkg --parallel
-          --target
-          kbe_machine
-          kbe_baseappmgr
-          kbe_baseapp
-          kbe_cellappmgr
-          kbe_cellapp
-          kbe_dbmgr
-          kbe_interfaces
-          kbe_logger
-          kbe_kbcmd
-          kbe_loginapp
-          kbe_bots
-          kbe_smoke_tests
-
-      - name: Test
-        timeout-minutes: 8
-        shell: pwsh
-        run: >
-          ctest --preset vcpkg --output-on-failure
-          --timeout "$env:CTEST_TIMEOUT_SECONDS"
-          -E "_NOT_BUILT$"
-
-  macos:
-    name: macOS CMake
-    runs-on: macos-14
-    timeout-minutes: 70
-    env:
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-      VCPKG_DOWNLOADS: ${{ github.workspace }}/.cache/vcpkg/downloads
-      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/.cache/vcpkg/archives,readwrite
-
-    steps:
-      - name: Checkout
-        timeout-minutes: 2
-        uses: actions/checkout@v4
-
-      - name: Restore vcpkg cache
-        timeout-minutes: 5
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ github.workspace }}/.cache/vcpkg/downloads
-            ${{ github.workspace }}/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-
-
-      - name: Verify toolchain
-        timeout-minutes: 2
-        run: |
-          cmake --version
-          ninja --version
-          clang++ --version
-
-      - name: Install autotools dependencies
-        timeout-minutes: 8
-        run: |
-          brew install \
-            autoconf \
-            autoconf-archive \
-            automake \
-            libtool
-
-      - name: Bootstrap vcpkg
-        timeout-minutes: 8
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git "${VCPKG_ROOT}"
-          git -C "${VCPKG_ROOT}" checkout "${VCPKG_BASELINE}"
-          "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
-
-      - name: Configure
-        timeout-minutes: 8
-        run: cmake --preset vcpkg
-
-      - name: Build
-        timeout-minutes: 20
-        run: >
-          cmake --build --preset vcpkg --parallel
-          --target
-          kbe_machine
-          kbe_baseappmgr
-          kbe_baseapp
-          kbe_cellappmgr
-          kbe_cellapp
-          kbe_dbmgr
-          kbe_interfaces
-          kbe_logger
-          kbe_kbcmd
-          kbe_loginapp
-          kbe_bots
-          kbe_smoke_tests
-
-      - name: Test
-        timeout-minutes: 8
-        run: >
-          ctest --preset vcpkg --output-on-failure
-          --timeout "${CTEST_TIMEOUT_SECONDS}"
-          -E "_NOT_BUILT$"

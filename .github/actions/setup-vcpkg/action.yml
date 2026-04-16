@@ -1,0 +1,99 @@
+name: Setup vcpkg
+description: Prepare a workspace-local vcpkg checkout, cache directories, and exported environment.
+
+inputs:
+  baseline:
+    description: Git commit or ref to check out in the vcpkg repository.
+    required: true
+  cache-key:
+    description: Cache key for vcpkg downloads and binary archives.
+    required: true
+  cache-restore-key:
+    description: Restore key prefix for vcpkg downloads and binary archives.
+    required: true
+
+outputs:
+  vcpkg_root:
+    description: Workspace-local vcpkg checkout path.
+    value: ${{ steps.paths.outputs.vcpkg_root }}
+  vcpkg_downloads:
+    description: Shared vcpkg downloads cache directory.
+    value: ${{ steps.paths.outputs.vcpkg_downloads }}
+  vcpkg_archives:
+    description: Shared vcpkg binary archives cache directory.
+    value: ${{ steps.paths.outputs.vcpkg_archives }}
+
+runs:
+  using: composite
+  steps:
+    - name: Export vcpkg paths
+      id: paths
+      shell: pwsh
+      run: |
+        $root = Join-Path $env:GITHUB_WORKSPACE ".ci/vcpkg"
+        $cacheRoot = Join-Path $env:GITHUB_WORKSPACE ".cache/vcpkg"
+        $downloads = Join-Path $cacheRoot "downloads"
+        $archives = Join-Path $cacheRoot "archives"
+
+        New-Item -ItemType Directory -Force -Path $downloads | Out-Null
+        New-Item -ItemType Directory -Force -Path $archives | Out-Null
+
+        @(
+          "VCPKG_ROOT=$root"
+          "VCPKG_DOWNLOADS=$downloads"
+          "VCPKG_BINARY_SOURCES=clear;files,$archives,readwrite"
+        ) | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+        @(
+          "vcpkg_root=$root"
+          "vcpkg_downloads=$downloads"
+          "vcpkg_archives=$archives"
+        ) | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+    - name: Restore vcpkg cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ steps.paths.outputs.vcpkg_downloads }}
+          ${{ steps.paths.outputs.vcpkg_archives }}
+        key: ${{ inputs.cache-key }}
+        restore-keys: |
+          ${{ inputs.cache-restore-key }}
+
+    - name: Bootstrap workspace-local vcpkg
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+
+        $root = "${{ steps.paths.outputs.vcpkg_root }}"
+        $repoUrl = "https://github.com/microsoft/vcpkg.git"
+        $baseline = "${{ inputs.baseline }}"
+
+        if (Test-Path (Join-Path $root ".git"))
+        {
+          git -C $root remote set-url origin $repoUrl
+        }
+        else
+        {
+          if (Test-Path $root)
+          {
+            Remove-Item -LiteralPath $root -Recurse -Force
+          }
+
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          git init $root | Out-Null
+          git -C $root remote add origin $repoUrl
+        }
+
+        git -C $root fetch --depth 1 origin $baseline
+        git -C $root -c advice.detachedHead=false checkout --force FETCH_HEAD
+        git -C $root clean -ffdqx
+
+        if ($IsWindows)
+        {
+          & (Join-Path $root "bootstrap-vcpkg.bat") -disableMetrics
+        }
+        else
+        {
+          bash (Join-Path $root "bootstrap-vcpkg.sh") -disableMetrics
+        }
