@@ -11,6 +11,7 @@
 - Ghost 上的 RealEntityMethod 怎么把调用转接到 real entity？
 - Exposed 方法的信任边界是什么？
 - TwoWay + Deferred vs 纯单向 + CallbackMgr 的取舍？
+- 在纯单向消息模型里，工程上怎么优雅地“拿结果”而不退化成回调地狱？
 
 ## 11.2 RPC 的四种通信模式
 
@@ -687,7 +688,881 @@ def onError(self, error):
 
 **一句话**：BigWorld 的 Deferred 是可组合的异步原语（类似 Promise），KBEngine 的 CallbackMgr 是简单的回调注册表。
 
-## 11.11 与 gRPC / Protobuf / HTTP 的设计对比
+## 11.11 单向消息流下，如何优雅地“拿结果”
+
+前面说到 `KBEngine` 的 `EntityCall` 本质上是**单条消息单向发送**。这里最容易产生一个误解：
+
+- “单向消息”不等于“没有结果返回”
+- 它真正不提供的是“像本地函数一样同步返回值”
+
+换句话说，`KBEngine` 的问题不是“不能拿结果”，而是“不能把跨进程调用写成同步栈帧语义”。一旦接受这个前提，工程上的重点就不再是“怎么假装它是本地函数”，而是：
+
+1. 怎么把“请求 + 响应”表达清楚
+2. 怎么把超时、错误、取消、重试放进统一模型
+3. 怎么避免业务代码退化成回调地狱
+
+### 11.11.1 先把问题说透：单向消息 vs 同步返回值
+
+`KBEngine` 远程调用最准确的心智模型不是“远程函数调用”，而是：
+
+```text
+发送一条命令或请求消息
+  → 目标进程在自己的主循环里处理
+  → 如有需要，再通过另一条响应消息把结果送回来
+```
+
+所以：
+
+- `entity.base.someMethod()` / `entity.cell.someMethod()` 这类调用，默认是 fire-and-forget
+- 需要结果时，通常要显式附带一个 `callbackID / reqId`
+- 结果返回时，再命中本地的请求跟踪项，继续后续逻辑
+
+这也是 `CallbackMgr` 的工程角色：它不是“TwoWay RPC”，而是**给单向消息流补一个旁路返回通道**。
+
+### 11.11.2 各种工程解法总览
+
+下面这些方案并不是互斥关系，而是从底层到上层、从机制到组织方式的一组连续谱：
+
+| 解法 | 核心思想 | 适合场景 | 主要问题 |
+|------|----------|----------|----------|
+| 原始 Callback | 结果回来后直接调函数 | 低频、短链路异步请求 | 容易回调嵌套 |
+| CPS | 把“后续逻辑”显式当参数传递 | 轻量组织异步续延 | 错误与超时仍要自行管理 |
+| Callback Registry | `reqId -> callback` 注册表 | KBEngine 风格的最小统一封装 | 组合能力弱 |
+| Future | 把“未来的结果”对象化 | 想把异步结果变成可传递对象 | 需要统一调度器 |
+| Promise | `resolve/reject` 驱动 Future 完成 | 通信层封装请求/响应完成态 | 生命周期处理要严谨 |
+| Deferred | callback/errback 链式编排 | 老式 Python 异步链 | 可读性不如 `async/await` |
+| `async/await` | 用同步语法写异步流程 | 长链路、多步骤流程 | 需要协程调度整合 |
+| Actor `ask` | `tell` 与 `ask` 分离 | Base/Cell/DBMgr 进程式架构 | 不能滥用 ask |
+| Reducer + Effects | 纯函数只产出副作用 | 函数式、可测试业务 | 初期改造成本较高 |
+| Saga / 状态机 | 显式管理长事务步骤与补偿 | 交易、迁移、写库、多步流程 | 设计过重会拖慢开发 |
+| CQRS / Read Model | 把常见查询变成本地读模型 | 高频查询、减少跨进程往返 | 要接受最终一致 |
+| 数据归属重构 | 让决策发生在数据拥有者所在进程 | 强一致、频繁要结果的逻辑 | 涉及领域边界调整 |
+
+下面按抽象层级逐层展开。
+
+### 11.11.3 原始 Callback 与 CPS：最贴近 KBEngine 当前风格
+
+最原始的写法是：
+
+```python
+def askCell(self, payload, callback):
+    callbackID = callbackMgr.save(callback)
+    sendReqToCell(callbackID, payload)
+
+def onCellRsp(self, callbackID, result):
+    cb = callbackMgr.take(callbackID)
+    if cb:
+        cb(result)
+```
+
+这已经是一个可用的请求/响应模型，但它的问题在于：业务一旦变成多步流程，回调就会层层嵌套。
+
+`CPS` 是 `Continuation-Passing Style` 的缩写，意思是：
+
+- 不直接返回结果
+- 而是把“拿到结果后该继续做什么”一起传进去
+
+同步思维是：
+
+```python
+result = query()
+nextStep(result)
+```
+
+CPS 写法是：
+
+```python
+query(lambda result: nextStep(result))
+```
+
+对于 `KBEngine` 这类消息系统，CPS 的价值在于：它承认“跨进程结果一定是晚点到”，然后把“后续流程”显式化。
+
+但要注意，CPS 只是把异步续延表达清楚了，并没有自动解决：
+
+- 超时
+- 错误传播
+- 取消
+- 多步组合
+
+所以它更适合作为底层思维，不适合作为大型业务系统的最终暴露接口。
+
+### 11.11.4 Callback Registry：最小可用统一封装
+
+如果团队希望保持 `KBEngine` 当前风格，同时减少样板代码，最实用的第一步是做一个统一的请求跟踪层：
+
+```python
+pending = {}
+
+def ask(dst, method, payload, on_ok, on_err=None, timeout=5):
+    req_id = alloc_req_id()
+    pending[req_id] = {
+        "on_ok": on_ok,
+        "on_err": on_err,
+        "deadline": now() + timeout,
+    }
+    send(dst, method, req_id, payload)
+    return req_id
+
+def on_rsp(req_id, ok, result=None, error=None):
+    req = pending.pop(req_id, None)
+    if not req:
+        return
+
+    if ok:
+        req["on_ok"](result)
+    elif req["on_err"]:
+        req["on_err"](error)
+```
+
+这一步的意义不在于“高级”，而在于**把散落在各业务里的 `callbackID` 管理收口到一处**。
+
+优点：
+
+- 低改造成本
+- 与 `CallbackMgr` 心智一致
+- 超时、重复响应、未命中请求都可以统一兜底
+
+缺点：
+
+- 调用方仍然要思考回调
+- 多步流程仍然容易散
+- 结果还不是一等对象，难以组合
+
+如果项目现在大量使用裸 `callbackID`，这一层是非常值得先做的。
+
+### 11.11.5 Future / Promise / Deferred：把“异步结果”对象化
+
+`Future` 的核心思想是：把“未来会完成的结果”包装成一个对象，而不是把后续逻辑直接塞进函数参数。
+
+```python
+future = askCellFuture(entityID, "GetHP", {})
+future.then(self.onHP)
+future.catch(self.onHPError)
+```
+
+可以把职责理解成：
+
+- `Future`：给调用方看的只读结果对象
+- `Promise`：给通信层持有的可写完成句柄
+
+```python
+promise = Promise()
+pending[req_id] = promise
+sendReq(req_id, payload)
+
+def onRsp(req_id, ok, data):
+    promise = pending.pop(req_id)
+    if ok:
+        promise.resolve(data)
+    else:
+        promise.reject(data)
+```
+
+`Deferred` 可以看成更早期、更显式 callback/errback 链的 Promise 体系。BigWorld 的 `TwoWay + PyDeferred` 本质上就在这里。
+
+这类封装的主要收益是：
+
+- 成功/失败通道统一
+- 可以做链式组合
+- 可以集中实现超时、取消、重试、日志、追踪
+- 业务层不再直接接触 `pending[reqId]`
+
+但也不要误读：
+
+- 它们没有把异步变同步
+- 只是把“结果回来后怎么继续”从裸回调提升成了可组合对象
+
+### 11.11.6 `async/await`：可读性最好，但需要调度器
+
+如果再往上封装一层，就会得到：
+
+```python
+async def upgradeSkill(self, skillID):
+    combatInfo = await askCell(self.id, "GetCombatInfo", {})
+    skillInfo = await askDB("LoadSkill", {"skillID": skillID})
+
+    result = calcUpgrade(combatInfo, skillInfo)
+    await askDB("SaveSkill", result)
+
+    self.client.onUpgradeSkillResult(result)
+```
+
+这类写法的优点非常明显：
+
+- 复杂流程最清晰
+- 可以自然使用 `try/except`
+- 多步链路的控制流接近同步思维
+
+先把版本边界说清楚，否则很容易把“语法支持”和“引擎运行时支持”混为一谈：
+
+| 能力 | Python 版本 |
+|------|-------------|
+| `yield from` 生成器式协程语法 | `3.3+` |
+| `asyncio` 标准库进入 CPython | `3.4+` |
+| `async def` / `await` 正式语法 | `3.5+` |
+| `asyncio.run()` | `3.7+` |
+
+这意味着：
+
+- `await` 不是 Python `3.12` 才有的语法，而是 **Python `3.5` 就已经正式支持**
+- `KBEngine` 最后维护时使用的 Python `3.7.3`，在语法层面已经可以完整使用 `async def` / `await`
+- 当前库升级到 Python `3.12.13`，收益主要是 `asyncio` 生态、任务管理、调试信息和运行时实现更成熟，而**不是**“终于能写 `await` 了”
+
+这里最关键的理解是：
+
+- `await` 不等于“把远程调用变成同步返回值”
+- `await` 的真实语义是：**当前协程先挂起，等一个 awaitable 完成后，再由调度器恢复执行**
+
+所以在 `KBEngine` 语境里，真正的难点从来不是关键字本身，而是下面这些运行时能力有没有补齐：
+
+- 请求 ID 分配与响应路由
+- `pending` 请求表管理
+- 超时、取消、异常传播
+- 收到响应后恢复正确的协程
+- 把协程调度和 `BaseApp / CellApp` 主循环整合起来
+
+如果这些能力没有封装好，那么 `await askCell(...)` 只是更好看的伪代码，而不是现成可落地的 API。
+
+下面给两个例子。第一个例子是标准 Python，可直接说明 `await` 究竟在做什么；第二个例子再贴近 `KBEngine` 的 `Req/Rsp` 封装方式。
+
+#### 一个可直接运行的完整 Python 例子
+
+这段代码在 Python `3.7.3` 和 `3.12.13` 上都可以运行，用它来理解 `await` 的语义最直接：
+
+```python
+import asyncio
+
+
+async def ask_cell(entity_id, method, payload):
+    print(f"[send] entity={entity_id}, method={method}, payload={payload}")
+
+    # 模拟远端处理和网络往返。await 到这里时，当前协程会挂起，
+    # 主循环可以先去执行其他任务，而不是阻塞整个线程。
+    await asyncio.sleep(0.1)
+
+    if method == "GetCombatInfo":
+        return {"hp": 120, "mp": 80, "level": 15}
+
+    if method == "UpgradeSkill":
+        return {"ok": True, "newLevel": 4}
+
+    raise ValueError(f"unknown method: {method}")
+
+
+async def upgrade_skill(entity_id, skill_id):
+    combat = await ask_cell(entity_id, "GetCombatInfo", {})
+    if combat["level"] < 10:
+        return {"ok": False, "reason": "level too low"}
+
+    result = await ask_cell(entity_id, "UpgradeSkill", {"skillID": skill_id})
+    return {
+        "ok": result["ok"],
+        "skillID": skill_id,
+        "newLevel": result["newLevel"],
+    }
+
+
+async def main():
+    result = await upgrade_skill(1001, 20001)
+    print("[result]", result)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+这段例子能说明三件事：
+
+1. `await` 从 Python `3.5` 开始就是正式语法，所以 `3.7.3` 完全能写
+2. `asyncio.run()` 是 Python `3.7` 引入的，所以 `KBEngine` 停留在 `3.7.3` 时也已经能用这种入口
+3. `await asyncio.sleep(0.1)` 的本质不是“卡住 0.1 秒”，而是“把当前协程交回调度器，等完成后再继续”
+
+#### 一个贴近 KBEngine 的完整封装示例
+
+下面这个例子不是说 `KBEngine` 现在就原生提供了这样的接口，而是说明：如果要把 callback 风格封装成 `await` 风格，工程上大致需要哪些部件。
+
+```python
+import asyncio
+
+
+class RpcBridge:
+    def __init__(self):
+        self._next_req_id = 1
+        self._pending = {}
+
+    async def ask(self, remote_stub, method, payload, timeout=3.0):
+        loop = asyncio.get_running_loop()
+        future = loop.create_future()
+
+        req_id = self._next_req_id
+        self._next_req_id += 1
+        self._pending[req_id] = future
+
+        remote_stub.call_remote(method, {
+            "reqID": req_id,
+            "payload": payload,
+        })
+
+        try:
+            return await asyncio.wait_for(future, timeout=timeout)
+        finally:
+            self._pending.pop(req_id, None)
+
+    def on_response(self, req_id, data=None, error=None):
+        future = self._pending.get(req_id)
+        if future is None or future.done():
+            return
+
+        if error is not None:
+            future.set_exception(RuntimeError(error))
+        else:
+            future.set_result(data)
+
+
+class FakeRemoteCell:
+    def __init__(self, bridge):
+        self._bridge = bridge
+
+    def call_remote(self, method, message):
+        req_id = message["reqID"]
+        payload = message["payload"]
+        asyncio.create_task(self._process(req_id, method, payload))
+
+    async def _process(self, req_id, method, payload):
+        await asyncio.sleep(0.1)
+
+        if method == "GetCombatInfoReq":
+            self._bridge.on_response(req_id, {
+                "level": 15,
+                "hp": 120,
+                "mp": 80,
+            })
+            return
+
+        if method == "UpgradeSkillReq":
+            self._bridge.on_response(req_id, {
+                "ok": True,
+                "skillID": payload["skillID"],
+                "newLevel": 4,
+            })
+            return
+
+        self._bridge.on_response(req_id, error=f"unknown method: {method}")
+
+
+class Avatar:
+    def __init__(self):
+        self.rpc = RpcBridge()
+        self.cell = FakeRemoteCell(self.rpc)
+
+    async def upgrade_skill(self, skill_id):
+        combat = await self.rpc.ask(self.cell, "GetCombatInfoReq", {})
+        if combat["level"] < 10:
+            return {"ok": False, "reason": "level too low"}
+
+        result = await self.rpc.ask(self.cell, "UpgradeSkillReq", {
+            "skillID": skill_id,
+        })
+        return result
+
+
+async def main():
+    avatar = Avatar()
+    result = await avatar.upgrade_skill(20001)
+    print(result)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+这个例子里，`await` 能成立，不是因为语法神奇，而是因为下面这条链路已经被补齐：
+
+```text
+业务协程
+  -> await rpc.ask(...)
+  -> ask 内部创建 Future 并登记到 pending
+  -> 远端返回 reqID 对应的响应
+  -> bridge.on_response() 完成 Future
+  -> 调度器恢复原先挂起的协程
+```
+
+但它的前提不是“会写 `async`”，而是**你要有一个和主循环整合良好的协程调度器**：
+
+- `await` 不能阻塞主线程
+- 响应回来时要恢复被挂起的协程
+- 超时要能抛异常或返回失败态
+- 协程取消要有明确语义
+
+所以在 `KBEngine` 里，`async/await` 适合作为成熟封装的最上层语法糖，而不适合作为第一步改造。
+
+### 11.11.7 Actor `tell/ask`：最符合 Base/Cell/DBMgr 心智模型
+
+如果团队希望统一“分布式进程 + 实体”这套认知，最贴切的模型其实是 Actor：
+
+| 模式 | 含义 |
+|------|------|
+| `tell` | 告诉对方做一件事，不等结果 |
+| `ask` | 发一个带回复通道的请求，异步等待结果 |
+
+对 `KBEngine` 来说，这是一个很自然的分层：
+
+- 大多数 `EntityCall` 都应该被视为 `tell`
+- 少数确实要结果的链路，再显式建模为 `ask`
+
+例如：
+
+```python
+self.cell.tell("ApplyDamage", payload)
+
+self.cell.ask("CheckCanAttack", payload) \
+    .then(self.onCanAttack) \
+    .catch(self.onAttackError)
+```
+
+这个模型有两个重要好处：
+
+1. 它不会误导开发者把远程对象当成本地对象
+2. 它能迫使团队区分“命令”和“查询”
+
+但也要控制边界：`ask` 不能滥用。否则系统虽然语法上仍是异步，思维上却会退回“满屏远程查询响应”。
+
+### 11.11.8 Reducer + Effects：最接近“函数式化解单向数据流”
+
+如果问题不是“怎么拿结果”，而是“怎么让单向消息系统的业务代码不痛苦”，函数式里最有价值的方案不是 Hook，而是：
+
+- `Reducer`
+- `Effects`
+
+也就是：
+
+```text
+收到一条消息
+  → 纯函数决定状态怎么变
+  → 同时产出需要执行的副作用
+  → 副作用执行器去发消息、查库、启动定时器
+  → 结果回来后再变成一条新消息，喂回 reducer
+```
+
+伪代码：
+
+```python
+def reduce(state, msg):
+    if msg["type"] == "UpgradeSkillRequested":
+        return state, [
+            AskCell("GetCombatInfo", {"entityID": state.entityID}),
+            AskDB("LoadSkill", {"skillID": msg["skillID"]}),
+        ]
+
+    if msg["type"] == "CombatInfoLoaded":
+        return state.withCombatInfo(msg["data"]), []
+
+    if msg["type"] == "SkillUpgradeCommitted":
+        new_state = applyUpgrade(state, msg["data"])
+        return new_state, [
+            NotifyClient("SkillUpgradeResult", msg["data"])
+        ]
+```
+
+它特别适合 `KBEngine` 这种单向消息流系统，因为：
+
+- 业务逻辑可以做成纯函数，容易测试
+- 网络、副作用、超时集中管理
+- 响应回来不是“回调跳转”，而是“进入下一轮消息处理”
+
+如果要找一个和前端更接近的类比，它更像：
+
+- `Redux`
+- `Elm Architecture`
+
+而不是 `React Hooks`
+
+`Hooks` 主要解决组件内部复用与生命周期问题；`Reducer + Effects` 才是“单向数据流 + 外部副作用”的正对位方案。
+
+### 11.11.9 状态机 / Saga：处理长事务而不是普通回调
+
+当流程进入多步骤、跨组件、需要补偿的区间时，继续叠 Promise 或回调就不够稳了。这时更合适的是：
+
+- 显式状态机
+- Saga / Process Manager
+
+例如交易流程：
+
+```text
+Idle
+→ WaitingCellLock
+→ WaitingDBCommit
+→ WaitingCellApply
+→ Completed / Failed
+```
+
+每一条响应消息都只是推动状态机前进一步。
+
+这类方案适合：
+
+- 扣货币发道具
+- 跨服迁移
+- 交易
+- 传送
+- 邮件领奖
+- 多步写库与回滚
+
+关键价值不是“语法更优雅”，而是：
+
+- 补偿逻辑清楚
+- 失败边界清楚
+- 超时语义清楚
+- 重启恢复更容易做
+
+### 11.11.10 CQRS / Read Model / 数据归属重构：从架构上减少“想拿结果”的次数
+
+很多“我想在一个调用里立刻拿到结果”的场景，根因不是封装不够高级，而是：
+
+- 查询频率太高
+- 决策位置不合理
+- 数据归属不清晰
+
+这时候比 Promise/Future 更有效的，往往是架构上的处理。
+
+第一类是 `CQRS / Read Model`：
+
+- 把高频查询需要的数据做成本地可读快照
+- 不要每次都跨进程 ask
+
+例如：
+
+```text
+CellApp 持有实时战斗权威状态
+  → 同步 CombatSnapshot 到 BaseApp
+  → BaseApp 直接读取本地摘要
+```
+
+代价是：
+
+- 接受最终一致
+- 不适合强一致决策
+
+第二类是数据归属重构：
+
+如果一个流程总是：
+
+```text
+Base 问 Cell 能不能做
+Cell 回答可以
+Base 再命令 Cell 去做
+```
+
+那通常意味着这个决策本来就应该在 Cell 做。
+
+正确重构往往是：
+
+```text
+Base 发“请求执行攻击”
+Cell 在本地完成校验与执行
+Cell 再把结果回给 Base
+```
+
+这比“先 ask 再 tell”更符合单向消息系统的设计。
+
+### 11.11.11 反模式：不要把远程调用硬写成阻塞 RPC
+
+最需要避免的方案其实很简单：
+
+```python
+result = remoteCallAndWait()
+```
+
+如果这发生在 `BaseApp / CellApp` 的主循环线程里，问题会非常直接：
+
+- 阻塞消息泵
+- 增大 tick 抖动
+- 容易形成链式超时
+- 极端情况下造成死锁
+
+管理工具、后台线程、离线脚本可以做同步等待；主业务循环不要这样做。
+
+### 11.11.12 一个最小可用的 `Req/Rsp + Promise/Future` 模板
+
+如果要把这套思路落到 `KBEngine` 项目里，一个足够克制、又有明显收益的最小模板大致长这样：
+
+```python
+class Promise:
+    def __init__(self):
+        self.future = Future()
+
+    def resolve(self, value):
+        self.future._resolve(value)
+
+    def reject(self, error):
+        self.future._reject(error)
+
+
+class Future:
+    def __init__(self):
+        self.done = False
+        self.result = None
+        self.error = None
+        self.callbacks = []
+        self.errbacks = []
+
+    def then(self, callback):
+        if self.done and self.error is None:
+            callback(self.result)
+        else:
+            self.callbacks.append(callback)
+        return self
+
+    def catch(self, errback):
+        if self.done and self.error is not None:
+            errback(self.error)
+        else:
+            self.errbacks.append(errback)
+        return self
+
+    def _resolve(self, value):
+        if self.done:
+            return
+        self.done = True
+        self.result = value
+        for cb in self.callbacks:
+            cb(value)
+
+    def _reject(self, error):
+        if self.done:
+            return
+        self.done = True
+        self.error = error
+        for eb in self.errbacks:
+            eb(error)
+```
+
+通信层再封一层：
+
+```python
+class RpcSession:
+    def __init__(self):
+        self.pending = {}
+
+    def ask(self, target, method, payload, timeout=5.0):
+        req_id = self._alloc_req_id()
+        promise = Promise()
+        self.pending[req_id] = {
+            "promise": promise,
+            "deadline": self._now() + timeout,
+        }
+
+        self._send_req(target, method, req_id, payload)
+        return promise.future
+
+    def on_response(self, req_id, ok, result=None, error=None):
+        req = self.pending.pop(req_id, None)
+        if not req:
+            return
+
+        if ok:
+            req["promise"].resolve(result)
+        else:
+            req["promise"].reject(error)
+
+    def tick(self):
+        now = self._now()
+        timeout_ids = [
+            req_id
+            for req_id, req in self.pending.items()
+            if req["deadline"] <= now
+        ]
+
+        for req_id in timeout_ids:
+            req = self.pending.pop(req_id, None)
+            if req:
+                req["promise"].reject("timeout")
+```
+
+业务层再用它：
+
+```python
+def requestAttack(self, targetID):
+    self.rpc.ask(
+        self.cell,
+        "CheckCanAttack",
+        {"attackerID": self.id, "targetID": targetID},
+        timeout=0.5,
+    ).then(
+        self._onCanAttack
+    ).catch(
+        self._onAttackRejected
+    )
+```
+
+这个模板的重点不是“高级”，而是先把几个最关键的工程责任统一起来：
+
+- `reqId` 分配
+- `pending` 生命周期
+- 超时清理
+- 成功/失败双通道
+- 业务层不再直接操作 `callbackID`
+
+如果再往上走一步，就可以把 `.then().catch()` 再包成 `async/await` 或 reducer/effect 风格；但第一步先做到这里，收益已经很明显。
+
+### 11.11.13 一个贴近 `BaseApp -> CellApp` 的完整例子
+
+假设有一个典型业务：玩家在 `BaseApp` 发起攻击请求，但真正的实时判定权在 `CellApp`。这时最容易写成下面这种两段式：
+
+```text
+BaseApp 问 CellApp：能不能打？
+CellApp 回答：可以 / 不可以
+BaseApp 再决定是否发“执行攻击”
+```
+
+如果只是教学演示，这样没有问题；但在真实项目里，它会暴露两个风险：
+
+1. `check` 与 `use` 之间存在状态窗口，目标可能已经变化
+2. `BaseApp` 开始承担本来属于 `CellApp` 的强一致决策
+
+更合理的工程写法一般分两档。
+
+**第一档：保留 ask，但把协议写清楚**
+
+```python
+# BaseApp
+def requestAttack(self, targetID):
+    self.rpc.ask(
+        self.cell,
+        "CheckCanAttack",
+        {
+            "attackerID": self.id,
+            "targetID": targetID,
+            "skillID": self.currentSkillID,
+        },
+        timeout=0.3,
+    ).then(
+        lambda result: self._onAttackCheckOK(targetID, result)
+    ).catch(
+        lambda error: self.client.onAttackFailed(error)
+    )
+
+
+def _onAttackCheckOK(self, targetID, result):
+    if not result["ok"]:
+        self.client.onAttackFailed(result["reason"])
+        return
+
+    self.cell.tell(
+        "ApplyAttack",
+        {
+            "attackerID": self.id,
+            "targetID": targetID,
+            "skillID": self.currentSkillID,
+        }
+    )
+```
+
+这个版本适合：
+
+- 判定链路不长
+- `BaseApp` 确实还需要读这个中间结果
+- 项目暂时不准备调整领域边界
+
+但它仍然有 `check -> use` 窗口。
+
+**第二档：把 ask 收缩成“请求执行”，由 CellApp 本地判定并执行**
+
+```python
+# BaseApp
+def requestAttack(self, targetID):
+    self.rpc.ask(
+        self.cell,
+        "RequestAttack",
+        {
+            "attackerID": self.id,
+            "targetID": targetID,
+            "skillID": self.currentSkillID,
+        },
+        timeout=0.3,
+    ).then(
+        self._onAttackResult
+    ).catch(
+        lambda error: self.client.onAttackFailed(error)
+    )
+
+
+def _onAttackResult(self, result):
+    if not result["ok"]:
+        self.client.onAttackFailed(result["reason"])
+        return
+
+    self.client.onAttackStarted(result["combatSnapshot"])
+```
+
+```python
+# CellApp
+def onRequestAttack(self, attackerID, targetID, skillID, reply):
+    if not self._canAttack(attackerID, targetID, skillID):
+        reply.fail({"reason": "out_of_range"})
+        return
+
+    combatSnapshot = self._applyAttack(attackerID, targetID, skillID)
+    reply.ok({
+        "ok": True,
+        "combatSnapshot": combatSnapshot,
+    })
+```
+
+这个版本更符合 `KBEngine` 的分布式实体模型，因为：
+
+- 强一致判定发生在数据拥有者所在进程
+- `BaseApp` 只处理结果，不重复做实时判定
+- `CellApp` 内部可以一次性完成校验、扣资源、落战斗态
+
+经验上：
+
+- “先 ask 一个布尔值，再 tell 真正执行”通常是过渡方案
+- “ask 一个执行请求，结果里返回执行结果或快照”通常是更稳的最终形态
+
+### 11.11.14 什么时候该用 `tell`、`ask`、读模型，还是直接重构数据归属
+
+下面这张表可以当成实战判断清单：
+
+| 场景特征 | 更推荐 | 原因 |
+|------|------|------|
+| 只是通知对方做事，不关心结果 | `tell` | 最符合 fire-and-forget 主路径，简单且高吞吐 |
+| 需要一次性返回结果，链路短，频率不高 | `ask` | 显式请求/响应最直接 |
+| 需要结果，但查询非常高频 | 读模型 / CQRS | 减少跨进程往返，稳定性能 |
+| 结果用于强一致决策，且数据权威在对端 | 数据归属重构 | 让决策在数据拥有者本地完成 |
+| 多步骤流程、可能失败、需要补偿 | 状态机 / Saga | 统一管理步骤推进、超时与补偿 |
+| 只是为了“语法像同步”而发请求 | 不推荐 | 这是把远程调用误当成本地调用 |
+
+再换一个更口语化的判断法：
+
+- **能用 `tell` 就别先上 `ask`**
+- **能把判断搬到数据拥有者本地，就别做“问一下再执行”**
+- **能用本地快照读，就别高频跨进程查询**
+- **流程一长，就别继续堆 callback，要上状态机或 Saga**
+
+### 11.11.15 推荐落地顺序
+
+如果站在 `KBEngine` 项目的工程现实看，最稳妥的演进顺序通常是：
+
+1. 先统一 `Req/Rsp + reqId + pending map`
+2. 再在其上封装 `Promise/Future`
+3. 对复杂长链路引入状态机或 Saga
+4. 对高频查询做读模型或数据归属重构
+5. 如果脚本运行时条件成熟，再考虑 `async/await`
+
+不要一开始就上完整协程框架，也不要继续让每个业务自己拼 `callbackID`。
+
+### 11.11.16 一句话原则
+
+- **把 `EntityCall` 当成异步消息投递，不要当成本地函数调用**
+- **把“需要结果”的远程调用当成显式的请求/响应协议**
+- **把“怎么继续”从散落回调提升成统一抽象**
+- **把高频强一致决策放到数据拥有者所在进程**
+
+如果只允许记住一句：
+
+> 在 KBEngine 里，解决“单向消息流下怎么拿结果”的最佳路径，不是伪造同步返回值，而是把请求/响应、异步结果对象、状态推进和数据归属都建模清楚。
+
+## 11.12 与 gRPC / Protobuf / HTTP 的设计对比
 
 | 维度 | gRPC / Protobuf | EntityCall / Mailbox |
 |------|----------------|---------------------|
@@ -709,7 +1584,7 @@ def onError(self, error):
 4. **属性同步**：gRPC 没有内建的"只发变更字段"机制
 5. **EntityCall 可序列化**：EntityCall 可以写入 Bundle 传给其他进程，gRPC 的 stub 做不到
 
-## 11.12 两套项目的 RPC 系统对比
+## 11.13 两套项目的 RPC 系统对比
 
 | 维度 | KBEngine EntityCall | BigWorld Mailbox |
 |------|-------------------|-----------------|
@@ -728,7 +1603,7 @@ def onError(self, error):
 
 避免误读：`KBEngine 暴露 base/cell` 不是“只有 KBEngine 这样做”。BigWorld 同样要求理解 Cell/Base/Client 执行域；主要差异在 RPC 能力与接口细节（KBEngine `ENTITYCALL_TYPE` 路由变体 vs BigWorld TwoWay/Deferred）以及配套工具链。
 
-## 11.13 关键源码入口
+## 11.14 关键源码入口
 
 ### KBEngine
 
@@ -761,7 +1636,7 @@ def onError(self, error):
 | ExposedMessageRange | `BigWorld-Engine-14.4.1/programming/bigworld/lib/network/exposed_message_range.hpp` |
 | TwoWay 初始化 | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/method_description.cpp` |
 
-## 11.14 源码走读路径
+## 11.15 源码走读路径
 
 ### 路径一：跟踪一次 EntityCall RPC 的完整发送
 
@@ -788,7 +1663,7 @@ def onError(self, error):
 2. `BigWorld-Engine-14.4.1/programming/bigworld/server/cellapp/real_entity.hpp` — `Haunt` 类
 3. 对比：两套项目的 ghost→real 转发机制
 
-## 11.15 小结
+## 11.16 小结
 
 - **MMO 的 RPC 以 fire-and-forget 为主**：高频实体通信不需要 req-resp 的同步等待
 - **EntityCall / Mailbox 是远端实体的 Python 引用**：持有 ID、地址、类型信息，可以像本地对象一样调用
