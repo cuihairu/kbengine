@@ -897,6 +897,253 @@ struct GameplayTimeContext
 
 把这三者拆开，时间系统才会长期稳定。
 
+### G.8.4 Python 脚本层的时间分层：为什么 `time.time = kbe_time` 风格不好
+
+这一点值得单独讲，因为很多 `KBEngine` 项目最终的问题，不是在 C++ 内核层，而是在 Python 业务层把时间语义混脏了。
+
+先说一个关键事实：
+
+- `KBEngine` 的网络循环、`EventDispatcher`、底层 timeout、`timestamp()` 这些核心运行时，大多在 C++ 里实现
+- Python 层就算做了 `time.time = kbe_time` 这样的 monkey patch，也**不会直接改掉 C++ 内核里的物理时间实现**
+
+也就是说：
+
+- 它不会直接把底层网络调度“整体改坏”
+- 真正会受影响的，主要是 **Python 脚本层的时间语义**
+
+所以问题的重点不是“引擎内核会不会炸”，而是：
+
+> 你是否把 Python 层里原本表示“真实 Unix 时间戳”的接口，偷偷改成了“游戏逻辑时间”。
+
+这就是为什么这种风格通常不推荐。
+
+#### 先明确：游戏里至少有四层时间
+
+到了脚本层，时间最好明确拆成下面四层：
+
+| 时间层 | 典型来源 | 适合做什么 | 不适合做什么 |
+| --- | --- | --- | --- |
+| 物理单调时间 | C++ `timestamp()` / `EventDispatcher` | 底层 timeout、I/O、调度、性能计时 | 直接暴露给业务脚本做游戏语义 |
+| 模拟时间 | `KBEngine.time()` / `g_kbetime` | 技能 CD、Buff、AI、任务冷却、副本流程 | 日志、邮件过期、真实跨天重置 |
+| 世界日历时间 | `worldCalendarTick` 这类自定义层 | 昼夜、季节、游戏内日期、世界任务窗口 | 技能 CD、战斗持续时间 |
+| 现实服务时间 | `time.time()` / Unix 时间戳 | 每天 `05:00`、活动截止、支付超时、日志审计 | 技能/副本流程的主时间轴 |
+
+这四层里，最容易被误伤的是最后一层：
+
+- `time.time()` 在 Python 生态里默认语义是**真实 Unix 时间戳**
+
+如果你把它 monkey patch 成 `kbe_time`，那你改变的不是一个普通函数，而是整个脚本层对“time”的公共语义。
+
+#### 这种写法为什么有人会用
+
+很多项目里会看到类似：
+
+```python
+import time
+
+def kbe_time():
+    return KBEngine.time()
+
+time.time = kbe_time
+```
+
+这么写通常是为了：
+
+- 兼容老代码
+- 让大量已有 `time.time()` 自动变成“游戏时间”
+- 避免全项目重构成 `KBEngine.time()`
+
+短期看，这种方式确实“省改动”。
+
+但长期代价通常更大。
+
+#### 主要弊端一：标准库语义被全局污染
+
+在 Python 世界里，大家默认理解的是：
+
+```python
+time.time()  # Unix 时间戳秒
+```
+
+你把它改成 `kbe_time` 之后，同样这行代码在项目里就可能表示：
+
+- 真实 Unix 时间戳
+- 游戏逻辑 tick
+- 游戏逻辑秒数
+
+这会导致最典型的问题：
+
+- 读代码时无法一眼判断“这里到底拿的是什么时间”
+- 新同事会按标准 Python 语义理解，结果踩坑
+- 一部分代码按真实时间写，一部分代码按虚拟时间写，名字却完全一样
+
+这本质上是**语义污染**问题。
+
+#### 主要弊端二：第三方库和通用脚本会被误导
+
+很多 Python 代码天然假设 `time.time()` 是 Unix 时间戳。
+
+一旦你全局覆盖它，下面这些逻辑都可能变得很危险：
+
+- `datetime.fromtimestamp(time.time())`
+- token / session 过期判断
+- 缓存过期时间
+- 任务调度器
+- 审计日志
+- 只想拿真实时间做打印或统计的工具脚本
+
+也就是说，**你本来只是想让 gameplay 用虚拟时间，结果把所有通用时间 API 一起改语义了。**
+
+#### 主要弊端三：不同导入方式下行为还可能不一致
+
+Python 的 monkey patch 还有一个隐蔽问题：
+
+```python
+from time import time as now
+import time
+
+time.time = kbe_time
+```
+
+这时：
+
+- `time.time()` 变了
+- `now()` 不一定变
+
+也就是说，同一个进程里，不同模块可能看到不同版本的“time”。
+
+这种问题非常难排查，因为它不是稳定的“全局统一行为”，而是跟导入时机有关。
+
+#### 主要弊端四：会掩盖时间分层设计本该显式暴露的边界
+
+前面我们一直强调：
+
+- `KBEngine.time()` 是模拟时间
+- `worldCalendarTick` 是游戏内日历时间
+- `time.time()` 是现实服务时间
+
+如果你直接把：
+
+```python
+time.time = kbe_time
+```
+
+做成全局风格，那么业务层就更容易继续写出这种代码：
+
+```python
+deadline = time.time() + 30
+```
+
+表面上看很方便，但实际没人知道这里的 `30` 是：
+
+- 30 秒真实时间
+- 30 tick
+- 30 秒游戏逻辑时间
+
+这会让系统越来越难演进。
+
+#### 你刚刚说的判断为什么成立
+
+你前面说：
+
+> `KBEngine` 网络部分其实是 C++ 实现的，C++ 中获取的是真实世界时钟，所以影响没有那么严重，只是这种风格真的不好。
+
+这个判断是对的，而且应该写进结论里。
+
+更准确地说：
+
+- **对 C++ 内核层影响没那么严重**
+  - 因为内核调度时间不靠 Python 的 `time.time()`
+- **对 Python 业务层影响很严重**
+  - 因为它污染了脚本层“真实时间 API”的公共语义
+
+所以这是一个典型的：
+
+- 不是“马上炸”
+- 但会持续积累技术债
+
+的问题。
+
+#### 最佳实践：不要覆盖标准库时间接口，应该显式分层
+
+更稳的做法是：
+
+1. 保持 `time.time()` 的标准语义不变
+2. 显式封装 `game_time()` / `world_calendar_time()` / `service_time()`
+3. 在代码规范里明确不同场景该用哪一个
+
+例如：
+
+```python
+import time
+import KBEngine
+
+
+def game_tick():
+    return KBEngine.time()
+
+
+def service_unix_seconds():
+    return int(time.time())
+
+
+def game_seconds(update_hertz):
+    return KBEngine.time() / float(update_hertz)
+```
+
+如果再加上世界日历层，可以这样组织：
+
+```python
+class TimeContext:
+    def __init__(self, simulation_tick, world_calendar_tick, service_unix_seconds):
+        self.simulation_tick = simulation_tick
+        self.world_calendar_tick = world_calendar_tick
+        self.service_unix_seconds = service_unix_seconds
+```
+
+然后业务层按规则使用：
+
+- 技能 CD / Buff / 副本流程：读 `simulation_tick`
+- 昼夜 / 季节 / 游戏内每日刷新：读 `world_calendar_tick`
+- 每天 `05:00` / 运营活动截止 / 邮件过期：读 `service_unix_seconds`
+
+#### 一个更现实的折中策略
+
+如果项目历史包袱很重，短期内确实还不能彻底清掉 `time.time = kbe_time`，那么至少应该做到：
+
+1. 不再新增新的 monkey patch 依赖
+2. 新代码禁止再把 `time.time()` 当游戏时间使用
+3. 先引入显式接口：
+
+```python
+def game_time():
+    return KBEngine.time()
+
+def real_time():
+    import time
+    return int(time.time())
+```
+
+4. 再逐步把老逻辑从 `time.time()` 迁移到明确接口
+
+也就是说：
+
+- 可以接受“历史兼容”
+- 但不应该继续把它当推荐风格
+
+#### 最终建议
+
+如果目标是“正确使用 KBEngine 的时间体系”，那么推荐约束很简单：
+
+- `KBEngine.time()`：游戏模拟时间
+- 自定义 `worldCalendarTick`：游戏内日历时间
+- 标准库 `time.time()`：现实服务时间
+- 不要覆盖 `time.time()` 的标准语义
+
+一句话总结这节：
+
+> `time.time = kbe_time` 不会轻易破坏 `KBEngine` 的 C++ 内核调度，但会污染 Python 业务层的时间语义边界；短期可作为历史兼容，长期不是好的工程风格，最佳实践是显式分层而不是 monkey patch 标准库。
+
 ---
 
 ## G.9 如果自己设计一套世界时钟，应该怎么做
