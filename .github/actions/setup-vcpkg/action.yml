@@ -16,6 +16,9 @@ outputs:
   vcpkg_root:
     description: Workspace-local vcpkg checkout path.
     value: ${{ steps.paths.outputs.vcpkg_root }}
+  vcpkg_executable:
+    description: Workspace-local vcpkg executable path.
+    value: ${{ steps.paths.outputs.vcpkg_executable }}
   vcpkg_downloads:
     description: Shared vcpkg downloads cache directory.
     value: ${{ steps.paths.outputs.vcpkg_downloads }}
@@ -34,6 +37,7 @@ runs:
         $cacheRoot = Join-Path $env:GITHUB_WORKSPACE ".cache/vcpkg"
         $downloads = Join-Path $cacheRoot "downloads"
         $archives = Join-Path $cacheRoot "archives"
+        $exe = if ($IsWindows) { Join-Path $root "vcpkg.exe" } else { Join-Path $root "vcpkg" }
 
         New-Item -ItemType Directory -Force -Path $downloads | Out-Null
         New-Item -ItemType Directory -Force -Path $archives | Out-Null
@@ -44,8 +48,11 @@ runs:
           "VCPKG_BINARY_SOURCES=clear;files,$archives,readwrite"
         ) | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
+        $root | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
         @(
           "vcpkg_root=$root"
+          "vcpkg_executable=$exe"
           "vcpkg_downloads=$downloads"
           "vcpkg_archives=$archives"
         ) | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append

@@ -94,6 +94,7 @@ jobs:
 
       - name: Setup vcpkg
         timeout-minutes: 10
+        id: setup_vcpkg
         uses: ./.github/actions/setup-vcpkg
         with:
           baseline: ${{ env.VCPKG_BASELINE }}
@@ -102,13 +103,11 @@ jobs:
 
       - name: Install vcpkg dependencies
         timeout-minutes: 40
-        run: vcpkg install
+        run: ${{ steps.setup_vcpkg.outputs.vcpkg_executable }} install
 
       - name: Configure
         timeout-minutes: 12
-        run: >
-          cmake --preset vcpkg
-          -DVCPKG_MANIFEST_MODE=OFF
+        run: cmake --preset vcpkg
 
       - name: Build
         timeout-minutes: 20
@@ -170,6 +169,7 @@ jobs:
 
       - name: Setup vcpkg
         timeout-minutes: 10
+        id: setup_vcpkg
         uses: ./.github/actions/setup-vcpkg
         with:
           baseline: ${{ env.VCPKG_BASELINE }}
@@ -178,15 +178,14 @@ jobs:
 
       - name: Install vcpkg dependencies
         timeout-minutes: 40
-        run: vcpkg install
+        run: ${{ steps.setup_vcpkg.outputs.vcpkg_executable }} install
 
       - name: Configure with Coverage
         timeout-minutes: 12
         run: |
           cmake --preset vcpkg \
             -DCMAKE_BUILD_TYPE=Debug \
-            -DKBE_ENABLE_CODE_COVERAGE=ON \
-            -DVCPKG_MANIFEST_MODE=OFF
+            -DKBE_ENABLE_CODE_COVERAGE=ON
 
       - name: Verify Coverage Flags
         timeout-minutes: 3
