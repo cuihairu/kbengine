@@ -59,6 +59,7 @@
 
 - 为什么游戏服务器选 Python 做业务语言
 - C++ 与 Python 的桥接
+- 如何把 C++ 方法导出成 `KBEngine.xxx()`
 - 热重载机制
 - BigWorld Twisted Deferred vs KBEngine CallbackMgr
 

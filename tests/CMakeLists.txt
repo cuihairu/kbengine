@@ -99,12 +99,24 @@ set_target_properties(kbe_entitydef_xml_tests PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/bin"
 )
 
+add_executable(kbe_client_lib_tests
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_client_lib_config.cpp"
+)
+
+set_target_properties(kbe_client_lib_tests PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/bin"
+)
+
 if(APPLE)
   target_link_options(kbe_smoke_tests PRIVATE
     LINKER:-no_warn_duplicate_libraries
   )
 
   target_link_options(kbe_entitydef_xml_tests PRIVATE
+    LINKER:-no_warn_duplicate_libraries
+  )
+
+  target_link_options(kbe_client_lib_tests PRIVATE
     LINKER:-no_warn_duplicate_libraries
   )
 endif()
@@ -196,3 +208,16 @@ target_link_libraries(kbe_entitydef_xml_tests
 )
 
 gtest_discover_tests(kbe_entitydef_xml_tests)
+
+target_link_libraries(kbe_client_lib_tests
+  PRIVATE
+    GTest::gtest_main
+    KBEngine::build_config
+    KBEngine::client_lib
+    KBEngine::common_version
+    KBEngine::helper_debug_option
+    KBEngine::server_serverconfig
+    KBEngine::resmgr
+)
+
+gtest_discover_tests(kbe_client_lib_tests)

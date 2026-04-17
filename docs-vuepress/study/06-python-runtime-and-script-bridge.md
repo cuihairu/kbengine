@@ -503,7 +503,347 @@ BigWorld 通过 `ScriptApp::triggerOnInit(isReload=true)` 触发，调用 `BWPer
 - **全局变量的重置语义**：热更后模块级全局变量会被重新初始化，已有的引用不受影响
 - **已创建的实体**：旧实例的 `__class__` 被替换为新类，但 `__dict__` 保持不变
 
-## 6.11 关键源码入口
+## 6.11 如何把一个 C++ 方法暴露成 `KBEngine.xxx()`
+
+前面几节已经讲清楚了“`KBEngine` 模块是引擎在启动时由 C++ 注册给 Python 的”，但如果你现在真的要扩展引擎，最常见的问题其实是：
+
+- 我想新增一个 `KBEngine.xxx()`，应该改哪里？
+- 这个方法应该放公共层，还是放 `baseapp/cellapp` 专属层？
+- Python 里 `import KBEngine` 之后，为什么能直接调到 C++？
+
+这一节把完整实现步骤讲透。
+
+### 先区分三类扩展，不要混写
+
+第一类：模块函数
+
+- 形态是 `KBEngine.time()`、`KBEngine.createEntity()`、`KBEngine.executeRawDatabaseCommand()`
+- 本质是给 `KBEngine` 这个 Python 模块挂一个 `PyCFunction`
+
+第二类：脚本类型方法 / 属性
+
+- 形态是 `entity.xxx()`、`proxy.client`、`Entity.id`
+- 本质是给 `Entity/Proxy/Space/...` 这些 Python 类型注册脚本接口
+
+第三类：纯 Python 业务脚本
+
+- 形态是 `scripts/base/*.py`、`scripts/cell/*.py`、`scripts/common/*.py`
+- 不需要改 C++ 注册表
+
+你这次问的是第一类，也就是“新增一个 `KBEngine.xxx()` 模块函数”。
+
+### 注册链路长什么样
+
+最短的真实链路是：
+
+```text
+Python: import KBEngine
+  │
+  ▼
+installPyModules()
+  │
+  ▼
+APPEND_SCRIPT_MODULE_METHOD(module, xxx, __py_xxx, ...)
+  │
+  ▼
+PyModule_AddObject(module, "xxx", PyCFunction_New(...))
+  │
+  ▼
+Python: KBEngine.xxx(...)
+  │
+  ▼
+C++: __py_xxx(PyObject* self, PyObject* args)
+```
+
+注册宏本身就在：
+
+- `kbe/src/lib/pyscript/py_macros.h`
+
+```cpp
+#define APPEND_SCRIPT_MODULE_METHOD(MODULE, NAME, FUNC, FLAGS, SELF) \
+    static PyMethodDef __pymethod_##NAME = {#NAME, (PyCFunction) FUNC, FLAGS, NULL}; \
+    if(PyModule_AddObject(MODULE, #NAME, PyCFunction_New(&__pymethod_##NAME, SELF)) != 0) \
+    { \
+        SCRIPT_ERROR_CHECK(); \
+        ERROR_MSG("append " #NAME " to pyscript error!\n"); \
+    }
+```
+
+也就是说，`KBEngine.xxx` 并不是“Python 自动找到一个同名 `.py` 函数”，而是启动时由 C++ 把一个函数指针塞进了 Python 模块对象。
+
+### 先决定这个方法属于哪一层
+
+这一步最关键，决定了你应该把方法注册到哪里。
+
+#### 情况一：所有服务端进程都需要
+
+例如：
+
+- `KBEngine.addTimer`
+- `KBEngine.delTimer`
+- `KBEngine.open`
+- `KBEngine.listPathRes`
+
+这类放在：
+
+- `kbe/src/lib/server/python_app.cpp`
+
+因为 `PythonApp::installPyModules()` 是 `loginapp/dbmgr/logger/interfaces` 等公共服务进程共享的模块初始化入口。
+
+#### 情况二：所有实体型服务进程都需要
+
+例如：
+
+- `KBEngine.globalData`
+- `KBEngine.entities`
+- `KBEngine.getWatcher`
+
+这类放在：
+
+- `kbe/src/lib/server/entity_app.h`
+
+因为 `EntityApp<E>::installPyModules()` 是 `baseapp/cellapp` 共享的实体型脚本入口。
+
+#### 情况三：只给某个组件用
+
+例如：
+
+- `KBEngine.createEntity()`、`KBEngine.charge()` 只在 `baseapp`
+- `KBEngine.raycast()`、`KBEngine.addSpaceGeometryMapping()` 只在 `cellapp`
+
+这类分别放在：
+
+- `kbe/src/server/baseapp/baseapp.cpp`
+- `kbe/src/server/cellapp/cellapp.cpp`
+
+一个直接例子：
+
+```cpp
+// kbe/src/server/baseapp/baseapp.cpp
+APPEND_SCRIPT_MODULE_METHOD(getScript().getModule(),
+    time, __py_gametime, METH_VARARGS, 0);
+```
+
+Python 里就能写：
+
+```python
+import KBEngine
+
+now = KBEngine.time()
+```
+
+### 一个最小可运行例子：新增 `KBEngine.echo()`
+
+下面用 `baseapp` 侧举例，做一个最小但完整的 API。
+
+目标：
+
+```python
+import KBEngine
+print(KBEngine.echo("hello"))
+```
+
+输出仍然是 `"hello"`。
+
+#### 第一步：在头文件声明包装函数
+
+文件：
+
+- `kbe/src/server/baseapp/baseapp.h`
+
+新增声明：
+
+```cpp
+static PyObject* __py_echo(PyObject* self, PyObject* args);
+```
+
+这类函数的签名基本固定：
+
+- `self` 对模块函数通常没业务意义
+- `args` 是 Python 传进来的参数元组
+- 返回值必须是 `PyObject*`
+- 出错时返回 `NULL`，让 Python 看到异常
+
+#### 第二步：在模块初始化里注册这个名字
+
+文件：
+
+- `kbe/src/server/baseapp/baseapp.cpp`
+
+在 `Baseapp::installPyModules()` 里增加：
+
+```cpp
+APPEND_SCRIPT_MODULE_METHOD(getScript().getModule(),
+    echo, __py_echo, METH_VARARGS, 0);
+```
+
+到这里，模块名 `KBEngine.echo` 已经建立好了，但真正逻辑还没实现。
+
+#### 第三步：实现包装函数
+
+还是在：
+
+- `kbe/src/server/baseapp/baseapp.cpp`
+
+实现：
+
+```cpp
+PyObject* Baseapp::__py_echo(PyObject* self, PyObject* args)
+{
+    const char* text = nullptr;
+
+    if (!PyArg_ParseTuple(args, "s", &text))
+        return NULL;
+
+    return PyUnicode_FromString(text);
+}
+```
+
+这里有三个关键点：
+
+1. 用 `PyArg_ParseTuple()` 解析 Python 参数。
+2. 参数解析失败时直接 `return NULL`，由 Python C API 继续抛异常。
+3. 返回值要构造成新的 Python 对象，比如 `PyLong_FromLong`、`PyUnicode_FromString`、`PyBool_FromLong`。
+
+#### 第四步：在 Python 里调用验证
+
+例如：
+
+```python
+import KBEngine
+
+def onBaseAppReady(isBootstrap):
+    print(KBEngine.echo("hello"))
+```
+
+如果注册和实现都没问题，脚本层就能直接调用到这个 C++ 方法。
+
+### 一个更贴近 KBEngine 风格的例子：包装层只做参数转换
+
+实际工程里，不建议把复杂逻辑都写进 `__py_xxx`。
+
+更好的结构是：
+
+```cpp
+PyObject* Baseapp::__py_echo(PyObject* self, PyObject* args)
+{
+    const char* text = nullptr;
+
+    if (!PyArg_ParseTuple(args, "s", &text))
+        return NULL;
+
+    std::string result = Baseapp::getSingleton().echo(text);
+    return PyUnicode_FromString(result.c_str());
+}
+```
+
+再把真正逻辑放进普通成员函数：
+
+```cpp
+std::string Baseapp::echo(const std::string& text)
+{
+    return text;
+}
+```
+
+这样分层的好处是：
+
+- `__py_xxx` 只负责 Python/C++ 边界
+- 业务逻辑可单测、可复用
+- 包装层不会堆成一团难以维护的 `PyObject*` 操作
+
+### 常见返回值怎么构造
+
+新增模块函数时，经常会用到这些返回方式：
+
+```cpp
+return PyLong_FromLong(123);                    // int
+return PyLong_FromUnsignedLong(v);             // unsigned int
+return PyLong_FromUnsignedLongLong(v);         // uint64
+return PyUnicode_FromString("ok");             // str
+Py_RETURN_TRUE;                                // bool True
+Py_RETURN_FALSE;                               // bool False
+Py_RETURN_NONE;                                // None
+```
+
+如果要返回 tuple / list / dict，就要手工创建 Python 对象并填充。
+
+### 参数解析时最容易踩的坑
+
+#### 坑一：只注册了函数名，忘了实现
+
+这种会在链接期或运行期暴露，取决于声明和定义是否完整。
+
+#### 坑二：函数注册到了错误的组件
+
+例如你把 `baseapp` 专属接口注册到 `PythonApp::installPyModules()`，那 `loginapp/dbmgr` 也会看到这个名字，但底层语义可能根本不成立。
+
+#### 坑三：包装函数里直接塞太多业务
+
+这会让：
+
+- 参数解析
+- 错误处理
+- 引用计数
+- 真实业务逻辑
+
+全部混在一起，后期很难维护。
+
+#### 坑四：返回裸 C++ 值，没转成 `PyObject*`
+
+Python 只认识 `PyObject*`。C++ 基本类型必须显式封装。
+
+#### 坑五：没想清楚进程作用域
+
+文档里最容易被忽略的一点是：**同样叫 `import KBEngine`，不同进程看到的模块接口并不完全相同。**
+
+例如：
+
+- `baseapp` 里有 `KBEngine.createEntity`
+- `cellapp` 里有 `KBEngine.raycast`
+- `dbmgr` 里不一定有这两个
+
+所以新增接口前，先问一句：
+
+- “这个 API 应该在哪些组件可见？”
+
+### 如果不是模块函数，而是想给 `Entity/Proxy` 加方法呢
+
+那就不是这一节的 `APPEND_SCRIPT_MODULE_METHOD` 了。
+
+你要改的是脚本类型注册链，也就是：
+
+- `Entity::installScript(...)`
+- `Proxy::installScript(...)`
+- `SCRIPT_METHOD_DECLARE(...)`
+- `SCRIPT_GETSET_DECLARE(...)`
+
+换句话说：
+
+- `KBEngine.xxx()` 是“模块级 API”
+- `entity.xxx()` / `proxy.xxx()` 是“脚本对象类型 API”
+
+两套机制不要混。
+
+### 实战时最稳妥的步骤
+
+如果你准备真正新增一个接口，建议按这个顺序：
+
+1. 先搜仓库里最接近的现成接口，例如 `KBEngine.time()` 或 `KBEngine.address()`
+2. 确认它属于公共层、实体层还是组件专属层
+3. 抄同层已有接口的声明、注册、实现骨架
+4. 让 `__py_xxx` 只做参数解析和返回值封装
+5. 把核心逻辑放到普通 C++ 函数
+6. 最后再补 Python 文档和类型桩
+
+最接近的对照入口有：
+
+- `kbe/src/lib/server/python_app.cpp`
+- `kbe/src/lib/server/entity_app.h`
+- `kbe/src/server/baseapp/baseapp.cpp`
+- `kbe/src/server/cellapp/cellapp.cpp`
+
+## 6.12 关键源码入口
 
 ### KBEngine
 
@@ -516,6 +856,9 @@ BigWorld 通过 `ScriptApp::triggerOnInit(isReload=true)` 触发，调用 `BWPer
 | ScriptTimers | `kbe/src/lib/server/script_timers.h` | `addTimer()` / `delTimer()` |
 | 远程方法 | `kbe/src/lib/entitydef/remote_entity_method.cpp` | `tp_call()` |
 | 热重载 | `kbe/src/server/baseapp/baseapp.cpp` | `reloadScript()` |
+| 模块函数注册 | `kbe/src/lib/pyscript/py_macros.h` | `APPEND_SCRIPT_MODULE_METHOD` |
+| 公共模块入口 | `kbe/src/lib/server/python_app.cpp` | `installPyModules()` |
+| 实体型模块入口 | `kbe/src/lib/server/entity_app.h` | `EntityApp<E>::installPyModules()` |
 
 ### BigWorld
 
@@ -529,7 +872,7 @@ BigWorld 通过 `ScriptApp::triggerOnInit(isReload=true)` 触发，调用 `BWPer
 | Personality | `lib/pyscript/personality.cpp` | `callOnInit()` |
 | 实体创建 | `server/baseapp/entity_type.cpp` | `newEntityBase()` |
 
-## 6.12 源码走读路径
+## 6.13 源码走读路径
 
 ### 路径一：跟踪 Python 初始化
 
@@ -553,7 +896,7 @@ BigWorld 通过 `ScriptApp::triggerOnInit(isReload=true)` 触发，调用 `BWPer
 1. KBEngine: `kbe/src/server/baseapp/baseapp.cpp` — `reloadScript()` → Entity::reload()
 2. BigWorld: `lib/server/script_app.cpp` — `triggerOnInit(isReload=true)`
 
-## 6.13 小结
+## 6.14 小结
 
 - **Python 被选中是因为工程生产力，不是运行速度**——标准库、表现力、热重载、团队门槛
 - **Entity 就是 PyObject**：C++ 对象和 Python 对象共享同一块内存，用 placement new 统一构造

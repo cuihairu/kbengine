@@ -607,6 +607,559 @@ pTelnetServer_->start(g_kbeSrvConfig.getCellApp().telnet_passwd,
 
 `telnet_deflayer` 在 `TelnetServer::start()` 里实际只识别 `"python"` 和默认的 `root`。`readonly`/`quit` 是会话内状态，不是启动默认层。它的价值主要是在线排查和临时 profile，不是对外的长期运维 API。
 
+### 20.5.2 Telnet 使用指南
+
+#### 启动说明
+
+**Telnet 服务随组件自动启动，无需手动开启。**
+
+每个组件（CellApp、BaseApp、LoginApp、DBMgr、Logger 等）在启动时会自动创建并启动 TelnetServer：
+
+```cpp
+// 组件初始化时自动执行
+pTelnetServer_ = new TelnetServer(...);
+pTelnetServer_->start(passwd, deflayer, port);
+```
+
+| 特性 | 说明 |
+|------|------|
+| 自动启动 | 组件启动时 Telnet 同时启动 |
+| 自动关闭 | 组件关闭时 Telnet 同时关闭 |
+| 无需手动操作 | 任何时候都可以直接连接 |
+| 独立端口 | 每个组件有自己的 Telnet 端口 |
+
+日志中会显示 Telnet 启动信息：
+```
+[INFO]: TelnetServer server is running on port 20005
+```
+
+#### 快速连接
+
+```bash
+# 连接到 BaseApp（默认端口 20005+）
+telnet localhost 20005
+
+# 连接到 CellApp（默认端口 20105+）
+telnet localhost 20105
+
+# 连接到 LoginApp（默认端口 20313）
+telnet localhost 20313
+```
+
+连接后会提示输入密码（`telnet_passwd`，在 `kbengine.xml` 中配置）。
+
+#### 命令列表
+
+进入系统后输入 `:help` 查看所有可用命令：
+
+| 命令 | 说明 | 用法示例 |
+|------|------|----------|
+| `:help` | 显示命令列表 | `:help` |
+| `:quit` | 退出连接 | `:quit` |
+| `:python` | 进入 Python 解释器模式 | `:python` |
+| `:root` | 返回根命令模式 | `:root` |
+| `:cprofile` | C++ 性能剖析 | `:cprofile 30` |
+| `:pyprofile` | Python 性能剖析 | `:pyprofile 30` |
+| `:eventprofile` | 事件剖析 | `:eventprofile 30` |
+| `:networkprofile` | 网络剖析 | `:networkprofile 30` |
+| `:pytickprofile` | Python tick 剖析 | `:pytickprofile 30` |
+
+#### 状态模式
+
+Telnet 有四种工作状态：
+
+```
+PASSWD（输入密码）
+    ↓
+ROOT（根命令模式，可执行 C++ 命令）
+    ↓ [:python]
+PYTHON（Python 解释器模式）
+    ↓ [:root]
+ROOT
+    ↓ [:quit]
+QUIT（退出）
+```
+
+#### Python 模式使用
+
+输入 `:python` 进入 Python 模式后，可以直接执行 Python 代码：
+
+```python
+# 查看所有实体
+>>> KBEngine.entities
+{'1001': <Avatar object at 0x...>, '1002': <Monster object at 0x...>}
+
+# 查看具体实体
+>>> entity = KBEngine.entities['1001']
+>>> entity.position
+(100.0, 200.0, 300.0)
+
+# 调用实体方法
+>>> entity.level
+10
+>>> entity.level = 20  # 修改属性
+```
+
+**常用操作**：
+
+```python
+# 统计实体数量
+>>> len(KBEngine.entities)
+1500
+
+# 按类型过滤
+>>> [e for e in KBEngine.entities.values() if e.__class__.__name__ == 'Avatar']
+[<Avatar ...>, <Avatar ...>, ...]
+
+# 查看所有 Avatar 等级
+>>> [(e.id, e.level) for e in KBEngine.entities.values() if hasattr(e, 'level')]
+[(1001, 10), (1002, 25), ...]
+
+# 踢出指定玩家
+>>> KBEngine.entities['1001'].logout()
+```
+
+#### 性能剖析
+
+**C++ 性能剖析**（`:cprofile`）：
+
+```bash
+:cprofile 30
+# 会采集 30 秒的 C++ 函数调用数据
+# 完成后显示各函数耗时排序
+```
+
+**Python 性能剖析**（`:pyprofile`）：
+
+```bash
+:pyprofile 30
+# 采集 30 秒的 Python 函数调用数据
+# 用于定位 Python 脚本性能瓶颈
+```
+
+**网络剖析**（`:networkprofile`）：
+
+```bash
+:networkprofile 60
+# 分析网络消息的发送/接收情况
+# 查看带宽使用最高的消息类型
+```
+
+#### 配置说明
+
+在 `kbengine.xml` 或 `kbengine_defaults.xml` 中配置：
+
+```xml
+<!-- CellApp 配置 -->
+<CellApp>
+    <telnet_port>20105</telnet_port>
+    <telnet_passwd>xxxxxx</telnet_passwd>
+    <telnet_deflayer>root</telnet_deflayer>  <!-- 或 python -->
+</CellApp>
+
+<!-- BaseApp 配置 -->
+<BaseApp>
+    <telnet_port>20005</telnet_port>
+    <telnet_passwd>xxxxxx</telnet_passwd>
+    <telnet_deflayer>root</telnet_deflayer>
+</BaseApp>
+```
+
+#### 安全注意事项
+
+1. **生产环境务必修改默认密码**
+2. **Telnet 连接未加密**，不应通过公网访问
+3. **Python 模式可执行任意代码**，权限控制至关重要
+4. 建议通过 VPN 或内网访问 Telnet 端口
+
+#### 与 GUIConsole 的关系
+
+| 维度 | Telnet | GUIConsole |
+|------|--------|------------|
+| 接入方式 | 命令行 telnet/nc | Windows 桌面程序 |
+| 使用场景 | Linux 服务器远程调试 | 本地开发调试 |
+| 功能 | 完全一致 | 完全一致 |
+| 多进程管理 | 需分别连接各端口 | 统一界面管理 |
+
+GUIConsole 本质上是 Telnet 协议的图形化前端，底层通信协议完全相同。
+
+#### Python 调试进阶
+
+Telnet 的 Python 模式是一个**交互式 shell**，但缺乏断点、单步执行等调试功能。以下介绍几种更强大的调试方法。
+
+##### 方法一：Telnet Python 模式的能力和限制
+
+**能做什么**：
+- 执行任意 Python 表达式
+- 查看和修改实体属性
+- 调用实体方法
+- 运行简单的诊断脚本
+
+**不能做什么**：
+- 设置断点
+- 单步执行代码
+- 查看调用栈
+- 查看局部变量（除非在当前作用域）
+
+**Telnet 调试示例**：
+
+```python
+# 在 Telnet Python 模式中
+>>> # 找到问题实体
+>>> entity = KBEngine.entities['1001']
+>>>
+>>> # 查看状态
+>>> entity.hp
+100
+>>> entity.maxHp
+500
+>>>
+>>> # 模拟调用
+>>> entity.takeDamage(100)
+>>>
+>>> # 检查结果
+>>> entity.hp
+0
+>>> entity.isDead()
+True
+```
+
+##### 方法二：使用 pdb 内置断点调试
+
+在需要调试的代码位置插入 `pdb.set_trace()`，当执行到该位置时会进入交互式调试。
+
+**步骤**：
+
+1. **在代码中插入断点**：
+
+```python
+# file: base/scripts/Avatar.py
+import KBEngine
+import pdb  # 导入 pdb
+
+class Avatar(KBEngine.Entity):
+    def takeDamage(self, damage):
+        currentHp = self.hp
+        pdb.set_trace()  # 设置断点
+
+        # 执行会在这里暂停，进入 pdb 交互模式
+        if currentHp > damage:
+            self.hp -= damage
+        else:
+            self.hp = 0
+            self.onDeath()
+```
+
+2. **运行时触发断点**：
+
+当代码执行到 `pdb.set_trace()` 时，会在终端（或日志）中进入 pdb 模式：
+
+```
+(Pdb)
+```
+
+3. **pdb 常用命令**：
+
+| 命令 | 说明 |
+|------|------|
+| `h` 或 `help` | 显示帮助 |
+| `l` 或 `list` | 显示当前代码位置 |
+| `n` 或 `next` | 执行下一行（不进入函数） |
+| `s` 或 `step` | 执行下一行（进入函数） |
+| `c` 或 `continue` | 继续执行直到下一个断点 |
+| `p 变量名` | 打印变量值 |
+| `pp 变量名` | 美化打印变量值 |
+| `w` 或 `where` | 显示调用栈 |
+| `q` 或 `quit` | 退出调试器 |
+
+**pdb 调试示例**：
+
+```python
+>>> # 在 pdb 模式中
+(Pdb) p damage        # 查看变量
+100
+(Pdb) p self.hp       # 查看属性
+500
+(Pdb) l               # 查看代码
+234         currentHp = self.hp
+235         pdb.set_trace()
+236  ->     if currentHp > damage:
+237             self.hp -= damage
+238         else:
+239             self.hp = 0
+(Pdb) n               # 单步执行
+240         else:
+241  ->     self.hp = 0
+(Pdb) c               # 继续执行
+```
+
+##### 方法三：使用 debugpy + VSCode 远程调试
+
+这是最强大的调试方式，可以在 VSCode 中设置断点、查看变量、单步执行。
+
+**原理**：在 KBEngine Python 环境中启动 debugpy 服务，VSCode 作为客户端连接。
+
+> ⚠️ **重要：KBEngine 使用嵌入式 Python**
+>
+> KBEngine 的 Python 环境与系统 Python 是**隔离**的：
+> - `Py_NoSiteFlag = 1` → 禁止导入 site.py
+> - `Py_IgnoreEnvironmentFlag = 1` → 忽略 PYTHONPATH 环境变量
+> - 模块搜索路径仅限于 `kbe/res/scripts/` 和用户脚本目录
+>
+> **这意味着**：你在系统 Python 上安装的 debugpy，KBEngine **无法访问**。
+>
+> **解决方案**：将 debugpy 复制到 KBEngine 的模块搜索路径中：
+>
+> ```bash
+> # 1. 在系统 Python 上安装 debugpy
+> pip install debugpy
+>
+> # 2. 找到 debugpy 位置
+> python -c "import debugpy; import os; print(os.path.dirname(debugpy.__file__))"
+>
+> # 3. 复制到 KBEngine 路径（Windows 示例）
+> xcopy /E /I "%USERPROFILE%\AppData\Local\Programs\Python\Lib\site-packages\debugpy" "D:\workspaces\kbengine\kbe\res\scripts\common\debugpy"
+>
+> # Linux 示例：
+> # cp -r /usr/local/lib/python3.x/site-packages/debugpy /path/to/kbe/res/scripts/common/
+> ```
+>
+> 验证安装（在 Telnet Python 模式）：
+> ```python
+> >>> import debugpy
+> >>> print(debugpy.__file__)
+> ```
+
+**步骤**：
+
+1. **安装 debugpy**（确保与 KBEngine 使用的 Python 版本一致）：
+
+```bash
+# KBEngine 通常使用 Python 3.x
+python3 -m pip install debugpy
+
+# 然后复制到 KBEngine 路径（见上方警告框）
+```
+
+2. **在服务器代码中启动 debugpy**：
+
+```python
+# file: base/scripts/Avatar.py
+import KBEngine
+import sys
+import os
+
+# 添加 debugpy 路径（如果安装在非标准位置）
+# sys.path.append('/path/to/debugpy')
+
+class Avatar(KBEngine.Entity):
+    def __init__(self):
+        KBEngine.Entity.__init__(self)
+
+        # 只在调试模式下启动 debugpy（避免生产环境启用）
+        if KBEngine.getScript().config.get('debug', {}).get('enabled', False):
+            import debugpy
+            # 监听所有接口，端口 5678
+            debugpy.listen(('0.0.0.0', 5678))
+            KBEngine.INFO_MSG(f'debugpy is listening on port 5678, PID={os.getpid()}')
+
+    def takeDamage(self, damage):
+        if self.hp > damage:
+            self.hp -= damage
+        else:
+            self.hp = 0
+            self.onDeath()
+```
+
+3. **配置 VSCode `launch.json`**：
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Remote Attach (KBE)",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "your-server-ip",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/kbe/res",
+                    "remoteRoot": "/path/to/server/kbe/res"
+                }
+            ],
+            "justMyCode": false
+        }
+    ]
+}
+```
+
+4. **设置端口转发**（如果服务器在远程）：
+
+```bash
+# 方法1: SSH 端口转发
+ssh -L 5678:localhost:5678 user@server
+
+# 方法2: 在 VSCode 中配置 Remote-SSH 扩展
+```
+
+5. **在 VSCode 中设置断点并启动调试**：
+
+1. 打开 Python 文件
+2. 在行号左侧点击设置断点（红点）
+3. 按 F5 或点击 "Run and Debug"
+4. 选择 "Python: Remote Attach (KBE)"
+5. 当代码执行到断点时会自动暂停
+
+**VSCode 调试界面**：
+
+```
+┌─────────────────────────────────────────┐
+│ variable          │ value              │
+├─────────────────────────────────────────┤
+│ ▼ self            │ Avatar(1001)        │
+│   ▼ hp            │ 500                │
+│   ▼ maxHp         │ 500                │
+│   ▼ position      │ (100, 200, 300)    │
+│ ▼ damage          │ 100                │
+└─────────────────────────────────────────┘
+
+    Avatar.py:24    ✗Paused ▶ Step↓
+    ─────────────────────────────────────
+    23  def takeDamage(self, damage):
+    24  ->   if self.hp > damage:
+    25          self.hp -= damage
+    26      else:
+```
+
+6. **配置开关控制（避免生产环境启用）**：
+
+在 `kbengine.xml` 或专门的配置中添加调试开关：
+
+```python
+# 检查环境变量或配置
+import os
+DEBUG_MODE = os.environ.get('KBE_DEBUG', '0') == '1'
+
+if DEBUG_MODE:
+    import debugpy
+    debugpy.listen(('0.0.0.0', 5678))
+```
+
+启动服务器时设置环境变量：
+
+```bash
+# Linux
+export KBE_DEBUG=1
+./start.sh
+
+# Windows
+set KBE_DEBUG=1
+start.bat
+```
+
+##### 调试方法对比
+
+| 方法 | 优点 | 缺点 | 适用场景 |
+|------|------|------|----------|
+| **Telnet Python** | 无需修改代码，随时可用 | 无断点功能，只能查状态 | 快速查看运行时状态 |
+| **pdb** | 内置，无需额外安装 | 需修改代码，界面简陋 | 临时调试，无 GUI 环境 |
+| **debugpy + VSCode** | 完整 GUI，功能强大 | 需安装配置，有性能开销 | 复杂问题调试，开发阶段 |
+
+##### 调试技巧
+
+**技巧 1：条件断点**
+
+```python
+# 只在特定条件下进入调试
+def takeDamage(self, damage):
+    if damage > 1000:  # 只调试大伤害
+        import pdb; pdb.set_trace()
+    # ...
+```
+
+**技巧 2：使用 ipdb（增强版 pdb）**
+
+```bash
+pip install ipdb
+```
+
+```python
+import ipdb
+ipdb.set_trace()  # 替代 pdb.set_trace()
+```
+
+**技巧 3：日志 + Telnet 组合**
+
+```python
+# 打印关键变量
+def takeDamage(self, damage):
+    KBEngine.INFO_MSG(f'takeDamage: self={self.id}, hp={self.hp}, damage={damage}')
+    # 然后在 Telnet 中查看日志和状态
+```
+
+##### 注意事项
+
+⚠️ **生产环境安全**：
+- 调试端口不应暴露到公网
+- debugpy 允许执行任意代码，务必限制访问
+- 使用完后立即关闭调试模式
+
+⚠️ **性能影响**：
+- debugpy 会显著降低执行速度
+- pdb 断点会阻塞整个线程
+- 生产环境应避免使用这些调试工具
+
+#### 常见问题
+
+**Q: Telnet 中 `import debugpy` 报错 `ModuleNotFoundError`？**
+
+这是最常见的问题，原因：KBEngine 使用嵌入式 Python，模块搜索路径与系统 Python 隔离。
+
+**解决步骤**：
+
+```bash
+# 1. 确认系统 Python 已安装 debugpy
+python -c "import debugpy; print(debugpy.__file__)"
+
+# 2. 找到 debugpy 安装位置（输出类似：C:\Python311\Lib\site-packages\debugpy）
+
+# 3. 复制到 KBEngine 模块搜索路径
+# Windows:
+xcopy /E /I "C:\Python311\Lib\site-packages\debugpy" "D:\workspaces\kbengine\kbe\res\scripts\common\debugpy"
+
+# Linux:
+cp -r /usr/local/lib/python3.x/site-packages/debugpy /path/to/kbe/res/scripts/common/
+```
+
+**验证**（在 Telnet Python 模式）：
+```python
+>>> import sys
+>>> print('\n'.join(sys.path))  # 查看 KBEngine 的模块搜索路径
+>>> import debugpy
+>>> print(debugpy.__file__)  # 应显示 kbe/res/... 路径
+```
+
+**Q: 连接后立即断开？**
+- 检查密码是否正确
+- 检查防火墙是否允许对应端口
+
+**Q: Python 模式无响应？**
+- 可能是组件正在处理其他请求
+- 尝试重新连接
+
+**Q: 无法执行某些命令？**
+- 某些命令只能在特定组件执行（如 `writeToDB` 只能在 BaseApp）
+- 检查当前连接的是哪个组件
+
+**Q: debugpy 连接成功但断点不触发？**
+- 检查 `pathMappings` 配置是否正确
+- 确认代码文件路径与远程路径一致
+- 尝试设置 `justMyCode: false`
+
 ---
 
 ## 20.6 Message Logger：集中日志

@@ -10,6 +10,7 @@
 #include "network/common.h"
 #include "resmgr/resmgr.h"
 #include "server/serverconfig.h"
+#include "test_resmgr_environment.h"
 
 namespace {
 
@@ -139,4 +140,186 @@ TEST(ServerServerConfigBootstrapTest, LoadsCoreXmlSettings)
 
   delete config;
   std::filesystem::remove(xml_path);
+}
+
+TEST(ServerServerConfigBootstrapTest, LoadsDbMgrInterfacesMachineAddressesAndEmailService)
+{
+  KBEngineTest::ScopedResmgrEnvironment env("kbengine_serverconfig_resmgr_test");
+  ASSERT_TRUE(env.ready());
+
+  KBEngineTest::write_file(
+      env.system_res_dir() / "server" / "kbengine_defaults.xml",
+      R"(<root>
+  <interfaces>
+    <host>127.0.0.1</host>
+    <port_min>30099</port_min>
+    <port_max>30099</port_max>
+    <SOMAXCONN>64</SOMAXCONN>
+  </interfaces>
+  <dbmgr>
+    <InterfacesServiceAddr>
+      <enable>true</enable>
+      <item>
+        <host>10.0.0.10</host>
+        <port>31001</port>
+      </item>
+      <item>
+        <host>10.0.0.11</host>
+        <port>0</port>
+      </item>
+    </InterfacesServiceAddr>
+    <databaseInterfaces>
+      <default>
+        <pure>true</pure>
+        <type>mysql</type>
+        <host>127.0.0.1</host>
+        <port>3306</port>
+        <auth>
+          <username>root</username>
+          <password>rootpwd</password>
+          <encrypt>false</encrypt>
+        </auth>
+        <databaseName>kbengine</databaseName>
+        <numConnections>8</numConnections>
+        <unicodeString>
+          <characterSet>utf8mb4</characterSet>
+          <collation>utf8mb4_bin</collation>
+        </unicodeString>
+      </default>
+      <analytics>
+        <pure>true</pure>
+        <type>mysql</type>
+        <host>192.168.1.20</host>
+        <port>3307</port>
+        <auth>
+          <username>report</username>
+          <password>reportpwd</password>
+          <encrypt>true</encrypt>
+        </auth>
+        <databaseName>analytics</databaseName>
+        <numConnections>3</numConnections>
+        <unicodeString>
+          <characterSet>latin1</characterSet>
+          <collation>latin1_bin</collation>
+        </unicodeString>
+      </analytics>
+    </databaseInterfaces>
+  </dbmgr>
+  <machine>
+    <addresses>
+      <internal>192.168.0.2</internal>
+      <external>8.8.8.8</external>
+    </addresses>
+  </machine>
+</root>)");
+
+  KBEngineTest::write_file(
+      env.user_res_dir() / "server" / "kbengine.xml",
+      R"(<root>
+  <email_service_config>server/email_service.xml</email_service_config>
+</root>)");
+
+  KBEngineTest::write_file(
+      env.user_res_dir() / "server" / "email_service.xml",
+      R"(<root>
+  <smtp_server>smtp.example.com</smtp_server>
+  <smtp_port>465</smtp_port>
+  <username>robot@example.com</username>
+  <password>plain-secret</password>
+  <smtp_auth>1</smtp_auth>
+  <email_activation>
+    <subject>Activate</subject>
+    <message> activation body </message>
+    <deadline>3600</deadline>
+    <backlink_success_message>ok</backlink_success_message>
+    <backlink_fail_message>fail</backlink_fail_message>
+    <backlink_hello_message>hello</backlink_hello_message>
+  </email_activation>
+  <email_resetpassword>
+    <subject>Reset</subject>
+    <message> reset body </message>
+    <deadline>7200</deadline>
+    <backlink_success_message>reset ok</backlink_success_message>
+    <backlink_fail_message>reset fail</backlink_fail_message>
+    <backlink_hello_message>reset hello</backlink_hello_message>
+  </email_resetpassword>
+  <email_bind>
+    <subject>Bind</subject>
+    <message> bind body </message>
+    <deadline>1800</deadline>
+    <backlink_success_message>bind ok</backlink_success_message>
+    <backlink_fail_message>bind fail</backlink_fail_message>
+    <backlink_hello_message>bind hello</backlink_hello_message>
+  </email_bind>
+</root>)");
+
+  delete KBEngine::ServerConfig::getSingletonPtr();
+  auto* config = new KBEngine::ServerConfig();
+
+  ASSERT_TRUE(config->loadConfig("server/kbengine_defaults.xml"));
+  ASSERT_TRUE(config->loadConfig("server/kbengine.xml"));
+
+  const std::vector<KBEngine::Network::Address> addrs = config->interfacesAddrs();
+  ASSERT_EQ(addrs.size(), 2u);
+  EXPECT_STREQ(addrs[0].ipAsString(), "10.0.0.10");
+  EXPECT_EQ(addrs[0].port, 31001);
+  EXPECT_STREQ(addrs[1].ipAsString(), "10.0.0.11");
+  EXPECT_EQ(addrs[1].port, KBE_INTERFACES_TCP_PORT);
+
+  const KBEngine::DBInterfaceInfo* default_db = config->dbInterface("default");
+  ASSERT_NE(default_db, nullptr);
+  EXPECT_FALSE(default_db->isPure);
+  EXPECT_STREQ(default_db->db_type, "mysql");
+  EXPECT_STREQ(default_db->db_ip, "127.0.0.1");
+  EXPECT_EQ(default_db->db_port, 3306u);
+  EXPECT_STREQ(default_db->db_username, "root");
+  EXPECT_STREQ(default_db->db_password, "rootpwd");
+  EXPECT_FALSE(default_db->db_passwordEncrypt);
+  EXPECT_STREQ(default_db->db_name, "kbengine");
+  EXPECT_EQ(default_db->db_numConnections, 8u);
+  EXPECT_EQ(default_db->db_unicodeString_characterSet, "utf8mb4");
+  EXPECT_EQ(default_db->db_unicodeString_collation, "utf8mb4_bin");
+
+  const KBEngine::DBInterfaceInfo* analytics_db = config->dbInterface("analytics");
+  ASSERT_NE(analytics_db, nullptr);
+  EXPECT_TRUE(analytics_db->isPure);
+  EXPECT_STREQ(analytics_db->db_ip, "192.168.1.20");
+  EXPECT_EQ(analytics_db->db_port, 3307u);
+  EXPECT_TRUE(analytics_db->db_passwordEncrypt);
+  EXPECT_STREQ(analytics_db->db_name, "analytics");
+  EXPECT_EQ(analytics_db->db_numConnections, 3u);
+
+  const KBEngine::ENGINE_COMPONENT_INFO& machine = config->getKBMachine();
+  ASSERT_EQ(machine.machine_addresses.size(), 2u);
+  EXPECT_EQ(machine.machine_addresses[0], "192.168.0.2");
+  EXPECT_EQ(machine.machine_addresses[1], "8.8.8.8");
+
+  EXPECT_EQ(config->emailServerInfo_.smtp_server, "smtp.example.com");
+  EXPECT_EQ(config->emailServerInfo_.smtp_port, 465u);
+  EXPECT_EQ(config->emailServerInfo_.username, "robot@example.com");
+  EXPECT_EQ(config->emailServerInfo_.password, "plain-secret");
+  EXPECT_EQ(config->emailServerInfo_.smtp_auth, 1u);
+
+  EXPECT_EQ(config->emailAtivationInfo_.subject, "Activate");
+  EXPECT_EQ(config->emailAtivationInfo_.message, " activation body ");
+  EXPECT_EQ(config->emailAtivationInfo_.deadline, 3600u);
+  EXPECT_EQ(config->emailAtivationInfo_.backlink_success_message, "ok");
+  EXPECT_EQ(config->emailAtivationInfo_.backlink_fail_message, "fail");
+  EXPECT_EQ(config->emailAtivationInfo_.backlink_hello_message, "hello");
+
+  EXPECT_EQ(config->emailResetPasswordInfo_.subject, "Reset");
+  EXPECT_EQ(config->emailResetPasswordInfo_.message, " reset body ");
+  EXPECT_EQ(config->emailResetPasswordInfo_.deadline, 7200u);
+  EXPECT_EQ(config->emailResetPasswordInfo_.backlink_success_message, "reset ok");
+  EXPECT_EQ(config->emailResetPasswordInfo_.backlink_fail_message, "reset fail");
+  EXPECT_EQ(config->emailResetPasswordInfo_.backlink_hello_message, "reset hello");
+
+  EXPECT_EQ(config->emailBindInfo_.subject, "Bind");
+  EXPECT_EQ(config->emailBindInfo_.message, " bind body ");
+  EXPECT_EQ(config->emailBindInfo_.deadline, 1800u);
+  EXPECT_EQ(config->emailBindInfo_.backlink_success_message, "bind ok");
+  EXPECT_EQ(config->emailBindInfo_.backlink_fail_message, "bind fail");
+  EXPECT_EQ(config->emailBindInfo_.backlink_hello_message, "bind hello");
+
+  delete config;
 }

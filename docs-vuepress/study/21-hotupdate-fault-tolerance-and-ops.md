@@ -20,6 +20,24 @@ MMO 服务器 24×7 运行，一次全服停机维护意味着几十万玩家同
 
 KBEngine 的热重载入口是 `KBEngine.reloadScript(fullReload)`，注册在 BaseApp 和 CellApp 的 Python 模块上：
 
+```mermaid
+sequenceDiagram
+    participant Py as Python 脚本
+    participant App as EntityApp
+    participant Def as EntityDef
+    participant Entity as 已存在实体
+
+    Py->>App: KBEngine.reloadScript(fullReload)
+    App->>Def: EntityDef::reload(fullReload)
+    alt fullReload = true
+        Def->>Def: finalise(true) + initialize()
+    else fullReload = false
+        Def->>Def: loadAllEntityScriptModules()
+    end
+    App->>Entity: onReloadScript(fullReload) 遍历实体 reload()
+    App->>Py: entryScript.onInit(1)
+```
+
 ```cpp
 // kbe/src/server/baseapp/baseapp.cpp
 // 脚本模块注册
@@ -147,6 +165,19 @@ BigWorld 的 `Reloader` / `ReloadListener` 是一个**观察者模式**，不仅
 ### 21.2.1 进程死亡是常态
 
 在 MMO 集群中，进程死亡不是"意外"，而是"必然"。硬件故障、OOM、网络分区都可能导致 CellApp 或 BaseApp 消失。系统必须能：
+
+```mermaid
+flowchart TD
+    A["组件失联 / 进程死亡"] --> B["检测\n心跳、Channel 断开、注册表变化"]
+    B --> C{"有自动拉起机制?"}
+    C -->|BigWorld Reviver| D["revive(component)\n拉起新进程"]
+    C -->|KBEngine 默认更简化| E["运维脚本 / systemd / 外部 supervisor"]
+    D --> F["恢复组件注册"]
+    E --> F
+    F --> G{"实体状态是否有备份/持久化?"}
+    G -->|有| H["恢复实体 / 自动加载 / 重建路由"]
+    G -->|无| I["只保留可从 DB 或业务状态重建的部分"]
+```
 
 1. **检测**到进程死亡
 2. **恢复**受影响的实体
@@ -579,6 +610,26 @@ Server ──可调用全部──→ 所有方法（内部可信）
 ### 21.4.2 登录挑战（Login Challenge）：反自动登录
 
 BigWorld 实现了**Proof-of-Work 登录挑战**机制，防止自动化脚本暴力登录：
+
+```mermaid
+sequenceDiagram
+    participant Client as Client / Bot
+    participant Login as LoginApp
+    participant DB as DBMgr / Account
+
+    Client->>Login: 连接并请求登录
+    Login-->>Client: challenge data / nonce
+    Client->>Client: 计算 PoW 响应
+    Client->>Login: response data + 登录请求
+    Login->>Login: 校验 challenge response
+    alt 校验通过
+        Login->>DB: 账号验证
+        DB-->>Login: 账号结果
+        Login-->>Client: 允许继续登录
+    else 校验失败
+        Login-->>Client: 拒绝 / 限流 / 断开
+    end
+```
 
 ```cpp
 // BigWorld: lib/connection/login_challenge.hpp
