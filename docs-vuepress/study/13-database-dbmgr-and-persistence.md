@@ -73,6 +73,29 @@ KBEngine 合并为单个 DBMgr。BigWorld 拆分的好处：多 DBApp 可以水�
 
 ### KBEngine：三段式
 
+先把三段式边界画清楚，后面的源码列表就是这张图的展开：
+
+```mermaid
+sequenceDiagram
+    participant Base as BaseApp Entity
+    participant Cell as Cell Entity
+    participant DBMgr as DBMgr MainThread
+    participant Pool as DB ThreadPool
+    participant DB as MySQL / Redis
+
+    Base->>Cell: reqWriteToDBFromBaseapp
+    Cell-->>Base: 回传 cellData
+    Base->>Base: onPreArchive / onWriteToDB / addPersistentsDataToStream
+    Base->>DBMgr: DbmgrInterface::writeEntity
+    DBMgr->>DBMgr: bufferedDBTasks.addTask
+    DBMgr->>Pool: 投递 DBTaskWriteEntity
+    Pool->>DB: writeEntity / updateEntity / EntityLog
+    DB-->>Pool: dbid + success
+    Pool-->>DBMgr: presentMainThread()
+    DBMgr-->>Base: onWriteToDBCallback
+    Base->>Base: 更新 dbid + 触发 Python callback
+```
+
 ```
 脚本调用: entity.writeToDB(callback)
   │
@@ -161,6 +184,18 @@ BigWorld 和 KBEngine 的共同点是"异步写库后再回调脚本"，只是�
 ### 为什么需要线程池
 
 数据库操作（SQL 查询）是阻塞 I/O。如果在 DBMgr 主线程执行，会阻塞消息处理。KBEngine 用线程池把 DB I/O 移到工作线程：
+
+```mermaid
+flowchart LR
+    A["DBMgr 主线程\n构造 DBTask"] --> B["bufferedDBTasks\n按 dbid / entityID 串行化"]
+    B --> C["线程池执行\nDBTask::db_thread_process"]
+    C --> D["数据库 I/O\nSQL / Redis / EntityLog"]
+    D --> E["结果写回 DBTask"]
+    E --> F["回到 DBMgr 主线程\npresentMainThread()"]
+    F --> G["回包 BaseApp\n触发 CallbackMgr / Python callback"]
+```
+
+如果不把这条边界看清楚，就会误以为 `writeToDB()` 是同步 SQL 调用。实际上同步的是“发起写库请求”，不是“等数据库返回”。
 
 ```cpp
 // 通用基类：kbe/src/lib/db_interface/db_tasks.h

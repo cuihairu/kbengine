@@ -33,6 +33,15 @@
 
 **结论**：MMO 实体 RPC 以 **fire-and-forget 为主**，需要返回值时用 Deferred/Callback 补充。
 
+```mermaid
+flowchart TD
+    A["实体方法调用需求"] --> B{"是否必须返回结果?"}
+    B -->|否| C["Fire-and-forget\n默认路径\nEntityCall / Mailbox 单向消息"]
+    B -->|是| D{"结果是短链路还是长事务?"}
+    D -->|短链路| E["Deferred / CallbackMgr\n回调拿结果"]
+    D -->|长事务| F["状态机 / Saga / Read Model\n不要伪装成同步 RPC"]
+```
+
 ## 11.3 BigWorld 的选择：Mailbox + 单向为主 + TwoWay 补充
 
 ### Mailbox 是什么
@@ -215,6 +224,21 @@ public:
 
 ### EntityCall 的本质
 
+```mermaid
+sequenceDiagram
+    participant Script as Python 脚本
+    participant EC as EntityCall
+    participant Channel as Channel / Bundle
+    participant Remote as 远端实体
+
+    Script->>EC: someEntity.cell.someMethod(args)
+    EC->>EC: tp_call()
+    EC->>EC: newCall_() 选择路由与 msgHandler
+    EC->>Channel: Bundle::newMessage + 序列化 args
+    Channel->>Remote: 发送网络消息
+    Remote->>Remote: handler 落地到实体方法
+```
+
 EntityCall 不是"一次调用请求"，而是**长期可持有的远端实体引用**。
 
 ```cpp
@@ -300,6 +324,23 @@ protected:
 ```
 
 ### newCall_ 的路由逻辑
+
+```mermaid
+flowchart TD
+    A["EntityCall::newCall_"] --> B{"ENTITYCALL_TYPE"}
+    B --> C["BASE\n发往 BaseApp"]
+    B --> D["CELL\n发往 CellApp"]
+    B --> E["CLIENT\n发往 Client"]
+    B --> F["BASE_VIA_BASE / CELL_VIA_BASE\n经当前 Base 转发"]
+    B --> G["CELL_VIA_CELL / GHOST\n经 Cell / RealEntityMethod 转接"]
+    C --> H["选择目标 componentID / channel"]
+    D --> H
+    E --> H
+    F --> H
+    G --> H
+    H --> I["Bundle::newMessage(msgHandler)"]
+    I --> J["后续 tp_call 序列化参数"]
+```
 
 ```cpp
 // 文件：kbe/src/lib/entitydef/entitycallabstract.cpp:65（简化）

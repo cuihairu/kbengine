@@ -13,19 +13,16 @@
 
 KBEngine 和 BigWorld 的启动流程都不是每个组件各写一套，而是四层分层模型：
 
+```mermaid
+flowchart TD
+    A["组件入口层\nmain.cpp\n只指定组件类型"] --> B["公共启动模板\nkbeMainT / bwMainT\n总装配"]
+    B --> C["通用服务进程层\nServerApp"]
+    C --> D["游戏进程基础层\nEntityApp / PythonApp\nBigWorld 还会引出 ScriptApp"]
+    D --> E["组件特化层\nBaseApp / CellApp / DBMgr / LoginApp"]
+    E --> F["进入主循环\nEventDispatcher 驱动网络、定时器、组件消息"]
 ```
-┌─────────────────────────────────────────────────┐
-│ 1. 组件入口层：main.cpp（极薄，只指定组件类型）    │
-├─────────────────────────────────────────────────┤
-│ 2. 公共启动模板：kbeMainT / bwMainT（总装配）     │
-├─────────────────────────────────────────────────┤
-│ 3. 通用服务进程层：ServerApp → EntityApp / PythonApp │
-│    （BigWorld 还会再引出 ScriptApp）                │
-├─────────────────────────────────────────────────┤
-│ 4. 组件特化层：BaseApp / CellApp / DBMgr / LoginApp│
-│    （各自补上差异化能力）                           │
-└─────────────────────────────────────────────────┘
-```
+
+这张图要强调的是：`main.cpp` 不是业务入口，真正决定组件行为的是最下层的组件特化逻辑。
 
 ## 4.3 main.cpp 为什么这么薄
 
@@ -245,6 +242,22 @@ componentID 不是装饰信息，而是：
 5. 把 CID 变更纳入发布流程：CID 调整需伴随变更单和回滚方案，避免“隐式漂移”
 
 ## 4.6 ServerApp：所有服务进程的通用生命周期
+
+从运行态看，`ServerApp` 的生命周期不是“构造完就立刻对外服务”，而是下面这条状态链：
+
+```mermaid
+stateDiagram-v2
+    [*] --> Constructing : 构造 EventDispatcher / NetworkInterface
+    Constructing --> Initializing : initialize()
+    Initializing --> Registering : 配置、脚本、网络接口初始化
+    Registering --> WaitingDependencies : 注册到 Machine / Components
+    WaitingDependencies --> Ready : DBMgr / BaseAppMgr 等依赖可用
+    Ready --> Running : run()
+    Running --> Finalising : 收到退出信号
+    Finalising --> [*] : finalise()
+```
+
+所以“进程启动了”和“可以接登录、接迁移、接脚本业务”不是同一个状态。后者通常还要等组件注册、脚本初始化和依赖组件回调完成。
 
 ### KBEngine ServerApp
 
@@ -488,6 +501,24 @@ BigWorld DBApp 的初始化是最复杂的：异步注册到 DBAppMgr → 获取
 ## 4.10 集群注册：从"本地已启动"到"被集群看见"
 
 组件启动不是各自孤立完成的。KBEngine 的 `InitProgressHandler` 展示了完整的启动收束过程：
+
+```mermaid
+sequenceDiagram
+    participant App as Component App
+    participant Machine as Machine / bwmachined
+    participant Components as Components Registry
+    participant Mgr as BaseAppMgr / CellAppMgr / DBMgr
+
+    App->>Machine: 注册进程类型、componentID、监听地址
+    App->>Components: 初始化本地组件表
+    Components->>Machine: 发现同机/集群组件
+    Machine-->>Components: 返回已知组件地址
+    Components->>Mgr: 建立到管理组件的 Channel
+    Mgr-->>App: 返回注册确认 / 依赖就绪
+    App->>App: 进入 Ready / Running
+```
+
+这一步的核心不是“广播一下自己存在”，而是建立后续消息路由所需的组件身份和 `Channel`。
 
 ```cpp
 // 文件：kbe/src/server/baseapp/initprogress_handler.cpp（简化）

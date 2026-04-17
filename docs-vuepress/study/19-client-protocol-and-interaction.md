@@ -94,6 +94,21 @@ END_STRUCT_MESSAGE()
 
 ### 消息收发的完整路径
 
+```mermaid
+sequenceDiagram
+    participant Script as Client Python Script
+    participant SDK as Client SDK
+    participant Channel as Channel / PacketReader
+    participant Server as BaseApp / CellApp
+
+    Script->>SDK: entity.base.requestMatchmaking()
+    SDK->>Channel: EntityCall::tp_call + Bundle::newMessage
+    Channel->>Server: TCP / KCP Packet
+    Server-->>Channel: onRemoteMethodCall / onUpdatePropertys
+    Channel->>SDK: PacketReader::processMessages
+    SDK->>Script: Entity::onRemoteMethodCall / 属性回调
+```
+
 ```
 客户端发送（脚本调用 → 网络）：
   Python: entity.base.requestMatchmaking()
@@ -127,6 +142,23 @@ END_STRUCT_MESSAGE()
 ## 19.3 客户端视角的实体生命周期
 
 ### 完整生命周期
+
+先用一张图看客户端侧状态变化，下面的文本再按消息逐段展开：
+
+```mermaid
+stateDiagram-v2
+    [*] --> Connected : onLoginSuccessfully
+    Connected --> ProxyCreated : onCreatedProxies
+    ProxyCreated --> InWorld : onEntityEnterWorld
+    InWorld --> InSpace : onEntityEnterSpace
+    InSpace --> Updating : onUpdatePropertys / onRemoteMethodCall
+    Updating --> InSpace : 渲染和脚本回调完成
+    InSpace --> LeaveWorld : onEntityLeaveWorld
+    LeaveWorld --> Destroyed : onEntityDestroyed / 清理本地对象
+    InSpace --> Disconnected : 连接断开
+    Disconnected --> Connected : relogin 成功后重新建连
+    Destroyed --> [*]
+```
 
 ```
                   服务器                           客户端
@@ -378,6 +410,22 @@ detailLevel=2（远处）：只有位置和朝向
 ## 19.5 断线重连的客户端侧
 
 ### KBEngine 重连流程
+
+客户端侧看，重连不是“继续使用旧 socket”，而是重新建连后让服务端把世界状态补回来：
+
+```mermaid
+flowchart TD
+    A["检测到连接断开"] --> B["保留 rndUUID / entityID / 登录态"]
+    B --> C["重新连接 BaseApp"]
+    C --> D["发送 reloginBaseapp(entityID, rndUUID)"]
+    D --> E{"服务端校验通过?"}
+    E -->|否| F["onReloginBaseappFailed\n回登录/错误处理"]
+    E -->|是| G["onReloginBaseappSuccessfully"]
+    G --> H["重新接收 onCreatedProxies / EntityCall"]
+    H --> I["服务端触发 Witness 恢复"]
+    I --> J["重新接收 enter world / property sync / view entities"]
+    J --> K["客户端恢复 UI 与世界表现"]
+```
 
 ```
 客户端检测到断线

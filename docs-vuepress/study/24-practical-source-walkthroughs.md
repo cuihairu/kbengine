@@ -13,6 +13,23 @@
 4. 回调收束：结果怎么回到发起者
 ```
 
+本章五条走读链路可以先压成一张总览图。读源码时不要从文件目录开始，而要先选“哪一条链”：
+
+```mermaid
+flowchart TD
+    A["实战走读入口"] --> B["24.2 登录链\nClient -> LoginApp -> DBMgr -> BaseApp"]
+    A --> C["24.3 EntityCall 链\nPython -> Bundle -> Handler -> 目标实体"]
+    A --> D["24.4 属性同步链\nonDefDataChanged -> Witness -> Client"]
+    A --> E["24.5 写库链\nBase -> DBMgr -> DBTask -> 回调"]
+    A --> F["24.6 视野建立链\nSpace -> Witness -> enter world / leave world"]
+
+    B --> G["看身份分配、PendingLogin、Proxy 创建"]
+    C --> H["看方法 utype、EntityCall、路由落点"]
+    D --> I["看属性标记、alias、广播边界"]
+    E --> J["看 cellData 合流、线程池、主线程回调"]
+    F --> K["看 onGetWitness、AOI、客户端表现恢复"]
+```
+
 **推荐工具**：
 - `grep` / `rg`：搜索函数名和消息名
 - IDE 跳转：从消息 ID 跳到 handler 注册处

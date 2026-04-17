@@ -16,16 +16,14 @@
 
 一个 CellApp 的处理能力有上限——CPU tick 预算、内存容量、网络带宽。当一个 Space 中的实体数量超过单个 CellApp 的处理能力时，需要将 Space 切分成多个 Cell，分布到不同的 CellApp 上。
 
-```
-Space（逻辑上的完整世界）
-  │
-  ├── 方案一：整个 Space 放在一个 CellApp 上
-  │     优势：简单，无跨进程通信
-  │     劣势：实体数受限、无法水平扩展
-  │
-  └── 方案二：把 Space 切成多个区域，每个区域一个 Cell
-        优势：水平扩展、单区域实体数可控
-        劣势：跨区域通信、Ghost 同步、动态迁移复杂
+```mermaid
+flowchart TD
+    A["Space\n逻辑上的完整世界"] --> B["方案一：单 CellApp 承载整个 Space"]
+    A --> C["方案二：按区域切成多个 Cell"]
+    B --> D["优势：简单\n无跨进程通信"]
+    B --> E["劣势：实体数、CPU、带宽受单进程限制"]
+    C --> F["优势：水平扩展\n单区域负载可控"]
+    C --> G["劣势：跨区域通信\nGhost 同步\n动态迁移复杂"]
 ```
 
 BigWorld 选择了方案二，并实现了完整的 BSP 树切分 + 动态负载均衡。KBEngine 选择了方案一——每个 Space 只有一个 Cell。
@@ -110,17 +108,14 @@ private:
 
 ### BSP 树的可视化
 
-```
-Space = [0, 1000] × [0, 1000]
-
-                InternalNode(H, y=500)           ← 水平分割，y=500
-                /                    \
-    InternalNode(V, x=300)      InternalNode(V, x=700)   ← 垂直分割
-       /           \                /           \
-  LeafNode       LeafNode      LeafNode       LeafNode
-  Cell A         Cell B        Cell C         Cell D
-  [0,300]×      [300,1000]×    [0,700]×      [700,1000]×
-  [0,500]       [0,500]        [500,1000]     [500,1000]
+```mermaid
+flowchart TD
+    A["InternalNode\n水平分割 y=500"] --> B["InternalNode\n垂直分割 x=300"]
+    A --> C["InternalNode\n垂直分割 x=700"]
+    B --> D["LeafNode\nCell A\n[0,300] x [0,500]"]
+    B --> E["LeafNode\nCell B\n[300,1000] x [0,500]"]
+    C --> F["LeafNode\nCell C\n[0,700] x [500,1000]"]
+    C --> G["LeafNode\nCell D\n[700,1000] x [500,1000]"]
 ```
 
 每个 LeafNode 对应一个 Cell，由一个 CellApp 管理。BSP 树的分割线可以动态移动——当某个 Cell 负载过重时，分割线向负载轻的方向移动，把一些实体的管辖权转移过去。
@@ -372,6 +367,22 @@ void OffloadChecker::run()
     // 发送待迁移的实体
     this->sendOffloads();
 }
+```
+
+```mermaid
+sequenceDiagram
+    participant Old as Source Cell
+    participant New as Target Cell
+    participant Base as BaseApp
+    participant Client as Client
+
+    Old->>Old: OffloadChecker::run()
+    Old->>Old: 判断 real entity 是否越界
+    Old->>New: 发送实体状态与迁移消息
+    Old->>Base: 更新 cellEntityCall / 路由归属
+    New->>New: 创建或切换为新的 real entity
+    New->>Client: 恢复 Witness / 继续属性同步
+    Old->>Old: 旧 real 退场或转为 ghost
 ```
 
 ```

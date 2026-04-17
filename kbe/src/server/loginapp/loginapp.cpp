@@ -21,6 +21,7 @@
 #include "baseapp/baseapp_interface.h"
 #include "baseappmgr/baseappmgr_interface.h"
 #include "dbmgr/dbmgr_interface.h"
+#include "xml/server_errors_xml.h"
 
 
 namespace KBEngine{
@@ -1509,65 +1510,15 @@ void Loginapp::importServerErrorsDescr(Network::Channel* pChannel)
 
 	if(bundle.empty())
 	{
-		std::map<uint16, std::pair< std::string, std::string> > errsDescrs;
-
+		xml::ServerErrorDescriptions errsDescrs;
+		if (!xml::loadServerErrorDescriptions(errsDescrs, "Loginapp::importServerErrorsDescr"))
 		{
-			tinyxml2::XMLNode *rootNode = NULL;
-			SmartPointer<XML> xml(new XML(Resmgr::getSingleton().matchRes("server/server_errors_defaults.xml").c_str()));
-
-			if (!xml->isGood())
-			{
-				ERROR_MSG(fmt::format("ServerConfig::loadConfig: load {} failed!\n",
-					"server/server_errors_defaults.xml"));
-
-				return;
-			}
-
-			rootNode = xml->getRootNode();
-			if (rootNode == NULL)
-			{
-				// root节点下没有子节点了
-				return;
-			}
-
-			XML_FOR_BEGIN(rootNode)
-			{
-				tinyxml2::XMLNode* node = xml->enterNode(rootNode->FirstChild(), "id");
-				tinyxml2::XMLNode* node1 = xml->enterNode(rootNode->FirstChild(), "descr");
-				errsDescrs[xml->getValInt(node)] = std::make_pair< std::string, std::string>(xml->getKey(rootNode), xml->getVal(node1));
-			}
-			XML_FOR_END(rootNode);
+			return;
 		}
 
-		{
-			tinyxml2::XMLNode *rootNode = NULL;
-
-			FILE* f = Resmgr::getSingleton().openRes("server/server_errors.xml");
-
-			if (f)
-			{
-				fclose(f);
-				SmartPointer<XML> xml(new XML(Resmgr::getSingleton().matchRes("server/server_errors.xml").c_str()));
-
-				if (xml->isGood())
-				{
-					rootNode = xml->getRootNode();
-					if (rootNode)
-					{
-						XML_FOR_BEGIN(rootNode)
-						{
-							tinyxml2::XMLNode* node = xml->enterNode(rootNode->FirstChild(), "id");
-							tinyxml2::XMLNode* node1 = xml->enterNode(rootNode->FirstChild(), "descr");
-							errsDescrs[xml->getValInt(node)] = std::make_pair< std::string, std::string>(xml->getKey(rootNode), xml->getVal(node1));
-						}
-						XML_FOR_END(rootNode);
-					}
-				}
-			}
-		}
 
 		bundle.newMessage(ClientInterface::onImportServerErrorsDescr);
-		std::map<uint16, std::pair< std::string, std::string> >::iterator iter = errsDescrs.begin();
+		xml::ServerErrorDescriptions::iterator iter = errsDescrs.begin();
 		uint16 size = (uint16)errsDescrs.size();
 
 		bundle << size;

@@ -1520,6 +1520,8 @@ del KBEngine.globalData["notice"]
 - 组件启动时先做一次现有数据回放
 - 之后再接收增量广播
 
+这一节只从“不要和类型系统混淆”的角度做摘要。更完整的实现链路、流程图、接收侧回调时序、并发写入边界和完整示例，见：[网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/architecture/source-analysis/networking.html#global-data-dicts-sync)。
+
 ### `types.xml`、`.def`、Python 的依赖关系
 
 ```mermaid

@@ -35,6 +35,21 @@
 
 ### 类结构
 
+先把 `MemoryStream -> Bundle -> Packet -> PacketReader -> MessageHandler` 这条主链看成一个统一流水线：
+
+```mermaid
+flowchart LR
+    A["脚本/实体数据\n属性、RPC 参数、持久化字段"] --> B["MemoryStream\n按字节序列化"]
+    B --> C["Bundle\n拼装一条或多条消息"]
+    C --> D["Packet\n按 MTU 自动分包"]
+    D --> E["Channel 发送"]
+    E --> F["PacketReader\n半包/粘包解析"]
+    F --> G["MessageHandlers\n按 msgID 路由"]
+    G --> H["目标 handler / 实体方法 / 脚本回调"]
+```
+
+这张图要强调的是：`MemoryStream` 不是单独的工具类，而是贯穿“编码、网络发送、数据库落盘、回包解码”的共同数据载体。
+
 ```cpp
 // 文件：kbe/src/lib/common/memorystream.h（简化）
 class MemoryStream : public PoolObject
@@ -275,6 +290,26 @@ protected:
 ```
 
 ### newMessage / finiMessage 的完整流程
+
+`Bundle` 真正做的不是“装一个缓冲区”，而是维护消息边界和分包状态：
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方
+    participant Bundle as Bundle
+    participant Packet as Packet
+
+    Caller->>Bundle: newMessage(msgHandler)
+    Bundle->>Bundle: 写 msgID / 长度占位
+    Caller->>Bundle: << 参数1 << 参数2
+    Bundle->>Bundle: 检查当前 Packet 剩余空间
+    alt 当前 Packet 放不下
+        Bundle->>Packet: onPacketAppend() 新建 Packet
+        Bundle->>Packet: 继续写剩余数据
+    end
+    Caller->>Bundle: finiMessage()
+    Bundle->>Bundle: 回填消息长度 / 完成消息边界
+```
 
 ```cpp
 // 文件：kbe/src/lib/network/bundle.cpp:273（简化）
@@ -625,6 +660,17 @@ protected:
 ```
 
 ### processMessages 的状态机
+
+```mermaid
+stateDiagram-v2
+    [*] --> WaitingHeader : 等待消息头
+    WaitingHeader --> ReadingLength : 读到 msgID / 长度字段
+    ReadingLength --> WaitingBody : 消息体未收全
+    WaitingBody --> Dispatching : 消息体完整
+    Dispatching --> WaitingHeader : handler 执行完成
+    Dispatching --> Condemned : msgID 非法 / 长度异常 / 协议错误
+    Condemned --> [*] : Channel condemn / 后续销毁
+```
 
 ```cpp
 // 文件：kbe/src/lib/network/packet_reader.cpp:48（简化）

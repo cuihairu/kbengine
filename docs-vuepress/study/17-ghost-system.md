@@ -16,23 +16,25 @@
 
 **Ghost 就是解决方案**：在实体 A 的 AOI 覆盖到的其他 Cell 上创建 A 的只读副本。
 
-```
-Cell 1（CellApp A）              Cell 2（CellApp B）
-  ┌───────────────┐              ┌───────────────┐
-  │               │              │               │
-  │  Real A ──────┼── AOI ──────┼── Ghost A     │
-  │  (权威)       │              │  (只读副本)    │
-  │               │              │               │
-  │  Player B     │              │  NPC C        │
-  │               │              │               │
-  └───────────────┘              └───────────────┘
+```mermaid
+flowchart LR
+    subgraph Cell1["Cell 1 / CellApp A"]
+        RA["Real A\n权威状态，可写"]
+        PB["Player B"]
+    end
 
-Real A 在 Cell 1 上拥有完整状态和写权限
-Ghost A 在 Cell 2 上拥有部分只读状态
+    subgraph Cell2["Cell 2 / CellApp B"]
+        GA["Ghost A\n只读副本"]
+        NC["NPC C"]
+    end
 
-当 NPC C 的位置进入 Ghost A 的 AOI 范围时：
-  → Ghost A 触发 onEnterView → 通知 Real A → 同步给 Player B 的客户端
+    RA -- AOI 跨边界 --> GA
+    NC -- 进入视野 --> GA
+    GA -- AOI 事件 / 状态转发 --> RA
+    RA -- 同步可见状态 --> PB
 ```
+
+Real A 在 Cell 1 上拥有完整状态和写权限，Ghost A 在 Cell 2 上拥有部分只读状态。
 
 **Ghost 不是 Cache**：Ghost 不只是为了加速查询。Ghost 是 AOI 系统的必要组件——没有 Ghost，跨 Cell 边界的 AOI 事件无法触发。
 
@@ -54,6 +56,18 @@ Ghost A 在 Cell 2 上拥有部分只读状态
 可以把它理解成：KBEngine 的 Ghost 既是“分布式可见性副本机制”，也是“迁移窗口的可靠转发机制”。
 
 ## 17.3 real / ghost 的区分
+
+最重要的不是“有没有副本”，而是权威写权限始终只有一份：
+
+```mermaid
+stateDiagram-v2
+    [*] --> Real : 实体在本 Cell 权威存在
+    Real --> RealWithGhost : AOI 跨 Cell 或迁移窗口
+    RealWithGhost --> Ghost : 本 Cell 退化为副本
+    Ghost --> Real : changeToReal / 迁移接管
+    RealWithGhost --> Real : 远端 ghost 清理完成
+    Ghost --> [*] : ghost 销毁
+```
 
 ### KBEngine
 
@@ -227,6 +241,17 @@ private:
 ```
 
 ### 消息缓冲流程
+
+```mermaid
+flowchart TD
+    A["消息到达 GhostManager"] --> B{"目标 real 已就绪?"}
+    B -->|是| C["直接转发到 real entity"]
+    B -->|否| D["按 ghost_route_ / entityID 缓冲"]
+    D --> E["等待迁移 / 路由建立完成"]
+    E --> F{"超时或目标可用?"}
+    F -->|目标可用| C
+    F -->|超时| G["丢弃并清理缓冲"]
+```
 
 ```
 Real Entity 属性变更

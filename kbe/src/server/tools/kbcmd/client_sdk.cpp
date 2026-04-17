@@ -15,6 +15,7 @@
 #include "server/serverconfig.h"
 #include "common/kbeversion.h"
 #include "network/fixed_messages.h"
+#include "xml/server_errors_xml.h"
 
 #include "client_lib/client_interface.h"
 #include "baseapp/baseapp_interface.h"
@@ -336,60 +337,11 @@ bool ClientSDK::copyPluginsSourceToPath(const std::string& path)
 //-------------------------------------------------------------------------------------
 bool ClientSDK::writeServerErrorDescrsModule()
 {
-	std::map<uint16, std::pair< std::string, std::string> > errsDescrs;
-
+	xml::ServerErrorDescriptions errsDescrs;
+	if (!xml::loadServerErrorDescriptions(errsDescrs, "ClientSDK::writeServerErrorDescrsModule"))
 	{
-		tinyxml2::XMLNode *rootNode = NULL;
-		SmartPointer<XML> xml(new XML(Resmgr::getSingleton().matchRes("server/server_errors_defaults.xml").c_str()));
-
-		if (!xml->isGood())
-		{
-			ERROR_MSG(fmt::format("ClientSDK::writeServerErrorDescrsModule: load {} is failed!\n",
-				"server/server_errors_defaults.xml"));
-
-			return false;
-		}
-
-		rootNode = xml->getRootNode();
-		if (rootNode)
-		{
-			XML_FOR_BEGIN(rootNode)
-			{
-				tinyxml2::XMLNode* node = xml->enterNode(rootNode->FirstChild(), "id");
-				tinyxml2::XMLNode* node1 = xml->enterNode(rootNode->FirstChild(), "descr");
-				errsDescrs[xml->getValInt(node)] = std::make_pair< std::string, std::string>(xml->getKey(rootNode), xml->getVal(node1));
-			}
-			XML_FOR_END(rootNode);
-		}
+		return false;
 	}
-
-	{
-		tinyxml2::XMLNode *rootNode = NULL;
-
-		FILE* f = Resmgr::getSingleton().openRes("server/server_errors.xml");
-
-		if (f)
-		{
-			fclose(f);
-			SmartPointer<XML> xml(new XML(Resmgr::getSingleton().matchRes("server/server_errors.xml").c_str()));
-
-			if (xml->isGood())
-			{
-				rootNode = xml->getRootNode();
-				if (rootNode)
-				{
-					XML_FOR_BEGIN(rootNode)
-					{
-						tinyxml2::XMLNode* node = xml->enterNode(rootNode->FirstChild(), "id");
-						tinyxml2::XMLNode* node1 = xml->enterNode(rootNode->FirstChild(), "descr");
-						errsDescrs[xml->getValInt(node)] = std::make_pair< std::string, std::string>(xml->getKey(rootNode), xml->getVal(node1));
-					}
-					XML_FOR_END(rootNode);
-				}
-			}
-		}
-	}
-
 	sourcefileName_ = sourcefileBody_ = "";
 	headerfileName_ = headerfileBody_ = "";
 
@@ -401,7 +353,7 @@ bool ClientSDK::writeServerErrorDescrsModule()
 	if (!writeServerErrorDescrsModuleBegin())
 		return false;
 
-	std::map<uint16, std::pair< std::string, std::string> >::iterator iter = errsDescrs.begin();
+	xml::ServerErrorDescriptions::iterator iter = errsDescrs.begin();
 
 	for (; iter != errsDescrs.end(); ++iter)
 	{

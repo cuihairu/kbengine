@@ -28,18 +28,18 @@
 | **异步结果回调** | 脚本发起异步操作 | writeToDB callback / createEntityFromDBID callback | 脚本（CallbackMgr） | 操作完成时 | 是 |
 | **事件注册/恢复** | 脚本注册事件响应 | registerEvent → fireEvent | 脚本 | fireEvent 调用时 | 是（实体事件表会随流迁移） |
 
-```
-时间线视图：
+```mermaid
+flowchart TD
+    A["脚本/引擎事件"] --> B{"属于哪类驱动?"}
+    B --> C["生命周期钩子\n引擎预定义时机\nonInit / onGetWitness / onDestroy"]
+    B --> D["定时器回调\n脚本 addTimer\nTimeQueue 到期触发"]
+    B --> E["异步结果回调\nwriteToDB / query / createEntity\nCallbackMgr 管理"]
+    B --> F["事件注册/恢复\nregisterEvent / fireEvent\n运行时事件表"]
 
-t=0    脚本注册 addTimer(5秒, callback)       ← 定时器
-t=0    脚本调用 writeToDB(callback)             ← 异步回调
-t=0    脚本调用 registerEvent("onLevelUp", cb)  ← 事件注册
-t=0    引擎创建实体 → onInit()                  ← 生命周期钩子
-
-t=5    TimeQueue 触发 → callback(timerID)        ← 定时器回调
-t=8    DB 写入完成 → callback(dbid, success)     ← 异步结果回调
-t=10   脚本调用 fireEvent("onLevelUp") → cb(args) ← 事件触发
-t=20   引擎销毁实体 → onDestroy()                ← 生命周期钩子
+    C --> G["不可由脚本改变触发时机"]
+    D --> H["需要序列化恢复 timerID"]
+    E --> I["需要保存 callbackID 并处理完成/超时"]
+    F --> J["事件绑定关系随实体迁移恢复"]
 ```
 
 **为什么必须严格区分**：
@@ -120,22 +120,20 @@ void Baseapp::onReadyForLogin()
 
 ### C++ → Python 调用路径
 
-```
-引擎事件触发
-  │
-  ├── C++ 函数被调用（如 Entity::onGetWitness）
-  │
-  ├── 查找 Python 方法
-  │     PyObject_GetAttrString(pyEntity, "onGetWitness")
-  │
-  ├── 构造 Python 参数
-  │     Py_BuildValue(...) 或 PyTuple_New(0)
-  │
-  ├── 调用 Python 方法
-  │     PyObject_CallObject(pyMethod, pyArgs)
-  │
-  └── 检查返回值 / 异常
-        if (PyErr_Occurred()) PyErr_Print();
+```mermaid
+sequenceDiagram
+    participant Engine as C++ 引擎事件
+    participant Entity as C++ Entity / Proxy
+    participant Python as Python 对象
+    participant Script as 脚本方法
+
+    Engine->>Entity: Entity::onGetWitness / Proxy::onClientEnabled
+    Entity->>Python: PyObject_GetAttrString(methodName)
+    Python-->>Entity: 返回 method 或 AttributeError
+    Entity->>Entity: 构造 PyTuple / Py_BuildValue
+    Entity->>Script: PyObject_CallObject(method, args)
+    Script-->>Entity: 返回值 / 抛异常
+    Entity->>Engine: 检查 PyErr 并记录日志
 ```
 
 **onReadyForLogin 的轮询模式**：

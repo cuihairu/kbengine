@@ -1407,6 +1407,27 @@ registerPyObjectToScript("entities", pEntities_);
 
 这三个名字看上去像普通 `dict`，但源码里它们不是“多个进程共享一份 Python 对象”，而是 `GlobalDataClient` / `GlobalDataServer` 这套跨进程同步通道。
 
+先给一个总图：
+
+```mermaid
+flowchart LR
+    A["Python 脚本<br/>KBEngine.globalData[key] = value"] --> B["Map::mp_ass_subscript"]
+    B --> C["GlobalDataClient::onDataChanged"]
+    C --> D["Pickler::pickle key/value"]
+    D --> E["DbmgrInterface::onBroadcastGlobalDataChanged"]
+    E --> F["dbmgr<br/>GlobalDataServer 权威副本"]
+    F --> G["广播给关注组件"]
+    G --> H["Baseapp/Cellapp 接收处理"]
+    H --> I["本地 GlobalDataClient 落地"]
+    I --> J["入口脚本回调<br/>onGlobalData/onBaseAppData/onCellAppData"]
+```
+
+这个模型里最容易被误解的三点是：
+
+- Python 层看到的是“像 dict 一样的对象”，但权威副本不在本地，而在 `dbmgr`
+- 写入方本地不会收到自己的回环广播
+- 新进程启动后不是只等后续增量，而是会先收到一次当前快照回放
+
 ### 第一层：三者分别同步到谁
 
 源码把这三类数据拆得很明确：
@@ -1428,6 +1449,24 @@ registerPyObjectToScript("entities", pEntities_);
 - `globalData` 是 `BaseApp` 和 `CellApp` 共同关注的进程级共享字典
 - `baseAppData` 只在 `BaseApp` 集群内同步
 - `cellAppData` 只在 `CellApp` 集群内同步
+
+如果只看注册点，可以把它们理解成：
+
+```mermaid
+flowchart TD
+    A[EntityApp::installPyModules] --> B[registerPyObjectToScript globalData]
+    C[Baseapp::onInstallPyModules] --> D[registerPyObjectToScript baseAppData]
+    E[Cellapp::onInstallPyModules] --> F[registerPyObjectToScript cellAppData]
+    B --> G[GlobalDataClient GLOBAL_DATA]
+    D --> H[GlobalDataClient BASEAPP_DATA]
+    F --> I[GlobalDataClient CELLAPP_DATA]
+```
+
+这也解释了为什么：
+
+- `baseapp` 能同时看到 `globalData` 和 `baseAppData`
+- `cellapp` 能同时看到 `globalData` 和 `cellAppData`
+- 三者不是同一个对象实例，只是底层类型都叫 `GlobalDataClient`
 
 ### 第二层：本地脚本写入后，真正的广播链怎么走
 
@@ -1523,6 +1562,35 @@ if(pChannel == lpChannel)
 - 写入方本地字典会在这次脚本赋值/删除流程里完成更新
 - 其他进程才通过 `dbmgr` 的广播把状态跟上
 
+这里要再补一个一致性边界：
+
+- 这套实现没有版本号、CAS、冲突检测
+- `dbmgr` 只是按消息到达顺序更新 `dict_`
+- 所以如果多个进程并发写同一个 `key`，本质上是“最后到达 `dbmgr` 的那次写覆盖前者”
+
+更准确地说，它是：
+
+- 单权威副本
+- 异步广播复制
+- 最后写入生效
+
+而不是：
+
+- 事务型共享内存
+- 强一致分布式字典
+
+因此它适合：
+
+- 配置开关
+- 跨进程公告
+- 低频状态同步
+
+不适合：
+
+- 高频计数器
+- 多写者并发竞争同一 key
+- 需要比较交换语义的共享状态
+
 ### 第三层：接收方如何落地并触发 Python 回调
 
 接收侧不是直接把原始字节塞回脚本，而是分别进入三条组件回调：
@@ -1561,6 +1629,26 @@ if(pBaseAppData_->write(pyKey, pyValue))
 
 而不是“我自己刚执行了 `KBEngine.xxx[key] = value`，于是本进程再额外回调一次”。
 
+如果把接收侧时序画出来，会更直观：
+
+```mermaid
+sequenceDiagram
+    participant W as 写入方脚本
+    participant WC as 写入方 GlobalDataClient
+    participant D as dbmgr/GlobalDataServer
+    participant R as 接收方组件
+    participant RS as 接收方入口脚本
+
+    W->>WC: KBEngine.xxx[key] = value
+    WC->>D: 发送 key/value 变更
+    Note over W,WC: 写入方本地 dict 已直接更新
+    D->>R: 广播变更
+    R->>R: 反序列化并写入本地 GlobalDataClient
+    R->>RS: onBaseAppData/onCellAppData/onGlobalData
+```
+
+所以回调不是“赋值成功回调”，而是“同步落地通知”。
+
 ### 第四层：新进程加入时，不是只收增量，而是先补一份快照
 
 这三个数据字典不是“只对已经在线的进程做后续广播”。
@@ -1597,6 +1685,21 @@ else if(CELLAPP_TYPE == componentType)
 - 新进程启动时先收一份当前快照
 - 之后再接收增量广播
 
+这意味着一个很实用的设计结论：
+
+- 如果你的 `baseapp` / `cellapp` 逻辑依赖某个共享开关，不需要担心“新进程错过了早先那次写入”
+- 只要它能正常走完启动同步，`dbmgr` 会把当前快照补给它
+
+但也要注意：
+
+- 快照回放是“逐条重放已有 key/value”
+- 不是脚本层原子切换一个完整版本
+
+所以如果你把很多互相关联的数据拆成多个 key，新进程启动回放过程中，脚本短暂看到的可能是“部分 key 已到，部分 key 未到”的过渡状态。更稳妥的办法通常是：
+
+- 要么把一组强关联状态压成一个顶层值
+- 要么在业务层自己再加一个“版本/ready 标记”
+
 ### 第五层：为什么“只改列表里的一个元素”不会同步
 
 这条规则的根源不是 `FIXED_DICT`，也不是文档层面的约定，而是写入入口本身决定的。
@@ -1625,6 +1728,17 @@ items[1] = 7
 KBEngine.globalData["list"] = items
 ```
 
+再进一步，实践里建议直接把“读-改-写顶层值”封装成函数，避免团队成员忘记重写：
+
+```python
+import KBEngine
+
+def set_global_list_item(key, index, new_value):
+    items = list(KBEngine.globalData.get(key, []))
+    items[index] = new_value
+    KBEngine.globalData[key] = items
+```
+
 ### 结论：这三个 API 应该怎么理解
 
 最稳妥的读法如下：
@@ -1635,6 +1749,101 @@ KBEngine.globalData["list"] = items
 | `KBEngine.globalData` | 在 `BaseApp` 与 `CellApp` 间同步的顶层 map，权威副本在 `dbmgr` |
 | `KBEngine.cellAppData` | 只在 `CellApp` 集群内同步的顶层 map，权威副本在 `dbmgr` |
 | `onBaseAppData*` / `onCellAppData*` / `onGlobalData*` | 接收侧在“广播落地或启动快照回放完成后”的脚本通知，不是写入方本地自触发 |
+
+### 最佳实践：什么时候该用，什么时候不该用
+
+适合放进这三类共享字典的内容：
+
+- 进程级公告
+- 低频切换开关
+- 少量跨进程共享配置
+- 启动后需要自动回放给新进程的状态
+
+不适合放进去的内容：
+
+- 玩家高频实时状态
+- 高频递增计数
+- 需要严格并发控制的共享变量
+- 很大的嵌套对象树
+
+一个比较稳妥的经验法则是：
+
+- 共享字典更像“跨进程配置总线”
+- 不是“通用状态数据库”
+
+### 一个完整例子：跨 BaseApp 和 CellApp 共享维护公告
+
+假设你要在运营时动态下发一个全服公告，让所有 `baseapp` 和 `cellapp` 都能拿到。
+
+写入侧：
+
+```python
+# scripts/base/maint_notice.py
+import KBEngine
+
+def publish_maint_notice(title, begin_ts, end_ts):
+    KBEngine.globalData["maint_notice"] = {
+        "title": title,
+        "begin_ts": begin_ts,
+        "end_ts": end_ts,
+    }
+```
+
+`baseapp` 接收侧：
+
+```python
+# scripts/base/kbemain.py
+def onGlobalData(key, value):
+    if key != "maint_notice":
+        return
+
+    INFO_MSG("baseapp got maint_notice: %s" % value)
+```
+
+`cellapp` 接收侧：
+
+```python
+# scripts/cell/kbemain.py
+def onGlobalData(key, value):
+    if key != "maint_notice":
+        return
+
+    INFO_MSG("cellapp got maint_notice: %s" % value)
+```
+
+删除公告：
+
+```python
+del KBEngine.globalData["maint_notice"]
+```
+
+这个例子适合 `globalData`，因为它满足：
+
+- 低频
+- 所有 `BaseApp/CellApp` 都关心
+- 新进程启动后也应该拿到当前公告
+
+### 一个反例：不要把在线人数计数器直接做成 `globalData`
+
+坏例子：
+
+```python
+# 多个进程都可能这么写
+count = KBEngine.globalData.get("online_count", 0)
+KBEngine.globalData["online_count"] = count + 1
+```
+
+这个写法的问题是：
+
+- 读和写之间没有原子性
+- 多个进程并发执行时会丢增量
+- 最终值只是谁最后写到 `dbmgr` 就算谁
+
+更合理的设计通常是：
+
+- 每个 `baseapp` 自己维护本地人数
+- 汇总时走明确的 RPC / watcher / 周期采集
+- 或者由单一权威组件独占写这个 key
 
 ## 内部通信和外部通信的共同点与差异
 

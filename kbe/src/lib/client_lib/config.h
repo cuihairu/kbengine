@@ -12,8 +12,7 @@
 #include "common/singleton.h"
 #include "thread/threadmutex.h"
 #include "thread/threadguard.h"
-#include "xml/xml.h"	
-	
+
 namespace KBEngine{
 
 class Config : public Singleton<Config>

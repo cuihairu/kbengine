@@ -10,7 +10,6 @@
 #include "common/common.h"
 #include "common/singleton.h"
 #include "common/timer.h"
-#include "xml/xml.h"	
 #include "common/smartpointer.h"
 	
 namespace KBEngine{

@@ -370,6 +370,8 @@ class Channel : public TimerHandler, public PoolObject
 - 管理消息的**路由分发**（MessageHandlers）
 - 管理**连接生命周期**（超时/断线/重连）
 
+<a id="channel-complete-lifecycle"></a>
+
 ### 8.4.1 Channel 的完整生命周期
 
 前面说 `Channel` 负责“连接生命周期”，但这里最容易犯的错误，就是把两个不同层次的生命周期混在一起：
@@ -875,7 +877,7 @@ flowchart TD
 - **上层真正稳定依赖的通知边界是 `onChannelDeregister()`**
 
 不过这里还有一个现实限制：虽然 `Channel` 内部有 `condemnReason()`，网络层也有 `Network::Reason` 这类枚举，但 KBEngine 默认并没有把这些原因继续传到脚本层 `onClientDeath`。
-也就是说，底层能记录一些原因，业务脚本默认只收到“客户端绑定消失了”这个结果。更细粒度的玩家断线原因控制，见 [22-player-complete-lifecycle.md](D:/workspaces/kbengine/docs-vuepress/study/22-player-complete-lifecycle.md#L523)。
+也就是说，底层能记录一些原因，业务脚本默认只收到“客户端绑定消失了”这个结果。更细粒度的玩家断线原因控制，见 [22.10.4 从 Channel 生命周期延伸出来的 hook 链](22-player-complete-lifecycle.md#connection-events-to-player-lifecycle)。
 
 ### `Baseapp` 是如何把“连接死亡”翻译成“玩家掉线”的
 
@@ -1196,7 +1198,7 @@ proxy->onGetWitness();
 
 这就是为什么说，`Channel` 生命周期如果只讲“旧连接怎么失效”，那其实还没讲完。
 
-如果要继续看这些连接事件如何落到玩家生命周期、匹配状态、断线宽限期和重连恢复策略上，可以接着看 [22-player-complete-lifecycle.md](D:/workspaces/kbengine/docs-vuepress/study/22-player-complete-lifecycle.md#L523)。
+如果要继续看这些连接事件如何落到玩家生命周期、匹配状态、断线宽限期和重连恢复策略上，可以接着看 [22.10.4 从 Channel 生命周期延伸出来的 hook 链](22-player-complete-lifecycle.md#connection-events-to-player-lifecycle)。
 
 #### 为什么 Channel 生命周期里没有“断线重连 hook”
 

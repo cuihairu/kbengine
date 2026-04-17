@@ -24,6 +24,16 @@
 | 6. Cell 创建 | 在空间中创建 Cell 实体 | BaseApp -> CellApp | CellApp 上实体创建完成 |
 | 7. 视野建立 | Witness 驱动客户端同步 | CellApp -> Client | 客户端开始收到视野内实体流 |
 
+```mermaid
+flowchart LR
+    A["1 接入<br/>Client -> LoginApp"] --> B["2 状态查询<br/>LoginApp -> DBMgr"]
+    B --> C["3 分配<br/>LoginApp -> BaseAppMgr"]
+    C --> D["4 会话建立<br/>Client -> BaseApp"]
+    D --> E["5 Base 恢复<br/>BaseApp -> DBMgr"]
+    E --> F["6 Cell 创建<br/>BaseApp -> CellApp"]
+    F --> G["7 Witness 建立<br/>CellApp -> Client"]
+```
+
 如果只看这一层，设计特点很清楚：
 
 - **接入和会话是分开的**：LoginApp 不持有玩家实体，BaseApp 才是会话锚点。
@@ -177,11 +187,27 @@ BigWorld 区分了"实体未检出（离线）"和"实体已检出（在线）"�
 
 之后 LoginApp 回给客户端的不是"你已经登录完成"，而是"去连这个 BaseApp"。这就是**两跳接入**的设计：
 
-```
-Client → LoginApp → DBMgr → BaseAppMgr → Client
-                                                  ↓
-Client ← LoginApp（BaseApp 地址）                  ↓
-Client → BaseApp（loginBaseapp）─────────────────→←
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant L as LoginApp
+    participant D as DBMgr
+    participant M as BaseAppMgr
+    participant B as BaseApp
+
+    C->>L: login(account, password)
+    L->>D: 查询账号在线状态
+    D-->>L: retcode + dbid + componentID/entityID
+    alt 已有在线上下文
+        L->>M: registerPendingAccountToBaseappAddr
+        M->>B: 向指定 BaseApp 登记 pending login
+    else 没有在线上下文
+        L->>M: registerPendingAccountToBaseapp
+        M->>B: 选择 BaseApp 并登记 pending login
+    end
+    M-->>L: BaseApp 地址 + rndUUID
+    L-->>C: onLoginSuccessfully(baseapp addr)
+    C->>B: loginBaseapp(rndUUID)
 ```
 
 ### 22.4.2 BigWorld 的 PendingLogins
@@ -250,6 +276,21 @@ BaseApp 只接管经过 LoginApp 预分配和登记的会话。这防止了客�
 3. 重新执行 `createClientProxies()`
 4. 调用 `Proxy::onGetWitness()`，把客户端控制权恢复推到 Cell 侧
 
+```mermaid
+flowchart TD
+    A["Client loginBaseapp"] --> B["BaseApp 校验 rndUUID / 地址 / pending login"]
+    B --> C{ptinfos.entityID > 0?}
+    C -- 否 --> D["查询 DBMgr<br/>恢复或创建 Proxy"]
+    C -- 是 --> E["找到旧 Proxy<br/>调用 onLogOnAttempt"]
+    E --> F{脚本是否接受重登?}
+    F -- 拒绝 --> G["拒绝新连接"]
+    F -- 接受 --> H["踢旧 clientEntityCall"]
+    H --> I["新 Channel 绑定旧 Proxy"]
+    I --> J["createClientProxies"]
+    J --> K["onGetWitness<br/>恢复 Cell 控制权"]
+    D --> J
+```
+
 ### 22.5.2 BigWorld：LoginHandler + attachToClient
 
 BigWorld 的对应流程更分散，但有明确的超时和统计：
@@ -311,6 +352,20 @@ BaseApp::loginBaseapp
 5. `initializeEntity(pyDict)` 完成脚本对象初始化
 6. 若客户端连接还在，构造 `clientEntityCall` 并执行 `createClientProxies()`
 
+```mermaid
+flowchart TD
+    A["BaseApp::loginBaseapp"] --> B["DBMgrInterface::queryAccount"]
+    B --> C["BaseApp::onQueryAccountCBFromDbmgr"]
+    C --> D["createEntity(accountType)"]
+    D --> E["安装 dbid / clientType / loginDatas"]
+    E --> F["createDictDataFromPersistentStream"]
+    F --> G["initializeEntity(pyDict)"]
+    G --> H{客户端连接仍有效?}
+    H -- 是 --> I["创建 clientEntityCall"]
+    I --> J["createClientProxies"]
+    H -- 否 --> K["只保留 Base 实体状态"]
+```
+
 ### 22.6.2 BigWorld 的恢复链路
 
 BigWorld 的恢复发生在 `Base::restoreTo()` 中，它从 backup 数据流中恢复整个 Base 实体：
@@ -369,6 +424,15 @@ Entity::restoreCell
 
 这说明了 Base/Cell 分离的本质——不是概念分离，而是真有一次跨组件的数据交接。Base 把 Cell 所需的初始状态序列化后交给 CellApp。
 
+```mermaid
+flowchart LR
+    A["Base Entity / Proxy"] --> B["addCellDataToStream<br/>序列化 Cell 初始数据"]
+    B --> C["Bundle<br/>onCreateCellEntityFromBaseapp"]
+    C --> D["CellApp"]
+    D --> E["创建 Cell 实体"]
+    E --> F["建立 baseEntityCall / cellEntityCall"]
+```
+
 ### 22.7.2 进入世界的三小步
 
 把"进入世界"拆开来看：
@@ -378,6 +442,21 @@ Entity::restoreCell
 3. **Cell 创建完成后，通过 `Proxy::onGetWitness()` 把"客户端控制权"绑定到 Cell 侧**
 
 所以进入世界不是一次构造动作，而是三步接力。
+
+```mermaid
+sequenceDiagram
+    participant B as BaseApp/Proxy
+    participant C as CellApp/Entity
+    participant W as Witness
+    participant CL as Client
+
+    B->>C: createCellEntity(cellData)
+    C-->>B: Cell 创建完成并建立 EntityCall
+    B->>C: Proxy::onGetWitness()
+    C->>C: controlledBy(baseEntityCall)
+    C->>W: 创建或重新 attach Witness
+    W->>CL: 同步 spaceID / 控制实体 / 初始属性
+```
 
 ### 22.7.3 BigWorld 的 restoreTo + createEntity
 
@@ -430,6 +509,21 @@ void Proxy::onGetWitness()
 2. 重新同步关键客户端属性
 3. 重新建立视野状态
 
+```mermaid
+flowchart TD
+    A["Proxy::onGetWitness"] --> B{是否有 cellEntityCall?}
+    B -- 否 --> C["等待 Cell 创建完成"]
+    B -- 是 --> D["发送 onGetWitnessFromBase"]
+    D --> E["Cell Entity::onGetWitness(true)"]
+    E --> F["controlledBy(baseEntityCall)"]
+    F --> G{Witness 是否已存在?}
+    G -- 否 --> H["创建 Witness"]
+    G -- 是 --> I["onAttach + resetViewEntities"]
+    H --> J["同步控制实体和视野"]
+    I --> J
+    J --> K["Client 开始接收 AOI 实体流"]
+```
+
 ### 22.8.2 BigWorld 的 Witness 构建
 
 BigWorld 的 Witness 构造更复杂，包含 alias 预分配和 AOI 初始化：
@@ -479,43 +573,45 @@ BigWorld 的 Witness 内部维护了 `entityQueue_`（优先级队列）和 `aoi
 
 ### 会话主线：LoginApp -> BaseApp
 
-```
-Client ──login──→ LoginApp
-                LoginApp ──DbmgrInterface::onAccountLogin──→ DBMgr
-                LoginApp ←──onLoginAccountQueryResultFromDbmgr── DBMgr
-                LoginApp ──registerPendingAccountToBaseapp[Addr]──→ BaseAppMgr
-                BaseAppMgr ──registerPendingLogin──→ BaseApp
-                LoginApp ←──onLoginAccountQueryBaseappAddrFromBaseappmgr── BaseAppMgr
-Client ←──onLoginSuccessfully(baseapp addr)── LoginApp
-Client ──loginBaseapp──→ BaseApp
-                BaseApp ──DbmgrInterface::queryAccount──→ DBMgr
-                BaseApp ←──onQueryAccountCBFromDbmgr── DBMgr
-                BaseApp 创建/恢复 Proxy
+```mermaid
+flowchart LR
+    C["Client"] --> L["LoginApp"]
+    L --> D["DBMgr<br/>账号/在线状态"]
+    D --> L
+    L --> M["BaseAppMgr<br/>选择或定位 BaseApp"]
+    M --> B["BaseApp<br/>登记 pending login"]
+    M --> L
+    L --> C
+    C --> B
+    B --> D2["DBMgr<br/>恢复账号实体数据"]
+    D2 --> B
+    B --> P["Proxy 创建或复用"]
 ```
 
 ### 世界主线：Base -> Cell -> Witness -> Client
 
-```
-Base.Proxy ──createCellEntity──→ CellApp
-CellApp 创建 Cell 实体
-Base.Proxy ──onGetWitness──→ CellApp
-CellApp 创建 Witness
-Witness ──AOI event──→ 触发 addToAoI
-Witness ──update()──→ 构造客户端消息
-Client ←──实体流── CellApp
+```mermaid
+flowchart LR
+    P["Base.Proxy"] --> CE["createCellEntity"]
+    CE --> C["CellApp 创建 Cell 实体"]
+    P --> GW["onGetWitness"]
+    GW --> W["CellApp 创建/恢复 Witness"]
+    W --> A["AOI enter/leave"]
+    A --> U["Witness::update"]
+    U --> CL["Client 实体流"]
 ```
 
 ### 数据主线：Cell -> Base -> DBMgr
 
-```
-Cell 实体状态变更
-  → Base 写库时先向 Cell 请求状态收束
-  → Cell 执行 onWriteToDB + backupCellData
-  → Base 收到 Cell 数据后执行 onPreArchive
-  → Base 调用 addPersistentsDataToStream 序列化
-  → 发送 DbgmrInterface::writeEntity
-  → DBMgr 执行 DBTaskWriteEntity / EntityDBTask
-  → 回调 Entity::onWriteToDBCallback
+```mermaid
+flowchart LR
+    C["Cell 实体状态变更"] --> R["Base 请求 Cell 写库收束"]
+    R --> CW["Cell onWriteToDB<br/>backupCellData"]
+    CW --> B["Base onPreArchive"]
+    B --> S["addPersistentsDataToStream"]
+    S --> D["DBMgr::writeEntity"]
+    D --> T["DBTaskWriteEntity"]
+    T --> CB["Base onWriteToDBCallback"]
 ```
 
 ---
@@ -566,6 +662,109 @@ KBEngine 的 `BaseApp::reloginBaseapp`：
 5. 通过 `proxy->onGetWitness()` 通知 Cell 侧恢复控制权
 6. 回给客户端 `onReloginBaseappSuccessfully`
 
+这条链路最适合看成“同一个 `Proxy` 复用，客户端连接切到新的 `Channel`”。  
+更精确地说，重连阶段做的不是“替换 `Proxy` 对象”，而是：
+
+1. 先 `findEntity(entityID)` 找到已有 `Proxy`
+2. 让旧 `Channel` 退场：`proxyID(0) + condemn("", true)`
+3. 更新已有 `Proxy` 的 `addr`
+4. 更新已有 `clientEntityCall` 的 `addr`（已有旧连接分支下通常复用这个对象，不重建）
+5. 把新 `Channel` 的 `proxyID` 绑定到这个已有 `Proxy`
+6. 再通过 `createClientProxies(proxy, true)` 和 `proxy->onGetWitness()` 恢复客户端状态与世界表现
+
+也就是说，**长期业务对象是旧 `Proxy`，变化的是连接映射和地址映射**。
+
+```mermaid
+sequenceDiagram
+    participant Client as Client
+    participant BA as BaseApp
+    participant OldCH as 旧 Channel
+    participant PX as 同一个 Proxy / Avatar
+    participant Cell as Cell Entity
+    participant Script as Python Script
+
+    Client->>BA: reloginBaseapp(entityID, rndUUID)
+    BA->>PX: findEntity(entityID)
+    BA->>PX: 校验 rndUUID
+    alt 旧 clientEntityCall / 旧通道仍存在
+        PX->>OldCH: proxyID(0) + condemn("", true)
+        OldCH-->>BA: 旧连接退场，不代表业务对象销毁
+    end
+    BA->>PX: 复用已有 Proxy
+    BA->>PX: clientEntityCall.addr = 新 Channel 地址
+    BA->>PX: proxy.addr = 新 Channel 地址
+    BA->>BA: 新 Channel.proxyID = proxy.id
+    BA->>PX: createClientProxies(proxy, true)
+    PX->>Script: onClientEnabled()
+    PX->>Cell: onGetWitnessFromBase
+    Cell->>Cell: onGetWitness(true)
+    Cell->>Cell: resetViewEntities()
+    Cell->>Script: onGetWitness()
+    BA-->>Client: onReloginBaseappSuccessfully
+    Client->>Client: 按服务端下发状态重建世界表现
+```
+
+对应源码关键点是：
+
+```cpp
+Entity* pEntity = findEntity(entityID);
+Proxy* proxy = static_cast<Proxy*>(pEntity);
+
+// 旧连接退场，但不销毁 Proxy
+pMBChannel->proxyID(0);
+pMBChannel->condemn("", true);
+
+// 复用已有 clientEntityCall，更新地址
+entityClientEntityCall->addr(pChannel->addr());
+proxy->addr(pChannel->addr());
+pChannel->proxyID(proxy->id());
+
+createClientProxies(proxy, true);
+proxy->onGetWitness();
+```
+
+源码核对点可以直接对照下面几处：
+
+- `findEntity(entityID)` 找已有实体，而不是创建新 `Proxy`
+  [baseapp.cpp](/D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3981)
+- 旧 `Channel` 先 `proxyID(0)` 再 `condemn("", true)`
+  [baseapp.cpp](/D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4008)
+- 已有 `clientEntityCall` 分支下只是更新 `addr`
+  [baseapp.cpp](/D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4016)
+- `proxy.addr` 和新 `Channel.proxyID` 被写回
+  [baseapp.cpp](/D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4028)
+- 随后用已有 `Proxy` 调 `createClientProxies(proxy, true)`
+  [baseapp.cpp](/D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4035)
+- `createClientProxies` 内部再从 `clientEntityCall()->getChannel()` 取当前通道，并执行 `onClientEnabled()`
+  [baseapp.cpp](/D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3142)
+- `Proxy::onClientEnabled()` 只是把 `clientEnabled_ = true`
+  [proxy.cpp](/D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L174)
+
+还要再区分一层：
+
+- `Proxy` 对象本体没有换
+- `clientEntityCall` 在“已有旧连接”的分支下通常也不重建，而是只更新 `addr`
+- `EntityCallAbstract` 自身持有的是 `addr_`；`getChannel()` 通过注册的 `FindChannelFunc` 解析当前通道
+  [entitycallabstract.h](/D:/workspaces/kbengine/kbe/src/lib/entitydef/entitycallabstract.h#L52)
+  [entitycallabstract.cpp](/D:/workspaces/kbengine/kbe/src/lib/entitydef/entitycallabstract.cpp#L178)
+- `Proxy` 自己在 `kick()/disconnect()` 里也是按 `addr_` 去 `networkInterface().findChannel(addr_)` 找当前连接
+  [proxy.cpp](/D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L72)
+
+如果只看对象关系，重连前后真正变化的是 `Channel` 绑定和 `addr` 映射，不是 `Proxy / Avatar` 本体：
+
+```mermaid
+flowchart LR
+    A["旧 Client"] --> B["旧 Channel"]
+    B --> C["同一个 Proxy / Avatar\nentityID 不变\n业务身份保留"]
+    D["新 Client"] --> E["新 Channel"]
+    C --> I["同一个 clientEntityCall\n更新 addr(newAddr)"]
+    E -- "pChannel.proxyID(proxy.id)" --> C
+    I -- "getChannel()\n按当前 addr_ 解析" --> E
+    B -. "proxyID(0)\ncondemn / destroy" .-> F["对象池回收"]
+    C --> G["Cell Entity / Witness"]
+    G --> H["resetViewEntities\n恢复视野"]
+```
+
 重连成功包含两层恢复：
 
 - **Base 层**：恢复会话（Proxy 绑定新客户端）
@@ -611,6 +810,8 @@ KBEngine 的 `BaseApp::reloginBaseapp`：
 - **断线 != 逃跑处罚**
 - **断线 != 销毁玩家业务对象**
 
+<a id="connection-events-to-player-lifecycle"></a>
+
 ### 22.10.4 从 Channel 生命周期延伸出来的 hook 链
 
 如果继续往下问一个更工程化的问题，其实就是：
@@ -639,7 +840,7 @@ flowchart TD
 
 这里建议和第 8 章配合着看：
 
-- 连接对象本身的创建、失效、`condemn / deregister / destroy`，见 [08-network-infrastructure.md](D:/workspaces/kbengine/docs-vuepress/study/08-network-infrastructure.md#L373)
+- 连接对象本身的创建、失效、`condemn / deregister / destroy`，见 [8.4.1 Channel 的完整生命周期](08-network-infrastructure.md#channel-complete-lifecycle)
 - 本章更关注这些连接事件最终如何翻译成玩家层 hook 和恢复链
 - 特别是“为什么 `kick / relogin` 的旧连接退场未必会转成 `Proxy::onClientDeath()`”，第 8 章已经从 `proxyID(0)` 和 `deregister` 边界把源码链讲清楚
 
@@ -1489,13 +1690,29 @@ void Proxy::giveClientTo(Proxy* proxy)
 4. `BaseApp::createClientProxies()` 把新控制实体同步给客户端
 5. `Proxy::onGetWitness()` 再次驱动 Cell 侧建立 Witness/视野
 
+```mermaid
+sequenceDiagram
+    participant OP as Old Proxy
+    participant NP as New Proxy
+    participant C as CellApp
+    participant CL as Client
+
+    OP->>C: onLoseWitness
+    C-->>CL: onEntityDestroyed(旧控制实体)
+    OP->>NP: 转移 client Channel
+    NP->>CL: createClientProxies(新控制实体)
+    NP->>C: onGetWitness
+    C-->>CL: 新控制实体进入世界并重建视野
+```
+
 ### 22.10.7 恢复主线
 
-```
-Proxy（Base 层逻辑实体）
-  ↕ clientEntityCall（客户端连接引用）
-  ↕ Cell 实体（空间状态）
-  ↕ Witness（视野同步通道）
+```mermaid
+flowchart TD
+    P["Proxy<br/>Base 层逻辑身份"] --- E["clientEntityCall<br/>客户端连接引用"]
+    P --- C["Cell 实体<br/>空间状态"]
+    C --- W["Witness<br/>视野同步通道"]
+    E --- CL["Client Channel<br/>当前网络会话"]
 ```
 
 这四个对象彼此关联但不是同一个对象。正因为拆开了，系统才有能力支持重连、挤号和控制权迁移。
@@ -1506,36 +1723,48 @@ Proxy（Base 层逻辑实体）
 
 ### 属性更新
 
-```
-脚本 setattr → 标记脏 → Cell 确定 authoritative 侧
-  → Witness 收集 → Bundle 构造 → 发送给客户端
+```mermaid
+flowchart LR
+    A["脚本 setattr"] --> B["属性描述检查"]
+    B --> C["标记脏数据"]
+    C --> D["权威侧 Cell/Base 判断"]
+    D --> E["Witness 收集可见对象变化"]
+    E --> F["Bundle 构造"]
+    F --> G["Client 接收属性更新"]
 ```
 
 "属性更新"不是简单广播，而是被实体位置和视野约束。
 
 ### 远程方法调用
 
-```
-脚本发起 EntityCall
-  → 根据实体定义查找方法与参数信息
-  → 参数序列化进入 Bundle/MemoryStream
-  → 网络层发送到目标组件
-  → 目标端解包并调用
+```mermaid
+flowchart LR
+    A["脚本发起 EntityCall"] --> B["查 MethodDescription"]
+    B --> C["参数类型检查"]
+    C --> D["序列化到 MemoryStream"]
+    D --> E["Bundle 发送"]
+    E --> F["目标组件解包"]
+    F --> G["调用目标脚本方法"]
 ```
 
 EntityCall 在玩家生命周期里扮演"跨 Base/Cell/Client 协作的动作通道"。
 
 ### 持久化
 
-```
-Base::writeToDB
-  → Cell::reqWriteToDBFromBaseapp（如果 Cell 存在）
-  → Cell::writeToDB + backupCellData
-  → Base::onCellWriteToDBCompleted
-  → Base::onPreArchive + addPersistentsDataToStream
-  → DBMgr::writeEntity
-  → DBTaskWriteEntity::presentMainThread
-  → Base::onWriteToDBCallback
+```mermaid
+sequenceDiagram
+    participant B as Base Entity
+    participant C as Cell Entity
+    participant D as DBMgr
+    participant DB as Database
+
+    B->>C: reqWriteToDBFromBaseapp(如果 Cell 存在)
+    C-->>B: onCellWriteToDBCompleted(cellData)
+    B->>B: onPreArchive + addPersistentsDataToStream
+    B->>D: writeEntity(stream)
+    D->>DB: DBTaskWriteEntity
+    DB-->>D: 写库结果
+    D-->>B: onWriteToDBCallback
 ```
 
 这完全不是"本地对象直接写数据库"，而是一条跨 Base/Cell/DBMgr 的状态收束流水线。

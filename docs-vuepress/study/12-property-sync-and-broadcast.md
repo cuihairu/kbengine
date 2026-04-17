@@ -16,22 +16,28 @@
 
 这是理解属性同步时最容易混淆的地方：KBEngine 里“不是所有客户端相关数据都走同一条节拍”。
 
-```text
-一个 tick（100ms）内的时序：
+```mermaid
+sequenceDiagram
+    participant Script as Python 脚本
+    participant Entity as Cell Entity
+    participant Ghost as Ghost CellApp
+    participant Witness as Witness
+    participant Client as Client
 
-───────────────────────────────────────────────────
-│ 脚本逻辑执行                                    │ tick 末
-│                                                 │
-│ entity.health = 80                              │ Witness::update()
-│ entity.health = 75    ← 同一 tick 内可能多次改值 │   ├── 处理 enter / leave view
-│ entity.position = (10, 0, 20)                   │   ├── 处理位置 / 朝向等 volatile 更新
-│ entity.mana = 50                                │   └── flush 当前 tick 的客户端视野消息
-│                                                 │
-│ onDefDataChanged()                              │
-│   ├── ghost 同步：立即发                        │
-│   ├── own client：立即发                        │
-│   └── other clients：按当前 witnesses 立即发     │
-───────────────────────────────────────────────────
+    Script->>Entity: entity.health = 80
+    Script->>Entity: entity.health = 75
+    Entity->>Entity: onDefDataChanged()
+    alt CELL_PUBLIC 且 hasGhost
+        Entity->>Ghost: onUpdateGhostPropertys
+    end
+    alt OTHER_CLIENTS
+        Entity->>Witness: 遍历当前 witnesses
+        Witness->>Client: onUpdatePropertys
+    end
+    alt OWN_CLIENT
+        Entity->>Client: onUpdatePropertys
+    end
+    Note over Entity,Witness: tick 末 Witness::update() 处理 enter/leave 与 volatile flush
 ```
 
 **为什么不改了就发**：
@@ -43,6 +49,32 @@
 ## 12.3 一条属性更新的完整链路
 
 ### KBEngine
+
+先把主链路画出来，后面的源码就是这张图的展开：
+
+```mermaid
+flowchart TD
+    A["Python 赋值\nentity.health = 75"] --> B["Entity::_tp_setattro"]
+    B --> C["onScriptSetAttribute"]
+    C --> D["PropertyDescription 类型检查"]
+    D --> E["写入属性值"]
+    E --> F["Entity::onDefDataChanged"]
+    F --> G{"是否 Persistent?"}
+    G -->|是| H["setDirty()\n等待写库"]
+    G -->|否| I["跳过 dirty 标记"]
+    H --> J["序列化到 MemoryStream"]
+    I --> J
+    J --> K{"CELL_PUBLIC 且 hasGhost?"}
+    K -->|是| L["同步到 Ghost\nonUpdateGhostPropertys"]
+    K -->|否| M["不走 Ghost 同步"]
+    L --> N{"客户端广播标记?"}
+    M --> N
+    N -->|OTHER_CLIENTS| O["遍历 witnesses\n发给可见客户端"]
+    N -->|OWN_CLIENT| P["发给自己的客户端"]
+    N -->|无客户端标记| Q["仅服务端内存变化"]
+    O --> R["Client onUpdatePropertys"]
+    P --> R
+```
 
 ```text
 Python: entity.health = 75
