@@ -74,7 +74,7 @@
 
 ### [Ch8 网络基础设施：I/O 模型与进程间通信](08-network-infrastructure.md)
 
-- I/O 多路复用：select / poll / epoll / kqueue
+- I/O 事件模型：select / poll / epoll / kqueue / IOCP / io_uring
 - Reactor 模式与 Channel / Endpoint
 - TCP vs UDP：KBEngine 内部 TCP，BigWorld 内部 UDP + 自建可靠性
 
@@ -98,6 +98,8 @@
 
 - BigWorld：Mailbox + TwoWay + PyDeferred
 - KBEngine：EntityCall = 纯单向 + CallbackMgr
+- 单向消息流下的工程化解法：CPS、Future/Promise、Actor ask、Reducer + Effects、Saga、CQRS
+- `tell / ask / 读模型 / 数据归属重构` 的实战决策表
 - Base/Cell/Client 三侧的专用方法类
 - 与 gRPC / Protobuf 的设计对比
 

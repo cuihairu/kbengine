@@ -4,37 +4,118 @@
 
 ## 8.1 本章核心问题
 
-- I/O 事件模型（select / poll / epoll / kqueue / io_uring）各自的特点和选择依据？
+- I/O 事件模型（select / poll / epoll / kqueue / IOCP / io_uring）各自的特点和选择依据？
 - Reactor / Proactor 的关键参与者在代码里怎么对应？
 - Channel 与 Endpoint 的职责划分？
 - TCP vs UDP：两套项目为什么做了不同选择？
 - InterfaceTable / MessageHandlers：消息路由怎么实现？
 
-## 8.2 I/O 多路复用：为什么游戏服务器选 epoll
+## 8.2 I/O 事件通知模型：为什么这两套引擎最终落在 epoll/select
 
-### select / poll / epoll / kqueue / io_uring 对比
+先把一个容易混淆的点说清：
 
-| 维度 | select | poll | epoll | kqueue | io_uring |
-|------|--------|------|-------|--------|----------|
-| 核心模型 | 同步就绪通知 | 同步就绪通知 | 同步就绪通知 | 同步就绪通知 | 异步提交 + 完成队列 |
-| 最大 FD 数 | 1024（FD_SETSIZE） | 无限制 | 无限制 | 无限制 | 无固定上限（受 ring/资源限制） |
-| 事件获取开销 | O(n) 遍历 | O(n) 遍历 | O(1) 近似事件通知 | O(1) 近似事件通知 | 批量提交/批量完成，系统调用可更少 |
-| 每次调用 | 全量传 fd_set | 全量传 pollfd | 只返回就绪 fd | 只返回就绪事件 | 取完成队列 CQE（完成事件） |
-| 触发语义 | Readiness | Readiness | Readiness | Readiness | Completion（更接近 Proactor） |
-| 主平台 | 全平台 | 全平台 | Linux | BSD/macOS | Linux（较新内核） |
-| 适用场景 | 少量连接 | 中等连接 | Linux 大量长连接 | BSD/macOS 大量连接 | 极高并发 + 异步 I/O 深度优化 |
+- `select / poll / epoll / kqueue` 主要属于 **readiness notification**，也就是“就绪通知”
+- `IOCP / io_uring` 更接近 **completion notification**，也就是“完成通知”
+
+所以严格说，`IOCP` 和 `io_uring` 不该被归进传统意义上的“I/O 多路复用”一类；它们和 `epoll` 不是同一层抽象，更接近 Proactor 一侧。但 `io_uring` 在 Linux 上也可以同时承载 `POLL_ADD` 这类 readiness 风格操作，因此工程上常表现为**偏 completion 的混合模型**，不能简单粗暴地把它等同成“Linux 版 IOCP”。
+
+### 8.2.1 两大类模型先分开
+
+```mermaid
+flowchart LR
+    A["I/O 事件模型"] --> B["Readiness / 就绪通知"]
+    A --> C["Completion / 完成通知"]
+
+    B --> B1["select"]
+    B --> B2["poll"]
+    B --> B3["epoll"]
+    B --> B4["kqueue"]
+
+    C --> C1["IOCP"]
+    C --> C2["io_uring"]
+```
+
+如果压缩成一句话：
+
+```text
+epoll 告诉你“现在可以读/写了”
+IOCP 告诉你“之前提交的读/写已经完成了”
+io_uring 的主路径也是“提交 -> 完成”，但也能挂接 poll 类操作
+```
+
+### 8.2.2 select / poll / epoll / kqueue / IOCP / io_uring 对比
+
+| 维度 | select | poll | epoll | kqueue | IOCP | io_uring |
+|------|--------|------|-------|--------|------|----------|
+| 核心模型 | 同步就绪通知 | 同步就绪通知 | 同步就绪通知 | 同步就绪通知 | 异步提交 + 完成端口 | 异步提交 + 完成队列 |
+| 触发语义 | Readiness | Readiness | Readiness | Readiness | Completion | Completion |
+| 最大 FD / 请求规模 | 1024（FD_SETSIZE） | 无限制 | 无限制 | 无限制 | 无固定上限（受系统资源限制） | 无固定上限（受 ring/资源限制） |
+| 每次等待的代价 | 全量扫描 | 全量扫描 | 只取就绪事件 | 只取就绪事件 | 取完成结果 | 取 CQE 完成结果 |
+| 应用读写时机 | 收到可读/可写后自己读写 | 收到可读/可写后自己读写 | 收到可读/可写后自己读写 | 收到可读/可写后自己读写 | 先投递异步 I/O，完成后取结果 | 先提交 SQE，完成后取 CQE |
+| 主平台 | 全平台 | 全平台 | Linux | BSD/macOS | Windows | Linux（较新内核） |
+| 更接近的模式 | Reactor | Reactor | Reactor | Reactor | Proactor | 偏 Proactor，也可做混合模型 |
+| 适用场景 | 少量连接 | 中等连接 | Linux 大量长连接 | BSD/macOS 大量连接 | Windows 高并发异步服务器 | 极高并发 + 异步 I/O 深度优化 |
 
 补充说明：
 
 - `kqueue` 不是缺失项，它是 BSD/macOS 生态里的 `epoll` 对等方案；本章之前写得偏薄，这里补齐。
-- `io_uring` 不只是“新一代 epoll”，它把模型从“就绪通知”推进到“完成通知”，设计上更接近 Proactor。
+- `IOCP` 是 Windows 服务器领域非常经典的高并发模型，传统传奇类、网游后端大量使用它。
+- `io_uring` 不只是“新一代 epoll”，它把模型从“就绪通知”推进到“提交/完成队列”这一层；其主路径更接近 Proactor，但在 Linux 上也能承载 readiness 风格操作，因此更准确的说法是“偏 Proactor 的混合模型”。
 
-**游戏服务器为什么选 epoll**：
+### 8.2.3 为什么很多传统 Windows 游戏服务器会选 IOCP
+
+你提到的这点非常重要。很多传奇、棋牌、页游时代的服务端，历史包袱和部署习惯都偏 Windows，因此 `IOCP` 在工程上非常常见。
+
+它流行的原因大致有四个：
+
+1. **平台现实**
+   - 当时大量国内商业游戏后端直接部署在 Windows Server
+   - 团队的运维、工具链、监控链路也围绕 Windows 建立
+
+2. **模型成熟**
+   - `CreateIoCompletionPort / GetQueuedCompletionStatus` 这套接口很早就稳定
+   - 对 Windows 平台的高并发 socket 来说，它长期是标准答案
+
+3. **线程池友好**
+   - IOCP 天然就是“提交异步请求 -> 工作线程取完成事件”
+   - 很适合做高并发收发与工作线程池结合
+
+4. **工程经验沉淀**
+   - 大量成熟的 C++ 游戏网络库、商业框架、遗留项目都以 IOCP 为基础
+   - 团队更容易复用经验和模板
+
+所以如果讨论“传统传奇类游戏为什么常听到 IOCP”，答案很简单：
+
+- **因为它们很多本来就是 Windows 生态下成长起来的**
+- **而 IOCP 正是那个生态里最成熟的高并发网络模型之一**
+
+### 8.2.4 那为什么本章最终还是讲 epoll
+
+因为本书分析的这两套具体代码基线，不是“所有游戏服务器”，而是：
+
+- `KBEngine`
+- `BigWorld`
+
+这两套代码的实际取向都是：
+
+- 主部署平台偏 Linux
+- 主事件循环偏 Reactor
+- 代码里实际落地的是 `epoll / select / poll`
+- 并没有采用 `IOCP` 这条 Windows Proactor 路线
+
+所以这里更准确的说法不是“游戏服务器都选 epoll”，而是：
+
+- **这两套引擎在自己的代码基线里，最终落在 epoll/select 这一侧**
+- **不是因为 IOCP 不重要，而是因为它们的目标平台和架构取向不同**
+
+### 8.2.5 这两套引擎为什么最终落在 epoll/select
+
+**对这两套代码来说，为什么选 epoll**：
 - CellApp / BaseApp 每个进程维护数百到数千个 Channel（客户端 + 内部进程）
 - select 每次传全部 fd_set 内核 ↔ 用户态拷贝开销大
 - epoll 只返回就绪事件，O(1) 通知，不受总连接数影响
 - Linux 是两套引擎的主部署平台，`kqueue` 在该平台不可用
-- 对既有 Reactor 架构而言，切到 `io_uring` 意味着重写 I/O 生命周期与回调收束方式，迁移成本高
+- 对既有 Reactor 架构而言，切到 `IOCP / io_uring` 这类 completion 模型，意味着重写 I/O 生命周期与回调收束方式，迁移成本高
 
 ### KBEngine EventPoller
 
@@ -126,7 +207,7 @@ KBEngine 的 `EpollPoller::processPendingEvents` 逻辑相同。
 ### 8.3.1 先看设计思想（两句话抓住本质）
 
 - **Reactor（就绪通知）**：内核只告诉你“这个 fd 现在可读/可写”，真正的 `recv/send` 由应用线程执行。
-- **Proactor（完成通知）**：应用先提交异步 I/O，请求完成后内核/运行时再通知“读写已经完成”。
+- **Proactor（完成通知）**：应用先提交异步 I/O，请求完成后内核/运行时再通知“读写已经完成”。`IOCP` 是典型代表；`io_uring` 的主路径也更接近这种模式，但工程上可组合出混合形态。
 
 核心差别是：**通知的是“可以做”还是“已经做完”**。
 
@@ -135,7 +216,7 @@ KBEngine 的 `EpollPoller::processPendingEvents` 逻辑相同。
 | 通知语义 | Readiness（就绪） | Completion（完成） |
 | 谁执行真正读写 | 应用线程 | 内核/异步运行时 + 完成队列 |
 | 代码主循环 | `poll -> dispatch -> read/write` | `submit -> complete -> callback` |
-| 典型实现 | epoll/kqueue + 事件循环 | IOCP / io_uring（完成队列） |
+| 典型实现 | epoll/kqueue + 事件循环 | IOCP；`io_uring` 主路径也更接近这一侧 |
 
 ### 8.3.2 Reactor 的关键组成与职责（含本项目映射）
 
@@ -178,6 +259,33 @@ EventDispatcher::processOnce()
 
 优势在于：网络事件、定时器、任务队列在同一主循环中可统一观测和限流。
 
+如果把 readiness 和 completion 两类模型并排画出来，会更直观：
+
+```mermaid
+flowchart LR
+    subgraph R["Readiness / Reactor"]
+        R1["wait(epoll/select/kqueue)"]
+        R2["收到可读/可写事件"]
+        R3["应用线程执行 recv/send"]
+        R4["分发到 handler"]
+        R1 --> R2 --> R3 --> R4
+    end
+
+    subgraph P["Completion / Proactor-like"]
+        P1["submit async I/O"]
+        P2["内核/运行时执行 I/O"]
+        P3["completion queue / port"]
+        P4["dispatch completion handler"]
+        P1 --> P2 --> P3 --> P4
+    end
+```
+
+把它翻译成人话就是：
+
+- `epoll` 这一类先告诉你“现在可以操作了”，真正的 `recv/send` 还得你自己做
+- `IOCP` 这一类先让你把请求投出去，后面等“结果完成”再处理
+- `io_uring` 的主路径更接近右边，但在 Linux 上也能组合出带 poll 的混合风格
+
 ### 8.3.4 Proactor 的关键组成与职责（概念对照）
 
 当前两套引擎未采用 Proactor，但要理解它的组件才能看清取舍：
@@ -190,7 +298,7 @@ EventDispatcher::processOnce()
 | Completion Handler | 处理“已完成”结果 | `onReadDone/onWriteDone` |
 | Buffer/Context Manager | 管理缓冲区和请求上下文生命周期 | request context、引用计数、取消控制 |
 
-Proactor 的设计思想是：**把 I/O 执行外包给异步引擎，应用主要处理完成事件**。
+Proactor 的设计思想是：**把 I/O 执行外包给异步引擎，应用主要处理完成事件**。需要补一句现实世界的工程判断：`IOCP` 几乎是教科书式 Proactor；`io_uring` 虽然有明显的 submission/completion 结构，但由于还能组合 poll、timeout、link 等操作，工程上经常被用成偏 Proactor 的混合事件框架。
 
 ### 8.3.5 优缺点对照（工程视角）
 
@@ -261,6 +369,917 @@ class Channel : public TimerHandler, public PoolObject
 - 管理消息的**发送缓冲**（Bundle）
 - 管理消息的**路由分发**（MessageHandlers）
 - 管理**连接生命周期**（超时/断线/重连）
+
+### 8.4.1 Channel 的完整生命周期
+
+前面说 `Channel` 负责“连接生命周期”，但这里最容易犯的错误，就是把两个不同层次的生命周期混在一起：
+
+1. **单个 `Channel` 对象本身的技术生命周期**
+   - 创建、注册、收发、失效、注销、销毁、回收
+2. **同一个玩家连接控制权的生命周期**
+   - 首次绑定、连接丢失、等待重连、新连接接管旧 `Proxy`、恢复 `Witness`
+
+如果不先把这两层拆开，就很容易误读成：
+
+```text
+旧 Channel 断了
+  = 玩家生命周期结束
+  = 后面的重连是在让旧 Channel 复活
+```
+
+这两个结论其实都不对。
+**KBEngine 里更常见的模型是：旧 `Channel` 退场，新 `Channel` 接管旧 `Proxy`。**
+
+下面先讲**单个 `Channel` 对象**本身的生命周期：
+
+```mermaid
+stateDiagram-v2
+    [*] --> Created : createPoolObject / initialize
+    Created --> Active : registerChannel + 开始收发
+    Active --> Sending : send() 后有待发送数据
+    Sending --> Active : onSendCompleted()
+    Active --> Condemned : 超时 / recv错误 / 协议非法 / logout
+    Sending --> Condemned : send错误 / 协议非法
+    Active --> CondemnedWait : kick / 顶号 / relogin
+    Sending --> CondemnedWait : condemn(reason, true)
+    Condemned --> Destroyed : deregister + destroy
+    CondemnedWait --> Destroyed : 发送完成后 deregister + destroy
+    Destroyed --> Reclaimed : reclaimPoolObject
+```
+
+如果换成一句更工程化的话：
+
+```text
+Channel 先被创建并接入 NetworkInterface，
+在活跃态里负责收包、拆包、组包、发包；
+一旦被标记为 condemn，就不再是合法会话；
+随后在 processChannels() 中真正 destroy 并回收到对象池。
+```
+
+#### 第 1 阶段：创建与初始化
+
+`Channel` 不是普通 `new/delete` 风格对象，而是对象池对象。它会先通过对象池创建，再初始化底层 endpoint、协议类型、收发器等。
+
+对应入口：
+
+- [channel.cpp:41](/D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L41) `Channel::createPoolObject`
+- [channel.cpp:182](/D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L182) `Channel::initialize`
+
+这一阶段做的事主要是：
+
+- 绑定 `NetworkInterface`
+- 绑定 `EndPoint`
+- 根据协议类型安装 `PacketReceiver` / `PacketSender`
+- 注册读事件
+- 准备进入可收发状态
+
+可以画成：
+
+```mermaid
+flowchart TD
+    A["对象池 createPoolObject()"] --> B["initialize()"]
+    B --> C["绑定 NetworkInterface / EndPoint"]
+    C --> D["创建 PacketReceiver / PacketSender"]
+    D --> E["注册 fd 到 EventDispatcher"]
+    E --> F["进入 Active"]
+```
+
+#### 第 2 阶段：活跃态
+
+进入活跃态后，`Channel` 就成了这一条连接的真实运行态。它至少维护以下几类东西：
+
+- 地址和 endpoint
+- 收包解析状态：`PacketReader`
+- 发包缓冲：`bundles_`
+- 协议状态：TCP / KCP / WebSocket / Filter
+- 超时状态：`startInactivityDetection()`
+- 统计信息：收发字节数、包数
+- 会话附着信息：例如 `proxyID`
+
+这一层最关键的不是“它能发包”，而是：
+
+- 它知道当前还剩多少待发数据
+- 它知道这个连接是否超时
+- 它知道这个连接是不是已经进入待销毁状态
+
+#### 第 3 阶段：发送中
+
+当逻辑层调用 `Channel::send()` 后，`Bundle` 会被挂到发送队列里；如果当前不在发送中，就启动 `PacketSender`，必要时把写事件注册到 `EventDispatcher`。
+
+对应代码：
+
+- [channel.cpp:747](/D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L747) `Channel::send`
+- [channel.cpp:888](/D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L888) `Channel::stopSend`
+- [channel.cpp:910](/D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L910) `Channel::onSendCompleted`
+
+这个阶段可以理解成：
+
+```text
+Bundle 已经进入 Channel 的发送窗口
+  -> PacketSender 持续 flush 到 socket
+  -> flush 完成后 onSendCompleted()
+  -> 回到 Active
+```
+
+#### 第 4 阶段：被 condemn
+
+这是最容易误解的一步。
+
+`condemn()` 不是普通的“马上 close”，而是：
+
+- 把 `Channel` 标记为**已经不合法**
+- 阻止它继续作为正常会话参与收发
+- 交给后续主循环统一销毁
+
+对应实现见 [channel.cpp:1033](/D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L1033)：
+
+```cpp
+void Channel::condemn(const std::string& reason, bool waitSendCompletedDestroy)
+{
+    if (condemnReason_.size() == 0)
+        condemnReason_ = reason;
+
+    flags_ |= (waitSendCompletedDestroy ? FLAG_CONDEMN_AND_WAIT_DESTROY : FLAG_CONDEMN);
+}
+```
+
+这里有两种语义：
+
+- `condemn(reason)`
+  - 立即进入待销毁状态
+- `condemn(reason, true)`
+  - 如果还有发送中的数据，先等发送完成，再销毁
+
+这也是为什么在重连挤旧连接时，常见写法是：
+
+```cpp
+pOldChannel->condemn("", true);
+```
+
+意思不是“永远保留旧连接”，而是：
+
+- 旧连接已经作废
+- 但允许其发送窗口尽量收尾
+- 然后再统一销毁
+
+#### 第 5 阶段：统一销毁
+
+真正执行销毁的地方不是 `condemn()` 本身，而是 `NetworkInterface::processChannels()`。
+
+关键逻辑见 [network_interface.cpp:432](/D:/workspaces/kbengine/kbe/src/lib/network/network_interface.cpp#L432)：
+
+```cpp
+if (pChannel->condemn() == FLAG_CONDEMN_AND_WAIT_DESTROY && pChannel->sending())
+{
+    pChannel->updateTick(pMsgHandlers);
+}
+else
+{
+    deregisterChannel(pChannel);
+    pChannel->destroy();
+    Channel::reclaimPoolObject(pChannel);
+}
+```
+
+也就是说，主循环对 `condemn` channel 的处理规则是：
+
+1. 如果只是 `WAIT_DESTROY`，并且仍有待发数据
+   - 继续让它跑一个发送收尾流程
+2. 否则
+   - 从 `NetworkInterface` 注销
+   - 调用 `destroy()`
+   - 回收到对象池
+
+所以从设计上看：
+
+```text
+condemn = 宣告这条连接已经无效
+destroy = 真正关闭底层资源
+reclaimPoolObject = 把对象放回池中复用
+```
+
+#### 第 6 阶段：destroy 清理了什么
+
+`Channel::destroy()` 本身很薄，真正的清理在 `clearState()`，见 [channel.cpp:533](/D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L533)。
+
+它会收束的内容包括：
+
+- 清空发送队列 `bundles_`
+- 清零统计数据
+- 清掉 `proxyID`、`extra`、`condemnReason`
+- 停止发送
+- 注销读事件
+- 停止 inactivity timer
+- 关闭底层 `EndPoint`
+- 重置 `PacketReader`
+- 结束 KCP/SSL 等附着状态
+
+这一步很关键，因为它说明 `destroy()` 不是业务层“掉线通知”，而是网络运行时层面的**彻底资源收束**。
+
+#### 常见失效来源：并不只有超时
+
+如果只把 `Channel` 生命周期理解成“超时断线”，那其实只看到了一个入口。
+真实项目里更常见的是下面几大类：
+
+```mermaid
+flowchart TD
+    A["Active Channel"] --> B["超时未收到数据"]
+    A --> C["对端主动断开 / recv 返回 0"]
+    A --> D["socket 读写错误"]
+    A --> E["协议异常 / 非法包 / WebSocket frame error"]
+    A --> F["业务主动下线 logout"]
+    A --> G["踢线 / 顶号 / relogin 接管"]
+
+    B --> H["onChannelTimeOut"]
+    C --> I["TCPPacketReceiver::onGetError"]
+    D --> J["TCPPacketSender / Receiver::onGetError"]
+    E --> K["condemn(reason)"]
+    F --> L["condemn(\"\")"]
+    G --> M["proxyID(0) + condemn(\"\", true)"]
+
+    H --> N["deregisterChannel / destroy"]
+    I --> N
+    J --> N
+    K --> O["processChannels()"]
+    L --> O
+    M --> O
+    O --> N
+    N --> P["回收对象池"]
+```
+
+分别对应：
+
+- **超时**
+  - `Channel::handleTimeout()` 调 `networkInterface().onChannelTimeOut(this)`，见 [channel.cpp](D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L660)
+- **对端主动断开 / recv 读到 EOF**
+  - `TCPPacketReceiver::processRecv()` 中 `len == 0`，随后进入 `onGetError(pChannel, "disconnected")`，见 [tcp_packet_receiver.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_receiver.cpp#L105)
+- **socket 读写错误**
+  - 读错误走 `TCPPacketReceiver::onGetError()`，见 [tcp_packet_receiver.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_receiver.cpp#L118)
+  - 发错误先走 `TCPPacketSender::onGetError()` 做 `condemn(err)`，再由后续主循环统一收束，见 [tcp_packet_sender.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_sender.cpp#L79)
+- **协议异常 / 非法包**
+  - 例如未知 MessageID、消息长度超限、packet invalid、WebSocket frame error
+  - 典型入口见 [packet_reader.cpp](D:/workspaces/kbengine/kbe/src/lib/network/packet_reader.cpp#L85)、[channel.cpp](D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L1198)、[websocket_packet_filter.cpp](D:/workspaces/kbengine/kbe/src/lib/network/websocket_packet_filter.cpp#L207)
+- **业务主动下线**
+  - `Baseapp::logoutBaseapp()` 中直接对当前连接 `condemn("")`，见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3950)
+- **踢线 / 顶号 / 重连接管**
+  - 这类不是“简单断线”，而是**旧连接退场，新连接接管**
+  - 典型入口见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4048) `kickChannel()` 和 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3974) `reloginBaseapp()`
+
+如果再把“是否会上抛到玩家层”压缩成一张矩阵，会更容易把边界看清楚：
+
+| 场景 | 典型入口 | 会走 `onChannelTimeOut` 吗 | 会走 `deregisterChannel` 吗 | 一定触发 `Proxy::onClientDeath()` 吗 | 是否可能进入重连接管 |
+|------|----------|---------------------------|-----------------------------|--------------------------------------|----------------------|
+| inactivity 超时 | `Channel::handleTimeout()` | 会 | 会 | 通常会 | 会 |
+| 对端断开 / recv EOF | `TCPPacketReceiver::onGetError()` | 不会 | 会 | 通常会 | 会 |
+| socket 读写错误 | `TCPPacketReceiver/TCPPacketSender::onGetError()` | 不一定 | 会或后续主循环会处理 | 通常会 | 会 |
+| 协议错误 / 非法包 | `PacketReader::condemn()` / `Channel::processPackets()` | 不会 | 会 | 通常会 | 一般不作为正常重连入口 |
+| 主动 logout | `Baseapp::logoutBaseapp()` | 不会 | 后续主循环会处理 | 通常会 | 可以之后重新登录 |
+| kick / 顶号 / relogin 接管 | `kickChannel()` / `reloginBaseapp()` | 不会 | 会 | **不一定** | **是** |
+
+表里最重要的一格是最后一行：
+
+- `kick / 顶号 / relogin` 的旧连接退场
+- **不应该简单等同于“玩家离线事件”**
+- 因为这类流程常常会先把旧连接 `proxyID(0)`，再让它退出
+
+#### 连接死亡后，如何把事件通知到上层
+
+前面几段已经说明了 `Channel` 会超时、会被 `condemn`、最终会被 `deregister + destroy`。
+但对玩法层来说，真正重要的问题其实是：
+
+```text
+连接死了以后，Baseapp / Proxy / 脚本层到底是怎么知道的？
+```
+
+答案是：**不是 `Channel` 直接通知玩法层，而是 `NetworkInterface` 先把连接死亡事件向上抛给 `ServerApp`，再由 `Baseapp` 翻译成 `Proxy::onClientDeath()`。**
+
+这一层抽象在源码里有三处固定锚点：
+
+1. `ChannelTimeOutHandler / ChannelDeregisterHandler` 接口定义
+   见 [interfaces.h](D:/workspaces/kbengine/kbe/src/lib/network/interfaces.h#L27)
+2. `NetworkInterface` 持有这两个 handler 指针
+   见 [network_interface.h](D:/workspaces/kbengine/kbe/src/lib/network/network_interface.h#L46)
+3. `ServerApp` 继承并注册这两个 handler
+   见 [serverapp.h](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.h#L37) 和 [serverapp.cpp](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.cpp#L57)
+
+先把总链路看清楚：
+
+```mermaid
+sequenceDiagram
+    participant CH as Channel
+    participant NI as NetworkInterface
+    participant SA as ServerApp/Baseapp
+    participant PX as Proxy
+    participant SC as Script
+
+    CH->>NI: onChannelTimeOut / deregisterChannel
+    NI->>SA: onChannelTimeOut / onChannelDeregister
+    SA->>PX: proxy->onClientDeath()
+    PX->>SC: 脚本 onClientDeath()
+```
+
+上面这张图里，最容易被忽略的一点是：
+
+- `condemn()` 只是“宣判这个连接不再可用”
+- **真正把事件抛给上层的边界，是 `onChannelTimeOut()` 或 `deregisterChannel()`**
+
+### 先看源码骨架：handler 是怎么挂上的
+
+`ServerApp` 本身同时实现了 `ChannelTimeOutHandler` 和 `ChannelDeregisterHandler`：
+
+```cpp
+class ServerApp :
+    public Network::ChannelTimeOutHandler,
+    public Network::ChannelDeregisterHandler
+{
+    virtual void onChannelTimeOut(Network::Channel * pChannel);
+    virtual void onChannelDeregister(Network::Channel * pChannel);
+};
+```
+
+对应源码见 [serverapp.h](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.h#L37)。
+
+然后在构造函数里，`ServerApp` 显式把自己挂到 `NetworkInterface` 上：
+
+```cpp
+networkInterface_.pChannelTimeOutHandler(this);
+networkInterface_.pChannelDeregisterHandler(this);
+```
+
+对应源码见 [serverapp.cpp](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.cpp#L57)。
+
+所以从这一刻开始：
+
+- 连接超时，`NetworkInterface` 会回调 `ServerApp::onChannelTimeOut()`
+- 连接注销，`NetworkInterface` 会回调 `ServerApp::onChannelDeregister()`
+
+### 第一类入口：超时断线
+
+这一条链是最标准、也最容易读懂的。
+
+#### 1. `Channel` 自己发现“长期没收到数据”
+
+`Channel::handleTimeout()` 里如果发现超过 `inactivityExceptionPeriod_`，就会调用：
+
+```cpp
+this->networkInterface().onChannelTimeOut(this);
+```
+
+见 [channel.cpp](D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L660)。
+
+这里很关键，因为 `Channel` 到这里为止只是说了一句话：
+
+```text
+这个连接超时了
+```
+
+它还没有直接去找 `Proxy`，也没有直接调脚本。
+
+#### 2. `NetworkInterface` 把“超时”抛给上层 handler
+
+`NetworkInterface::onChannelTimeOut()` 的实现非常薄，只做一件事：
+
+```cpp
+if (pChannelTimeOutHandler_)
+{
+    pChannelTimeOutHandler_->onChannelTimeOut(pChannel);
+}
+```
+
+见 [network_interface.cpp](D:/workspaces/kbengine/kbe/src/lib/network/network_interface.cpp#L417)。
+
+也就是说，**`NetworkInterface` 只是事件中转站，它不做玩家逻辑。**
+
+#### 3. `ServerApp` 执行默认超时收尾
+
+`ServerApp::onChannelTimeOut()` 的默认实现是：
+
+```cpp
+pChannel->condemn("timedout");
+networkInterface_.deregisterChannel(pChannel);
+pChannel->destroy();
+Network::Channel::reclaimPoolObject(pChannel);
+```
+
+见 [serverapp.cpp](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.cpp#L286)。
+
+注意这里的顺序：
+
+1. 先 `condemn`
+2. 再 `deregisterChannel`
+3. 再 `destroy`
+4. 最后回收到对象池
+
+这说明“超时”只是死亡原因，而“真正把连接从网络层摘掉”的动作是 `deregisterChannel()`。
+
+### 第二类入口：socket 正常断开或底层读错误
+
+如果不是 inactivity timeout，而是 TCP 读包时发现对端断开或 socket 出错，链路会从 `TCPPacketReceiver` 进来。
+
+#### 1. `recv()` 返回 0，表示对端已经断开
+
+`TCPPacketReceiver::processRecv()` 中：
+
+```cpp
+else if(len == 0)
+{
+    TCPPacket::reclaimPoolObject(pReceiveWindow);
+    onGetError(pChannel, "disconnected");
+    return false;
+}
+```
+
+见 [tcp_packet_receiver.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_receiver.cpp#L100)。
+
+#### 2. 读错误统一走 `onGetError()`
+
+`TCPPacketReceiver::onGetError()` 会直接执行：
+
+```cpp
+pChannel->condemn(err);
+pChannel->networkInterface().deregisterChannel(pChannel);
+pChannel->destroy();
+Network::Channel::reclaimPoolObject(pChannel);
+```
+
+见 [tcp_packet_receiver.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_receiver.cpp#L118)。
+
+可以看到，这条链**不会先经过 `onChannelTimeOut()`**，但依然会进入：
+
+```text
+deregisterChannel()
+  -> onChannelDeregister()
+```
+
+所以对上层来说：
+
+- 超时断线和 socket 断开，来源不同
+- 但最后都会在 `deregisterChannel()` 这个边界汇合
+
+### 第三类入口：协议错误、非法消息、长度异常
+
+如果连接还活着，但包本身已经非法，路径又不一样。
+
+例如 `PacketReader::processMessages()` 里发现未知消息号或消息长度异常时，会做：
+
+```cpp
+pChannel_->condemn("PacketReader::processMessages: not found msgID");
+```
+
+见 [packet_reader.cpp](D:/workspaces/kbengine/kbe/src/lib/network/packet_reader.cpp#L85)。
+
+这里先只有 `condemn()`，还没有立刻通知上层。
+真正的清理发生在 `NetworkInterface::processChannels()`：
+
+```cpp
+else if(pChannel->condemn() > 0)
+{
+    ...
+    deregisterChannel(pChannel);
+    pChannel->destroy();
+    Network::Channel::reclaimPoolObject(pChannel);
+}
+```
+
+见 [network_interface.cpp](D:/workspaces/kbengine/kbe/src/lib/network/network_interface.cpp#L443)。
+
+所以这一类错误说明得更清楚一点就是：
+
+- 解析层先把连接标记为“应当死亡”
+- 网络层主循环在稳定边界统一做 `deregister + destroy`
+- 上层依旧是通过 `onChannelDeregister()` 感知死亡
+
+### 不同来源，最终汇合到同一个“上抛边界”
+
+把三种来源合在一起看，就很清楚了：
+
+```mermaid
+flowchart TD
+    A["Channel::handleTimeout"] --> D["NetworkInterface::onChannelTimeOut"]
+    D --> E["ServerApp::onChannelTimeOut"]
+    E --> F["deregisterChannel()"]
+
+    B["TCPPacketReceiver::onGetError"] --> F
+    C["PacketReader::condemn"] --> G["NetworkInterface::processChannels"]
+    G --> F
+
+    F --> H["ServerApp::onChannelDeregister"]
+    H --> I["Baseapp::onChannelDeregister"]
+    I --> J["Proxy::onClientDeath"]
+    J --> K["脚本 onClientDeath"]
+```
+
+这张图就是本节最关键的结论：
+
+- **断线原因可能很多**
+- **上层真正稳定依赖的通知边界是 `onChannelDeregister()`**
+
+不过这里还有一个现实限制：虽然 `Channel` 内部有 `condemnReason()`，网络层也有 `Network::Reason` 这类枚举，但 KBEngine 默认并没有把这些原因继续传到脚本层 `onClientDeath`。
+也就是说，底层能记录一些原因，业务脚本默认只收到“客户端绑定消失了”这个结果。更细粒度的玩家断线原因控制，见 [22-player-complete-lifecycle.md](D:/workspaces/kbengine/docs-vuepress/study/22-player-complete-lifecycle.md#L523)。
+
+### `Baseapp` 是如何把“连接死亡”翻译成“玩家掉线”的
+
+`Baseapp::onChannelDeregister()` 里先处理内部组件通道，然后再看这条外部连接是否绑定了某个 `proxyID`：
+
+```cpp
+ENTITY_ID pid = pChannel->proxyID();
+...
+if(pid > 0)
+{
+    Proxy* proxy = static_cast<Proxy*>(this->findEntity(pid));
+    if(proxy)
+    {
+        proxy->onClientDeath();
+    }
+}
+```
+
+见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L797)。
+
+这一步的意义是：
+
+- `NetworkInterface` 只知道“某条连接被注销了”
+- `Baseapp` 负责把它翻译成“这个连接原来属于哪个 `Proxy`”
+- `Proxy` 才继续把它翻译成玩家业务事件
+
+但这里必须补一句很重要的限制条件：
+
+```text
+不是所有 onChannelDeregister 都一定会变成 Proxy::onClientDeath()
+```
+
+因为 `Baseapp::onChannelDeregister()` 是否继续找到 `Proxy`，取决于这条 `Channel` 退场时是否还保留 `proxyID`。
+在 `kick / 顶号 / relogin` 这类接管型流程里，旧连接往往会先做：
+
+```cpp
+pOldChannel->proxyID(0);
+pOldChannel->condemn("", true);
+```
+
+见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4008) 和 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4061)。
+
+这意味着旧连接之后即使完成 `deregister`，也不会再被翻译成“这个玩家离线了”。
+它更准确的语义其实是：
+
+```text
+这个旧连接已经失去对 Proxy 的所有权
+```
+
+### `Proxy::onClientDeath()` 才是脚本层常用的断线 hook
+
+最终进入 `Proxy::onClientDeath()`：
+
+```cpp
+Py_DECREF(clientEntityCall());
+clientEntityCall(NULL);
+addr(Network::Address::NONE);
+
+clientEnabled_ = false;
+CALL_ENTITY_AND_COMPONENTS_METHOD(this,
+    SCRIPT_OBJECT_CALL_ARGS0(pyTempObj, const_cast<char*>("onClientDeath"), GETERR));
+```
+
+见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L217)。
+
+这说明 `Proxy` 层做了几件上层真正关心的事：
+
+1. 解绑旧的 `clientEntityCall`
+2. 清掉旧客户端地址
+3. 标记 `clientEnabled_ = false`
+4. 调脚本层 `onClientDeath`
+
+所以真正值得玩法逻辑依赖的，不是 `Channel::condemn()`，而是：
+
+```text
+NetworkInterface.deregisterChannel()
+  -> Baseapp.onChannelDeregister()
+  -> Proxy.onClientDeath()
+  -> 脚本 onClientDeath()
+```
+
+如果把它压缩成一句最短记忆链，可以这样背：
+
+```text
+连接死亡来源很多
+  -> 最终进入 deregisterChannel
+  -> Baseapp.onChannelDeregister
+  -> Proxy.onClientDeath
+  -> 脚本 onClientDeath
+```
+
+#### 为什么要分成 timeout 和 deregister 两个通知
+
+这里还有一个细节很重要：上层不是只收到一个“断开了”的事件，而是有两类通知：
+
+- `onChannelTimeOut`
+  - 表示“连接因超时进入死亡流程”
+  - 更接近**原因**
+- `onChannelDeregister`
+  - 表示“连接已经从网络层注册表里移除”
+  - 更接近**状态边界**
+
+这两个事件的价值不同：
+
+- 做统计、日志、超时原因分析时，更关心 `onChannelTimeOut`
+- 做实体解绑、玩法收束时，更关心 `onChannelDeregister`
+
+也正因为如此，`Baseapp` 主要接的是 **deregister 这一层**，而不是直接在 `Channel` 里做玩家逻辑。
+
+#### 为什么要分成 condemn 和 destroy 两步
+
+这是一个很典型的运行时设计点。
+
+如果在任意读包/发包/回调现场直接 `destroy()`，很容易破坏：
+
+- 当前正在遍历的连接表
+- 发送队列状态
+- 正在进行中的回调栈
+- poller / dispatcher 注册状态
+
+所以 KBEngine 选择：
+
+- 先 `condemn`
+- 再由 `processChannels()` 在统一边界做真正销毁
+
+这和前面讲的游戏逻辑分层是同一种思路：**先标记状态，再在稳定时机收束资源**。
+
+#### 和玩家断线重连的关系
+
+把 `Channel` 生命周期放回玩家模型里看，会更容易理解：
+
+```text
+Channel 死亡
+  != Proxy 死亡
+  != Avatar 业务状态丢失
+```
+
+也就是说：
+
+- `Channel` 是网络会话层对象
+- `clientEntityCall` 是客户端绑定层引用
+- `Proxy / Avatar` 是玩家业务对象
+
+所以玩家掉线时，通常应该：
+
+1. 废弃旧 `Channel`
+2. 清理或重绑 `clientEntityCall`
+3. 保留 `Proxy / Avatar`
+4. 等新连接重连回来再绑定
+
+这也是为什么 PvP、队伍、跨服匹配状态不能绑在 `Channel` 上，而应该绑在 `Avatar.databaseID` 或玩法服务状态上。
+
+但这里还要进一步强调一件事：
+
+```text
+“连接生命周期完整” 不等于 “只把旧连接怎么死讲明白”
+```
+
+如果从玩家视角看，一个完整周期至少应包括：
+
+1. 新 `Channel` 创建并绑定到 `Proxy`
+2. 正常活跃收发
+3. 因某种原因失效或被替换
+4. 旧 `Channel` 退场
+5. 新 `Channel` 重新接管旧 `Proxy`
+6. `Proxy` / `Witness` / 视野 / 脚本状态恢复
+
+所以更完整的图应该是这样：
+
+```mermaid
+flowchart TD
+    A["新 Channel 创建"] --> B["绑定到 Proxy<br/>createClientProxies"]
+    B --> C["Active 收发中"]
+
+    C --> D["超时 / socket断开 / 协议错误"]
+    C --> E["logout 主动下线"]
+    C --> F["kick / 顶号 / relogin 接管"]
+
+    D --> G["deregister + onClientDeath"]
+    E --> G
+    F --> H["旧 Channel proxyID(0)<br/>condemn('', true)"]
+    H --> I["新 Channel 绑定旧 Proxy"]
+    I --> J["createClientProxies(proxy, true)"]
+    J --> K["Proxy.onClientEnabled"]
+    K --> L["Proxy.onGetWitness"]
+    L --> M["Cell Entity.onGetWitness(true)"]
+    M --> N["resetViewEntities / 世界表现恢复"]
+
+    G --> O["等待之后可能再次 relogin"]
+    O --> I
+```
+
+这张图里的关键结论有两个：
+
+- **旧 `Channel` 死亡，不代表玩家业务对象死亡**
+- **重连不是让旧 `Channel` 复活，而是让新 `Channel` 接管旧 `Proxy`**
+
+### 首次绑定：新连接如何接入 `Proxy`
+
+无论是首次登录，还是某些“在线但需要换连接”的流程，本质上都要走“把 `Channel` 绑定到 `Proxy`”这一步。
+
+`Baseapp::createClientProxies()` 里做的核心动作是：
+
+```cpp
+Network::Channel* pChannel = pEntity->clientEntityCall()->getChannel();
+pChannel->proxyID(pEntity->id());
+pEntity->addr(pChannel->addr());
+...
+pEntity->onClientEnabled();
+```
+
+见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3142)。
+
+这意味着首次接入至少完成了三件事：
+
+1. 把 `Channel.proxyID` 绑到目标 `Proxy`
+2. 把 `Proxy.addr` 更新成当前客户端地址
+3. 触发 `Proxy::onClientEnabled()`，把“客户端已可用”上抛到脚本层
+
+### 旧连接退场：为什么 kick / 顶号 / relogin 不等于普通断线
+
+这类场景和“对端掉线”最大的区别在于：
+
+- 不是简单把旧连接判死就结束了
+- 而是要**保证控制权平滑切到新连接**
+
+先看 `Baseapp::kickChannel()`：
+
+```cpp
+pChannel->send(onKickedBundle);
+pChannel->proxyID(0);
+pChannel->condemn("", true);
+```
+
+见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4048)。
+
+这里先把 `proxyID` 清成 `0` 很关键，因为这表示：
+
+- 这个旧 `Channel` 之后即使再走 `onChannelDeregister()`
+- `Baseapp::onChannelDeregister()` 也不会再把它翻译成某个 `Proxy` 的 `onClientDeath()`
+
+这正是“接管型重连”和“普通断线”最本质的区别。
+在接管流程里，系统并不希望把旧连接的退场再次解释成“玩家真的离线了”。
+
+### 重连：不是旧 Channel 复活，而是新 Channel 接管旧 Proxy
+
+`Baseapp::reloginBaseapp()` 就是最典型的源码入口：
+
+```cpp
+if(pMBChannel)
+{
+    pMBChannel->proxyID(0);
+    pMBChannel->condemn("", true);
+}
+
+entityClientEntityCall->addr(pChannel->addr());
+proxy->addr(pChannel->addr());
+pChannel->proxyID(proxy->id());
+proxy->rndUUID(KBEngine::genUUID64());
+
+createClientProxies(proxy, true);
+proxy->onGetWitness();
+```
+
+见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3974)。
+
+这一段代码已经把“重连恢复”说得非常清楚了：
+
+1. 旧连接如果还活着，先取消它对 `Proxy` 的所有权
+2. 旧连接进入 `condemn("", true)`，等待平滑退场
+3. 把 `clientEntityCall` / `Proxy.addr` 改成新连接地址
+4. 把**新 `Channel`** 的 `proxyID` 绑回原 `Proxy`
+5. 重新发一轮完整客户端初始化数据
+6. 再通知 Cell 侧恢复 `Witness`
+
+所以这里的抽象不是：
+
+```text
+旧 Channel 断了 -> 旧 Channel 重新连上 -> 旧 Channel 继续用
+```
+
+而是：
+
+```text
+旧 Channel 退场
+  -> 新 Channel 建立
+  -> 新 Channel 接管旧 Proxy
+  -> 重新恢复客户端与世界表现
+```
+
+### 重连成功后，哪些 hook 才算进入“恢复阶段”
+
+重连成功后，脚本真正关心的不是一个单独的“reconnect success”回调，而是一串分层恢复动作：
+
+1. `createClientProxies(proxy, true)`
+   - 重发 `onCreatedProxies`
+   - 内部会调用 `Proxy::onClientEnabled()`
+   - 见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3142)
+2. `Proxy::onClientEnabled()`
+   - 设置 `clientEnabled_ = true`
+   - 调脚本层 `onClientEnabled`
+   - 见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L174)
+3. `Proxy::onGetWitness()`
+   - 向 Cell 发送 `onGetWitnessFromBase`
+   - 见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L423)
+4. `Entity::onGetWitness(true)`
+   - 如果已有 witness，则执行 `pWitness_->onAttach(this)` 和 `resetViewEntities()`
+   - 见 [entity.cpp](D:/workspaces/kbengine/kbe/src/server/cellapp/entity.cpp#L2092)
+
+也就是说，真正完整的“重连恢复”不是一个 hook，而是下面这一串：
+
+```text
+新 Channel 接管 Proxy
+  -> onClientEnabled
+  -> onGetWitness
+  -> resetViewEntities
+```
+
+这就是为什么说，`Channel` 生命周期如果只讲“旧连接怎么失效”，那其实还没讲完。
+
+如果要继续看这些连接事件如何落到玩家生命周期、匹配状态、断线宽限期和重连恢复策略上，可以接着看 [22-player-complete-lifecycle.md](D:/workspaces/kbengine/docs-vuepress/study/22-player-complete-lifecycle.md#L523)。
+
+#### 为什么 Channel 生命周期里没有“断线重连 hook”
+
+这也是一个特别容易误解的点。
+
+很多人第一次看这里会直觉地问：
+
+- 连接断了，不就是 `Channel` 的事情吗？
+- 那为什么没有在 `Channel` 里直接提供 `onDisconnect / onReconnect` 这种玩家级 hook？
+
+答案是：**因为 `Channel` 层只知道“这条网络连接死了/活了”，它不知道“这个连接在业务上代表哪个玩家、哪个实体、哪个玩法状态”。**
+
+也就是说，`Channel` 层负责的是：
+
+- socket / endpoint 生命周期
+- 读写状态
+- timeout / condemn / destroy
+- 连接注册与回收
+
+而“玩家掉线重连”这件事，已经不是纯网络问题了，它至少还涉及：
+
+- 当前 `Channel` 绑定的是不是某个 `Proxy`
+- 这个 `Proxy` 是否仍然活着
+- `clientEntityCall` 是否需要清理或重绑
+- `Cell` 侧控制权是否需要恢复
+- 视野/Witness 是否需要重建
+- 脚本层是否要收到 `onClientDeath / onClientEnabled`
+
+所以真正的分层应该画成：
+
+```mermaid
+flowchart TD
+    A["Channel 层\n网络连接死亡/创建"] --> B["ServerApp / Baseapp\nonChannelDeregister / reloginBaseapp"]
+    B --> C["Proxy 层\nonClientDeath / onClientEnabled"]
+    C --> D["Cell / Witness 层\nonGetWitness / resetViewEntities"]
+    D --> E["脚本业务层\n匹配 / 队伍 / 战斗恢复"]
+```
+
+这就是为什么：
+
+- **`Channel` 没有玩家级 hook**
+- **玩家级 hook 在 `Proxy`**
+- **重连恢复的真正入口在 `Baseapp`**
+
+对应源码链路也很清楚：
+
+1. **断线**
+   - `Channel` 被 `condemn/destroy`
+   - `Baseapp::onChannelDeregister()` 被调用，见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L797)
+   - 如果 `proxyID > 0`，则找到对应 `Proxy` 并调用 `proxy->onClientDeath()`，见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L816)
+   - `Proxy::onClientDeath()` 再清理 `clientEntityCall`、清地址、调脚本 hook，见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L217)
+
+2. **重连**
+   - 新 `Channel` 进来后走 `Baseapp::reloginBaseapp()`，见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3974)
+   - 这里不是让旧 `Channel` 复活，而是把**新连接重新绑定到原 `Proxy`**
+   - 然后执行 `createClientProxies(proxy, true)`、`proxy->onGetWitness()`，让客户端与 Cell 表现层重建
+   - `onClientEnabled()` 也在 `createClientProxies()` 中被触发
+
+所以更准确的抽象是：
+
+```text
+Channel 层：连接断了
+Baseapp 层：这个断开的连接原来属于哪个 Proxy
+Proxy 层：玩家客户端死了 / 玩家客户端重新可用了
+Cell/Witness 层：世界表现需要重新恢复
+```
+
+如果把“断线重连 hook”强塞进 `Channel`，会立刻遇到两个问题：
+
+1. **职责污染**
+   - `Channel` 将不得不理解 `Proxy / Avatar / Cell / Witness`
+   - 网络层和实体层耦合会急剧上升
+
+2. **一对多映射问题**
+   - 不是所有 `Channel` 都代表玩家客户端
+   - 很多 `Channel` 是 BaseApp ↔ CellApp、BaseApp ↔ DBMgr 的内部连接
+   - 对这些内部通道，玩家级 hook 根本没有意义
+
+所以从架构上看，当前这种分层是合理的：
+
+- `Channel` 管连接
+- `Baseapp` 把连接事件翻译成实体事件
+- `Proxy` 再把实体事件翻译成脚本/玩法事件
 
 ### BigWorld Channel：抽象基类
 

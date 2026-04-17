@@ -571,7 +571,898 @@ KBEngine 的 `BaseApp::reloginBaseapp`：
 - **Base 层**：恢复会话（Proxy 绑定新客户端）
 - **Cell 层**：恢复世界表现（Witness 重建视野）
 
-### 22.10.3 控制权转移
+这里还要特别强调一个容易混淆的事实：
+
+- **重连不是重新创建一个新的玩家业务对象**
+- **重连的本质是把新的客户端会话重新绑定回已有 `Proxy`**
+
+也就是说，真正被替换的是网络连接和客户端引用，不是玩家在服务端的业务身份。
+
+### 22.10.3 断线重连的分层模型
+
+如果把断线重连抽象成分层模型，至少要区分下面四层：
+
+| 层 | 典型对象 | 断线时怎么处理 | 重连时怎么处理 |
+|------|---------|--------------|--------------|
+| **网络连接层** | `Channel` / socket | 断开、回收 | 建立新连接 |
+| **客户端绑定层** | `clientEntityCall` / `proxy.addr` / `clientEnabled_` | 清理或失效 | 重新绑定到新连接 |
+| **玩家业务身份层** | `Proxy` / `Avatar` / `Account` | 通常保留 | 继续复用同一业务对象 |
+| **玩法业务状态层** | 队伍、匹配、房间、战斗、惩罚状态 | 不应因断线直接丢弃 | 由服务端状态机决定恢复或清理 |
+
+可以把它压缩成一句话：
+
+```text
+断线 = 会话层失效
+重连 = 新会话重新绑定旧业务身份
+```
+
+这也是为什么 `BaseApp::reloginBaseapp` 主要做的是：
+
+1. 校验 `entityID + rndUUID`
+2. 处理旧 `clientEntityCall` / 旧通道
+3. 把新地址重新绑定到原 `Proxy`
+4. 重新执行 `createClientProxies(proxy, true)`
+5. 通过 `Proxy::onGetWitness()` 让 Cell 侧恢复控制权和视野
+
+从设计上看，这意味着下面几条规则必须单独成立：
+
+- **断线 != 登出**
+- **断线 != 取消匹配**
+- **断线 != 逃跑处罚**
+- **断线 != 销毁玩家业务对象**
+
+### 22.10.4 从 Channel 生命周期延伸出来的 hook 链
+
+如果继续往下问一个更工程化的问题，其实就是：
+
+```text
+Channel 死了以后，到底还会触发哪些后续 hook？
+重连成功以后，又会按什么顺序恢复？
+```
+
+这里最重要的不是单个函数，而是**一条分层链**：
+
+```mermaid
+flowchart TD
+    A["Channel 层\n连接死亡 / 新连接建立"] --> B["ServerApp/Baseapp 层\nonChannelTimeOut / onChannelDeregister / reloginBaseapp"]
+    B --> C["Proxy 层\nonClientDeath / onClientEnabled"]
+    C --> D["Cell/Witness 层\nonGetWitness / onLoseWitness / resetViewEntities"]
+    D --> E["脚本玩法层\n匹配 / 队伍 / 战斗恢复"]
+```
+
+也就是说：
+
+- `Channel` 自己只负责连接状态
+- `Baseapp` 把连接事件翻译成“哪个实体受影响”
+- `Proxy` 再把它翻译成“玩家客户端死了/恢复了”
+- `Cell/Witness` 最后把世界表现恢复到客户端
+
+这里建议和第 8 章配合着看：
+
+- 连接对象本身的创建、失效、`condemn / deregister / destroy`，见 [08-network-infrastructure.md](D:/workspaces/kbengine/docs-vuepress/study/08-network-infrastructure.md#L373)
+- 本章更关注这些连接事件最终如何翻译成玩家层 hook 和恢复链
+- 特别是“为什么 `kick / relogin` 的旧连接退场未必会转成 `Proxy::onClientDeath()`”，第 8 章已经从 `proxyID(0)` 和 `deregister` 边界把源码链讲清楚
+
+#### 先看总矩阵：不同连接事件最终会触发什么
+
+如果不先把事件矩阵列出来，后面很容易把三件事混为一谈：
+
+1. 连接对象是不是失效了
+2. 玩家层会不会收到 `onClientDeath`
+3. 后面会不会进入重连恢复链
+
+把它们压成一张表会更清楚：
+
+| 场景 | 典型入口 | `onClientDeath` | `onClientEnabled` | `onGetWitness / resetViewEntities` | 说明 |
+|------|----------|-----------------|-------------------|------------------------------------|------|
+| inactivity 超时 | `onChannelTimeOut` | 通常会 | 不会立刻触发 | 不会立刻触发 | 标准断线，后续可再走重连 |
+| 对端主动断开 / recv EOF | `TCPPacketReceiver::onGetError` | 通常会 | 不会立刻触发 | 不会立刻触发 | 本质仍是连接死亡 |
+| 协议错误 / 非法包 | `PacketReader::condemn` | 通常会 | 不会 | 不会 | 一般不是正常恢复场景 |
+| 主动 logout | `logoutBaseapp` | 通常会 | 不会 | 不会 | 语义更接近正常下线 |
+| kick / 顶号 | `kickChannel` | **旧连接未必会触发** | 新连接接管后会 | 新连接接管后会 | 旧连接通常先 `proxyID(0)` |
+| relogin 接管 | `reloginBaseapp` | **旧连接未必会触发** | 会 | 会 | 这是最典型的恢复链 |
+
+这张表最重要的结论是：
+
+- **不是所有连接死亡都会被翻译成玩家层 `onClientDeath`**
+- **不是所有 `deregister` 都等价于“玩家离线”**
+- **接管型流程里，旧连接退场和新连接恢复是两段不同的语义**
+
+#### KBEngine 默认接口能区分断线原因吗
+
+严格说：**脚本层默认不能可靠区分。**
+
+源码里其实存在两层信息：
+
+1. **网络层有一部分原因信息**
+   - `Channel` 有 `condemnReason()`，见 [channel.h](D:/workspaces/kbengine/kbe/src/lib/network/channel.h#L185)
+   - `Network::Reason` 里有 `REASON_INACTIVITY`、`REASON_CLIENT_DISCONNECTED`、`REASON_GENERAL_NETWORK`、`REASON_WEBSOCKET_ERROR` 等枚举，见 [common.h](D:/workspaces/kbengine/kbe/src/lib/network/common.h#L140)
+   - 例如超时会写入 `pChannel->condemn("timedout")`，见 [serverapp.cpp](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.cpp#L286)
+   - 例如 TCP 对端关闭会写入 `onGetError(pChannel, "disconnected")`，见 [tcp_packet_receiver.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_receiver.cpp#L105)
+   - 例如未知消息号会写入 `PacketReader::processMessages: not found msgID`，见 [packet_reader.cpp](D:/workspaces/kbengine/kbe/src/lib/network/packet_reader.cpp#L85)
+
+2. **但这些原因默认没有传到玩家脚本层**
+   - `Baseapp::onChannelDeregister()` 只拿 `pChannel->proxyID()` 找 `Proxy`，然后调用 `proxy->onClientDeath()`，见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L797)
+   - `Proxy::onClientDeath(void)` 没有参数，内部调用脚本 `onClientDeath` 也是 `SCRIPT_OBJECT_CALL_ARGS0`，见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L217)
+   - `Entity::onClientDeath()` 同样是无参脚本回调，见 [entity.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/entity.cpp#L1045)
+
+所以从默认脚本接口看：
+
+```python
+def onClientDeath(self):
+    ...
+```
+
+你只能知道：
+
+```text
+这个 Proxy 的客户端绑定消失了
+```
+
+但不能直接知道：
+
+```text
+是玩家主动断网？
+是客户端进程崩了？
+是 NAT / 网络抖动？
+是协议非法？
+是服务端踢线？
+是发包错误？
+```
+
+这也是 KBEngine 和 BigWorld 一个明显差异。BigWorld 的 `Proxy::onClientDeath(ClientDisconnectReason reason, ...)` 保留了更精细的断线原因，而 KBEngine 这里简化成了无参 hook。
+
+#### 这对匹配/PvP 惩罚策略意味着什么
+
+在我们前面那个“PVP 匹配成功后断线”的例子里，如果只依赖 KBEngine 默认脚本接口，确实无法做到下面这种精细判断：
+
+```text
+玩家真实断网：不处罚
+客户端协议错误：处罚
+网络异常：不处罚
+主动取消：处罚
+```
+
+因为 `onClientDeath()` 给不到原因。
+
+因此更合理的玩法层策略应该是：
+
+1. **把被动连接丢失统一视为 `CONNECTION_LOST`**
+   - 只进入离线宽限期
+   - 不立即处罚
+   - 等宽限期超时后再按 `NO_SHOW / FORFEIT` 处理
+
+2. **把主动业务行为单独建模**
+   - 玩家点击取消匹配：`CANCEL_MATCH`
+   - 玩家点击退出房间：`LEAVE_ROOM`
+   - 玩家主动登出：`LOGOUT`
+   - 服务端踢线：`KICKED`
+   - 这些不要依赖 `onClientDeath()` 反推，而应在对应业务入口直接记录原因
+
+3. **协议错误、作弊嫌疑、异常包不要在玩法脚本里靠 `onClientDeath()` 判断**
+   - 默认链路下脚本拿不到精确原因
+   - 应该在 C++ 网络/消息处理层记录安全事件
+   - 或扩展引擎，把断线原因传到 `Proxy::onClientDeath(reason)`
+
+换成状态机就是：
+
+```mermaid
+flowchart TD
+    A["连接消失: onClientDeath()"] --> B["Presence = CONNECTION_LOST"]
+    B --> C["进入重连宽限期"]
+    C --> D["宽限期内 onClientEnabled()"]
+    D --> E["恢复匹配/房间/战斗状态"]
+    C --> F["宽限期超时"]
+    F --> G["按玩法规则 NoShow / Forfeit"]
+
+    H["玩家点击取消"] --> I["业务入口明确记录 CANCEL_MATCH"]
+    I --> J["立即退出匹配并按规则处罚"]
+
+    K["协议非法/安全异常"] --> L["网络/消息层记录 SECURITY_ERROR"]
+    L --> M["可选: 封禁/踢线/安全审计"]
+```
+
+这比在脚本 `onClientDeath()` 里猜原因更可靠。
+
+#### 如果确实要做细粒度原因控制，应该改哪里
+
+如果项目真的需要区分 `TIMEOUT / DISCONNECTED / PROTOCOL_ERROR / KICKED / RELOGIN_REPLACED`，最佳改法不是在 Python 侧猜，而是扩展 C++ 链路。
+
+一个合理的改造方向是：
+
+1. 在 `Baseapp::onChannelDeregister()` 中读取 `pChannel->condemnReason()`
+2. 在 `Proxy` 上新增 `lastClientDisconnectReason_` 或直接改 `onClientDeath(reason)`
+3. 调脚本时从 `SCRIPT_OBJECT_CALL_ARGS0` 改成带参数的 `SCRIPT_OBJECT_CALL_ARGS1`
+4. Python 层新增兼容处理，例如 `onClientDeath(reason=None)`
+5. 对 `kick / relogin` 这种接管型流程，继续通过 `proxyID(0)` 避免旧连接误触发玩家离线
+
+但这属于引擎接口变更，需要考虑兼容性。默认文档和业务设计里，更稳妥的建议仍然是：
+
+```text
+默认 onClientDeath 只表示客户端绑定消失，
+不要把它当作精确断线原因。
+```
+
+#### 断线时会触发哪些点
+
+典型链路如下：
+
+```mermaid
+sequenceDiagram
+    participant CH as Channel
+    participant SA as ServerApp/Baseapp
+    participant PX as Proxy
+    participant SC as Script
+
+    CH->>SA: onChannelTimeOut / onChannelDeregister
+    SA->>PX: proxy->onClientDeath()
+    PX->>PX: 清理 clientEntityCall / addr / clientEnabled_
+    PX->>SC: 脚本 onClientDeath()
+```
+
+把源码入口对起来看，会更清楚：
+
+1. **连接层**
+   - `ServerApp::onChannelTimeOut()`：超时后直接 `condemn -> deregister -> destroy`
+   - 见 [serverapp.cpp](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.cpp#L286)
+
+2. **服务器层**
+   - `Baseapp::onChannelDeregister()`：当连接真正注销时，开始做“它关联了哪个实体”的翻译
+   - 见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L797)
+
+3. **Proxy 层**
+   - 如果 `proxyID > 0`，找到对应 `Proxy`
+   - 调用 `proxy->onClientDeath()`
+   - 见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L816)
+
+4. **脚本层**
+   - `Proxy::onClientDeath()` 会：
+     - `Py_DECREF(clientEntityCall())`
+     - `clientEntityCall(NULL)`
+     - `addr = NONE`
+     - `clientEnabled_ = false`
+     - 调脚本 `onClientDeath`
+   - 见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L217)
+
+所以断线后的直接 hook，最值得记住的是：
+
+| 层 | 入口 | 作用 |
+|------|------|------|
+| 连接层 | `onChannelTimeOut` / `onChannelDeregister` | 连接死亡与回收 |
+| Base 层 | `Baseapp::onChannelDeregister` | 把连接事件翻译成实体事件 |
+| Proxy 层 | `Proxy::onClientDeath` | 清理客户端绑定 |
+| 脚本层 | `onClientDeath` | 业务收束，例如掉线标记、宽限期计时 |
+
+#### 重连成功时会触发哪些点
+
+重连链比断线链更长，因为它不仅要恢复连接，还要恢复控制权和世界表现：
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant BA as Baseapp
+    participant PX as Proxy
+    participant CE as CellEntity
+    participant SC as Script
+
+    C->>BA: reloginBaseapp(entityID, rndUUID)
+    BA->>PX: 复用原 Proxy，重绑 clientEntityCall
+    BA->>PX: createClientProxies(proxy, true)
+    PX->>SC: onClientEnabled()
+    PX->>CE: onGetWitnessFromBase
+    CE->>CE: onGetWitness(true)
+    CE->>CE: resetViewEntities()
+    CE->>SC: onGetWitness()
+    BA-->>C: onReloginBaseappSuccessfully
+```
+
+把它拆开看：
+
+1. **Baseapp 入口**
+   - `Baseapp::reloginBaseapp()`
+   - 校验 `entityID + rndUUID`
+   - 旧连接如仍存在，则 `condemn("", true)`
+   - 新连接绑定到原 `Proxy`
+   - 见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3974)
+
+2. **客户端重新启用**
+   - `createClientProxies(proxy, true)`
+   - 会重发 `onCreatedProxies`
+   - 并在内部调用 `pEntity->onClientEnabled()`
+   - 见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3142)
+
+3. **Proxy 层 hook**
+   - `Proxy::onClientEnabled()`
+   - 设置 `clientEnabled_ = true`
+   - 调脚本层 `onClientEnabled`
+   - 见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L174)
+
+4. **Cell/Witness 层恢复**
+   - `Proxy::onGetWitness()` 通知 Cell 侧
+   - 见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L423)
+   - Cell 侧进入 `Entity::onGetWitness(true)`
+   - 若已有 witness，则执行 `pWitness_->onAttach(this)` 和 `resetViewEntities()`
+   - 见 [entity.cpp](D:/workspaces/kbengine/kbe/src/server/cellapp/entity.cpp#L2092)
+
+5. **Cell 脚本 hook**
+   - `Entity::onGetWitness()` 最后会调脚本 `onGetWitness`
+   - 见 [entity.cpp](D:/workspaces/kbengine/kbe/src/server/cellapp/entity.cpp#L2175)
+
+所以重连成功后，最关键的 hook 序列是：
+
+| 层 | hook / 入口 | 作用 |
+|------|-------------|------|
+| Base 层 | `reloginBaseapp` | 重绑新连接到旧 `Proxy` |
+| Proxy 层 | `onClientEnabled` | 脚本知道“客户端又可用了” |
+| Proxy -> Cell | `onGetWitness` | 恢复客户端控制权 |
+| Cell/Witness | `resetViewEntities` | 重新同步视野实体 |
+| Cell 脚本 | `onGetWitness` | 脚本知道“世界表现恢复了” |
+
+#### 为什么断线 hook 和重连 hook 不对称
+
+这里还有一个很值得说明的细节：
+
+- 断线时最核心的脚本 hook 是 `onClientDeath`
+- 重连时最核心的脚本 hook 不是 `onReloginBaseappSuccessfully`
+- 而是 `onClientEnabled` + `onGetWitness`
+
+原因很简单：
+
+- `onClientDeath` 对应的是“客户端绑定消失了”
+- `onClientEnabled` 对应的是“客户端绑定重新可用了”
+- `onGetWitness` 对应的是“世界表现和控制权重新恢复了”
+
+也就是说，**重连恢复被拆成了两层**：
+
+```text
+第一层：客户端会话恢复
+    -> onClientEnabled
+
+第二层：Cell 控制权 / 视野恢复
+    -> onGetWitness
+```
+
+这也是为什么脚本最佳实践通常不是只实现一个“重连成功回调”，而是要分开处理：
+
+- `onClientDeath`
+  - 标记离线
+  - 启动宽限期
+  - 不直接做处罚
+- `onClientEnabled`
+  - 重推 UI / 房间 / 匹配状态
+  - 恢复可交互状态
+- `onGetWitness`
+  - 恢复 Cell 相关的世界表现
+  - 处理需要依赖空间/视野的逻辑
+
+#### 一个更实用的记忆方式
+
+如果要把这些 hook 压缩成一句最容易记的口诀，可以这样记：
+
+```text
+Channel 死亡 -> Baseapp 收到连接事件
+Baseapp 翻译 -> Proxy.onClientDeath
+重连成功 -> Proxy.onClientEnabled
+世界恢复 -> Cell.onGetWitness / resetViewEntities
+```
+
+所以你前面那个问题的最终答案是：
+
+- **是的，所有这些 hook 都是从 Channel 生命周期“延伸出来”的**
+- **但真正暴露给业务层的 hook，不是在 Channel 本身，而是在 Proxy / Cell 这一层**
+- **因为玩家掉线重连不是纯连接问题，而是连接、实体、控制权、视野、脚本状态共同参与的恢复链**
+
+### 22.10.5 玩法设计建议：匹配、队伍与跨服
+
+把上面的分层模型放到 PvP、组队、跨服场景里，最重要的结论是：
+
+- **不要把玩法状态绑在客户端连接上**
+- **要把玩法状态绑在服务端身份对象或独立玩法服务上**
+
+这里还要把"玩家 ID"说准确：
+
+- **`entityID` / `Entity.id`**：当前激活实体的运行时 ID，只在当前在线实体生命周期内稳定
+- **`databaseID` / `dbid`**：实体的持久化 ID，才更适合做玩家长期身份标识
+
+所以如果讨论：
+
+- **本服进程内对象引用**，`entityID` 可以用
+- **跨服队伍、跨服匹配、战斗结算、惩罚记录、离线恢复**，应优先使用 `databaseID`
+
+换句话说，前面这里说的"业务身份"在 KBEngine 的玩家场景下，更准确地应该理解为：
+
+- **运行时载体**：`Proxy / Avatar`
+- **长期身份键**：`Avatar.databaseID`
+
+以"玩家已经匹配成功，但此时断线"为例，更合理的策略通常不是立即取消，而是进入一个**重连宽限期**：
+
+```mermaid
+stateDiagram-v2
+    [*] --> Queueing
+    Queueing --> Matched
+    Matched --> OfflineGrace : channel lost
+    OfflineGrace --> Matched : reconnect before deadline
+    OfflineGrace --> NoShow : reconnect timeout
+    Matched --> Cancelled : explicit cancel
+```
+
+这背后的状态机约束是：
+
+- 玩家主动点击取消，才进入 `Cancelled`，可以处罚
+- 玩家只是断线，则进入 `OfflineGrace`，应先清理连接态，不应立即处罚
+- 宽限期内重连成功，则恢复原有 `matchId / roomId / battleId`
+- 只有宽限期超时未归，才进入 `NoShow` 或战斗内的 `Forfeit`
+
+一个典型的脚本层伪代码如下：
+
+```python
+def onClientDeath(self):
+    self.online = False
+
+    if self.pvp.phase == "MATCHED":
+        self.pvp.reconnectDeadline = self.serviceNow() + 30
+        self.startReconnectGraceTimer(30)
+    elif self.pvp.phase == "IN_BATTLE":
+        # 跨服/跨进程场景优先传 databaseID，而不是当前 entityID
+        self.battle.markOffline(self.databaseID, graceSeconds=120)
+
+
+def onClientEnabled(self):
+    self.online = True
+    self.cancelReconnectGraceTimer()
+    self.pushPvpStateToClient()
+
+    if self.pvp.phase == "MATCHED":
+        self.sendEnterMatch(self.pvp.matchId, self.pvp.roomId)
+    elif self.pvp.phase == "IN_BATTLE":
+        self.battle.resyncPlayer(self.databaseID)
+```
+
+#### 以"匹配成功后断线，重连继续进入"为例
+
+假设流程是：
+
+1. 玩家 `Avatar.databaseID = 10086`，当前在线 `entityID = 2049`
+2. 匹配服务为其分配 `matchId = M9001`、`roomId = R77`
+3. 客户端在"已匹配，等待进入"阶段断线
+
+这时更合理的服务端处理不是：
+
+```python
+# 错误示例：把断线等同于取消匹配
+def onClientDeath(self):
+    matchService.cancel(self.databaseID)
+    penaltyService.punish(self.databaseID, "cancel_match")
+```
+
+而应该是：
+
+```python
+def onClientDeath(self):
+    self.online = False
+
+    if self.pvp.phase == "MATCHED":
+        self.pvp.reconnectDeadline = self.serviceNow() + 30
+        matchService.markOffline(self.databaseID, self.pvp.matchId, 30)
+
+
+def onClientEnabled(self):
+    self.online = True
+
+    if self.pvp.phase == "MATCHED":
+        matchState = matchService.query(self.databaseID)
+        if matchState and matchState.phase == "MATCHED":
+            self.client.onMatchRecovered(matchState.matchId, matchState.roomId)
+```
+
+这个例子里，几个标识分别承担不同职责：
+
+- `databaseID = 10086`
+  - 作为跨服匹配服务里的玩家主键
+  - 用于重连后找回原有匹配记录
+- `entityID = 2049`
+  - 只是当前这次在线实体的运行时句柄
+  - 可以用于本地 `BaseApp` 查找实体，不适合做跨服长期身份键
+- `matchId / roomId`
+  - 属于玩法状态层
+  - 不应因一次断线立即删除
+
+因此，"重连继续进入"真正依赖的不是旧 `entityID` 还在不在，而是：
+
+- 原 `Proxy/Avatar` 业务对象仍然存活
+- 匹配服务仍保留 `databaseID -> matchId / roomId` 的映射
+- 宽限期尚未超时
+- 重连后由服务端重新把当前玩法状态推回客户端
+
+这里有两个实践点非常关键：
+
+1. **惩罚绑定玩法规则，不绑定 socket 断开**
+   - 主动取消、拒绝确认、宽限期超时未归，才是处罚依据
+   - 单次掉线、网络抖动、本地切网，不应直接等价为"逃跑"
+
+2. **倒计时和截止时间必须由服务端统一维护**
+   - 应优先使用引擎的逻辑时间和脚本定时器
+   - 不要用客户端本地时间决定处罚、匹配失效、战斗判负
+   - 关于时间分层，可对照[附录 G 服务器时间管理与世界时钟](appendix-server-time-management-and-world-clock.md)
+
+再往前走一步，本服和跨服还要区分"真实状态拥有者"与"成员状态投影"：
+
+- **本服队伍/匹配**
+  - 队伍逻辑和 `Avatar/Proxy` 在同一个 `BaseApp`
+  - 可以直接读取实体状态，但最好仍维护一份本地 `MemberState`
+- **跨服队伍/匹配**
+  - 队伍或匹配服务运行在其他进程/其他服
+  - 不能依赖远端 `Avatar` 的进程内对象
+  - 必须维护一份 `MemberSnapshot` 或 `TeamMemberState`
+
+跨服成员状态至少应该包含：
+
+| 字段 | 用途 |
+|------|------|
+| `avatarDBID` | 玩家长期身份键，通常对应 `Avatar.databaseID` |
+| `online` | 当前在线/离线 |
+| `entityID` | 当前在线实体的运行时句柄，可选 |
+| `sessionVersion` | 防止旧离线消息覆盖新连接 |
+| `homeBaseappID` / `zoneID` | 确认玩家当前归属服与路由 |
+| `matchState` / `readyState` | 玩法进度 |
+| `reconnectDeadline` | 重连宽限截止时间 |
+
+如果跨服服务只保存一个 `online = true/false`，通常是不够的，因为会很快遇到两个问题：
+
+- 玩家已经重连成功，但旧离线消息把他再次标成离线
+- 玩家已经切服或切进程，但队伍服务仍按旧路由给他发消息
+
+所以更稳妥的抽象应该是：
+
+```text
+Avatar / Proxy：玩家真实状态拥有者
+databaseID：玩家长期身份键
+entityID：当前在线实体的运行时句柄
+Team / Match / Battle：玩法协作状态拥有者
+MemberSnapshot：玩法服务对玩家状态的局部镜像
+```
+
+#### 本服匹配的重连时序
+
+如果队伍和匹配逻辑都在玩家所在的 `BaseApp`，链路可以比较直接：
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant B as BaseApp(Avatar/Proxy)
+    participant M as MatchState(本地)
+
+    C->>B: 请求匹配
+    B->>M: createQueue(databaseID, entityID)
+    M-->>B: matched(matchId, roomId)
+    B-->>C: onMatchReady(matchId, roomId)
+
+    C-x B: 网络断开
+    B->>M: markOffline(databaseID, reconnectDeadline)
+
+    C->>B: reloginBaseapp(entityID, rndUUID)
+    B->>B: 复用原 Proxy，重绑 clientEntityCall
+    B->>M: queryByDBID(databaseID)
+    M-->>B: matched(matchId, roomId)
+    B-->>C: onMatchRecovered(matchId, roomId)
+```
+
+这个模型里：
+
+- `entityID` 用于 `BaseApp` 本地重新找到活着的实体
+- `databaseID` 用于在匹配状态表里稳定索引这个玩家
+- 匹配状态本身可以直接挂在 `Avatar` 上，也可以挂在 `BaseApp` 的玩法模块上
+
+如果是单服设计，推荐最小可用的数据结构是：
+
+```python
+class LocalMatchState(object):
+    avatarDBID: int
+    entityID: int
+    phase: str
+    matchId: str
+    roomId: str
+    online: bool
+    reconnectDeadline: int
+```
+
+#### 跨服匹配的重连时序
+
+跨服时，最关键的变化是：匹配状态不能再依赖某个 `BaseApp` 里的内存对象。
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant HB as HomeBaseApp(Avatar/Proxy)
+    participant MS as CrossServerMatchService
+    participant BS as BattleServer
+
+    C->>HB: 请求跨服匹配
+    HB->>MS: enqueue(avatarDBID, zoneID, sessionVersion)
+    MS-->>HB: matched(matchId, roomId, battleServer)
+    HB-->>C: onMatchReady(matchId, roomId)
+
+    C-x HB: 网络断开
+    HB->>MS: markOffline(avatarDBID, sessionVersion, reconnectDeadline)
+
+    C->>HB: reloginBaseapp(entityID, rndUUID)
+    HB->>HB: 复用原 Proxy，重绑 clientEntityCall
+    HB->>MS: queryPlayer(avatarDBID)
+    MS-->>HB: matched(matchId, roomId, battleServer)
+    HB-->>C: onMatchRecovered(matchId, roomId)
+
+    C->>BS: 进入战斗 / 恢复房间
+    BS->>MS: confirmJoin(avatarDBID, roomId)
+```
+
+跨服场景里，几个约束必须更严格：
+
+- 匹配中心或战斗服务必须用 `databaseID` 做主键
+- `entityID` 只能作为 HomeBaseApp 当前在线实体的局部引用
+- 每次重连都最好推进 `sessionVersion`
+- 跨服服务处理离线/重连消息时，必须校验 `sessionVersion`，避免旧消息回写新状态
+
+一个更稳妥的跨服成员镜像可以写成：
+
+```python
+class MemberSnapshot(object):
+    avatarDBID: int
+    entityID: int
+    zoneID: int
+    homeBaseappID: int
+    matchId: str
+    roomId: str
+    phase: str
+    online: bool
+    sessionVersion: int
+    reconnectDeadline: int
+```
+
+字段职责分别是：
+
+- `avatarDBID`
+  - 跨服长期主键
+  - 用于结算、惩罚、恢复匹配记录
+- `entityID`
+  - 当前在线实体句柄
+  - 只在 HomeBaseApp 当前激活期间有效
+- `sessionVersion`
+  - 一次会话对应一个版本
+  - 新重连成功后，旧离线通知就不能再覆盖新状态
+
+#### 什么时候应该处罚，什么时候不应该
+
+还是用"匹配成功后掉线"这个场景，可以把策略压缩成一个判断表：
+
+| 场景 | 是否处罚 | 说明 |
+|------|---------|------|
+| 玩家主动点击取消匹配 | 是 | 明确业务动作 |
+| 已匹配后拒绝确认进入 | 是 | 明确 no-show |
+| 已匹配后断线，但在宽限期内重连 | 否 | 只丢会话，不丢玩法资格 |
+| 已匹配后断线，宽限期超时未归 | 视规则而定 | 可记 no-show 或失败 |
+| 战斗中断线，但宽限期内回到战斗 | 否 | 应恢复状态而不是处罚 |
+| 战斗中断线且超时未归 | 通常是 | 可判负或记逃跑 |
+
+所以最关键的设计不是"如何检测断线"，而是：
+
+- **把断线先落成 Presence 变化**
+- **再由玩法状态机决定是否取消、失败或处罚**
+
+如果把这层关系画成更抽象的依赖顺序，就是：
+
+```text
+socket/channel 断开
+  -> Proxy.onClientDeath()
+  -> online/presence 变为 false
+  -> Match/Battle 状态机收到离线事件
+  -> 根据 phase + deadline 决定恢复、清理或处罚
+```
+
+#### 一套更接近实战的代码骨架
+
+上面这些规则如果要真正落地，建议拆成三块职责：
+
+- `Avatar`：持有玩家在线态与当前玩法引用
+- `LocalMatchService`：本服匹配状态拥有者
+- `CrossServerMatchService`：跨服匹配状态拥有者
+
+先定义一个最小状态对象：
+
+```python
+class MatchPhase:
+    IDLE = "IDLE"
+    QUEUEING = "QUEUEING"
+    MATCHED = "MATCHED"
+    IN_ROOM = "IN_ROOM"
+    IN_BATTLE = "IN_BATTLE"
+    FINISHED = "FINISHED"
+
+
+class MatchState(object):
+    def __init__(self):
+        self.phase = MatchPhase.IDLE
+        self.matchId = ""
+        self.roomId = ""
+        self.battleServer = 0
+        self.online = True
+        self.sessionVersion = 0
+        self.reconnectDeadline = 0
+```
+
+`Avatar` 侧只负责两件事：把连接变化翻译成 Presence 变化，以及把当前状态重推给客户端。
+
+```python
+class Avatar(KBEngine.Proxy):
+    def __init__(self):
+        KBEngine.Proxy.__init__(self)
+        self.matchState = MatchState()
+
+    def getLogicNow(self):
+        # 实际项目里应统一封装，不要直接混用本地 wall clock
+        return int(KBEngine.time())
+
+    def onClientDeath(self):
+        self.matchState.online = False
+
+        if self.matchState.phase == MatchPhase.MATCHED:
+            self.matchState.reconnectDeadline = self.getLogicNow() + 30
+            LocalMatchService.getInstance().markOffline(
+                self.databaseID,
+                self.matchState.sessionVersion,
+                self.matchState.reconnectDeadline
+            )
+
+        elif self.matchState.phase == MatchPhase.IN_BATTLE:
+            CrossServerMatchService.getInstance().markOffline(
+                self.databaseID,
+                self.matchState.sessionVersion,
+                self.getLogicNow() + 120
+            )
+
+    def onClientEnabled(self):
+        self.matchState.online = True
+        self.matchState.sessionVersion += 1
+
+        state = LocalMatchService.getInstance().query(self.databaseID)
+        if state is None:
+            state = CrossServerMatchService.getInstance().query(self.databaseID)
+
+        if state is None:
+            return
+
+        self.matchState = state
+        self.client.onMatchStateSync(
+            state.phase,
+            state.matchId,
+            state.roomId,
+            state.reconnectDeadline
+        )
+```
+
+本服匹配服务的关键不是复杂算法，而是把"断线"和"取消"分开：
+
+```python
+class LocalMatchService(object):
+    _instance = None
+
+    @classmethod
+    def getInstance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
+    def __init__(self):
+        self.states = {}   # avatarDBID -> MatchState
+
+    def enqueue(self, avatar):
+        state = self.states.setdefault(avatar.databaseID, MatchState())
+        state.phase = MatchPhase.QUEUEING
+        state.online = True
+        state.sessionVersion = avatar.matchState.sessionVersion
+
+    def onMatched(self, avatarDBID, matchId, roomId):
+        state = self.states[avatarDBID]
+        state.phase = MatchPhase.MATCHED
+        state.matchId = matchId
+        state.roomId = roomId
+
+    def markOffline(self, avatarDBID, sessionVersion, reconnectDeadline):
+        state = self.states.get(avatarDBID)
+        if state is None:
+            return
+
+        if sessionVersion != state.sessionVersion:
+            return
+
+        state.online = False
+        state.reconnectDeadline = reconnectDeadline
+
+    def cancelByPlayer(self, avatarDBID):
+        state = self.states.get(avatarDBID)
+        if state is None:
+            return
+
+        state.phase = MatchPhase.IDLE
+        PenaltyService.getInstance().punishNoShow(avatarDBID)
+
+    def query(self, avatarDBID):
+        return self.states.get(avatarDBID)
+
+    def tick(self, now):
+        for avatarDBID, state in list(self.states.items()):
+            if state.phase == MatchPhase.MATCHED and not state.online:
+                if now >= state.reconnectDeadline:
+                    state.phase = MatchPhase.FINISHED
+                    PenaltyService.getInstance().punishNoShow(avatarDBID)
+```
+
+跨服匹配服务相比本服，多出来的不是业务规则，而是**远程状态镜像**与**版本保护**：
+
+```python
+class CrossServerMatchService(object):
+    _instance = None
+
+    @classmethod
+    def getInstance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
+    def __init__(self):
+        self.snapshots = {}   # avatarDBID -> MatchState
+
+    def enqueue(self, avatarDBID, zoneID, sessionVersion):
+        state = self.snapshots.setdefault(avatarDBID, MatchState())
+        state.phase = MatchPhase.QUEUEING
+        state.online = True
+        state.sessionVersion = sessionVersion
+
+    def onMatched(self, avatarDBID, matchId, roomId, battleServer):
+        state = self.snapshots[avatarDBID]
+        state.phase = MatchPhase.MATCHED
+        state.matchId = matchId
+        state.roomId = roomId
+        state.battleServer = battleServer
+
+    def markOffline(self, avatarDBID, sessionVersion, reconnectDeadline):
+        state = self.snapshots.get(avatarDBID)
+        if state is None:
+            return
+
+        if sessionVersion != state.sessionVersion:
+            return
+
+        state.online = False
+        state.reconnectDeadline = reconnectDeadline
+
+    def onReconnect(self, avatarDBID, newSessionVersion):
+        state = self.snapshots.get(avatarDBID)
+        if state is None:
+            return None
+
+        state.online = True
+        state.sessionVersion = newSessionVersion
+        return state
+
+    def query(self, avatarDBID):
+        return self.snapshots.get(avatarDBID)
+```
+
+这一套骨架有三个设计点最值得保留：
+
+1. `Avatar` 不直接决定处罚，只上报连接态变化
+2. 匹配服务永远用 `databaseID` 作为长期主键
+3. 所有离线/重连消息都经过 `sessionVersion` 过滤，避免旧消息覆盖新状态
+
+如果再压缩成一句实现原则，就是：
+
+```text
+Proxy 负责连接恢复
+Match/Battle 负责玩法恢复
+Penalty 只对明确的玩法违规负责
+```
+
+### 22.10.6 控制权转移
 
 `Proxy::giveClientTo` 更进一步——"客户端控制哪个 Proxy"本身可以切换。
 
@@ -598,7 +1489,7 @@ void Proxy::giveClientTo(Proxy* proxy)
 4. `BaseApp::createClientProxies()` 把新控制实体同步给客户端
 5. `Proxy::onGetWitness()` 再次驱动 Cell 侧建立 Witness/视野
 
-### 22.10.4 恢复主线
+### 22.10.7 恢复主线
 
 ```
 Proxy（Base 层逻辑实体）

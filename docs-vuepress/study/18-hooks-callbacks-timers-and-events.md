@@ -471,6 +471,11 @@ BigWorld TwoWay + PyDeferred:
 
 **本质相同**：都是 ID→回调映射。BigWorld 多了 errback 链和组合能力（Ch11）。
 
+如果你关心的不是“`CallbackMgr` 在底层怎么工作”，而是“在纯单向消息流里，业务层应该怎么优雅地拿结果、避免回调地狱”，请继续看 [Ch11.11 单向消息流下，如何优雅地“拿结果”](./11-rpc-entitycall-and-communication-patterns.md#1111-单向消息流下如何优雅地拿结果)：
+
+- 那一节讨论的是工程化解法与建模方式
+- 这里这一节讨论的是 `CallbackMgr` 这个具体机制本身
+
 ## 18.6 事件注册/恢复：运行时的事件响应关系
 
 ### 问题
