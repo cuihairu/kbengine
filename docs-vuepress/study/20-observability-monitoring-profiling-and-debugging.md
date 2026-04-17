@@ -627,24 +627,64 @@ pTelnetServer_->start(passwd, deflayer, port);
 | 自动关闭 | 组件关闭时 Telnet 同时关闭 |
 | 无需手动操作 | 任何时候都可以直接连接 |
 | 独立端口 | 每个组件有自己的 Telnet 端口 |
+| **端口自动递增** | **多实例时端口冲突自动递增** |
 
 日志中会显示 Telnet 启动信息：
 ```
 [INFO]: TelnetServer server is running on port 20005
 ```
 
+> #### 多实例端口分配机制
+>
+> **问题**：启动多个 BaseApp/CellApp 实例时，它们都配置相同的 `telnet_port`，会冲突吗？
+>
+> **答案**：不会冲突。KBEngine 有**端口自动递增机制**。
+>
+> **源码实现**：
+> ```cpp
+> // kbe/src/lib/server/telnet_server.cpp:44-66
+> while(true)
+> {
+>     if (listener_.bind(port, ip) == -1)
+>     {
+>         port++;        // 绑定失败，端口 +1
+>         continue;      // 继续尝试
+>     }
+>     else
+>     {
+>         break;         // 绑定成功
+>     }
+> }
+> ```
+>
+> **实际分配示例**（配置 `telnet_port=20000`）：
+>
+> | 实例 | 配置端口 | 绑定结果 | **实际端口** |
+> |------|----------|----------|-------------|
+> | BaseApp #1 | 20000 | ✅ 成功 | **20000** |
+> | BaseApp #2 | 20000 | ❌ 冲突 → 20001 | **20001** |
+> | BaseApp #3 | 20000 | ❌ 冲突 → 20002 | **20002** |
+> | CellApp #1 | 30000 | ✅ 成功 | **30000** |
+> | CellApp #2 | 30000 | ❌ 冲突 → 30001 | **30001** |
+>
+> **查看实际端口**：启动日志会显示每个组件的实际监听端口。
+
 #### 快速连接
 
 ```bash
-# 连接到 BaseApp（默认端口 20005+）
-telnet localhost 20005
+# 连接到 BaseApp（默认端口 20000+）
+telnet localhost 20000    # 第1个 BaseApp
+telnet localhost 20001    # 第2个 BaseApp（自动递增）
 
-# 连接到 CellApp（默认端口 20105+）
-telnet localhost 20105
+# 连接到 CellApp（默认端口 30000+）
+telnet localhost 30000    # 第1个 CellApp
+telnet localhost 30001    # 第2个 CellApp（自动递增）
 
-# 连接到 LoginApp（默认端口 20313）
-telnet localhost 20313
+# 连接到 LoginApp（通常只有1个）
+telnet localhost <配置的端口>
 ```
+
+**不确定端口时**：查看启动日志中的 `TelnetServer server is running on port XXXXX` 信息。
 
 连接后会提示输入密码（`telnet_passwd`，在 `kbengine.xml` 中配置）。
 
@@ -752,18 +792,23 @@ QUIT（退出）
 ```xml
 <!-- CellApp 配置 -->
 <CellApp>
-    <telnet_port>20105</telnet_port>
+    <telnet_port>30000</telnet_port>
     <telnet_passwd>xxxxxx</telnet_passwd>
     <telnet_deflayer>root</telnet_deflayer>  <!-- 或 python -->
 </CellApp>
 
 <!-- BaseApp 配置 -->
 <BaseApp>
-    <telnet_port>20005</telnet_port>
+    <telnet_port>20000</telnet_port>
     <telnet_passwd>xxxxxx</telnet_passwd>
     <telnet_deflayer>root</telnet_deflayer>
 </BaseApp>
 ```
+
+**多实例配置说明**：
+- 所有 BaseApp/CellApp 实例使用**相同**的 `telnet_port` 配置
+- 实际运行时，第 2 个及之后的实例会自动使用 `配置端口 + 1`、`配置端口 + 2`...
+- 无需为每个实例单独配置端口
 
 #### 安全注意事项
 
