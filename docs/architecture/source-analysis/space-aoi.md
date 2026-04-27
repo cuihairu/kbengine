@@ -262,6 +262,111 @@ pWitness_ = NULL;
 
 这也是为什么 `setViewRadius()` / `entitiesInView()` 都直接依赖 `pWitness_`，没有 `Witness` 就要报错或返回空状态。
 
+### 第一层半：`isReal()` / `clientEntity()` / `onGetWitness()` / `onLoseWitness()` 其实是同一条 Witness 绑定链
+
+这几个 API 如果分开看，很容易误解：
+
+- `isReal()` 像是一个普通布尔判断
+- `clientEntity()` 像是一个随时可用的客户端代理
+- `onGetWitness()` / `onLoseWitness()` 像是两个轻量脚本回调
+
+但源码里它们共同描述的是“当前 Cell 实体有没有建立起可用的客户端观察链”。
+
+先看 `isReal()`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.inl
+INLINE bool Entity::isReal(void) const
+{
+    return realCell_ == 0;
+}
+```
+
+它判断的不是“是不是玩家”，也不是“有没有客户端”，而是：
+
+- **当前这个 Cell 实体是不是本 Cell 上的权威 real**
+
+这也是为什么 `clientEntity()`、`addProximity()`、`teleport()` 这些运行态 API 的 Python 包装层，都会先用 `isReal()` 拦住 ghost。
+
+再看 `onGetWitness(true)` 的关键片段：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+if(clientEntityCall() == NULL)
+{
+    PyObject* clientMB = PyObject_GetAttrString(baseEntityCall(), "client");
+    EntityCall* client = static_cast<EntityCall*>(clientMB);
+    clientEntityCall(client);
+}
+
+if(pWitness_ == NULL)
+{
+    setWitness(Witness::createPoolObject(OBJECTPOOL_POINT));
+}
+else
+{
+    pWitness_->onAttach(this);
+    pWitness_->resetViewEntities();
+}
+```
+
+这说明 `onGetWitness()` 并不只是“通知脚本拿到视野”：
+
+- 它会重新接上 `clientEntityCall`
+- 会创建或复用 `Witness`
+- 会重置 `viewEntities`
+- 最后才进入脚本层 `onGetWitness`
+
+`onLoseWitness()` 则是反向拆链：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+clientEntityCall()->addr(Network::Address::NONE);
+Py_DECREF(clientEntityCall());
+clientEntityCall(NULL);
+
+pWitness_->detach(this);
+Witness::reclaimPoolObject(pWitness_);
+pWitness_ = NULL;
+```
+
+因此更准确的说法是：
+
+- `onGetWitness()`：建立 `real -> clientEntityCall -> Witness -> 客户端同步` 这条链
+- `onLoseWitness()`：拆掉这条链
+
+`clientEntity(destID)` 则只是建立在这条链已经成立之后的脚本代理：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+if(!isReal())
+    PyErr_Format(..., "clientEntity: not is real entity");
+
+if (entityID == id())
+    PyErr_Format(..., "call your own method using entity.client");
+
+return new ClientEntity(id(), entityID);
+```
+
+而 `ClientEntity::onScriptGetAttribute()` 还会继续验证目标是否真的已经在 view 内：
+
+```cpp
+// 文件：kbe/src/server/cellapp/client_entity.cpp
+if(srcEntity->pWitness() == NULL)
+    PyErr_Format(..., "clientEntity: no client");
+
+EntityRef* pEntityRef = srcEntity->pWitness()->getViewEntityRef(clientEntityID_);
+Entity* e = (pEntityRef && ((pEntityRef->flags() & ENTITYREF_FLAG_ENTER_CLIENT_PENDING) <= 0))
+    ? pEntityRef->pEntity() : NULL;
+```
+
+所以 `clientEntity(entityID)` 的真实边界是：
+
+- 当前实体必须是 real
+- 当前实体必须已经有 Witness，也就是当前确实已经挂上客户端同步链
+- 目标实体必须已经稳定进入当前 Witness 的 view，不能只是 pending
+- 调自己客户端方法不该走 `clientEntity(self.id)`，而该走 `entity.client`
+
 ### 第二层：`setViewRadius()` 改的不是一个数字，而是两层 `ViewTrigger`
 
 `Entity.setViewRadius()` 只是薄包装：
@@ -440,6 +545,10 @@ if(pEntityRef == NULL || pEntityRef->pEntity() == NULL || pEntityRef->flags() ==
 | `getViewHystArea()` | 读取当前 Witness 的滞后区半径；没有 Witness 时返回 `0` |
 | `entitiesInView(pending=False)` | 读取当前实体作为观察者时的 view 集；`pending=True` 会把待进入客户端的对象也包含进来 |
 | `getWitnesses()` | 返回当前仍在有效观察该实体的观察者实体集合，不等于原始 `witnesses_` 列表 |
+| `isReal()` | 判断当前 Cell 实体是不是本 Cell 上的权威 real，不等于“是否有客户端” |
+| `onGetWitness()` | 建立 `clientEntityCall + Witness + view reset` 这条客户端观察链，然后才进入脚本回调 |
+| `onLoseWitness()` | 拆掉 `clientEntityCall + Witness` 观察链，再进入脚本回调 |
+| `clientEntity(entityID)` | 以当前 real 实体的 Witness 为视角，获取某个已稳定进入 view 的实体客户端方法代理 |
 
 <a id="cell-entity-space-runtime-apis"></a>
 ## Cell 实体的 `entitiesInRange()` / `destroySpace()` / `debugView()` / `getRandomPoints()` / `canNavigate()` 是空间运行态查询，不是通用工具函数
@@ -703,6 +812,149 @@ Cellapp::getSingleton().getScript().pyPrint(fmt::format("{7}::debugView: {0} {1}
 | `destroySpace()` | 以当前实体所在 `spaceID` 为目标，启动整个 `SpaceMemory` 的销毁流程 |
 | `debugView()` | 把当前 Witness 的 view 集、pending 状态和距离信息打印到脚本输出，不返回结构化查询结果 |
 
+<a id="cell-entity-destroy-lifecycle"></a>
+## Cell 实体的 `destroy()` / `onDestroy()` 不是简单删除对象，而是空间摘除、视野拆链和 Base 通知的收束点
+
+这一组接口如果只看 API 页，很容易理解成“调用 `destroy()`，然后脚本收到 `onDestroy()`”。  
+源码里实际做的事情更重，因为 Cell 实体销毁时必须同时收束：
+
+- 当前移动/转向控制器
+- 当前 `Witness`
+- 当前空间中的坐标节点与实体索引
+- Base 侧的 Cell 存在状态
+- 其他实体仍持有的 witnessed 关系
+
+先看脚本入口：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+if(pobj->initing())
+    PyErr_Format(..., "destroy(): initing, reject the request!");
+else if (pobj->isDestroyed())
+    PyErr_Format(..., "destroy: is destroyed!");
+
+pobj->destroyEntity();
+```
+
+Python 层本身并没有复杂参数，它只负责：
+
+- 拒绝初始化中的实体
+- 拒绝已经销毁的实体
+- 把真正的收束工作交给 `destroyEntity()`
+
+真正的关键逻辑在 `onDestroy(bool callScript)`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+if(callScript && isReal())
+{
+    CALL_ENTITY_AND_COMPONENTS_METHOD(..., "onDestroy", ...);
+
+    if(baseEntityCall_ != NULL)
+    {
+        this->backupCellData();
+        (*pBundle).newMessage(BaseappInterface::onLoseCell);
+        (*pBundle) << id_;
+        baseEntityCall_->sendCall(pBundle);
+    }
+}
+
+stopMove();
+S_RELEASE(controlledBy_);
+
+if(pWitness_)
+{
+    pWitness_->detach(this);
+    Witness::reclaimPoolObject(pWitness_);
+    pWitness_ = NULL;
+}
+
+SpaceMemory* space = SpaceMemorys::findSpace(this->spaceID());
+if(space)
+    space->removeEntity(this);
+```
+
+### 第一层：`onDestroy()` 只在 real 且允许脚本通知时进入脚本
+
+这里有两个显式条件：
+
+- `callScript`
+- `isReal()`
+
+源码注释已经说明，`callScript=false` 常见于迁移或 teleport 过程中的内部销毁。  
+所以不能把 `onDestroy()` 理解成“任何 Cell 实体离开内存都一定会回调脚本”。
+
+### 第二层：有 Base 时，Cell 销毁前会先备份 Cell 数据并通知 `onLoseCell`
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+this->backupCellData();
+(*pBundle).newMessage(BaseappInterface::onLoseCell);
+```
+
+这说明 Cell 侧销毁不是纯本地行为。  
+如果这个实体还有 Base 部分，销毁前会先把 Cell 权威态收束给 Base，再告诉 Base：
+
+- 这个实体失去 Cell 了
+
+因此 `destroy()` 是 `Base <-> Cell` 生命周期边界的一部分。
+
+### 第三层：销毁时会先停控制器，再拆 Witness，再从空间里摘掉
+
+顺序也很关键：
+
+1. `stopMove()` 清掉移动和转向控制器
+2. 释放 `controlledBy_`
+3. 如果有 `Witness`，先 `detach` 并回收
+4. 再从 `SpaceMemory` 里 `removeEntity(this)`
+
+这说明 `destroy()` 的真实语义不是简单打标记，而是：
+
+- **把这个实体从当前 Cell 运行态结构里完整摘掉**
+
+### 第四层：`witnesses_count_` 非零被视为异常，需要反向清理 view 链
+
+`onDestroy()` 后半段还有一个很重要的兜底：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+if (witnesses_count_ > 0)
+{
+    ...
+    ent->pWitness()->_onLeaveView((*view_iter));
+    ...
+    ent->delWitnessed(this);
+}
+```
+
+这代表：
+
+- 正常情况下，实体销毁前不应该还被别的 Witness 持续观察
+- 如果还有，源码会把它当成 view 链异常，并主动补做 leave 清理
+
+所以 `destroy()` 还承担一个职责：
+
+- 收拾异常残留的 AOI / Witness 关系
+
+### 第五层：迁移成功后的旧 Cell 销毁通常不会再触发脚本 `onDestroy()`
+
+跨 Cell 传送成功回包后，旧 Cell 会：
+
+```cpp
+// 文件：kbe/src/server/cellapp/cellapp.cpp
+destroyEntity(teleportEntityID, false);
+```
+
+这里显式传了 `false`，正好对应 `onDestroy(bool callScript)` 的第一层条件。  
+所以迁移成功时，旧 Cell 上那次销毁通常是内部收束，不是业务脚本生命周期事件。
+
+### 结论：这组销毁 API 应该怎么读
+
+| API | 更准确的语义 |
+| --- | --- |
+| `destroy()` | 发起当前 Cell 实体的完整摘除流程，包含控制器、Witness、空间索引和 Base 通知收束 |
+| `onDestroy()` | 只在 real 且允许脚本通知时触发的销毁回调，不覆盖迁移/teleport 等内部销毁场景 |
+
 <a id="cell-entity-controller-component-apis"></a>
 ## Cell 实体的 `accelerate()` / `getComponent()` 分别属于控制器调速和组件描述系统
 
@@ -740,6 +992,35 @@ float Entity::accelerate(const char* type, float acceleration)
     }
 }
 ```
+
+### 第一层半：`addYawRotator()` 返回的是控制器 ID，而且会先打断当前移动链
+
+`addYawRotator()` 不是“附加一个轻量旋转任务”，它和移动控制器共享同一个停止入口：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+uint32 Entity::addYawRotator(float yaw, float velocity, PyObject* userData)
+{
+    stopMove();
+
+    velocity = velocity / g_kbeSrvConfig.gameUpdateHertz();
+    KBEShared_ptr<Controller> p(new TurnController(this, NULL));
+    ...
+    pTurnController_ = p;
+    return p->id();
+}
+```
+
+这里有三个直接可见的边界：
+
+- 它会先 `stopMove()`，所以会打断当前移动控制器
+- `velocity` 会先按 `gameUpdateHertz` 折算成每 tick 速度
+- 返回值不是布尔，而是新建 `TurnController` 的 `controllerID`
+
+因此 `addYawRotator(targetYaw, velocity, userArg)` 的脚本语义更接近：
+
+- 创建一条新的“朝目标 yaw 转向”的控制器链
+- 返回这条链的控制器 ID，供 `cancelController()` 或 `onTurn(controllerID, userArg)` 对应
 
 这说明它做的不是：
 
@@ -1573,6 +1854,77 @@ pController_->pEntity()->onTurn(pController_->id(), pyuserarg_);
 
 因此这几个回调应该和移动控制器一起读，而不是放进通用事件系统里读。
 
+### 参数走读：`addProximity()` / `addYawRotator()` / `teleport()` 到底收什么、回什么
+
+这三个 API 在 CHM 里都很短，但源码里的参数边界其实非常明确。
+
+#### `addProximity(rangeXZ, rangeY, userArg)`
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+if(range_xz <= 0.0f || (CoordinateSystem::hasY && range_y <= 0.0f))
+    return 0;
+
+if(this->pEntityCoordinateNode() == NULL || this->pEntityCoordinateNode()->pCoordinateSystem() == NULL)
+    return 0;
+
+KBEShared_ptr<Controller> p(new ProximityController(this, range_xz, range_y, userarg, pControllers_->freeID()));
+return p->id();
+```
+
+它的真实边界是：
+
+- `rangeXZ` 必须大于 `0`
+- 如果坐标系统启用了 Y 轴，`rangeY` 也必须大于 `0`
+- 当前实体必须已经在 world / coordinate system 中
+- 返回值是新的 `ProximityController` 的 `controllerID`
+- 失败时直接返回 `0`
+
+因此它不是只靠回调识别的黑箱接口，而是一个标准的控制器创建入口。
+
+#### `addYawRotator(targetYaw, velocity, userArg)`
+
+从上一节可以直接提炼出：
+
+- `targetYaw` 是目标朝向
+- `velocity` 是脚本层角速度，进入底层前会按 tick 折算
+- `userArg` 会原样透传到 `onTurn(controllerID, userArg)`
+- 返回值是 `TurnController` 的 `controllerID`
+
+所以它和 `moveToPoint()` 一样，本质上也是“创建控制器并返回 ID”。
+
+#### `teleport(nearbyMBRef, position, direction)`
+
+`pyTeleport()` 的参数检查比看起来严格：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+if(!PySequence_Check(pyposition) || PySequence_Size(pyposition) != 3)
+    PyErr_Format(..., "position not is Sequence!");
+
+if(!PySequence_Check(pydirection) || PySequence_Size(pydirection) != 3)
+    PyErr_Format(..., "direction not is Sequence!");
+```
+
+随后它会把参数拆成：
+
+- `position = (x, y, z)`
+- `direction = (roll, pitch, yaw)`
+
+不是 `(yaw, pitch, roll)`，也不是任意长度向量。
+
+而 `nearbyMBRef` 在后续 `teleport()` 分发里可以落到三类语义：
+
+- 空引用或 `None`：走本地 teleport 逻辑
+- 当前或目标 Cell 上的实体对象：走 `teleportRefEntity()`
+- `cellEntityCall`：走跨 Cell `teleportRefEntityCall()`
+
+所以 `teleport()` 的“成功或失败”并不靠返回值表达。  
+Python 层返回的是 `None`，真正的反馈路径是：
+
+- 立即抛异常或打印错误
+- 后续 `onTeleportSuccess(nearbyEntity)` / `onTeleportFailure()`
+
 ### Teleport：`onTeleport()` 不是所有 teleport 的开始回调
 
 Cell 侧源码里 `onTeleport()` 的注释非常关键：
@@ -1605,6 +1957,45 @@ void Entity::onTeleportSuccess(PyObject* nearbyEntity, SPACE_ID lastSpaceID)
 ```
 
 这说明 teleport 不是简单改坐标。它还要处理空间切换、ghost/real 迁移、Base 映射变更、客户端位置强制刷新，以及范围触发器重装。
+
+### Teleport 参数再往下一层：`nearbyMBRef` 决定的是迁移语义，不只是位置参考
+
+如果继续往 `teleportRefEntity()` / `teleportRefEntityCall()` 看，会更清楚：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+if(spaceID == this->spaceID())
+{
+    teleportLocal(entity, pos, dir);
+}
+else
+{
+    currspace->removeEntity(this);
+    this->setPositionAndDirection(pos, dir);
+    space->addEntityAndEnterWorld(this);
+    onTeleportSuccess(entity, lastSpaceID);
+}
+```
+
+以及：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+(*pBundle).newMessage(CellappInterface::reqTeleportToCellApp);
+...
+changeToGhost(nearbyMBRef->componentID(), *s);
+nearbyMBRef->sendCall(pBundle);
+```
+
+这说明 `nearbyMBRef` 的作用不是“给一个附近实体方便定位”这么简单，而是：
+
+- 决定目标空间是谁
+- 决定这是本 Cell 迁移还是跨 Cell 迁移
+- 决定是否要先 `changeToGhost()`，再把实体序列化发往目标 Cell
+
+因此读 `teleport()` 时，最准确的问题不是“坐标会被改成什么”，而是：
+
+- **这次 teleport 以谁为锚点，它最终会落到哪一种迁移语义上**
 
 ### Witness update：`onUpdateBegin()` / `onUpdateEnd()` 包住客户端同步帧
 

@@ -20,6 +20,7 @@ flowchart TD
     A --> G["Python 宿主 / 定时器 / 热重载"]
     A --> H["fireEvent / 事件边界"]
     A --> I["某个 API 是否已有解析"]
+    A --> J["配置怎么覆盖\n路径怎么生效\nVector3 怎么联动底层"]
 
     B --> B1["入口与引导流程\n进程模型"]
     C --> C1["实体系统"]
@@ -27,8 +28,10 @@ flowchart TD
     E --> E1["网络与消息系统"]
     F --> F1["持久化与数据库"]
     G --> G1["脚本运行时与热重载"]
+    G --> G2["通用运行时工具 API"]
     H --> H1["事件系统"]
     I --> I1["API 覆盖矩阵"]
+    J --> J1["运行时配置与基础类型"]
 ```
 
 ## 学习主线
@@ -36,12 +39,25 @@ flowchart TD
 1. [启动入口与引导流程](/architecture/source-analysis/entry-and-bootstrap.md)
 2. [进程模型与组件协作](/architecture/source-analysis/process-model.md)
 3. [实体系统](/architecture/source-analysis/entity-system.md)
-4. [空间、AOI 与视野同步](/architecture/source-analysis/space-aoi.md)
-5. [网络与消息系统](/architecture/source-analysis/networking.md)
-6. [持久化与数据库](/architecture/source-analysis/persistence.md)
-7. [脚本运行时与热重载](/architecture/source-analysis/scripting.md)
-8. [事件系统：fireEvent 与事件总线](/architecture/source-analysis/events.md)
-9. [API 到源码解析覆盖矩阵](/architecture/source-analysis/api-coverage.md)
+4. [类型系统与实体定义文件](/architecture/source-analysis/entitydef-type-system.md)
+5. [空间、AOI 与视野同步](/architecture/source-analysis/space-aoi.md)
+6. [网络与消息系统](/architecture/source-analysis/networking.md)
+7. [持久化与数据库](/architecture/source-analysis/persistence.md)
+8. [脚本运行时与热重载](/architecture/source-analysis/scripting.md)
+9. [事件系统：fireEvent 与事件总线](/architecture/source-analysis/events.md)
+10. [Base 实体生命周期](/architecture/source-analysis/base-entity-lifecycle.md)
+11. [BaseApp 运行时 API](/architecture/source-analysis/baseapp-kbengine-runtime-api.md)
+12. [Proxy 会话与流式传输 API](/architecture/source-analysis/proxy-client-session-api.md)
+13. [CellApp 空间运行时 API](/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md)
+14. [客户端登录、重登录与 SpaceData API](/architecture/source-analysis/client-login-and-space-data-api.md)
+15. [组件型脚本 API](/architecture/source-analysis/component-script-api.md)
+16. [通用运行时工具 API](/architecture/source-analysis/runtime-utility-api.md)
+17. [运行时配置与基础类型](/architecture/source-analysis/runtime-config-and-types.md)
+18. [API 到源码解析覆盖矩阵](/architecture/source-analysis/api-coverage.md)
+
+## 执行看板
+
+- [文档重构 TODO](/architecture/source-analysis/todo.md)：当前执行看板，后续推进以这张表为准，用来固定批次、状态和下一步，避免源码解析范围继续漂移。
 
 ## 内容归属
 

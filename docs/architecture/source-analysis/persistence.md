@@ -104,6 +104,76 @@ sequenceDiagram
 
 这也是为什么你在 `study/13` 里看到“三段式写库”，在源码层面仍然成立。
 
+## Cell 侧的 `writeToDB()` / `onWriteToDB()` 不是直接写库，而是“打包 Cell 态并回交 Base”
+
+如果只看 API 名，`cellapp/Entity.writeToDB()` 很容易被理解成“Cell 实体自己写数据库”。  
+源码里它真正做的事情其实是：
+
+- 校验 DB interface 目标
+- 先调用 Cell 脚本 `onWriteToDB()`
+- 备份当前 Cell 权威态
+- 把“Cell 已经收束完成”的结果回发给 Base
+
+关键代码在 `kbe/src/server/cellapp/entity.cpp`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+void Entity::writeToDB(void* data, void* extra1, void* extra2)
+{
+    ...
+    onWriteToDB();
+    backupCellData();
+
+    (*pBundle).newMessage(BaseappInterface::onCellWriteToDBCompleted);
+    (*pBundle) << this->id();
+    (*pBundle) << callbackID;
+    (*pBundle) << shouldAutoLoad;
+    (*pBundle) << dbInterfaceIndex;
+
+    if(this->baseEntityCall())
+    {
+        this->baseEntityCall()->sendCall(pBundle);
+    }
+}
+```
+
+这段代码直接说明：
+
+- Cell 侧 `writeToDB()` 不会直接连到 `Dbmgr::writeEntity()`
+- 它先把 Cell 权威态通过 `backupCellData()` 收束进 Base 可写出的状态
+- 然后只把“收束完成”的消息告诉 Base
+
+因此更准确的语义是：
+
+- **Cell 侧 `writeToDB()` 是持久化前的空间态收束入口，不是最终写库入口**
+
+### `onWriteToDB()` 在 Cell 侧的作用：给脚本一个“收束前最后修改 Cell 态”的钩子
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+void Entity::onWriteToDB()
+{
+    CALL_ENTITY_AND_COMPONENTS_METHOD(this, SCRIPT_OBJECT_CALL_ARGS0(pyTempObj, const_cast<char*>("onWriteToDB"), GETERR));
+}
+```
+
+它的位置很关键：
+
+1. 先调用 `onWriteToDB()`
+2. 再 `backupCellData()`
+3. 再通知 Base `onCellWriteToDBCompleted`
+
+因此 Cell 侧这个回调最准确的理解是：
+
+- 在 Cell 权威态被打包回 Base 之前，给脚本最后一次修正持久化数据的机会
+
+它不是：
+
+- DB 线程写成功后的回调
+- Base 最终收到写库结果后的回调
+
+回调发生时机要比真正落库更早。
+
 ## Dbmgr::writeEntity() 只做接入，不在主线程里直接落库
 
 关键入口：
@@ -125,6 +195,76 @@ sequenceDiagram
 - 交给后台任务队列
 
 所以 `Dbmgr` 的价值一半在网络面，一半在任务编排面。
+
+## `onRestore()` 也不是普通初始化回调，而是 Cell 恢复链上的“脚本重新接管点”
+
+`cellapp/Entity.onRestore()` 的位置也容易被看轻，像是“恢复后通知一下脚本”。  
+实际上它对应的是 Cell 恢复链中非常具体的一个阶段。
+
+先看 `Entity::onRestore()`：
+
+```cpp
+// 文件：kbe/src/server/cellapp/entity.cpp
+void Entity::onRestore()
+{
+    bufferOrExeCallback(const_cast<char*>("onRestore"), NULL);
+}
+```
+
+单看这一段很轻，但把它放回 `cellapp.cpp` 的恢复路径里就清楚了。
+
+恢复已有空间时：
+
+```cpp
+// 文件：kbe/src/server/cellapp/cellapp.cpp
+cellData = e->createCellDataFromStream(pCellData);
+e->createNamespace(cellData, true);
+...
+if(!inRescore)
+{
+    e->initializeScript();
+}
+else
+{
+    e->onRestore();
+}
+```
+
+恢复整块空间时：
+
+```cpp
+// 文件：kbe/src/server/cellapp/cellapp.cpp
+e->spaceID(space->id());
+e->createNamespace(cellData);
+...
+e->onRestore();
+space->addEntityAndEnterWorld(e, true);
+```
+
+这两段代码连起来后，`onRestore()` 的真实位置就很明确了：
+
+- Cell 数据流已经反序列化回来
+- 脚本 namespace 已经建立
+- 但这不是普通首次初始化，而是“恢复路径重新接管”
+
+因此更准确的理解是：
+
+- **`onRestore()` 是 Cell 恢复链里脚本重新接管实体状态的入口**
+
+### `onRestore()` 和 `initializeScript()` 是两条不同语义的链
+
+从上面的分支也能看出：
+
+- 首次创建更接近 `initializeScript()`
+- 恢复已有 Cell 状态更接近 `onRestore()`
+
+所以不能把 `onRestore()` 简化成“和 `__init__` 差不多的另一个回调”。  
+它强调的是：
+
+- 这份实体状态不是刚生成的
+- 而是从已有 Cell 数据、空间数据或跨组件恢复出来的
+
+这也是为什么 API 页把它单独列出来是有意义的。
 
 ## DBTaskWriteEntity：真正把“内存流”变成“写库任务”
 
