@@ -1,13 +1,16 @@
-from __future__ import annotations
+from typing import Any, Union
 
-from typing import Any, Protocol
+try:
+    from typing import Protocol
+except ImportError:
+    from typing_extensions import Protocol
 
 from _KBEngine_common import Address, Entity
 
 
 class BaseAppModuleHooks(Protocol):
     def onBaseAppReady(self, isBootstrap: bool) -> None: ...
-    def onReadyForLogin(self, isBootstrap: bool) -> float | int: ...
+    def onReadyForLogin(self, isBootstrap: bool) -> Union[float, int]: ...
     def onReadyForShutDown(self) -> bool: ...
     def onBaseAppShutDown(self, state: int) -> None: ...
     def onInit(self, isReload: bool) -> None: ...
