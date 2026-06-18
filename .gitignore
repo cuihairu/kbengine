@@ -239,3 +239,10 @@ codecov.exe
 *.codecov
 coverage.info
 coverage/*.info
+
+# Obsidian editor workspace
+docs/.obsidian/
+
+# Local source listing snapshots
+h_files.txt
+cpp_files.txt
