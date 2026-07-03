@@ -5,18 +5,18 @@ on:
     branches:
       - master
     paths:
-      - 'docs-vuepress/**'
+      - 'docs/**'
       - '.github/workflows/docs.yml'
       - 'package.json'
-      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
   pull_request:
     branches:
       - master
     paths:
-      - 'docs-vuepress/**'
+      - 'docs/**'
       - '.github/workflows/docs.yml'
       - 'package.json'
-      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
   workflow_dispatch:
 
 permissions:
@@ -44,21 +44,33 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+
+      - name: Enable pnpm via corepack
+        timeout-minutes: 2
+        run: corepack enable
+
+      - name: Cache pnpm store
+        timeout-minutes: 3
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-
 
       - name: Install dependencies
-        timeout-minutes: 8
-        run: npm ci
+        timeout-minutes: 10
+        run: pnpm install --frozen-lockfile
 
-      - name: Build VuePress
+      - name: Build VitePress
         timeout-minutes: 12
-        run: npm run docs:build
+        run: pnpm docs:build
 
       - name: Upload artifact
         timeout-minutes: 3
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs-vuepress/.vuepress/dist
+          path: docs/.vitepress/dist
 
   deploy:
     environment:

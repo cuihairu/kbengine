@@ -23,5 +23,6 @@
     "vitepress"
   ],
   "author": "KBEngine Team",
-  "license": "MIT"
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.0"
 }
