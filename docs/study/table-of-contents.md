@@ -109,6 +109,8 @@
 - "tick 内收集，tick 末批量发"的心智模型
 - Bundle payload 复用：一份 payload + N 份 header
 - alias 机制与 detailLevel 分级
+- 容器属性的脏标记边界：ARRAY/FIXED_DICT 内部修改不触发同步
+- BigWorld 的容器属性变更追踪：PropertyOwner 链 + attach/detach + SlicePropertyChange 增量同步
 
 ### [Ch13 数据库、DBMgr 与持久化](13-database-dbmgr-and-persistence.md)
 

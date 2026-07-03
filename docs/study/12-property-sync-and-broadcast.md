@@ -147,7 +147,421 @@ void Entity::onDefDataChanged(EntityComponent* pEntityComponent,
 }
 ```
 
-## 12.4 Witness：观察者驱动的广播引擎
+## 12.4 容器属性的脏标记边界：ARRAY/FIXED_DICT 内部修改不触发同步
+
+### 问题：一个常见的误区
+
+读完 12.3 后容易推断："只要 Python 改了属性，引擎就会自动 `setDirty` + 触发同步"。这个推断对**普通属性**成立，对**容器属性的内部修改不成立**——这是 KBEngine 一个非常容易踩的坑。
+
+```python
+class Avatar:
+    def addItem(self, item):
+        # ❌ 期望：append 后引擎自动同步给客户端
+        self.inventory.append(item)
+
+        # ✓ 正确：必须整体重新赋值才能触发同步
+        inv = list(self.inventory)
+        inv.append(item)
+        self.inventory = inv
+```
+
+### 脏标记的真实触发粒度
+
+`onDefDataChanged` 只在 `Entity._tp_setattro` 这一层被调用：
+
+```mermaid
+flowchart LR
+    A["entity.xxx = value"] --> B["_tp_setattro"]
+    B --> C["onScriptSetAttribute"]
+    C --> D["PropertyDescription::onSetValue"]
+    D --> E["onDefDataChanged"]
+    E --> F["setDirty + addToStream + 广播"]
+```
+
+`entity.xxx` 必须是**直接赋值**才能命中这条链路。下面这些都不命中：
+
+```
+✗ entity.inventory.append(item)        容器方法调用
+✗ entity.inventory[i] = newItem        容器下标赋值
+✗ entity.inventory.pop()               容器修改
+✗ entity.info["name"] = "new"          FIXED_DICT 下标赋值
+```
+
+### FixedArray 源码证据：所有修改路径都不回调
+
+`FixedArray` 的所有修改接口（`fixedarray.cpp:219-368`）——`append / extend / insert / pop / remove / clear`——最终都汇聚到基类 `Sequence::seq_ass_slice`（`sequence.cpp:295`）：
+
+```cpp
+// kbe/src/lib/pyscript/sequence.cpp:295（简化）
+int Sequence::seq_ass_slice(PyObject* self, Py_ssize_t index1,
+                            Py_ssize_t index2, PyObject* oterSeq)
+{
+    // 1. 类型检查
+    for (int i = 0; i < osz; ++i) {
+        if (!seq->isSameItemType(pyVal)) return -1;
+    }
+
+    // 2. erase + insert 修改 values_
+    values_.erase(values_.begin() + index1, values_.begin() + index2);
+    values_.insert(values_.begin() + index1, osz, nullptr);
+    for (int i = 0; i < osz; ++i) {
+        values_[index1 + i] = seq->createNewItemFromObj(pyTemp);
+    }
+
+    return 0;
+    // ★ 没有任何 onDefDataChanged / setDirty / 上层通知
+}
+```
+
+`clear`（`fixedarray.cpp:356`）甚至直接 `values_.clear()`，连类型检查都不做。
+
+### FixedDict 源码证据：`checkDataChanged` 是个误导名字
+
+`FixedDict::mp_ass_subscript`（`fixeddict.cpp:272`）在写入前会调用 `checkDataChanged`，但这个名字极具误导性：
+
+```cpp
+// kbe/src/lib/entitydef/fixeddict.cpp:312（简化）
+bool FixedDict::checkDataChanged(const char* keyName, PyObject* value,
+                                 bool isDelete)
+{
+    // 仅检查：key 是否存在、类型是否匹配、是否尝试删除
+    for (auto& kv : keyTypes) {
+        if (kv.first == keyName) {
+            if (isDelete) return false;          // 不允许删除
+            if (!dataType->isSameType(value))
+                return false;                     // 类型不匹配
+            return true;                          // ★ 仅返回"是否允许这次修改"
+        }
+    }
+    return false;   // 未知 key
+}
+```
+
+它应该被理解为 `checkKeyTypeValid`——纯粹是**键合法性 + 类型校验器**，不触发任何脏标记或同步。`mp_ass_subscript` 拿到 `true` 后直接 `PyDict_SetItem` 写入，没有任何上层通知。
+
+### 数据类型层也没有钩子
+
+`FixedArrayType`（`datatype.h:638`）和 `FixedDictType`（`datatype.h:676`）只提供：
+
+| 接口 | 用途 |
+|------|------|
+| `isSameType / isSameItemType` | 类型检查 |
+| `addToStream / addToStreamEx` | 序列化 |
+| `createFromStream / createFromStreamEx` | 反序列化 |
+| `createNewItemFromObj` | 元素转换 |
+
+**没有任何 `onChanged / onOwnedPropertyChanged` 之类的变更通知接口。**
+
+### 对比 BigWorld：BigWorld 有细粒度钩子
+
+BigWorld 在 `DataDescription` 层提供了完整的变更通知机制，能区分"属性级赋值"和"容器内部修改"：
+
+| 维度 | KBEngine | BigWorld |
+|------|----------|----------|
+| 属性级赋值触发同步 | ✓ | ✓ |
+| ARRAY `append/pop/[]=` 触发同步 | ✗（需重新赋值） | ✓（DataInstance 事件） |
+| FIXED_DICT `[key]=` 触发同步 | ✗（需重新赋值） | ✓（字段级变更通知） |
+| 触发链路层 | `Entity::_tp_setattro` | `DataDescription::onOwnedPropertyChanged` 等 |
+| 容器层钩子数量 | 0 | 多个（事件戳、pReal_/pGhost_ 区分等） |
+
+### 实际工程中的处理方式
+
+KBEngine 项目里的常见写法：
+
+```python
+# 方式 1：修改后整体重新赋值
+def add_item(self, item):
+    self.inventory.append(item)
+    self.inventory = self.inventory       # ← 触发 onDefDataChanged
+
+# 方式 2：构造新容器整体替换
+def reset_inventory(self, items):
+    new_inv = FixedArray(items)
+    self.inventory = new_inv               # ← 整体赋值
+```
+
+**代价**：客户端会收到**整个容器**的完整序列化，而不是增量。`alias` 机制（12.7 节）能压缩属性 ID，但容器内容本身仍然是全量重传。
+
+### 设计的权衡
+
+这种"容器内部修改不自动触发同步"是**有意的权衡**：
+
+- **优点**：容器修改极其便宜——纯内存 vector/dict 操作，无 RPC 开销
+- **缺点**：脚本层需显式触发同步，容易写出"明明改了但客户端看不到"的 bug
+- **架构哲学**：KBEngine 把"何时同步"交给脚本层决策；BigWorld 则倾向于引擎层自动追踪
+
+### 排查指南
+
+遇到"服务端改了 ARRAY/FIXED_DICT 但客户端没收到更新"，按这个顺序排查：
+
+1. **是否整体赋值**：`self.xxx = new_value` 才会触发，`self.xxx.append()/[]=` 不会
+2. **`isReal() && !initing()`**：`onDefDataChanged` 第一行就 return 了非 real entity
+3. **flags 是否有客户端标记**：`OTHER_CLIENTS / OWN_CLIENT / BASE_AND_CLIENT`
+4. **`hasGhost()` 是否成立**：cell 属性需要 ghost 同步时要确认 ghost 是否存在
+5. **Witness 是否存在**：客户端必须有 Witness 才会收到 OTHER_CLIENTS 广播
+
+## 12.5 BigWorld 的容器属性变更追踪：PropertyOwner 链机制
+
+> 12.4 节最后留下一个问题：既然 KBEngine 的容器内部修改不触发同步，那 BigWorld 是怎么做到的？这一节专门展开 BigWorld 的实现，重点是 **PropertyOwner 链** + **attach/detach** + **PropertyChange 路径**三件套。
+
+### 12.5.1 三层架构：DataType + DataInstance + PropertyOwner
+
+BigWorld 把"类型描述"、"数据实例"、"所有者"三者拆开，再让数据实例本身承担"属性所有者"的角色：
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    BigWorld 三层架构                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ArrayDataType         (类型描述，无数据)                     │
+│       │                                                      │
+│       │  attach() / detach()  ← 把 owner 注入到实例           │
+│       ▼                                                      │
+│  PyArrayDataInstance   (数据实例，就是 Python 对象本身)       │
+│       │                                                      │
+│       │  继承自 IntermediatePropertyOwner ← PropertyOwner     │
+│       │                                                      │
+│       ▼                                                      │
+│  onOwnedPropertyChanged(change)  → 冒泡到 Entity             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+关键差异：KBEngine 里 `FixedArray` 只是 `Sequence` 的子类，纯粹是个容器；BigWorld 里 `PyArrayDataInstance` **既是容器又是 PropertyOwner**——这是后续一切机制的基础。
+
+类继承关系（`array_data_instance.hpp:19`）：
+
+```cpp
+class PyArrayDataInstance : public IntermediatePropertyOwner
+{
+    Py_Header(PyArrayDataInstance, PropertyOwner)
+    // ...
+};
+
+// IntermediatePropertyOwner 提供 getTopLevelOwner()，
+// 沿 owner 链找到顶层（通常是 Entity）
+```
+
+### 12.5.2 attach/detach：让容器知道"我属于哪个 Entity"
+
+`array_data_type.cpp:163` 的 `ArrayDataType::attach`：
+
+```cpp
+// BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/
+// data_types/array_data_type.cpp:163（简化）
+ScriptObject ArrayDataType::attach(ScriptObject pObject,
+    PropertyOwnerBase * pOwner, int ownerRef)
+{
+    // ... 构造 PyArrayDataInstance ...
+    pInst->setOwner(pOwner, ownerRef);   // ★ 把 owner 保存到容器内部
+    return pInst;
+}
+```
+
+当脚本执行 `entity.inventory = [...]` 时，整个流程是：
+
+1. `entity.inventory` 这条属性被赋值（命中 Entity 的 `_tp_setattro`）
+2. 调用 `ArrayDataType::attach(list, owner=entity, ownerRef=inventory_index)`
+3. 把原始 list 包装成 `PyArrayDataInstance`，并把 **owner 指针（Entity）+ ownerRef（属性索引）** 存进去
+4. 返回包装后的实例替换原始 list
+
+从此，这个 array 就"知道自己属于谁"。`detach` 则在容器被销毁或替换时解除 owner 关系。
+
+### 12.5.3 setSlice：所有修改的统一入口
+
+`PyArrayDataInstance::setSlice` 是整个机制的心脏（`array_data_instance.cpp:584`）：
+
+```cpp
+// BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/
+// data_instances/array_data_instance.cpp:584（简化）
+bool PyArrayDataInstance::setSlice(Py_ssize_t startIndex, Py_ssize_t endIndex,
+    const BW::vector<ScriptObject>& newValues,
+    bool notifyOwner, ScriptObject* ppOldValues)
+{
+    PropertyOwnerBase* pTopLevelOwner = NULL;
+    SlicePropertyChange change(startIndex, endIndex,
+        values_.size(), newValues, dataType);
+
+    // 1. 沿 owner 链找到顶层 owner（通常是 Entity）
+    if (notifyOwner) {
+        this->getTopLevelOwner(change, pTopLevelOwner);
+    }
+
+    // 2. 实际修改 values_（deleteElements + insert）
+    this->deleteElements(startIndex, endIndex, ppOldValues);
+    values_.insert(values_.begin() + startIndex, numToInsert, ScriptObject());
+    for (int i = 0; i < numToInsert; ++i) {
+        values_[startIndex + i] = dataType.attach(newValues[i], this, ...);
+    }
+
+    // 3. ★★ 通知顶层 owner（Entity）有属性变了 ★★
+    if (pTopLevelOwner) {
+        pTopLevelOwner->onOwnedPropertyChanged(change);
+    }
+    return true;
+}
+```
+
+**所有 Python 修改操作都汇聚到这里**，没有一个修改路径会"悄悄发生"：
+
+| Python 操作 | 调用路径 |
+|------------|----------|
+| `entity.inv[i] = v` | `pySeq_ass_item` → `changeOwnedProperty` → 通知 |
+| `entity.inv[i:j] = [...]` | `pySeq_ass_slice` → `setSlice(notifyOwner=true)` |
+| `entity.inv.append(x)` | `append()` → `pySeq_ass_slice(size, size, (x,))` |
+| `entity.inv.extend(seq)` | `extend()` → `pySeq_ass_slice(size, size, seq)` |
+| `entity.inv.insert(i, x)` | `insert()` → `pySeq_ass_slice(i, i, (x,))` |
+| `entity.inv.pop()` | `pop()` → `pySeq_ass_slice(i, i+1, ())` |
+| `entity.inv.remove(x)` | `remove()` → `pySeq_ass_slice(i, i+1, NULL)` |
+| `entity.inv += seq` | `pySeq_inplace_concat` → `pySeq_ass_slice` |
+| `entity.inv *= n` | `pySeq_inplace_repeat` → `setSlice(notifyOwner=true)` |
+
+### 12.5.4 PropertyOwner 链：嵌套属性的冒泡
+
+`property_owner.hpp:21` 的核心注释说得很清楚：
+
+```cpp
+/**
+ *  This method is called by a child PropertyOwnerBase to inform us that
+ *  a property has changed. Each PropertyOwner should pass this to their
+ *  parent, adding their index to the path, until the Entity is reached.
+ */
+virtual bool onOwnedPropertyChanged(PropertyChange& change) { ... }
+```
+
+对于嵌套结构 `entity.grid[x][y] = v`，整个冒泡过程是：
+
+```
+PyArrayDataInstance(外层 grid)
+    │
+    │  grid[3][4] = value
+    │   ↓
+    │  内层 PyArrayDataInstance(grid[3]) 触发 onOwnedPropertyChanged
+    │   ↓ 把自己 index (3) 加到 path
+    │  外层 PyArrayDataInstance(grid) 触发 onOwnedPropertyChanged
+    │   ↓ 把自己 index (1, 假设 grid 是 entity 第1个属性) 加到 path
+    │  Entity::onOwnedPropertyChanged(change)
+    │   ↓ path = [4, 3, 1]，知道是 entity.grid[3][4] 变了
+    │
+    └──→ 标记 propertyEventStamps_、触发同步
+```
+
+`PropertyChange.path_`（`property_change.hpp:66`）的注释：
+
+```cpp
+// A sequence of child indexes ordered from the leaf to the root
+// (i.e. entity). For example, 3,4,6 would be the 6th property of the
+// entity, the 4th "child" of that property and then the 3rd "child".
+// E.g. If the 6th property is a list of lists called myList, this refers
+// to entity.myList[4][3]
+typedef BW::vector<std::pair<int32, int32>> ChangePath;
+```
+
+注意路径方向是**从叶子到根**，每层冒泡都把自己的 index 加到 path。Entity 拿到完整路径后，就能精确知道是哪个嵌套属性变了。
+
+### 12.5.5 两种变更粒度：增量同步的关键
+
+BigWorld 区分两种 `PropertyChange`（`property_change.hpp`）：
+
+| 类型 | 触发场景 | 序列化内容 |
+|------|----------|----------|
+| `SinglePropertyChange` | `entity.info["name"] = "x"` 或 `entity.inv[i] = v` | 仅新值（leafIndex + 值） |
+| `SlicePropertyChange` | `entity.inv.append(x)` / `entity.inv[i:j] = ...` | startIndex + endIndex + 新元素列表 |
+
+这导致 BigWorld 的网络同步是**真正增量**的：
+
+```
+场景：一个 1000 元素的数组 append 一个新项
+
+KBEngine（必须整体重新赋值）:
+    self.inventory = self.inventory
+    → 客户端收到整个数组：1001 个元素的全量序列化
+
+BigWorld（自动捕获 append）:
+    self.inventory.append(item)
+    → 客户端只收到 SlicePropertyChange：
+      [startIndex=1000, endIndex=1000, newValues=[item]]
+    → 仅 1 个元素 + 索引
+```
+
+对于 1000 元素的数组 append 一个，KBEngine 重传 1001 个，BigWorld 只传 1 个——这就是 BigWorld 这套机制最大的带宽价值。
+
+### 12.5.6 完整的"一次 append"流程
+
+```mermaid
+sequenceDiagram
+    participant Script as Python
+    participant Array as PyArrayDataInstance
+    participant Change as SlicePropertyChange
+    participant Entity as Entity (TopLevelOwner)
+    participant Witness as Witness / 同步层
+
+    Script->>Array: self.inventory.append(item)
+    Note over Array: append() 转换为<br/>pySeq_ass_slice(size, size, (item,))
+    Array->>Array: setSlice(start=size, end=size, [item], notifyOwner=true)
+
+    Note over Array,Change: 1. 构造 SlicePropertyChange<br/>   记录 startIndex / endIndex / newValues
+    Array->>Change: new SlicePropertyChange(...)
+
+    Note over Array: 2. getTopLevelOwner()<br/>   沿 owner 链找 Entity
+    Array->>Entity: 找到顶层 owner
+
+    Note over Array: 3. 修改 values_ vector<br/>   deleteElements + insert
+    Array->>Array: values_.insert(...) + attach(item, this, index)
+
+    Note over Array,Entity: 4. 通知 Entity
+    Array->>Entity: onOwnedPropertyChanged(change)
+
+    Note over Entity: 5. 根据 change.path 标记<br/>   propertyEventStamps_
+    Entity->>Witness: 标记某属性脏
+
+    Note over Witness: 6. tick 末 Witness::update()<br/>   只发送 SlicePropertyChange（增量）
+    Witness->>Script: 客户端收到 [startIndex, endIndex, [item]]
+```
+
+### 12.5.7 关键源码对照表
+
+| 概念 | 文件 |
+|------|------|
+| PropertyOwner 基类 | `lib/entitydef/property_owner.hpp:21` |
+| TopLevelPropertyOwner | `lib/entitydef/property_owner.hpp:106` |
+| IntermediatePropertyOwner | `lib/entitydef/data_instances/intermediate_property_owner.hpp` |
+| PropertyChange 基类 | `lib/entitydef/property_change.hpp:27` |
+| SinglePropertyChange | `lib/entitydef/property_change.hpp:92` |
+| SlicePropertyChange | `lib/entitydef/property_change.hpp:119` |
+| ArrayDataType | `lib/entitydef/data_types/array_data_type.hpp:14` |
+| **attach 实现** | `lib/entitydef/data_types/array_data_type.cpp:163` |
+| **PyArrayDataInstance** | `lib/entitydef/data_instances/array_data_instance.hpp:19` |
+| **setSlice（核心）** | `lib/entitydef/data_instances/array_data_instance.cpp:584` |
+| pySeq_ass_item | `lib/entitydef/data_instances/array_data_instance.cpp:402` |
+| append / extend / insert / pop / remove | `lib/entitydef/data_instances/array_data_instance.cpp:721-829` |
+
+> 所有路径相对 `BigWorld-Engine-14.4.1/programming/bigworld/`。
+
+### 12.5.8 FIXED_DICT 也是同一套机制
+
+`PyFixedDictDataInstance`（`fixed_dict_data_instance.hpp`）同样继承自 `IntermediatePropertyOwner`，它的 `mp_ass_subscript`（即 `info[key] = value`）也走完整的"构造 PropertyChange → 沿 owner 链冒泡 → 通知 Entity"流程。这与 KBEngine 的 `FixedDict::checkDataChanged`（仅类型检查，无回调）形成鲜明对比。
+
+### 12.5.9 与 KBEngine 的对比：根因总结
+
+KBEngine 没做到容器内部修改自动同步的**根本原因**：
+
+```
+KBEngine:
+    FixedArray : Sequence          ← 容器只是容器
+    Sequence::seq_ass_slice        ← 修改入口无任何回调
+    Entity::_tp_setattro           ← 同步决策只挂在这一层
+
+BigWorld:
+    PyArrayDataInstance : PropertyOwner   ← 容器是 PropertyOwner
+    setSlice(notifyOwner=true)            ← 修改入口必走变更通知
+    Entity::onOwnedPropertyChanged        ← 同步决策挂在 Entity 层
+    + IntermediatePropertyOwner           ← 中间层负责冒泡和路径累积
+```
+
+BigWorld 用 `attach/detach + IntermediatePropertyOwner + ChangePath` 这一套，**把"何时同步"的决策权从顶层 Entity 下沉到了每一个容器实例**。这就是它能做到容器内部修改自动增量同步的本质。
+
+## 12.6 Witness：观察者驱动的广播引擎
 
 ### KBEngine Witness
 
@@ -276,7 +690,7 @@ void Witness::update()
 
 **与 KBEngine 的关键区别**：BigWorld 使用**优先级队列 + 带宽预算**——如果带宽不够，低优先级的实体更新会被推迟到下一个 tick。KBEngine 没有这套优先级预算器；它更偏向“属性变化时直接按当前 witness 集合发送，tick 末再由 Witness 处理视野进出和位置/朝向等基础同步”。
 
-## 12.5 EntityCache：BigWorld 的观察者-被观察者关系管理
+## 12.7 EntityCache：BigWorld 的观察者-被观察者关系管理
 
 ```cpp
 // 文件：BigWorld-Engine-14.4.1/programming/bigworld/server/cellapp/entity_cache.hpp（简化）
@@ -312,7 +726,7 @@ public:
 };
 ```
 
-## 12.6 alias 机制：为什么属性同步包这么小
+## 12.8 alias 机制：为什么属性同步包这么小
 
 ### 问题
 
@@ -364,7 +778,7 @@ BigWorld 使用 `IDAlias`（1 字节）压缩实体 ID，以及 `internalIndex()
 IDAlias idAlias_;    // 0xff = NO_ID_ALIAS，其他为 1 字节实体 ID 别名
 ```
 
-## 12.7 detailLevel：不是所有属性都实时同步
+## 12.9 detailLevel：不是所有属性都实时同步
 
 ### 问题
 
@@ -454,7 +868,7 @@ bool EntityCache::updateDetailLevel(Mercury::Bundle& bundle,
 2. **优先级阈值**：不直接用距离，而是经过 `AoIUpdateSchemes` 转换的优先级值
 3. **4 级 LOD**（`MAX_LOD_LEVELS = 4`），KBEngine 3 级
 
-## 12.8 Volatile 属性：独立的更新频率控制
+## 12.10 Volatile 属性：独立的更新频率控制
 
 位置和朝向是最高频同步的属性。它们不需要每次变化都同步——只要变化量超过阈值才发。
 
@@ -577,7 +991,7 @@ BigWorld 的 Volatile 定义在 .def 文件的 `<Volatile>` 块中：
 </ClientAvatar>
 ```
 
-## 12.9 BigWorld AoIUpdateSchemes：可插拔的更新策略
+## 12.11 BigWorld AoIUpdateSchemes：可插拔的更新策略
 
 ```cpp
 // BigWorld 使用 AoIUpdateSchemes 抽象 AOI 更新策略
@@ -587,7 +1001,7 @@ Priority delta = AoIUpdateSchemes::apply(updateSchemeID_, distSQ);
 
 不同的实体类型可以使用不同的 AOI 更新策略（比如 NPC 的更新频率可以低于玩家）。KBEngine 没有这层抽象——所有实体使用统一的更新逻辑。
 
-## 12.10 广播的效率边界：为什么 MMO 有"最大同屏人数"
+## 12.12 广播的效率边界：为什么 MMO 有"最大同屏人数"
 
 ### 带宽计算
 
@@ -645,7 +1059,7 @@ N = 1000 个客户端
 | Volatile 阈值 | 有（.def 中配置） | 有（.def 中配置） |
 | 距离相关优先级 | 无 | 有（Priority 基于距离递增） |
 
-## 12.11 两套项目的属性同步对比
+## 12.13 两套项目的属性同步对比
 
 | 维度 | KBEngine | BigWorld |
 |------|----------|----------|
@@ -664,7 +1078,7 @@ N = 1000 个客户端
 | 更新策略 | 统一 | AoIUpdateSchemes 可插拔 |
 | 带宽统计 | NetworkStats | PacketReceiverStats |
 
-## 12.12 关键源码入口
+## 12.14 关键源码入口
 
 ### KBEngine
 
@@ -680,6 +1094,13 @@ N = 1000 个客户端
 | aliasID | `kbe/src/lib/entitydef/property.h` |
 | ViewTrigger | `kbe/src/server/cellapp/view_trigger.h` |
 | EntityRef | `kbe/src/server/cellapp/entityref.h` |
+| onScriptSetAttribute | `kbe/src/lib/entitydef/entity_macro.h:779`（宏展开） |
+| FixedArray 容器修改 | `kbe/src/lib/entitydef/fixedarray.cpp` |
+| FixedDict 容器修改 | `kbe/src/lib/entitydef/fixeddict.cpp` |
+| Sequence::seq_ass_slice | `kbe/src/lib/pyscript/sequence.cpp:295` |
+| checkDataChanged（误导名字） | `kbe/src/lib/entitydef/fixeddict.cpp:312` |
+| FixedArrayType | `kbe/src/lib/entitydef/datatype.h:638` |
+| FixedDictType | `kbe/src/lib/entitydef/datatype.h:676` |
 
 ### BigWorld
 
@@ -691,8 +1112,16 @@ N = 1000 个客户端
 | DataLoDLevels | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/data_lod_level.hpp` |
 | EntityDataFlags | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/data_description.hpp` |
 | onOwnedPropertyChanged | `BigWorld-Engine-14.4.1/programming/bigworld/server/cellapp/entity.cpp` |
+| PropertyOwnerBase | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/property_owner.hpp:21` |
+| TopLevelPropertyOwner | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/property_owner.hpp:106` |
+| IntermediatePropertyOwner | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/data_instances/intermediate_property_owner.hpp` |
+| PropertyChange 基类 | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/property_change.hpp:27` |
+| SinglePropertyChange | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/property_change.hpp:92` |
+| SlicePropertyChange | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/property_change.hpp:119` |
+| ArrayDataType::attach | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/data_types/array_data_type.cpp:163` |
+| PyArrayDataInstance::setSlice | `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/data_instances/array_data_instance.cpp:584` |
 
-## 12.13 源码走读路径
+## 12.15 源码走读路径
 
 ### 路径一：跟踪一次属性变更的完整同步链路
 
@@ -713,10 +1142,27 @@ N = 1000 个客户端
 3. `kbe/src/lib/entitydef/volatileinfo.h` — Volatile 更新阈值
 4. `BigWorld-Engine-14.4.1/programming/bigworld/server/cellapp/witness.cpp` — bandwidthDeficit 带宽预算
 
-## 12.14 小结
+### 路径四：理解容器属性的脏标记边界（KBEngine 侧）
+
+1. `kbe/src/lib/entitydef/entity_macro.h:779` — `onScriptSetAttribute` 宏：脏标记的真实入口
+2. `kbe/src/lib/pyscript/sequence.cpp:295` — `Sequence::seq_ass_slice`：所有 ARRAY 修改的汇聚点，注意没有任何回调
+3. `kbe/src/lib/entitydef/fixeddict.cpp:312` — `checkDataChanged`：误导名字，实际只是键合法性 + 类型校验
+4. `kbe/src/lib/entitydef/datatype.h:638` 和 `:676` — `FixedArrayType` / `FixedDictType`：确认没有 `onChanged` 钩子
+
+### 路径五：理解 BigWorld 容器属性变更追踪机制
+
+1. `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/property_owner.hpp:21` — `PropertyOwnerBase` 接口与 `onOwnedPropertyChanged` 注释
+2. `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/property_change.hpp:27` — `PropertyChange` 基类、`ChangePath` 含义、`SinglePropertyChange` / `SlicePropertyChange` 区分
+3. `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/data_types/array_data_type.cpp:163` — `ArrayDataType::attach`：把 owner 注入到容器实例
+4. `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/data_instances/array_data_instance.cpp:584` — `setSlice`：所有修改的统一入口，确认必走 `onOwnedPropertyChanged`
+5. `BigWorld-Engine-14.4.1/programming/bigworld/lib/entitydef/data_instances/array_data_instance.cpp:402-829` — `pySeq_ass_item / append / extend / insert / pop / remove` 都汇聚到 `setSlice`
+
+## 12.16 小结
 
 - **属性同步是 tick 末批量发的**：一个 tick 内多次修改只同步最终值，减少网络包数量
 - **onDefDataChanged 是变更入口**：判断是否 real、是否持久化、广播给 ghost 和客户端
+- **容器属性的脏标记边界**：ARRAY/FIXED_DICT 的内部修改（`append / []=` 等）**不会**自动触发同步，必须整体重新赋值（`self.xxx = self.xxx` 或新容器）；这是 KBEngine 与 BigWorld 的一个关键差异，BigWorld 在 `DataDescription` 层有细粒度钩子
+- **BigWorld 用 PropertyOwner 链实现容器内部修改自动追踪**：容器实例本身就是 `PropertyOwner`，通过 `attach/detach` 知道"我属于哪个 Entity"，所有修改都汇聚到 `setSlice(notifyOwner=true)` → `onOwnedPropertyChanged` 冒泡到顶层；变更用 `SinglePropertyChange` / `SlicePropertyChange` 区分粒度，网络同步是真正增量的
 - **Witness 是观察者驱动的广播引擎**：每 tick 末收集所有可见实体的脏属性，构造 Bundle 批量发送
 - **alias 机制会在满足条件时把属性 ID 从 `utype` 压成 1 字节 alias**：它受 alias 开关、保留区间和客户端可见属性数量共同约束
 - **detailLevel/LOD 实现按距离分级同步**：远处实体只同步位置朝向，近处实体同步全部
