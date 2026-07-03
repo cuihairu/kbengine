@@ -112,6 +112,14 @@
 - 容器属性的脏标记边界：ARRAY/FIXED_DICT 内部修改不触发同步
 - BigWorld 的容器属性变更追踪：PropertyOwner 链 + attach/detach + SlicePropertyChange 增量同步
 
+### [Ch12.5 cellData 与 Base-Cell 数据同步](12-celldata-and-base-cell-sync.md)
+
+- cellData 的本质：Base 侧的 Cell 属性快照字典（持久化桥梁，非实时查询接口）
+- backupCellData() 完整调用链路与 SHA1 变化检测如何减少网络传输
+- 为什么同步不是实时的：延迟来源分析
+- onWriteToDB(cellData) 回调中应该做什么
+- self.cell.xxx() 与 cellData 的使用场景决策
+
 ### [Ch13 数据库、DBMgr 与持久化](13-database-dbmgr-and-persistence.md)
 
 - Base → Cell → DBMgr 三段式写库

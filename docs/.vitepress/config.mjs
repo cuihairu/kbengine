@@ -106,6 +106,7 @@ const config = defineConfig({
             { text: '10 - 序列化、Bundle 与消息', link: '/study/10-serialization-bundle-and-messages' },
             { text: '11 - RPC、EntityCall 与通信模式', link: '/study/11-rpc-entitycall-and-communication-patterns' },
             { text: '12 - 属性同步与广播', link: '/study/12-property-sync-and-broadcast' },
+            { text: '12.5 - cellData 与 Base-Cell 同步', link: '/study/12-celldata-and-base-cell-sync' },
             { text: '13 - 数据库、DBMgr 与持久化', link: '/study/13-database-dbmgr-and-persistence' },
           ],
         },
