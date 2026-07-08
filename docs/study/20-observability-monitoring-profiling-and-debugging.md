@@ -759,6 +759,28 @@ QUIT（退出）
 >>> KBEngine.entities['1001'].logout()
 ```
 
+Telnet Python 模式最终会把每次输入交给 `Script::run_simpleString()`，源码中使用 `PyRun_String(..., Py_single_input, d, d)` 执行，因此它更接近交互式解释器，而不是完整的脚本上传通道。排查线上问题时，推荐用以下三种方式：
+
+| 方式 | 示例 | 适用场景 |
+|------|------|----------|
+| 单行表达式 | `>>> len(KBEngine.entities)` | 快速查看状态 |
+| `exec` 包多行脚本 | `>>> exec("""...""")` | 临时运行一段诊断逻辑 |
+| 导入诊断模块 | `>>> import hotfix_probe; hotfix_probe.dump()` | 复杂脚本、可复用排查 |
+
+多行诊断脚本示例：
+
+```python
+>>> exec("""
+... import sys
+... mod = sys.modules.get("interfaces.Interface_FootballGuessMgr")
+... cls = getattr(mod, "Interface_FootballGuessMgr", None)
+... print("module:", mod, id(mod))
+... print("class:", cls, id(cls) if cls else None)
+... """)
+```
+
+如果脚本较长，不建议在 Telnet 中手工粘贴大量业务逻辑。更稳妥的方式是提前把只读诊断模块放到脚本路径中，通过 `import probe; probe.run()` 调用；涉及修改状态的修复脚本必须先在灰度进程验证。
+
 #### 性能剖析
 
 **C++ 性能剖析**（`:cprofile`）：
@@ -869,7 +891,147 @@ Telnet 的 Python 模式是一个**交互式 shell**，但缺乏断点、单步�
 True
 ```
 
-##### 方法二：使用 pdb 内置断点调试
+##### 方法二：在线对象和字节码检查工具箱
+
+Telnet Python 模式最适合做“在线取证”：在不重启进程的情况下，直接读取当前进程里的 Python 对象、模块字典、函数元信息和字节码。它不是原始内存查看器，不能安全地随意读 C++ 地址；它看到的是 CPython 暴露出来的对象图和对象元信息。
+
+热更新、旧 callback、单例缓存分叉这类问题，优先查 Python 对象图：
+
+| 工具 | 用途 | 典型问题 |
+|------|------|----------|
+| `id(obj)` | 查看对象 identity | 判断两个名字是否指向同一个对象 |
+| `type(obj)` / `isinstance` | 判断对象类型 | 区分 function、method、class、partial |
+| `dir(obj)` / `vars(obj)` / `obj.__dict__` | 查看对象属性字典 | 查类属性、模块变量、实例字段 |
+| `sys.modules` | 查看当前模块对象 | 判断当前模块名绑定到哪个 module object |
+| `gc.get_objects()` | 扫描 GC 管理的 Python 对象 | 查旧函数、旧 bound method 是否仍存活 |
+| `gc.get_referrers(obj)` | 查看谁引用了对象 | 追踪旧对象被哪个容器、timer、事件表持有 |
+| `gc.get_referents(obj)` | 查看对象引用了谁 | 查 partial、容器、实例内部保存的旧对象 |
+| `sys.getsizeof(obj)` | 查看对象自身占用大小 | 粗略判断对象体积；不递归统计引用对象 |
+| `types` | 精确识别函数和 method | `types.FunctionType` / `types.MethodType` |
+| `inspect` | 查看签名、来源、成员 | 辅助确认函数来源和对象结构 |
+| `dis` | 反汇编 Python 字节码 | 判断代码从 `__globals__` 取值还是从闭包取值 |
+
+常用对象检查模板：
+
+```python
+import sys, gc, types, inspect, functools, dis
+
+mod = sys.modules.get("interfaces.Interface_FootballGuessMgr")
+cls = getattr(mod, "Interface_FootballGuessMgr", None)
+func = getattr(cls.do_settle_one_match, "__func__", cls.do_settle_one_match)
+
+print("module:", mod, id(mod))
+print("class:", cls, id(cls))
+print("func:", func, id(func))
+print("file:", func.__code__.co_filename, func.__code__.co_firstlineno)
+print("globals is module dict:", func.__globals__ is mod.__dict__)
+print("names:", func.__code__.co_names)
+print("freevars:", func.__code__.co_freevars)
+print("closure:", func.__closure__)
+```
+
+查看 bound method 绑定到了谁：
+
+```python
+m = cls.do_settle_one_match
+print("method:", m)
+print("__func__:", getattr(m, "__func__", None))
+print("__self__:", getattr(m, "__self__", None))
+```
+
+`@classmethod` 的关键检查点也是 `__self__`，只是它绑定的不是实例，而是 class object：
+
+```python
+cfg_cls = mod.FootballGuessRedisConfig
+m = cfg_cls.get
+print("get method:", m)
+print("get __func__:", getattr(m, "__func__", None))
+print("get __self__:", getattr(m, "__self__", None), id(getattr(m, "__self__", None)))
+```
+
+如果怀疑旧对象仍被某个容器持有，可以用 `gc` 扫描。但要注意：`gc.get_objects()` 和 `gc.get_referrers()` 在大进程里可能很慢，生产环境应限制筛选条件，避免打印海量对象。
+
+```python
+hits = []
+for o in gc.get_objects():
+    try:
+        if isinstance(o, types.MethodType):
+            f = getattr(o, "__func__", None)
+            if f and getattr(f, "__qualname__", "").endswith("do_settle_one_match"):
+                hits.append((id(o), id(o.__self__), id(f), id(f.__globals__)))
+    except Exception:
+        pass
+
+print("hits:", len(hits))
+for item in hits[:20]:
+    print(item)
+```
+
+对象大小只能作为辅助信号，不能把 `sys.getsizeof()` 当作“完整内存占用”。它只统计对象本身，不会递归累加对象引用的 dict、list、缓存和业务对象。要判断“谁还活着”和“谁引用了它”，优先用 `id()`、`gc.get_referrers()`、`gc.get_referents()` 和业务容器反查。
+
+`dis` 看的是 Python 字节码，不是 CPU 机器码。它的价值是回答“这段 Python 代码运行时到底从哪里取值”。在 KBEngine 这类嵌入式 CPython 场景里，Python 源码先编译成 bytecode，随后由 CPython 解释器执行；`dis` 展示的是解释器要执行的 opcode，不是 C++ 编译器生成的 x86/ARM 指令。
+
+```python
+import dis
+dis.dis(func)
+print(func.__code__.co_names)
+print(func.__code__.co_varnames)
+print(func.__code__.co_freevars)
+```
+
+常见 opcode 可以这样读：
+
+| opcode | 含义 | 热更新排查意义 |
+|--------|------|----------------|
+| `LOAD_FAST` | 读取局部变量 | 与模块热更新无关，来自当前调用栈局部变量 |
+| `LOAD_GLOBAL` | 从 `func.__globals__` / builtins 取名字 | 重点看 `func.__globals__ is mod.__dict__` |
+| `LOAD_ATTR` / `LOAD_METHOD` | 从对象上取属性或方法 | 继续看对象 identity 和类对象是否旧 |
+| `LOAD_DEREF` | 从闭包 cell 取值 | 重点看 `func.__closure__` 和 `co_freevars` |
+| `CALL_FUNCTION` / `CALL_METHOD` | 调用函数或方法 | 确认调用对象来自哪里 |
+| `STORE_GLOBAL` | 写模块全局变量 | 可能改的是旧 `__globals__` 字典 |
+| `IMPORT_NAME` | 执行 import | 检查导入后绑定到哪个模块对象 |
+| `RETURN_VALUE` | 函数返回 | 通常不是排查重点 |
+
+例如，看到：
+
+```text
+LOAD_GLOBAL FootballGuessRedisConfig
+LOAD_METHOD get
+```
+
+说明代码不是读闭包，而是从 `func.__globals__["FootballGuessRedisConfig"]` 取类，再取 `get` 方法。如果 telnet 当前模块里的 `mod.FootballGuessRedisConfig` 是新类，但 `func.__globals__["FootballGuessRedisConfig"]` 是旧类，就会出现同进程手工调用新数据、timer 路径读旧数据的现象。
+
+如果看到：
+
+```text
+LOAD_DEREF cfg
+```
+
+说明变量来自闭包，需要检查：
+
+```python
+for name, cell in zip(func.__code__.co_freevars, func.__closure__ or ()):
+    try:
+        print(name, cell.cell_contents, id(cell.cell_contents))
+    except ValueError:
+        print(name, "<empty cell>")
+```
+
+原始 C++ 内存和系统级内存问题要用另一类工具，不应在 Telnet Python 模式里硬读地址：
+
+| 工具 | 用途 |
+|------|------|
+| `debugTracing()` | KBEngine 暴露的 Python GC/引用跟踪辅助入口 |
+| `gdb` / `lldb` | Linux 下查看 C++ 调用栈、对象地址、崩溃现场 |
+| `gdb disassemble` / `objdump` | 查看 C/C++ 编译产物的 CPU 汇编指令 |
+| `perf annotate` | Linux 下把热点采样映射到汇编和源码行 |
+| `WinDbg` / Visual Studio Debugger | Windows 下查看 C++ 进程和 dump |
+| ASan / Valgrind | 定位越界、Use-After-Free、内存泄漏 |
+| `tracemalloc` | Python 分配追踪；取决于嵌入式 Python 版本是否可用 |
+
+实践上，热更新问题先用 `sys.modules`、`id()`、`__globals__`、`__func__`、`__self__`、`gc`、`dis` 查 Python 对象图；只有怀疑 C++ 层内存破坏、崩溃或泄漏时，再切到 gdb/WinDbg/ASan 这类工具。
+
+##### 方法三：使用 pdb 内置断点调试
 
 在需要调试的代码位置插入 `pdb.set_trace()`，当执行到该位置时会进入交互式调试。
 
@@ -938,7 +1100,7 @@ class Avatar(KBEngine.Entity):
 (Pdb) c               # 继续执行
 ```
 
-##### 方法三：使用 debugpy + VSCode 远程调试
+##### 方法四：使用 debugpy + VSCode 远程调试
 
 这是最强大的调试方式，可以在 VSCode 中设置断点、查看变量、单步执行。
 
@@ -1111,6 +1273,7 @@ start.bat
 | 方法 | 优点 | 缺点 | 适用场景 |
 |------|------|------|----------|
 | **Telnet Python** | 无需修改代码，随时可用 | 无断点功能，只能查状态 | 快速查看运行时状态 |
+| **对象/字节码检查** | 能直接确认旧函数、旧类、旧 globals | 需要理解 CPython 元信息，`gc` 扫描可能较慢 | 热更新、旧 callback、闭包和单例分叉 |
 | **pdb** | 内置，无需额外安装 | 需修改代码，界面简陋 | 临时调试，无 GUI 环境 |
 | **debugpy + VSCode** | 完整 GUI，功能强大 | 需安装配置，有性能开销 | 复杂问题调试，开发阶段 |
 

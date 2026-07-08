@@ -1,6 +1,6 @@
 # 6. Python 运行时与脚本桥接
 
-> 两个项目都用 Python 做业务脚本，但集成深度不同。这一章回答：Python 在引擎里处于什么位置？C++ 和 Python 怎么桥接？热重载到底能不能改 .def？为什么不用 Lua？
+> 两个项目都用 Python 做业务脚本，但集成深度不同。这一章回答：Python 在引擎里处于什么位置？C++ 和 Python 怎么桥接？热更新到底能不能改 .def？为什么不用 Lua？
 
 ## 6.1 本章核心问题
 
@@ -28,7 +28,7 @@
 1. BigWorld 的脚本示例默认按 Python 2.7 语义理解（例如旧式字符串/部分标准库行为）
 2. 当前 KBEngine 文档与示例应优先按 Python 3 语义编写
 3. 涉及第三方库（如 Twisted）时，必须结合对应 Python 大版本讨论可用性
-- 热重载的边界在哪里？
+- 热更新的边界在哪里？
 
 ## 6.2 为什么选 Python 而不是 Lua
 
@@ -56,7 +56,7 @@ MMO 脚本是几十万行业务代码，不是几百行嵌入式脚本：
 ### 其他因素
 
 - **Twisted Deferred**：BigWorld 的 PyDeferred 直接基于 Twisted，提供异步回调链式处理。Lua 没有 Twisted
-- **热重载**：CPython 内置 `PyImport_ReloadModule`。Lua 的 `require` 缓存模块，热重载需手动清 `package.loaded`
+- **热更新**：CPython 内置 `PyImport_ReloadModule`。Lua 的 `require` 缓存模块，热更新需手动清 `package.loaded`
 - **团队门槛**：MMO 团队是"少数 C++ 引擎程序员 + 多数脚本程序员 + 策划"，Python 可读性更高
 - **历史时机**：BigWorld 架构设计于 2002-2004 年，Python 2.x 已成熟，LuaJIT 还不存在
 
@@ -455,53 +455,58 @@ CallbackMgr 是“ID 到函数”的映射表，优点是直观、低心智负�
 
 这也是两套引擎的典型取舍：BigWorld 追求异步表达力，KBEngine 追求实现和使用成本更低。
 
-## 6.10 热重载机制与边界
+## 6.10 热更新机制与边界
 
-### KBEngine 热重载
+本节只给运行时视角的概览；`reloadScript` 与 `xreload` 的取舍、`from X import Y` 旧引用、旧 callback 残留、timer 重绑和发布流程，详见 [Ch21 热更新](21-hotupdate-fault-tolerance-and-ops.md)。
+
+### KBEngine 热更新
 
 ```cpp
-// 文件：kbe/src/server/baseapp/baseapp.cpp（简化）
-void Baseapp::reloadScript(bool fullReload)
+// 文件：kbe/src/lib/server/entity_app.h（简化）
+void EntityApp<E>::reloadScript(bool fullReload)
 {
-    // 遍历所有 Entity
-    Entities<Entity>::ENTITYS_MAP& entities = pEntities_->getEntities();
-    for (auto& eiter : entities)
-    {
-        eiter->second->reload(fullReload);  // 切换 Python 类
-    }
-    // 调用入口脚本的 onInit(1)（1 表示重载）
+    EntityDef::reload(fullReload);
+    onReloadScript(fullReload);
+
+    // 调用入口脚本的 onInit(1)（1 表示热更新）
     PyObject_CallMethod(getEntryScript().get(), "onInit", "i", 1);
 }
 ```
 
-Entity::reload 的核心操作：
+BaseApp / CellApp 的 `onReloadScript(fullReload)` 会遍历当前存活实体，实体 `reload()` 的核心操作是：
 
 ```cpp
 // 通过替换 __class__ 属性实现类切换
 PyObject_SetAttrString(this, "__class__", newClass);
 ```
 
-### BigWorld 热重载
+这里有一个容易导致线上事故的边界：`reloadScript` 会刷新引擎知道的实体类绑定，但不会自动重绑外部容器已经保存的 Python callable。比如 `KBEngine.addTimer(..., callback)` 会在 C++ 侧保存传入的 callback 对象；如果 callback 是热更新前的 bound method 或模块函数，它仍可能持有旧 `__globals__`。
 
-BigWorld 通过 `ScriptApp::triggerOnInit(isReload=true)` 触发，调用 `BWPersonality.onInit(True)`。
+同样，`from X import Y` 得到的 `Y` 不会因为 `X` 重新执行而自动重绑。`xreload` 这类方案通过原地 patch 旧对象缓解这个问题，但会引入闭包、descriptor、类属性迁移和 `__globals__` 同步等复杂边界。
 
-`EntityType::reloadScript()` 重新导入 Python 类并更新 `pClass_`。
+### BigWorld 热更新
 
-### 热重载的边界
+BigWorld 的热更新入口在 BaseApp / CellApp 的 `BigWorld.reloadScript(fullReload)`。它会在新的 Python interpreter 中加载实体脚本或实体定义，成功后迁移 `sys.modules`、`EntityType`、mailbox 和现有实体，最后通过 `ScriptApp::triggerOnInit(isReload=true)` 调用 `BWPersonality.onInit(True)`。
+
+`EntityType::reloadScript()` 负责在不重读实体定义时重新导入 Python 类；`fullReload=true` 时则走 `EntityType::init(true)` 重建定义。BigWorld 源码注释明确提醒该接口偏开发用途，不适合直接作为生产热更新机制。
+
+### 热更新的边界
 
 | 能热更 | 不能热更 |
 |--------|---------|
-| 实体行为逻辑（Python 方法体） | EntityDef 定义（.def 文件的属性/方法签名） |
+| 实体行为逻辑（Python 方法体） | 不兼容的 EntityDef 结构变更 |
 | 全局脚本函数 | 已存在的实体对象的 C++ 侧状态 |
 | 脚本模块的顶层逻辑 | 网络协议中的 utype 分配 |
+| 实体当前类绑定 | 已保存的旧函数对象、旧 bound method、旧闭包 |
 | | 数据库表结构 |
 
-**.def 文件变更需要重启**。因为 .def 决定了三件事：Python 属性、网络协议 ID、数据库表列。运行时改 .def 意味着要同时改所有在线实体的内存布局、协议编解码、数据库结构——代价太大。
+`.def` 不是完全不能在源码层面热更新：KBEngine 的 `fullReload=true` 会重建 `EntityDef`，BigWorld 的 `fullReload=true` 会重建 `EntityType`。但只要变更影响协议 ID、持久化结构、客户端 SDK 或在线对象兼容性，就不能当作普通生产热更新处理，应走灰度、全组件一致性校验或重启发布。
 
 ### 灰区
 
 - **全局变量的重置语义**：热更后模块级全局变量会被重新初始化，已有的引用不受影响
 - **已创建的实体**：旧实例的 `__class__` 被替换为新类，但 `__dict__` 保持不变
+- **timer / 事件 / callback 表**：如果保存的是函数对象，热更新不会自动替换；如果保存的是实体和方法名，则更容易走到新实现
 
 ## 6.11 如何把一个 C++ 方法暴露成 `KBEngine.xxx()`
 
@@ -855,7 +860,7 @@ Python 只认识 `PyObject*`。C++ 基本类型必须显式封装。
 | CallbackMgr | `kbe/src/lib/server/callbackmgr.h` | `save()` / `take()` |
 | ScriptTimers | `kbe/src/lib/server/script_timers.h` | `addTimer()` / `delTimer()` |
 | 远程方法 | `kbe/src/lib/entitydef/remote_entity_method.cpp` | `tp_call()` |
-| 热重载 | `kbe/src/server/baseapp/baseapp.cpp` | `reloadScript()` |
+| 热更新 | `kbe/src/lib/server/entity_app.h` | `EntityApp::reloadScript()` |
 | 模块函数注册 | `kbe/src/lib/pyscript/py_macros.h` | `APPEND_SCRIPT_MODULE_METHOD` |
 | 公共模块入口 | `kbe/src/lib/server/python_app.cpp` | `installPyModules()` |
 | 实体型模块入口 | `kbe/src/lib/server/entity_app.h` | `EntityApp<E>::installPyModules()` |
@@ -891,17 +896,17 @@ Python 只认识 `PyObject*`。C++ 基本类型必须显式封装。
 1. KBEngine: `kbe/src/lib/entitydef/remote_entity_method.cpp` — `tp_call()` 的完整链路
 2. 对比 BigWorld: MailBox 的 `PY_TYPEOBJECT_WITH_CALL` 实现
 
-### 路径四：理解热重载
+### 路径四：理解热更新
 
-1. KBEngine: `kbe/src/server/baseapp/baseapp.cpp` — `reloadScript()` → Entity::reload()
-2. BigWorld: `lib/server/script_app.cpp` — `triggerOnInit(isReload=true)`
+1. KBEngine: `kbe/src/lib/server/entity_app.h` — `EntityApp::reloadScript()` → `EntityDef::reload()` → `Entity::reload()`
+2. BigWorld: `server/baseapp/script_bigworld.cpp` / `server/cellapp/cellapp.cpp` — `BigWorld.reloadScript()` → `EntityType::migrate()` → `triggerOnInit(true)`
 
 ## 6.14 小结
 
-- **Python 被选中是因为工程生产力，不是运行速度**——标准库、表现力、热重载、团队门槛
+- **Python 被选中是因为工程生产力，不是运行速度**——标准库、表现力、热更新、团队门槛
 - **Entity 就是 PyObject**：C++ 对象和 Python 对象共享同一块内存，用 placement new 统一构造
 - **BigWorld 多了 ScriptApp 层**和 **PyDeferred（Twisted Deferred）**——更完整的异步编程能力
 - **KBEngine 用 CallbackMgr 替代 Deferred**——更简单直接，但牺牲了组合能力
 - **远程方法调用的本质**：`tp_call` 把 Python 函数调用序列化成网络包
-- **热重载只改行为不改结构**：Python 方法体可以热更，.def 文件变更必须重启
+- **热更新优先改行为，结构变更慎用**：Python 方法体适合热更；`.def` 结构变更虽有 `fullReload` 路径，但生产上必须按协议/数据兼容变更处理
 - **无虚函数约束**：Entity/Base/Proxy 不能有虚函数，否则 vptr 会破坏 PyObject 内存布局

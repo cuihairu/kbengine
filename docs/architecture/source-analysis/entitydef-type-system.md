@@ -7,7 +7,7 @@
 > - `types.xml`、`ARRAY`、`FIXED_DICT` 是怎么真正进入实体系统的
 > - `ENTITYCALL` 到底是“实体对象引用”还是“远程 mailbox”
 >
-> 前面的 [实体系统](/architecture/source-analysis/entity-system.md) 和 [脚本运行时与热重载](/architecture/source-analysis/scripting.md) 已经把主线搭起来了；这一页继续把“类型系统”和“实体定义文件”这半边补成可落源码的专题。
+> 前面的 [实体系统](/architecture/source-analysis/entity-system.md) 和 [脚本运行时与热更新](/architecture/source-analysis/scripting.md) 已经把主线搭起来了；这一页继续把“类型系统”和“实体定义文件”这半边补成可落源码的专题。
 
 ## 先给结论
 
@@ -45,7 +45,97 @@ flowchart TD
 - `types.xml` 不是注释性配置，而是实体类型系统真正的注册入口。
 - `entities.xml` 不只是列名字，它还影响实体 `utype` 分配，以及 `hasBase / hasCell / hasClient` 的断言边界。
 - `.def` 解析时，属性和方法用到的类型都必须已经能在 `DataTypes` 里找到。
-- `ENTITYCALL` 不是普通持久化字段；它更接近“可序列化的远程调用句柄”。
+- `ENTITYCALL` 不是普通持久化字段；它更接近”可序列化的远程调用句柄”。
+- **`.def` 中的 `<Type>` 定义的是 KBEngine 统一类型系统，不是直接定义数据库类型**。
+
+## 第零层：`.def` 中的 Type 定义的是”统一类型”，自动映射到三种底层表示
+
+### 一个 Type，三种用途
+
+`.def` 文件中的 `<Type>` 定义的是 **KBEngine 抽象类型**，引擎会根据用途自动映射到不同的底层表示：
+
+```mermaid
+flowchart LR
+    A[“<Type> INT32 </Type>”]
+
+    B1[“内存 (Python)”]
+    B2[“数据库 (MySQL)”]
+    B3[“网络 (Binary Stream)”]
+
+    A --> B1
+    A --> B2
+    A --> B3
+
+    B1 --> B1V[“int”]
+    B2 --> B2V[“INT”]
+    B3 --> B3V[“4 bytes big-endian”]
+
+    A2[“<Type> STRING </Type>”]
+    A2 --> C1V[“str”]
+    A2 --> C2V[“VARCHAR”]
+    A2 --> C3V[“长度 + 字节”]
+```
+
+### 完整映射表
+
+| KBEngine Type | Python 内存 | MySQL 数据库 | 网络传输 |
+|--------------|-------------|--------------|----------|
+| `UINT8` | `int` | `TINYINT UNSIGNED` | 1 byte |
+| `UINT16` | `int` | `SMALLINT UNSIGNED` | 2 bytes |
+| `UINT32` | `int` | `INT UNSIGNED` | 4 bytes |
+| `UINT64` | `int` | `BIGINT UNSIGNED` | 8 bytes |
+| `INT8` | `int` | `TINYINT` | 1 byte |
+| `INT16` | `int` | `SMALLINT` | 2 bytes |
+| `INT32` | `int` | `INT` | 4 bytes |
+| `INT64` | `int` | `BIGINT` | 8 bytes |
+| `FLOAT` | `float` | `FLOAT` | 4 bytes |
+| `DOUBLE` | `float` | `DOUBLE` | 8 bytes |
+| `STRING` | `str` | `VARCHAR(N)` | 长度+字节 |
+| `UNICODE` | `str` | `VARCHAR(N) UTF8` | 长度+UTF8字节 |
+| `VECTOR3` | `tuple(x,y,z)` | 3 个 `FLOAT` 列 | 12 bytes |
+| `BLOB` | `bytes` | `BLOB` | 长度+字节 |
+| `ARRAY<of>` | `list` | 多行关联表 / 序列化 | 长度+元素 |
+| `FIXED_DICT` | `PyFixedDictDataInstance` | 多列 / BLOB | 字段序列 |
+
+### 源码证据
+
+**数据库映射** - `property_mapping.cpp:231-304`:
+
+```cpp
+// KBEngine Type → MySQL 映射
+if (strcmp( metaName, “UINT8” ) == 0)
+    pResult = new NumMapping< uint8 >( ... );      // → TINYINT UNSIGNED
+else if (strcmp( metaName, “UINT32” ) == 0)
+    pResult = new NumMapping< uint32 >( ... );    // → INT UNSIGNED
+else if (strcmp( metaName, “INT32” ) == 0)
+    pResult = new NumMapping< int32 >( ... );     // → INT
+else if (strcmp( metaName, “FLOAT32” ) == 0)
+    pResult = new NumMapping< float >( ... );     // → FLOAT
+else if (strcmp( metaName, “STRING” ) == 0)
+    pResult = new StringMapping( ... );           // → VARCHAR
+else if (strcmp( metaName, “UNICODE_STRING” ) == 0)
+    pResult = new UnicodeStringMapping( ... );    // → VARCHAR (UTF8)
+```
+
+### 关键点
+
+1. **`.def` 中定义的是抽象类型**，不直接对应数据库类型
+2. **自动映射**：系统根据 Type 自动选择合适的数据库列类型
+3. **Persistent 标志控制**：只有标记 `<Persistent>true</Persistent>` 的属性才会写入数据库
+4. **DATABASE_LENGTH**：字符串类型可用 `<DatabaseLength>255</DatabaseLength>` 控制 VARCHAR 长度
+
+```xml
+<!-- 示例：Type 是 KBEngine 类型，不是 MySQL 类型 -->
+<Properties>
+    <!-- 这里的 STRING 是 KBEngine 类型，会自动映射到 MySQL VARCHAR -->
+    <playerName>
+        <Type> UNICODE </Type>
+        <Flags> BASE_AND_CLIENT </Flags>
+        <Persistent> true </Persistent>
+        <DatabaseLength> 64 </DatabaseLength>  <!-- 控制 VARCHAR 长度 -->
+    </playerName>
+</Properties>
+```
 
 ## 第一层：真正的加载顺序是 `types.xml -> entities.xml -> .def`
 
@@ -258,10 +348,292 @@ flowchart TD
 ### 使用场景
 
 - `ARRAY`
-  适合“同构重复项”，例如背包格子列表、路径点列表。
+  适合”同构重复项”，例如背包格子列表、路径点列表。
 - `FIXED_DICT`
-  适合“字段固定的结构”，例如一条邮件头、一个战斗结算块。
+  适合”字段固定的结构”，例如一条邮件头、一个战斗结算块。
 - 如果只是想临时塞任意对象，`PYTHON / PY_DICT / PY_LIST` 更自由，但协议边界会更弱。
+
+---
+
+## 4.5 层：`FIXED_DICT` 的本质是二进制格式，Dict 只是外层接口
+
+### FIXED_DICT = 固定字段的二进制打包 + Dict-like 接口
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    FIXED_DICT 本质                           │
+│                                                               │
+│   在网络/数据库中：二进制流（按字段顺序）                     │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │ [field1_value][field2_value][field3_value]...       │   │
+│   │ (按类型定义顺序，字段名不传输)                       │   │
+│   └─────────────────────────────────────────────────────┘   │
+│                         △                                    │
+│                         │                                    │
+│   在 Python 中：PyFixedDictDataInstance（实现 Mapping 协议）│
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │ obj[“field1”]  ─────▶  fieldValues_[0]              │   │
+│   │ obj[“field2”]  ─────▶  fieldValues_[1]              │   │
+│   │ obj.keys()    ─────▶  [“field1”, “field2”, ...]     │   │
+│   └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 源码证据
+
+**内部存储是数组，不是哈希表** - `fixed_dict_data_instance.hpp:89-90`:
+```cpp
+typedef BW::vector<ScriptObject> FieldValues;
+FieldValues fieldValues_;  // ← 数组，按字段索引访问
+```
+
+**字段访问是 O(1) 数组索引** - `fixed_dict_data_instance.cpp:271-293`:
+```cpp
+PyObject* getFieldByKey( const char * keyString )
+{
+    // 先通过字段名查索引
+    int idx = pDataType_->getFieldIndex( keyString );
+    if (idx >= 0) {
+        // 然后直接数组访问
+        pValue = fieldValues_[idx].get();  // ← O(1) 数组访问
+    }
+}
+```
+
+### 对比：Python Dict vs FIXED_DICT
+
+| 特性 | Python `dict` | FIXED_DICT |
+|------|--------------|------------|
+| **内部存储** | 哈希表 | **数组** (`vector<ScriptObject>`) |
+| **字段顺序** | 无序（Python 3.7+ 有序但非保证） | **固定顺序**（定义时确定） |
+| **序列化** | pickle（递归对象图） | **扁平二进制**（按字段类型） |
+| **字段添加** | 运行时动态添加 | **编译时固定** |
+| **网络传输** | 需要完整 pickle 支持 | **类型精确，无需反射** |
+
+### 为什么这样设计？
+
+```
+如果用普通 dict：
+序列化需要：{“field1”: 123, “field2”: “abc”}
+              ↑字段名  ↑值   ↑字段名  ↑值
+
+用 FIXED_DICT：
+序列化需要：<INT32><123><STRING><abc>
+              ↑类型  ↑值   ↑类型  ↑值
+              （字段名在编译时已确定，不需要传输）
+```
+
+---
+
+## 4.6 层：`implementedBy` 钩子系统详解
+
+`implementedBy` 不是简单的”类名”，而是一组**双向转换钩子**。
+
+### 完整钩子列表
+
+| 钩子方法 | 必需/可选 | 调用时机 | 作用 |
+|----------|----------|----------|------|
+| `getDictFromObj(self, obj)` | **必需** | 序列化时 | 自定义对象 → FIXED_DICT 格式 |
+| `createObjFromDict(self, dict)` | **必需** | 反序列化时 | FIXED_DICT 格式 → 自定义对象 |
+| `isSameType(self, obj)` | 可选 | 类型检查时 | 判断对象是否匹配此类型 |
+| `addToStream(self, obj)` | 可选（需成对） | 网络传输时 | 完全自定义序列化 |
+| `createFromStream(self, stream)` | 可选（需成对） | 网络接收时 | 完全自定义反序列化 |
+
+### 钩子调用流程
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        implementedBy 钩子流程                        │
+└─────────────────────────────────────────────────────────────────────┘
+
+                              ┌─────────────────┐
+                              │  属性赋值/读取   │
+                              └────────┬────────┘
+                                       │
+                       ┌───────────────┼───────────────┐
+                       ▼               ▼               ▼
+              ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+              │  内存访问   │ │ 网络传输   │ │ 数据库持久化 │
+              └──────┬──────┘ └──────┬──────┘ └──────┬──────┘
+                     │                │                │
+    ┌────────────────┼────────────────┼────────────────┼────────────────┐
+    │                │                │                │                │
+    ▼                ▼                ▼                ▼                ▼
+┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+│isSameType│    │getDict  │    │addToStrm│    │getDict  │    │createObj│
+│         │    │FromObj  │    │         │    │FromObj  │    │FromDict │
+└─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
+ 类型检查    自定义对象→dict    自定义序列化    自定义对象→dict    dict→自定义对象
+```
+
+### 完整示例：邮件系统
+
+```python
+# data_types.py
+import cPickle
+
+class Mail:
+    “””业务对象：完全自定义的 Python 类”””
+    def __init__(self, mail_id, sender, title, attachment_id=0, is_read=False):
+        self.id = mail_id
+        self.sender = sender
+        self.title = title
+        self.attachment_id = attachment_id
+        self.is_read = is_read
+
+    def mark_read(self):
+        self.is_read = True
+
+class MailWrapper:
+    “””FIXED_DICT 的序列化适配器”””
+
+    # ========== 必需钩子 ==========
+    def getDictFromObj(self, obj):
+        “””业务对象 → FIXED_DICT 格式”””
+        return {
+            “mailId”: obj.id,
+            “sender”: obj.sender,
+            “title”: obj.title,
+            “attachmentId”: obj.attachment_id,
+            “isRead”: int(obj.is_read)
+        }
+
+    def createObjFromDict(self, dict):
+        “””FIXED_DICT 格式 → 业务对象”””
+        return Mail(
+            mail_id=dict[“mailId”],
+            sender=dict[“sender”],
+            title=dict[“title”],
+            attachment_id=dict[“attachmentId”],
+            is_read=bool(dict[“isRead”])
+        )
+
+    # ========== 可选钩子 ==========
+    def isSameType(self, obj):
+        “””类型检查”””
+        return isinstance(obj, Mail)
+
+    # 如果想要自定义序列化（如 pickle，覆盖默认行为）：
+    # def addToStream(self, obj):
+    #     return cPickle.dumps(obj)
+    #
+    # def createFromStream(self, stream):
+    #     return cPickle.loads(stream)
+
+# 导出实例供 types.xml 使用
+mailWrapper = MailWrapper()
+```
+
+```xml
+<!-- types.xml -->
+<Mail>
+    <Type> FIXED_DICT </Type>
+    <implementedBy> data_types.mailWrapper </implementedBy>
+    <Properties>
+        <mailId><Type> UINT64 </Type></mailId>
+        <sender><Type> UNICODE </Type></sender>
+        <title><Type> UNICODE </Type></title>
+        <attachmentId><Type> UINT32 </Type></attachmentId>
+        <isRead><Type> UINT8 </Type></isRead>
+    </Properties>
+</Mail>
+```
+
+---
+
+## 4.7 层：动态 Key 的处理方案
+
+### 问题：FIXED_DICT 无法处理动态 Key
+
+```python
+# 想要传递的数据（动态 ID 作为 key）
+{
+    10001: {“count”: 5, “expire”: 1234567890},
+    10002: {“count”: 3, “expire”: 1234567891},
+    # ... ID 是动态的，无法预先定义
+}
+
+# FIXED_DICT 要求 key 必须是预定义的固定字符串
+# <Properties>
+#     <10001> ← ❌ 不支持，key 必须是合法的变量名
+# </Properties>
+```
+
+### 解决方案对比
+
+| 方案 | 适用场景 | 优点 | 缺点 |
+|------|----------|------|------|
+| **ARRAY** | 小规模数据（<1000项） | 类型安全，性能好，可同步客户端 | 需要遍历查找 |
+| **implementedBy + pickle** | 大规模/复杂数据 | 开发快，支持任意结构 | 版本兼容性差，不能同步客户端 |
+| **PY_DICT** | 临时数据/服务端内部 | 最简单 | 性能差，不安全，不推荐 |
+
+### 方案 1：使用 ARRAY（推荐）
+
+把 `dict[id] → value` 转换为 `list of [id, value]`
+
+```xml
+<Item>
+    <Type> FIXED_DICT </Type>
+    <Properties>
+        <itemId><Type> UINT32 </Type></itemId>
+        <count><Type> UINT16 </Type></count>
+        <expire><Type> UINT64 </Type></expire>
+    </Properties>
+</Item>
+
+<ItemList>
+    <Type> ARRAY of Item </Type>
+</ItemList>
+```
+
+```python
+# 服务端
+self.inventory = [
+    {“itemId”: 10001, “count”: 5, “expire”: 1234567890},
+    {“itemId”: 10002, “count”: 3, “expire”: 1234567891},
+]
+
+# 客户端访问
+def get_item_count(item_id):
+    for item in self.inventory:
+        if item[“itemId”] == item_id:
+            return item[“count”]
+    return 0
+```
+
+### 方案 2：使用 implementedBy + pickle
+
+```xml
+<DynamicInventory>
+    <Type> FIXED_DICT </Type>
+    <implementedBy> InventoryWrapper </implementedBy>
+    <Properties>
+        <data><Type> BLOB </Type></data>
+    </Properties>
+</DynamicInventory>
+```
+
+```python
+class InventoryWrapper:
+    def getDictFromObj(self, obj):
+        return {“data”: cPickle.dumps(obj.items)}
+
+    def createObjFromDict(self, dict):
+        obj = Inventory()
+        obj.items = cPickle.loads(dict[“data”])
+        return obj
+```
+
+### 实际游戏中的选择建议
+
+| 数据类型 | 推荐方案 | 理由 |
+|----------|----------|------|
+| 背包（<1000物品） | `ARRAY of Item` | 类型安全，可同步客户端 |
+| 背包（>1000物品） | `implementedBy + pickle` | 性能更好 |
+| 临时缓存数据 | `PY_DICT` | 仅服务端用，简单 |
+| 玩家属性（力量/敏捷等） | `FIXED_DICT` | 字段固定 |
+
+---
 
 ## 第五层：`ENTITYCALL` 不是实体本身，而是远程调用句柄
 
@@ -468,7 +840,7 @@ mailbox.teleport(spaceID, position)
 ## 与其他专题的关系
 
 - 想看实体怎样被真正实例化，接着看 [实体系统](/architecture/source-analysis/entity-system.md)
-- 想看脚本宿主、热重载和实体脚本类型怎样接起来，接着看 [脚本运行时与热重载](/architecture/source-analysis/scripting.md)
+- 想看脚本宿主、热更新和实体脚本类型怎样接起来，接着看 [脚本运行时与热更新](/architecture/source-analysis/scripting.md)
 - `vector3`、配置路径、环境变量这条线，继续看 [运行时配置与基础类型](/architecture/source-analysis/runtime-config-and-types.md)
 - 远程消息、RPC、`EntityCall` 最后怎么走到网络层，继续看 [网络与消息系统](/architecture/source-analysis/networking.md)
 

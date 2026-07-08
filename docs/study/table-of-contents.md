@@ -60,7 +60,7 @@
 - 为什么游戏服务器选 Python 做业务语言
 - C++ 与 Python 的桥接
 - 如何把 C++ 方法导出成 `KBEngine.xxx()`
-- 热重载机制
+- 热更新机制
 - BigWorld Twisted Deferred vs KBEngine CallbackMgr
 
 ---
@@ -184,9 +184,9 @@
 - BigWorld ForwardingWatcher 分布式查询
 - 分布式链路追踪缺失与 OTel 接入可能
 
-### [Ch21 热更新、容错与运维工具](21-hotupdate-fault-tolerance-and-ops.md)
+### [Ch21 热更新](21-hotupdate-fault-tolerance-and-ops.md)
 
-- 脚本热重载的边界
+- 热更新的实现、边界与旧 callback 排查
 - BigWorld Reviver + Backup + Archive 三级容错
 - Bots 压测与安全机制
 

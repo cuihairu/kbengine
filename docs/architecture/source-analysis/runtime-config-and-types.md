@@ -183,7 +183,7 @@ sequenceDiagram
 - 脚本模块装不上
 - 组件脚本找不到
 - `EntityDef` 加载失败
-- `KBEngine.open()`、`matchPath()`、热重载、密钥文件路径全部一起出问题
+- `KBEngine.open()`、`matchPath()`、热更新、密钥文件路径全部一起出问题
 
 ```mermaid
 flowchart TD

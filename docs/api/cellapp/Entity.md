@@ -195,7 +195,7 @@ cellApp上新的Entity可以使用KBEngine.createEntity创建。一个实体还�
 
 源码解析：
 
-- [脚本运行时与热重载：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/architecture/source-analysis/scripting.html#cell-entity-script-timers)
+- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/architecture/source-analysis/scripting.html#cell-entity-script-timers)
 例子:
 
 ```python
@@ -319,7 +319,7 @@ debugView输出Entity的View的详细信息到cell的调试日志。
 
 源码解析：
 
-- [脚本运行时与热重载：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/architecture/source-analysis/scripting.html#cell-entity-script-timers)
+- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/architecture/source-analysis/scripting.html#cell-entity-script-timers)
 
 参数：
 
@@ -848,7 +848,7 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 
 源码解析：
 
-- [脚本运行时与热重载：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/architecture/source-analysis/scripting.html#cell-entity-script-timers)
+- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/architecture/source-analysis/scripting.html#cell-entity-script-timers)
 
 参数：
 

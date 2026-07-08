@@ -520,7 +520,7 @@ KBEngine.urlopen("https://example.com/ping", on_http)
 - 组件业务回调怎么走，看 [组件型脚本 API](/architecture/source-analysis/component-script-api.md)
 - BaseApp 自己的实体工厂、DBID 恢复和登录闸门，看 [BaseApp 运行时 API](/architecture/source-analysis/baseapp-kbengine-runtime-api.md)
 - CellApp 自己的空间几何、SpaceData 和 `raycast()`，看 [CellApp 空间运行时 API](/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md)
-- 实体定时器和热重载背景，看 [脚本运行时与热重载](/architecture/source-analysis/scripting.md)
+- 实体定时器和热更新背景，看 [脚本运行时与热更新](/architecture/source-analysis/scripting.md)
 
 这页最后只想把边界收成一句话：
 

@@ -54,7 +54,7 @@ architecture/
 │   ├── space-aoi.md                  # Space、Cell、AOI、Witness、Ghost
 │   ├── networking.md                 # 网络层、Bundle、Channel、消息分发
 │   ├── persistence.md                # DBMgr、数据库、序列化、恢复流程
-│   └── scripting.md                  # Python 运行时、脚本接口、热重载
+│   └── scripting.md                  # Python 运行时、脚本接口、热更新
 ├── comparison/                       # BigWorld 与 KBEngine 的映射与差异
 │   ├── README.md
 │   ├── terminology.md                # 术语映射

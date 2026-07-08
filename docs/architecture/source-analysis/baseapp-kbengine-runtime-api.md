@@ -494,7 +494,7 @@ PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(), "onInit", "i", 
 
 这也是它常见的使用场景：
 
-- 开发态调试热重载
+- 开发态调试热更新
 - 脚本修改后重新初始化全局状态
 
 而正常启动完成后的第一次 `onInit(False)`，是在 `baseapp.cpp` 的 `onDbmgrInitCompleted(...)` 里显式调用的：
@@ -506,7 +506,7 @@ PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(), "onInit", "i", 
 所以 `onInit` 的完整语义应当连起来理解：
 
 - `onInit(False)`：BaseApp 首次启动初始化完成
-- `onInit(True)`：热重载后重新初始化
+- `onInit(True)`：热更新后重新初始化
 
 `debugTracing()` 则不是 BaseApp 私有实现，而是统一挂到 `script::PyGC::__py_debugTracing`：
 
@@ -856,7 +856,7 @@ Baseapp::getSingleton().createEntityAnywhereFromDBID(...)
 - Base 实体自己的生命周期收束，看 [Base 实体生命周期](/architecture/source-analysis/base-entity-lifecycle.md)
 - 实体主线与 Base/Cell 交接，看 [实体系统](/architecture/source-analysis/entity-system.md)
 - 持久化主线与 Dbmgr 归档，看 [持久化与数据库](/architecture/source-analysis/persistence.md)
-- 脚本宿主、热重载、定时器背景，看 [脚本运行时与热重载](/architecture/source-analysis/scripting.md)
+- 脚本宿主、热更新、定时器背景，看 [脚本运行时与热更新](/architecture/source-analysis/scripting.md)
 
 这一页只负责把这些分散机制重新收束回一句话：
 

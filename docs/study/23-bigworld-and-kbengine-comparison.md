@@ -595,7 +595,9 @@ BigWorld 在安全方面投入更多——Cuckoo Cycle PoW 有效防止自动化
 | EntityLog | 无 | `kbe/src/server/dbmgr/dbtasks.h` |
 | 登录挑战 | `lib/connection/cuckoo_cycle_login_challenge_factory.hpp` | 无 |
 | 加密 | `lib/network/encryption_filter.hpp` | `kbe/src/lib/network/encryption_filter.h` |
-| 热重载 | `lib/moo/reload.hpp` | `kbe/src/lib/server/entity_app.h` |
+| 热更新 | `server/baseapp/script_bigworld.cpp` / `server/cellapp/cellapp.cpp` | `kbe/src/lib/server/entity_app.h` |
+| 热更新旧 callback 风险 | `lib/server/app_script_timers.cpp` | `kbe/src/lib/server/python_app.cpp` |
+| 资源热更新 | `lib/moo/reload.hpp` | 无对应通用资源 reload 观察者 |
 | Bots | `server/tools/bots/bot_entity.cpp` | `kbe/src/server/tools/bots/bots.h` |
 | 数据迁移 | `server/tools/transfer_db/` | 无 |
 | 注册中心 | `server/bwmachined/` | `kbe/src/server/machine/` |

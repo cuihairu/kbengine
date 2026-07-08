@@ -453,7 +453,7 @@ PyObject* pyResult = PyObject_CallMethod(getEntryScript().get(), "onInit", "i", 
 因此 `onInit` 在 CellApp 侧要连起来看：
 
 - `onInit(False)`：首次启动初始化完成
-- `onInit(True)`：热重载后重新初始化
+- `onInit(True)`：热更新后重新初始化
 
 ### `onReadyForLogin()`：CellApp 自己的就绪进度也会参与登录闸门
 
@@ -548,7 +548,7 @@ SCRIPT_OBJECT_CALL_ARGS1(getEntryScript().get(), "onGlobalDataDel", "O", pyKey, 
 ## 与其他专题的关系
 
 - Cell 实体自身的移动、AOI、Witness，看 [空间与 AOI](/architecture/source-analysis/space-aoi.md)
-- Cell 实体定时器与热重载背景，看 [脚本运行时与热重载](/architecture/source-analysis/scripting.md)
+- Cell 实体定时器与热更新背景，看 [脚本运行时与热更新](/architecture/source-analysis/scripting.md)
 - 全局字典同步链，看 [网络与消息系统](/architecture/source-analysis/networking.md#global-data-dicts-sync)
 - 通用脚本宿主工具，看 [BaseApp 运行时 API](/architecture/source-analysis/baseapp-kbengine-runtime-api.md)
 

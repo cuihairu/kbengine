@@ -1,6 +1,6 @@
-# 脚本运行时与热重载
+# 脚本运行时与热更新
 
-> 这一页只回答三个问题：KBEngine 的 Python 运行时是谁装起来的，实体脚本对象是怎么从 `EntityDef` 变成运行中实例的，`reloadScript` 到底会重载什么、不会重载什么。
+> 这一页只回答三个问题：KBEngine 的 Python 运行时是谁装起来的，实体脚本对象是怎么从 `EntityDef` 变成运行中实例的，`reloadScript` 到底会热更新什么、不会热更新什么。
 
 ## 先给结论
 
@@ -489,7 +489,7 @@ void Entity::createTimersFromStream(KBEngine::MemoryStream& s)
 
 这就是为什么 Cell 实体迁移、恢复后，脚本代码里原来的 `timerID` 还能继续成立。
 
-## 第八层：`reloadScript` 重载的是定义、类型和入口，不是整个进程状态
+## 第八层：`reloadScript` 更新的是定义、类型和入口回调，不是整个进程状态
 
 ### `EntityApp<E>::reloadScript()` 的真实顺序
 
@@ -504,7 +504,7 @@ sequenceDiagram
     E->>D: reload / initialize definitions
     D->>S: 重建 ScriptDefModule / scriptType
     E->>R: 切换到新类 / onReloadScript
-    E->>P: 再次导入入口脚本
+    E->>P: 调用现有入口脚本
     P-->>E: onInit(1)
 ```
 
@@ -521,7 +521,7 @@ EntityDef::reload(fullReload)
 - `fullReload = true`：把现有 `ScriptDefModule` 转存到 old 容器，`finalise(true)` 后重新 `initialize(...)`
 - `fullReload = false`：只重新加载实体脚本模块，不重建整套定义
 
-这说明 `reloadScript` 不是一个“统一热更新开关”，而是分成了“重建定义”和“仅重载模块”两档。
+这说明 `reloadScript` 不是一个“统一热更新开关”，而是分成了“重建定义”和“仅重载模块”两档；入口脚本这里是再次调用 `onInit(1)`，不是重新导入入口脚本模块。
 
 ### `onReloadScript()` 只会刷新一部分运行中对象
 
@@ -543,9 +543,9 @@ entity->reload(fullReload)
 - `fullReload` 时重新找新的 `ScriptDefModule`
 - 把 `__class__` 切到新的 `scriptType_`
 
-这说明 KBEngine 的热重载核心不是“重跑构造函数”，而是让现有 Python 实例切换到新的类定义，并重新绑定属性描述。
+这说明 KBEngine 的热更新核心不是“重跑构造函数”，而是让现有 Python 实例切换到新的类定义，并重新绑定属性描述。
 
-### 热重载的边界
+### 热更新的边界
 
 从这条实现可以看出几个明确边界：
 
@@ -553,8 +553,29 @@ entity->reload(fullReload)
 - 已有实体不会重新分配 `ENTITY_ID`
 - 运行中的实体容器不会被整体丢弃
 - 真正被刷新的，是 `EntityDef` 元数据、`EntityCall` / `EntityComponent` 包装、实体的 Python 类绑定，以及入口脚本的 `onInit(1)`
+- `fullReload=true` 能重建定义，但不保证所有协议、持久化、客户端 SDK 和在线对象状态都自动兼容
 
 换句话说，`reloadScript` 更接近“切换运行时定义并通知现存对象重新挂到新定义上”，而不是完全意义上的状态迁移系统。
+
+还有一个更容易在生产环境踩中的边界：`reloadScript` 不会自动改写已经保存出去的 Python callable。
+
+典型例子是组件级 `KBEngine.addTimer(callback)`。它在 `PythonApp::__py_addTimer()` 里创建 `ScriptTimerHandler`，handler 直接 `Py_INCREF` 并保存传入的 `pyCallback_`，超时时执行：
+
+```cpp
+PyObject *pyRet = PyObject_CallFunction(pyCallback_, "i", id);
+```
+
+如果传进去的是热更新前的 bound method、模块函数、`@classmethod` 产生的 method、闭包或 `functools.partial`，这个 timer 仍然可能调用旧函数对象。这里不是 timer 本身特殊，也不是因为 timer 一定是闭包；真正的风险是 timer handler 长期保存 callable。旧函数对象的 `__globals__` 可能不是当前 `sys.modules[module].__dict__`，旧 method 的 `__self__` 也可能是旧实例或旧 class object。这会造成一种很迷惑的现象：telnet 当前模块名看到的是新类/新配置，但 timer 触发路径仍读到旧 class object 或旧缓存。
+
+实体级 `Entity.addTimer()` 的风险小一些，因为底层 handler 保存的是实体指针，触发时走 `pEntity_->onTimer(...)`；实体如果已经切到新 `__class__`，通常会分派到新类的 `onTimer`。但只要业务自己把 bound method 保存到事件总线、回调表、命令表或装饰器注册表里，仍然会遇到同类问题。
+
+生产排查时应优先比较：
+
+```python
+func.__globals__ is sys.modules[func.__module__].__dict__
+```
+
+以及关键类对象的 `id()` 是否和当前模块导出的对象一致。完整发布规范和排查脚本见 `/study/21-hotupdate-fault-tolerance-and-ops.html`。
 
 ## 第九层：为什么 `Baseapp` / `Cellapp` 和 `interfaces` / `dbmgr` 的脚本感受完全不同
 

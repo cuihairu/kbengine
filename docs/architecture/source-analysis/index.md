@@ -17,7 +17,7 @@ flowchart TD
     A --> D["空间 / AOI / Witness\n为什么这样同步"]
     A --> E["消息怎么发\nRPC 怎么落地"]
     A --> F["数据怎么写库\n恢复怎么完成"]
-    A --> G["Python 宿主 / 定时器 / 热重载"]
+    A --> G["Python 宿主 / 定时器 / 热更新"]
     A --> H["fireEvent / 事件边界"]
     A --> I["某个 API 是否已有解析"]
     A --> J["配置怎么覆盖\n路径怎么生效\nVector3 怎么联动底层"]
@@ -27,7 +27,7 @@ flowchart TD
     D --> D1["空间、AOI 与视野同步"]
     E --> E1["网络与消息系统"]
     F --> F1["持久化与数据库"]
-    G --> G1["脚本运行时与热重载"]
+    G --> G1["脚本运行时与热更新"]
     G --> G2["通用运行时工具 API"]
     H --> H1["事件系统"]
     I --> I1["API 覆盖矩阵"]
@@ -43,7 +43,7 @@ flowchart TD
 5. [空间、AOI 与视野同步](/architecture/source-analysis/space-aoi.md)
 6. [网络与消息系统](/architecture/source-analysis/networking.md)
 7. [持久化与数据库](/architecture/source-analysis/persistence.md)
-8. [脚本运行时与热重载](/architecture/source-analysis/scripting.md)
+8. [脚本运行时与热更新](/architecture/source-analysis/scripting.md)
 9. [事件系统：fireEvent 与事件总线](/architecture/source-analysis/events.md)
 10. [Base 实体生命周期](/architecture/source-analysis/base-entity-lifecycle.md)
 11. [BaseApp 运行时 API](/architecture/source-analysis/baseapp-kbengine-runtime-api.md)

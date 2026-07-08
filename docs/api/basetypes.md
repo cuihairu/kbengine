@@ -2,6 +2,53 @@
 
 KBEngine 的 `.def` 文件中，属性（`<Type>`）和方法参数（`<Arg>`）必须使用系统中已注册的数据类型。
 
+## ⚠️ 重要：Type 定义的是 KBEngine 统一类型，不是数据库类型
+
+`.def` 文件中的 `<Type>` 定义的是 **KBEngine 抽象类型**，引擎会根据用途自动映射到不同的底层表示：
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    KBEngine Type System                      │
+│                                                               │
+│   <Type> INT32 </Type>  <Type> STRING </Type>  <Type> ...   │
+└──────────────┬──────────────────────┬───────────────────────┘
+               │                      │
+       ┌───────▼──────────┐    ┌─────▼──────────────┐
+       │  Memory (Python) │    │ Database (MySQL)   │
+       ├──────────────────┤    ├────────────────────┤
+       │ INT32  → int     │    │ INT32  → INT       │
+       │ STRING → str     │    │ STRING → VARCHAR   │
+       │ FLOAT  → float   │    │ FLOAT  → FLOAT     │
+       │ VECTOR3 → tuple  │    │ VECTOR3 → 3×FLOAT  │
+       └──────────────────┘    └────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│               Network (Binary Stream)                        │
+│  INT32 → 4 bytes big-endian                                 │
+│  STRING → length prefix + bytes                             │
+│  VECTOR3 → 12 bytes (3×FLOAT)                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+| KBEngine Type | Python 内存 | MySQL 数据库 | 网络传输 |
+|--------------|-------------|--------------|----------|
+| `INT32` | `int` | `INT` | 4 bytes |
+| `INT64` | `int` | `BIGINT` | 8 bytes |
+| `FLOAT` | `float` | `FLOAT` | 4 bytes |
+| `DOUBLE` | `float` | `DOUBLE` | 8 bytes |
+| `STRING` | `str` | `VARCHAR(N)` | 长度+字节 |
+| `UNICODE` | `str` | `VARCHAR(N) UTF8` | 长度+UTF8字节 |
+| `VECTOR3` | `tuple(x,y,z)` | 3 个 `FLOAT` 列 | 12 bytes |
+| `BLOB` | `bytes` | `BLOB` | 长度+字节 |
+
+**关键点**：
+- **`.def` 中定义的是抽象类型**，不直接对应数据库类型
+- **自动映射**：系统根据 Type 自动选择合适的数据库列类型
+- **Persistent 标志控制**：只有标记 `<Persistent>true</Persistent>` 的属性才会写入数据库
+- **DATABASE_LENGTH**：字符串类型可用 `<DatabaseLength>255</DatabaseLength>` 控制 VARCHAR 长度
+
+详见：[类型系统与实体定义文件](/architecture/source-analysis/entitydef-type-system.md)
+
 ## 类型总览
 
 | 类型 | 字节数 | 数值范围 | Python 对应 | 用途 |
@@ -193,9 +240,52 @@ if self.targetEntity:
 
 ```
 固定结构 → 使用 types.xml 定义 FIXED_DICT
-动态结构 → PY_DICT（性能较差）
+动态结构 → PY_DICT（性能较差）或 implementedBy + pickle
 数组类型 → 使用 types.xml 定义 ARRAY
+动态 Key → 必须转换为 ARRAY 或使用 implementedBy + BLOB
 ```
+
+#### FIXED_DICT vs ARRAY vs PY_DICT
+
+| 类型 | 适用场景 | 是否支持客户端同步 | 性能 |
+|------|----------|-------------------|------|
+| `FIXED_DICT` | 字段固定的结构（邮件、战斗结算） | ✅ | ⭐⭐⭐⭐⭐ |
+| `ARRAY` | 同构重复项（背包列表、路径点） | ✅ | ⭐⭐⭐⭐⭐ |
+| `PY_DICT` | 服务端临时数据 | ❌ | ⭐⭐ |
+| `implementedBy + pickle` | 复杂动态数据（大规模背包） | ❌ | ⭐⭐⭐⭐ |
+
+#### 动态 Key 的处理
+
+**问题**：FIXED_DICT 不支持动态 Key（如 `{10001: value, 10002: value}`）
+
+**解决方案**：
+
+1. **转换为 ARRAY**（推荐，小规模数据）
+```xml
+<Item>
+    <Type> FIXED_DICT </Type>
+    <Properties>
+        <id><Type> UINT32 </Type></id>
+        <count><Type> UINT16 </Type></count>
+    </Properties>
+</Item>
+<ItemList>
+    <Type> ARRAY of Item </Type>
+</ItemList>
+```
+
+2. **使用 implementedBy + BLOB**（大规模数据）
+```xml
+<DynamicData>
+    <Type> FIXED_DICT </Type>
+    <implementedBy> data_types.wrapper </implementedBy>
+    <Properties>
+        <data><Type> BLOB </Type></data>
+    </Properties>
+</DynamicData>
+```
+
+详见：[类型系统详解](/architecture/source-analysis/entitydef-type-system.md)
 
 ## ⚠️ .def 文件修改的版本兼容性
 

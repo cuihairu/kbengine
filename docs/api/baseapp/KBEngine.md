@@ -672,20 +672,19 @@ True
 功能说明：
 重新加载与实体和自定义数据类型相关的Python模块。当前实体类会设置为新加载的类。
 这个方法应该只用于开发模式，对于产品模式不合适。下面几点应该注意：
-1）重载脚本仅仅能在Baseapp上执行， 用户应该确保所有的服务端组件加载完成。
-2）自定义类型在脚本重载后应该确保内存中已经实例化的对象也被更新，下面是一个例子:
+
+1）本次调用只影响当前 BaseApp 进程，用户应该确保所有相关服务端组件都执行热更新。
+2）自定义类型在热更新后应该确保内存中已经实例化的对象也被更新，下面是一个例子:
 
 ```python
-for e in 
-KBEngine
-.
-entities
-.values():
+for e in KBEngine.entities.values():
    if type( e ) is Avatar.Avatar:
       e.customData.__class__ = CustomClass
 ```
 
-当这个方法完成时[KBEngine](./KBEngine.md).[onInit](./KBEngine.md#onInit)( True ) 被调用。
+3）已经保存到 timer、事件表、回调表里的旧 Python callable 不会自动重绑，需要业务在 `onInit(1)` 或统一 reload hook 中清理并重建。
+
+当这个方法完成时[KBEngine](./KBEngine.md).[onInit](./KBEngine.md#onInit)(1) 被调用。
 
 参数：
 
@@ -694,7 +693,7 @@ entities
 
 返回：
 
-- 重新加载成功返回True，否则返回False。
+- 无返回值（`None`）。热更新过程中的错误通过 Python 异常或日志输出。
 
 <a id="scriptLogType"></a>
 

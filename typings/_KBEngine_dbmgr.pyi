@@ -6,13 +6,20 @@ from _KBEngine_pythonapp import *
 
 # Type aliases
 DatabaseCommandResult = Union[List[List[str]], None]
-DatabaseCommandCallback = Callable[[DatabaseCommandResult, Union[int, None], Union[int, None], Union[str, None]], Any]
-
+DatabaseCommandCallback = Callable[
+    [
+        DatabaseCommandResult,
+        Union[int, None],
+        Union[int, None],
+        Union[str, None],
+    ],
+    Any,
+]
 
 def executeRawDatabaseCommand(
     command: str,
     callback: Union[DatabaseCommandCallback, None] = None,
     threadID: int = 0,
-    dbInterfaceName: str = "default"
+    dbInterfaceName: str = "default",
 ) -> None: ...
 def __getattr__(name: str) -> Any: ...
