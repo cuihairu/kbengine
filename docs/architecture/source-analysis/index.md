@@ -29,6 +29,7 @@ flowchart TD
     F --> F1["持久化与数据库"]
     G --> G1["脚本运行时与热更新"]
     G --> G2["通用运行时工具 API"]
+    G --> G3["非实体定时器与全局节拍"]
     H --> H1["事件系统"]
     I --> I1["API 覆盖矩阵"]
     J --> J1["运行时配置与基础类型"]
@@ -45,15 +46,16 @@ flowchart TD
 7. [持久化与数据库](/architecture/source-analysis/persistence.md)
 8. [脚本运行时与热更新](/architecture/source-analysis/scripting.md)
 9. [事件系统：fireEvent 与事件总线](/architecture/source-analysis/events.md)
-10. [Base 实体生命周期](/architecture/source-analysis/base-entity-lifecycle.md)
-11. [BaseApp 运行时 API](/architecture/source-analysis/baseapp-kbengine-runtime-api.md)
-12. [Proxy 会话与流式传输 API](/architecture/source-analysis/proxy-client-session-api.md)
-13. [CellApp 空间运行时 API](/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md)
-14. [客户端登录、重登录与 SpaceData API](/architecture/source-analysis/client-login-and-space-data-api.md)
-15. [组件型脚本 API](/architecture/source-analysis/component-script-api.md)
-16. [通用运行时工具 API](/architecture/source-analysis/runtime-utility-api.md)
-17. [运行时配置与基础类型](/architecture/source-analysis/runtime-config-and-types.md)
-18. [API 到源码解析覆盖矩阵](/architecture/source-analysis/api-coverage.md)
+10. [非实体定时器：EventDispatcher 与全局节拍](/architecture/source-analysis/non-entity-timers.md)
+11. [Base 实体生命周期](/architecture/source-analysis/base-entity-lifecycle.md)
+12. [BaseApp 运行时 API](/architecture/source-analysis/baseapp-kbengine-runtime-api.md)
+13. [Proxy 会话与流式传输 API](/architecture/source-analysis/proxy-client-session-api.md)
+14. [CellApp 空间运行时 API](/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md)
+15. [客户端登录、重登录与 SpaceData API](/architecture/source-analysis/client-login-and-space-data-api.md)
+16. [组件型脚本 API](/architecture/source-analysis/component-script-api.md)
+17. [通用运行时工具 API](/architecture/source-analysis/runtime-utility-api.md)
+18. [运行时配置与基础类型](/architecture/source-analysis/runtime-config-and-types.md)
+19. [API 到源码解析覆盖矩阵](/architecture/source-analysis/api-coverage.md)
 
 ## 执行看板
 

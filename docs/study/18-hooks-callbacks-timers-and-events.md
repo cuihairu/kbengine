@@ -729,7 +729,22 @@ BigWorld ScriptEvents（全局级）：
 1. `kbe/src/server/cellapp/entity.cpp` — `addEventsToStream()` / `createEventsFromStream()`
 2. `BigWorld-Engine-14.4.1/programming/bigworld/lib/pyscript/script_events.cpp` — ScriptEvents 全局事件
 
-## 18.10 小结
+## 18.10 延伸：非实体定时器与全局节拍
+
+本章涉及的 timer 全部走 `Entity.addTimer` / `onTimer`，**只绑定到实体**。脚本侧没有模块级的 `KBEngine.addTimer`，但 C++ 层每个 App 都有一个全局 `EventDispatcher`，挂在它上面的 timer 不依赖任何实体。
+
+这层机制不在本章主线，因为脚本无法直接调用它。如果你想做"非实体周期任务"（全服广播、定时清理全局缓存、定时拉外部接口），或者想理解 BaseApp 的 game tick、组件心跳、ghost 同步节拍是怎么落地的，跳到专题页：
+
+→ [非实体定时器：EventDispatcher 与全局节拍](/architecture/source-analysis/non-entity-timers.md)
+
+专题页给出了：
+
+- 三类 timer 的边界（进程级 EventDispatcher / App game tick / 实体 ScriptTimers）
+- `TimerHandler` 接口与 `dispatcher().addTimer` 注册方式
+- 仓库里 8 个非实体 `TimerHandler` 子类的分类速查
+- 脚本侧做非实体周期任务的三种变通方案
+
+## 18.11 小结
 
 - **四大类机制严格区分**：生命周期钩子（引擎调用）、定时器（未来触发）、异步回调（结果回调）、事件（运行时注册）
 - **生命周期钩子通过 getattr + PyObject_CallObject 从 C++ 进入 Python**：引擎在特定时机主动调用脚本方法

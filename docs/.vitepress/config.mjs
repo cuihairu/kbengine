@@ -194,6 +194,7 @@ const config = defineConfig({
             { text: '持久化', link: '/architecture/source-analysis/persistence' },
             { text: '脚本层', link: '/architecture/source-analysis/scripting' },
             { text: '事件系统', link: '/architecture/source-analysis/events' },
+            { text: '非实体定时器', link: '/architecture/source-analysis/non-entity-timers' },
             { text: 'Base 实体生命周期', link: '/architecture/source-analysis/base-entity-lifecycle' },
             { text: 'BaseApp 运行时 API', link: '/architecture/source-analysis/baseapp-kbengine-runtime-api' },
             { text: 'Proxy 会话与流式传输 API', link: '/architecture/source-analysis/proxy-client-session-api' },
