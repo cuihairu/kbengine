@@ -411,7 +411,7 @@ for slot in buff_slots:
 - 组件 detach / destroyed 清理存在
 - 定时器与事件清理存在
 
-但我**没有在当前 `client_lib` 里看到一个与 `docs/api/client/Entity.md#onDestroy` 对应的独立脚本回调触发点**，能像 `onLeaveWorld()` 那样明确落在源码里。
+但我**没有在当前 `client_lib` 里看到一个与 `docs/api/kbengine/client/Entity.md#onDestroy` 对应的独立脚本回调触发点**，能像 `onLeaveWorld()` 那样明确落在源码里。
 
 因此更稳妥的源码结论应该是：
 

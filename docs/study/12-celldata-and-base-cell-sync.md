@@ -31,7 +31,7 @@ class Account(KBEngine.Entity):
 
 ### 文档说明
 
-根据 API 文档（`docs/api/baseapp/Entity.md`）：
+根据 API 文档（`docs/api/kbengine/baseapp/Entity.md`）：
 
 > cellData 是一个字典属性。每当 base 实体没有创建它的 cell 实体时，cell 实体的属性会保存在这里。
 > 如果 cell 实体被创建，这些用到的值和 cellData 属性将被删除。

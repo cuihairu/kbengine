@@ -8,10 +8,12 @@
 flowchart TD
     A["study/**\n主学习路径\n按主题递进建立整体理解"] --> B["architecture/\n架构总览与系统地图"]
     A --> C["source-analysis/**\n源码学习专题\n按问题继续深挖"]
-    A --> D["api/**\n接口契约\n保持 CHM 一致"]
+    A --> D["api/kbengine/**\nKBEngine 接口契约\n保持 CHM 一致"]
+    A --> G["api/bigworld/**\nBigWorld 源码抽取版 API"]
     B --> E["bigworld/**\n背景概念与设计来源"]
     B --> F["comparison/**\nBigWorld / KBEngine 对照"]
     C --> D
+    C --> G
     C --> F
 
     style A fill:#f5f1e8,stroke:#8a6d3b,color:#3b2d1f
@@ -20,6 +22,7 @@ flowchart TD
     style D fill:#f4f4f4,stroke:#666,color:#222
     style E fill:#f8efe3,stroke:#9a6a2f,color:#4a2f12
     style F fill:#efe8f5,stroke:#6b4a8c,color:#2e1b45
+    style G fill:#f8efe3,stroke:#9a6a2f,color:#4a2f12
 ```
 
 ## 目录定位

@@ -13,8 +13,8 @@ python3 -c "import bs4, pdfplumber" >/dev/null 2>&1 || {
   exit 1
 }
 
-[ -f "docs/api/kbengine_api(cn).chm" ] || {
-  echo '未找到 CHM 源文件: "docs/api/kbengine_api(cn).chm"'
+[ -f "docs/api/kbengine/kbengine_api(cn).chm" ] || {
+  echo '未找到 CHM 源文件: "docs/api/kbengine/kbengine_api(cn).chm"'
   exit 1
 }
 

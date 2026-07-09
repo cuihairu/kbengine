@@ -307,7 +307,7 @@ class CHMToVuePressConverter:
 def main():
     """主函数"""
     # 配置
-    chm_file = "docs/api/kbengine_api(cn).chm"
+    chm_file = "docs/api/kbengine/kbengine_api(cn).chm"
     output_dir = "docs-vuepress"
 
     # 检查文件

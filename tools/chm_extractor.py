@@ -162,7 +162,7 @@ class CHMExtractor:
 def main():
     """主函数"""
     # 配置路径
-    chm_file = "docs/api/kbengine_api(cn).chm"
+    chm_file = "docs/api/kbengine/kbengine_api(cn).chm"
     output_dir = "docs-vuepress/api/chm-content"
 
     # 检查文件是否存在

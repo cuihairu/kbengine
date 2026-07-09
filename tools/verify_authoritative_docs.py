@@ -15,8 +15,8 @@ from chm import chmlib
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DOCS_ROOT = ROOT / "docs-vuepress"
-CHM_FILE = ROOT / "docs" / "api" / "kbengine_api(cn).chm"
+DOCS_ROOT = ROOT / "docs"
+CHM_FILE = ROOT / "docs" / "api" / "kbengine" / "kbengine_api(cn).chm"
 PDF_FILE = ROOT / "docs" / "WebConsole_Guide(cn).pdf"
 
 
@@ -63,7 +63,7 @@ def build_source_map(mod, chm_root: Path) -> tuple[list, dict[str, PurePosixPath
     }
 
     for module in modules:
-        source_to_output_map[module.intro_source.lower()] = PurePosixPath(f"{module.name}/README.md")
+        source_to_output_map[module.intro_source.lower()] = PurePosixPath(f"{module.name}/index.md")
         if module.module_source:
             source_to_output_map[module.module_source.lower()] = PurePosixPath(f"{module.name}/KBEngine.md")
         for class_page in module.classes:
@@ -87,7 +87,7 @@ def verify_api(mod, temp_root: Path) -> tuple[int, list[str]]:
     converter.convert_page("basetypes.html", "basetypes.md")
     converter.convert_page("keywords.html", "keywords.md")
     for module in modules:
-        converter.convert_page(module.intro_source, f"{module.name}/README.md")
+        converter.convert_page(module.intro_source, f"{module.name}/index.md")
         if module.module_source:
             converter.convert_page(module.module_source, f"{module.name}/KBEngine.md")
         for class_page in module.classes:
@@ -97,7 +97,7 @@ def verify_api(mod, temp_root: Path) -> tuple[int, list[str]]:
     generated_files = sorted(md_root.rglob("*.md"))
     for path in generated_files:
         rel = path.relative_to(md_root)
-        current = (DOCS_ROOT / "api" / rel).read_text(encoding="utf-8")
+        current = (DOCS_ROOT / "api" / "kbengine" / rel).read_text(encoding="utf-8")
         generated = path.read_text(encoding="utf-8")
         if current != generated:
             mismatches.append(str(rel))

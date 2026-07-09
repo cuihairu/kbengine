@@ -4,9 +4,9 @@
 
 ## 相关 API 回查
 
-- BaseApp 管理接口：[KBEngine(baseapp)](/api/baseapp/KBEngine.md)、[Proxy(baseapp)](/api/baseapp/Proxy.md)
-- Login / DB / Interfaces / Logger：[KBEngine(loginapp)](/api/loginapp/KBEngine.md)、[KBEngine(dbmgr)](/api/dbmgr/KBEngine.md)、[KBEngine(interfaces)](/api/interfaces/KBEngine.md)、[KBEngine(logger)](/api/logger/KBEngine.md)
-- Bots 压测接口：[KBEngine(bots)](/api/bots/KBEngine.md)、[PyClientApp(bots)](/api/bots/PyClientApp.md)
+- BaseApp 管理接口：[KBEngine(baseapp)](/api/kbengine/baseapp/KBEngine.md)、[Proxy(baseapp)](/api/kbengine/baseapp/Proxy.md)
+- Login / DB / Interfaces / Logger：[KBEngine(loginapp)](/api/kbengine/loginapp/KBEngine.md)、[KBEngine(dbmgr)](/api/kbengine/dbmgr/KBEngine.md)、[KBEngine(interfaces)](/api/kbengine/interfaces/KBEngine.md)、[KBEngine(logger)](/api/kbengine/logger/KBEngine.md)
+- Bots 压测接口：[KBEngine(bots)](/api/kbengine/bots/KBEngine.md)、[PyClientApp(bots)](/api/kbengine/bots/PyClientApp.md)
 
 ## 21.1 热更新：不停服修改 Python 行为的主要入口
 
@@ -258,6 +258,54 @@ void EntityDef::reload(bool fullReload)
     }
 }
 ```
+
+<a id="kbengine-def-hotupdate"></a>
+
+#### 关键问题：KBEngine 是否支持 `.def` 热更新
+
+结论要分两层看：
+
+- **源码层面支持**：`KBEngine.reloadScript(True)` 会重新构建 `EntityDef`，因此会重新读取 `types.xml`、`entities.xml` 和 `entity_defs/*.def`。
+- **生产层面慎用**：`.def` 是结构定义，不是普通 Python 行为逻辑。它同时约束网络协议、属性同步、RPC 参数、持久化和客户端实体定义；能重读不代表能安全迁移运行中世界。
+
+源码依据在 `EntityDef::initialize(...)`。`fullReload=true` 时，`EntityDef::reload()` 会 `finalise(true)` 后重新调用 `initialize(...)`，而初始化过程会重新走定义文件加载：
+
+```cpp
+// kbe/src/lib/entitydef/entitydef.cpp
+
+std::string entitiesFile = __entitiesPath + "entities.xml";
+std::string defFilePath = __entitiesPath + "entity_defs/";
+
+if(!DataTypes::initialize(defFilePath + "types.xml"))
+    return false;
+
+// 遍历 entities.xml 中的每个实体
+std::string deffile = defFilePath + moduleName + ".def";
+if (!defxml->openSection(deffile.c_str()))
+    return false;
+
+if (!loadDefInfo(defFilePath, moduleName, defxml.get(), defNode, pScriptModule))
+    return false;
+```
+
+所以调用语义应该这样记：
+
+| 调用方式 | 是否重读 `.def` | 更准确的含义 |
+|----------|----------------|--------------|
+| `KBEngine.reloadScript(True)` | 是 | 重建实体定义，再刷新实体类绑定和入口脚本回调 |
+| `KBEngine.reloadScript(False)` | 否 | 只重新加载实体 Python 脚本模块，不重建整套定义 |
+
+真正危险的是把 `.def` 当作“普通热更新文件”。下面这些变更不应该只靠线上 `reloadScript(True)`：
+
+| `.def` 变更 | 风险点 |
+|-------------|--------|
+| 修改属性类型、属性顺序、Flags、Persistent | 影响属性同步、存档格式和 DBMgr 表结构 |
+| 修改 Base/Cell/Client 方法参数 | 影响消息 ID、参数布局和远端调用解包 |
+| 修改 `entities.xml` 实体顺序或删除实体 | 影响 entity `utype`、EntityCall 和客户端实体类型映射 |
+| 修改 `types.xml` 或 `user_type` 编解码 | 影响序列化、反序列化和已持久化数据兼容 |
+| 改动需要客户端感知的属性或方法 | 需要客户端 EntityDef / SDK 同步更新 |
+
+相对低风险的场景是：新增服务端内部使用、非持久化、不暴露给客户端和跨进程 RPC 的定义，并且所有 BaseApp、CellApp、DBMgr 组件都在同一版本上验证通过。即便如此，也应按结构变更发布处理，而不是把它归类为普通 Python 方法体热更。
 
 2. **`onReloadScript(fullReload)`**：遍历所有已存在的实体，调用每个实体的 `reload()`
 
@@ -616,8 +664,9 @@ for item in hits:
 | 新增普通 Python 方法 | 通常可以 | 直接通过新类查找的方法可用；RPC 暴露仍受 `.def` 约束 |
 | 修改模块级函数 | 只能影响新查找路径 | 已保存的函数对象不会自动替换 |
 | 修改 class variable / 模块级缓存 | 灰区 | 新旧类对象可能并存，缓存容易分叉 |
-| 修改 `.def` 属性定义 | 源码有 `fullReload` 路径，但生产慎用 | 协议 ID、持久化结构、客户端 SDK、在线对象状态都要兼容 |
-| 修改 `.def` 方法签名 | 源码有 `fullReload` 路径，但生产慎用 | 消息 ID / 参数布局影响网络协议 |
+| 修改 `.def` 属性定义 | `reloadScript(True)` 会重读，但生产慎用 | 协议 ID、属性同步、持久化结构、客户端 SDK、在线对象状态都要兼容 |
+| 修改 `.def` 方法签名 | `reloadScript(True)` 会重读，但生产慎用 | 消息 ID / 参数布局影响网络协议，调用双方必须同时一致 |
+| 修改 `types.xml` / `entities.xml` | `reloadScript(True)` 会重读，但高风险 | 类型编解码、实体 `utype`、客户端映射和 DBMgr 都可能受影响 |
 | 修改基类、MRO、slot、C++ 扩展类型布局 | 高风险 | `__class__` 可能切换失败，或实例状态不兼容 |
 | 已有实体的 C++ 状态 | 不能靠热更新修改 | C++ 成员变量不受 Python 重载影响 |
 | App 级 timer / 事件总线 / callback 表 | 必须手工重绑 | 底层或业务容器可能保存旧 callable |

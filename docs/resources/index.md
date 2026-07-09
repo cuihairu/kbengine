@@ -5,13 +5,15 @@
 ## 当前资料
 
 - 协议文件：`LICENSE.txt`
-- API 中文文档：`docs/api/kbengine_api(cn).chm`
+- KBEngine API 中文文档：`docs/api/kbengine/kbengine_api(cn).chm`
+- BigWorld 源码与资料：`BigWorld-Engine-14.4.1/`
 - WebConsole 中文文档：`docs/WebConsole_Guide(cn).pdf`
 - 仓库说明：`README.md`
 
 ## 说明
 
-- `api/**` 与 `guide/webconsole.md` 已有原始资料可对照。
+- `api/kbengine/**` 与 `guide/webconsole.md` 已有原始资料可对照。
+- `api/bigworld/**` 是基于 BigWorld 源码注释和绑定点整理的源码抽取版 API。
 - `study/**` 与 `architecture/**` 主要属于人工整理、源码分析与设计说明，不是 CHM/PDF 原文转写。
 - 本站整理时优先以仓库内现有资料与源码为准。
 - 新增说明性内容需要逐项核对后再补充。

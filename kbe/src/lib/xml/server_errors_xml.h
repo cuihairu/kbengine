@@ -16,18 +16,18 @@ using ServerErrorDescriptions = std::map<uint16, std::pair<std::string, std::str
 inline void collectServerErrorDescriptions(const tinyxml2::XMLDocument& document,
 	ServerErrorDescriptions& errors)
 {
-	tinyxml2::XMLElement* root = document.RootElement();
+	const tinyxml2::XMLElement* root = document.RootElement();
 	if (root == nullptr)
 	{
 		return;
 	}
 
-	for (tinyxml2::XMLElement* element = root->FirstChildElement();
+	for (const tinyxml2::XMLElement* element = root->FirstChildElement();
 		element != nullptr;
 		element = element->NextSiblingElement())
 	{
-		tinyxml2::XMLElement* idElement = element->FirstChildElement("id");
-		tinyxml2::XMLElement* descrElement = element->FirstChildElement("descr");
+		const tinyxml2::XMLElement* idElement = element->FirstChildElement("id");
+		const tinyxml2::XMLElement* descrElement = element->FirstChildElement("descr");
 
 		const uint16 id = idElement ? uint16(idElement->IntText()) : 0;
 		const std::string name = element->Value() ? element->Value() : "";

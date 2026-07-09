@@ -1,6 +1,6 @@
 # KBEngine 2.0 重设计方案
 
-> 这是一份人工整理的重构草案，不来自 `docs/api/kbengine_api(cn).chm` 或 `docs/WebConsole_Guide(cn).pdf` 原文。
+> 这是一份人工整理的重构草案，不来自 `docs/api/kbengine/kbengine_api(cn).chm` 或 `docs/WebConsole_Guide(cn).pdf` 原文。
 > 
 > 文中内容属于设计提案与工程判断，不应视为 KBEngine 官方文档结论。
 

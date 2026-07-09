@@ -4,9 +4,9 @@
 
 ## 相关 API 回查
 
-- BaseApp 脚本接口：[KBEngine(baseapp)](/api/baseapp/KBEngine.md)、[Entity(baseapp)](/api/baseapp/Entity.md)、[Proxy(baseapp)](/api/baseapp/Proxy.md)
-- CellApp 脚本接口：[KBEngine(cellapp)](/api/cellapp/KBEngine.md)、[Entity(cellapp)](/api/cellapp/Entity.md)
-- 关键词补充：[关键词释义](/api/keywords.md)
+- BaseApp 脚本接口：[KBEngine(baseapp)](/api/kbengine/baseapp/KBEngine.md)、[Entity(baseapp)](/api/kbengine/baseapp/Entity.md)、[Proxy(baseapp)](/api/kbengine/baseapp/Proxy.md)
+- CellApp 脚本接口：[KBEngine(cellapp)](/api/kbengine/cellapp/KBEngine.md)、[Entity(cellapp)](/api/kbengine/cellapp/Entity.md)
+- 关键词补充：[关键词释义](/api/kbengine/keywords.md)
 
 ## 18.1 本章核心问题
 

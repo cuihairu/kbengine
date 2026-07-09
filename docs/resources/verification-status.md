@@ -4,14 +4,15 @@
 
 ## 核对范围
 
-- API 原始资料：`docs/api/kbengine_api(cn).chm`
+- KBEngine API 原始资料：`docs/api/kbengine/kbengine_api(cn).chm`
+- BigWorld API 来源：`BigWorld-Engine-14.4.1` 源码注释与 Python 绑定点
 - WebConsole 原始资料：`docs/WebConsole_Guide(cn).pdf`
 
 ## 核对方法
 
 - API 页面使用本地 `pychm + chmlib` 直接读取 CHM 内 HTML。
 - 读取出的 HTML 再复用 `tools/rebuild_docs.py` 中的 `HtmlConverter` 重新生成 Markdown。
-- 生成结果逐页对比当前 `docs-vuepress/api/**`。
+- 生成结果逐页对比当前 `docs/api/kbengine/**`。
 - `guide/webconsole.md` 使用 `tools/rebuild_docs.py` 中的 `build_pdf_markdown()` 重新从 PDF 生成后，与当前页面逐字对比。
 
 ## 当前结果
@@ -34,9 +35,9 @@
 
 ## 关键页状态
 
-- `/api/client/KBEngine.md` 已直接对到 CHM
-- `/api/baseapp/KBEngine.md` 已直接对到 CHM
-- `/api/cellapp/KBEngine.md` 已直接对到 CHM
+- `/api/kbengine/client/KBEngine.md` 已直接对到 CHM
+- `/api/kbengine/baseapp/KBEngine.md` 已直接对到 CHM
+- `/api/kbengine/cellapp/KBEngine.md` 已直接对到 CHM
 - `/guide/webconsole.md` 已直接对到 PDF
 
 ## 本地复核命令

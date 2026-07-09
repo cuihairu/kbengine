@@ -5,7 +5,7 @@
 > - `kbengine_defaults.xml`、`kbengine.xml`、`KBE_ROOT`、`KBE_RES_PATH` 这些配置和环境变量，到底是怎么进入运行时的
 > - `vector3` 为什么看起来像一个普通基础类型，但源码里又牵扯到 `math`、`entitydef`、Python 包装对象和实体同步
 >
-> 这页不改 `api/**` 原文，只按当前源码树把加载链、覆盖关系、运行时边界和典型使用方式串起来。
+> 这页不改 `api/kbengine/**` 原文，只按当前源码树把加载链、覆盖关系、运行时边界和典型使用方式串起来。
 
 ## 先给结论
 
@@ -89,7 +89,7 @@ sequenceDiagram
 
 ### `kbengine_defaults.xml` 和 `kbengine.xml` 的语义边界
 
-对照 `docs/api/keywords.md` 的描述，再看当前源码，我现在会这样理解：
+对照 `docs/api/kbengine/keywords.md` 的描述，再看当前源码，我现在会这样理解：
 
 - `kbengine_defaults.xml`
   - 更接近引擎基线配置
@@ -218,7 +218,7 @@ flowchart TD
 
 这里有一个当前源码树里很容易误判的点。
 
-`docs/api/keywords.md` 里记录的是：
+`docs/api/kbengine/keywords.md` 里记录的是：
 
 - `KBE_HYBRID_PATH`
 
@@ -239,7 +239,7 @@ flowchart TD
 
 所以这一页我会明确记成：
 
-- `api/**` 关键词页保留 CHM 原样
+- `api/kbengine/**` 关键词页保留 CHM 原样
 - 但按当前源码主链阅读时，真正生效的“可执行文件目录”环境变量是 `KBE_BIN_PATH`
 
 这不是要去改 API 文本，而是避免以后再花时间去源码里找一个当前版本根本没有进主链的名字。

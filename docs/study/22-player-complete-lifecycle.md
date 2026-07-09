@@ -6,9 +6,9 @@
 
 ## 相关 API 回查
 
-- 登录与会话入口：[KBEngine(loginapp)](/api/loginapp/KBEngine.md)、[KBEngine(baseapp)](/api/baseapp/KBEngine.md)、[Proxy(baseapp)](/api/baseapp/Proxy.md)
-- 实体侧接口：[Entity(baseapp)](/api/baseapp/Entity.md)、[Entity(cellapp)](/api/cellapp/Entity.md)
-- 客户端视角：[KBEngine(client)](/api/client/KBEngine.md)、[Entity(client)](/api/client/Entity.md)
+- 登录与会话入口：[KBEngine(loginapp)](/api/kbengine/loginapp/KBEngine.md)、[KBEngine(baseapp)](/api/kbengine/baseapp/KBEngine.md)、[Proxy(baseapp)](/api/kbengine/baseapp/Proxy.md)
+- 实体侧接口：[Entity(baseapp)](/api/kbengine/baseapp/Entity.md)、[Entity(cellapp)](/api/kbengine/cellapp/Entity.md)
+- 客户端视角：[KBEngine(client)](/api/kbengine/client/KBEngine.md)、[Entity(client)](/api/kbengine/client/Entity.md)
 
 ## 22.1 七阶段主流程总览
 

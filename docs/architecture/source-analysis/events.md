@@ -39,14 +39,14 @@ flowchart LR
 
 ## API 契约引用
 
-`docs/api/**` 保持和 CHM 原文一致，只在确认原文或迁移有误时修正。本文不改写 API 语义，只引用 API 页作为接口契约，再从源码解释这些接口如何实现。
+`docs/api/kbengine/**` 保持和 CHM 原文一致，只在确认原文或迁移有误时修正。本文不改写 API 语义，只引用 API 页作为接口契约，再从源码解释这些接口如何实现。
 
 | API 页面 | `fireEvent` | `registerEvent` | `deregisterEvent` |
 | --- | --- | --- | --- |
-| BaseApp `Entity` | [fireEvent](/api/baseapp/Entity.md#fireEvent) | [registerEvent](/api/baseapp/Entity.md#registerEvent) | [deregisterEvent](/api/baseapp/Entity.md#deregisterEvent) |
-| CellApp `Entity` | [fireEvent](/api/cellapp/Entity.md#fireEvent) | [registerEvent](/api/cellapp/Entity.md#registerEvent) | [deregisterEvent](/api/cellapp/Entity.md#deregisterEvent) |
-| Client `Entity` | [fireEvent](/api/client/Entity.md#fireEvent) | [registerEvent](/api/client/Entity.md#registerEvent) | [deregisterEvent](/api/client/Entity.md#deregisterEvent) |
-| Bots `Entity` | [fireEvent](/api/bots/Entity.md#fireEvent) | [registerEvent](/api/bots/Entity.md#registerEvent) | [deregisterEvent](/api/bots/Entity.md#deregisterEvent) |
+| BaseApp `Entity` | [fireEvent](/api/kbengine/baseapp/Entity.md#fireEvent) | [registerEvent](/api/kbengine/baseapp/Entity.md#registerEvent) | [deregisterEvent](/api/kbengine/baseapp/Entity.md#deregisterEvent) |
+| CellApp `Entity` | [fireEvent](/api/kbengine/cellapp/Entity.md#fireEvent) | [registerEvent](/api/kbengine/cellapp/Entity.md#registerEvent) | [deregisterEvent](/api/kbengine/cellapp/Entity.md#deregisterEvent) |
+| Client `Entity` | [fireEvent](/api/kbengine/client/Entity.md#fireEvent) | [registerEvent](/api/kbengine/client/Entity.md#registerEvent) | [deregisterEvent](/api/kbengine/client/Entity.md#deregisterEvent) |
+| Bots `Entity` | [fireEvent](/api/kbengine/bots/Entity.md#fireEvent) | [registerEvent](/api/kbengine/bots/Entity.md#registerEvent) | [deregisterEvent](/api/kbengine/bots/Entity.md#deregisterEvent) |
 
 API 层给出的公共语义是：
 

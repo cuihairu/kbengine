@@ -1,27 +1,20 @@
 # API 总览
 
-> 本目录来自 `docs/api/kbengine_api(cn).chm` 的中文 API 帮助文档。
+> 本站同时整理 KBEngine 与 BigWorld。API 区域按引擎拆分，避免把同名但语义不同的脚本接口混在一起。
 
-## 核心概念
+## 引擎 API
 
-- [基本数据类型](/api/basetypes.md)
-- [关键词释义](/api/keywords.md)
+- [KBEngine API](/api/kbengine/)
+- [BigWorld API](/api/bigworld/)
 
-## 客户端
+## 来源边界
 
-- [client](/api/client/)
-- [bots](/api/bots/)
+- KBEngine API 来自 `docs/api/kbengine/kbengine_api(cn).chm` 的中文 API 帮助文档。
+- BigWorld API 目前以 `BigWorld-Engine-14.4.1` 源码中的 `/*~ ... */` 脚本文档注释与 Python 绑定点为准，属于“源码抽取版 API”，不是 CHM 原文迁移。
 
-## 服务端组件
-
-- [cellapp](/api/cellapp/)
-- [baseapp](/api/baseapp/)
-- [loginapp](/api/loginapp/)
-- [dbmgr](/api/dbmgr/)
-- [interfaces](/api/interfaces/)
-- [logger](/api/logger/)
+后续新增引用必须使用 `/api/kbengine/**` 或 `/api/bigworld/**`，不再保留旧的根级 KBEngine API 入口。
 
 ## 核对与源码解析
 
-- [API 分类与核对清单](/api/audit-checklist.md)
+- [KBEngine API 分类与核对清单](/api/kbengine/audit-checklist.md)
 - [源码解析专题](/architecture/source-analysis/)

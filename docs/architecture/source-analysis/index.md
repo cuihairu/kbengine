@@ -63,12 +63,13 @@ flowchart TD
 
 - `study/**`：主学习路径，负责主题递进、章节串联和阅读顺序。
 - `source-analysis/**`：源码学习专题，负责沿着具体问题继续深挖实现和边界。
-- `api/**`：接口契约，保持和 CHM 一致，只在确认错误时修正。
+- `api/kbengine/**`：KBEngine 接口契约，保持和 CHM 一致，只在确认错误时修正。
+- `api/bigworld/**`：BigWorld 源码抽取版 API，按源码注释与 Python 绑定点逐项核对。
 - `comparison/**` 与 `bigworld/**`：负责对照和背景，不重复展开 KBEngine 的源码细节。
 
 ## API 覆盖追踪
 
-[API 到源码解析覆盖矩阵](/architecture/source-analysis/api-coverage.md) 用来维护 `docs/api/**` 和源码学习专题之间的对应关系。API 页保持和 CHM 一致，覆盖矩阵只记录解析状态、源码落点和后续缺口。
+[API 到源码解析覆盖矩阵](/architecture/source-analysis/api-coverage.md) 用来维护 `docs/api/kbengine/**` 和源码学习专题之间的对应关系。KBEngine API 页保持和 CHM 一致，覆盖矩阵只记录解析状态、源码落点和后续缺口。
 
 ## 阅读原则
 

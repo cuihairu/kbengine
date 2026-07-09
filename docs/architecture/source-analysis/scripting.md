@@ -523,6 +523,8 @@ EntityDef::reload(fullReload)
 
 这说明 `reloadScript` 不是一个“统一热更新开关”，而是分成了“重建定义”和“仅重载模块”两档；入口脚本这里是再次调用 `onInit(1)`，不是重新导入入口脚本模块。
 
+`.def` 的答案也在这里：`fullReload=true` 会重新走 `EntityDef::initialize(...)`，所以会重新读取 `types.xml`、`entities.xml` 和 `entity_defs/*.def`；`fullReload=false` 不会重建这些定义，只会重新加载实体 Python 脚本模块。生产上仍要把 `.def` 变更当结构变更处理，因为它会牵动协议、持久化、客户端 SDK 和在线对象兼容性。
+
 ### `onReloadScript()` 只会刷新一部分运行中对象
 
 `EntityApp<E>::onReloadScript(fullReload)` 会遍历：

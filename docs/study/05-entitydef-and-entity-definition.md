@@ -2,6 +2,8 @@
 
 > EntityDef 不是配置文件解析器。它是脚本描述 + 网络协议描述 + 持久化描述的**三合一运行时骨架**。改一个 .def 文件，同时影响 Python 类型、网络消息格式和数据库表结构。
 
+> 热更新边界：KBEngine 的 `KBEngine.reloadScript(True)` 在源码层面会重新构建 `EntityDef`，因此会重新读取 `types.xml`、`entities.xml` 和 `entity_defs/*.def`。但这只能说明“定义会被重读”，不能说明“结构变化可以安全在线迁移”。涉及属性类型、方法签名、持久化、客户端同步或实体 `utype` 的变更，应按结构发布处理；详细排查见 [Ch21 热更新](21-hotupdate-fault-tolerance-and-ops.md#kbengine-def-hotupdate)。
+
 ## 5.1 本章核心问题
 
 - `.def` 文件到底是什么？它怎样同时驱动脚本层、网络层、持久化层？

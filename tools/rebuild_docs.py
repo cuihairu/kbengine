@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "docs-vuepress"
-CHM_FILE = ROOT / "docs" / "api" / "kbengine_api(cn).chm"
+CHM_FILE = ROOT / "docs" / "api" / "kbengine" / "kbengine_api(cn).chm"
 PDF_FILE = ROOT / "docs" / "WebConsole_Guide(cn).pdf"
 LOGO_OUTPUT = OUTPUT_DIR / ".vuepress" / "public" / "logo.png"
 LOGO_GIT_PATH = "docs-vuepress/.vuepress/public/logo.png"
@@ -496,15 +496,15 @@ def discover_modules_from_output(api_root: Path) -> list[ModuleInfo]:
     modules: list[ModuleInfo] = []
     for module_name in MODULE_ORDER:
         module_dir = api_root / module_name
-        readme_path = module_dir / "README.md"
-        if not readme_path.exists():
+        index_path = module_dir / "index.md"
+        if not index_path.exists():
             continue
 
         module_source = f"{module_name}/Modules/KBEngine.html" if (module_dir / "KBEngine.md").exists() else None
         class_pages = sorted(
             path.name
             for path in module_dir.glob("*.md")
-            if path.name not in {"README.md", "KBEngine.md"}
+            if path.name not in {"index.md", "KBEngine.md"}
         )
 
         modules.append(
@@ -661,7 +661,7 @@ def should_join_paragraph(previous: str, current: str) -> bool:
 
 def build_homepage(modules: Iterable[ModuleInfo]) -> str:
     module_links = "\n".join(
-        f"- [{module.name} API](/api/{module.name}/)"
+        f"- [{module.name} API](/api/kbengine/{module.name}/)"
         for module in modules
     )
     return (
@@ -694,8 +694,8 @@ def build_homepage(modules: Iterable[ModuleInfo]) -> str:
         "\n"
         "### API 参考\n\n"
         "- [API 总览](/api/)\n"
-        "- [基本数据类型](/api/basetypes.md)\n"
-        "- [关键词释义](/api/keywords.md)\n\n"
+        "- [基本数据类型](/api/kbengine/basetypes.md)\n"
+        "- [关键词释义](/api/kbengine/keywords.md)\n\n"
         f"{module_links}\n\n"
         "### 资料\n\n"
         "- [资料与说明](/resources/)\n"
@@ -718,17 +718,17 @@ def build_api_index(modules: Iterable[ModuleInfo]) -> str:
     lines = [
         "# API 总览",
         "",
-        "> 本目录来自 `docs/api/kbengine_api(cn).chm` 的中文 API 帮助文档。",
+        "> 本目录来自 `docs/api/kbengine/kbengine_api(cn).chm` 的中文 API 帮助文档。",
         "",
         "## 核心概念",
         "",
-        "- [基本数据类型](/api/basetypes.md)",
-        "- [关键词释义](/api/keywords.md)",
+        "- [基本数据类型](/api/kbengine/basetypes.md)",
+        "- [关键词释义](/api/kbengine/keywords.md)",
         "",
         "## 客户端",
         "",
-        "- [client](/api/client/)",
-        "- [bots](/api/bots/)",
+        "- [client](/api/kbengine/client/)",
+        "- [bots](/api/kbengine/bots/)",
         "",
         "## 服务端组件",
         "",
@@ -736,7 +736,7 @@ def build_api_index(modules: Iterable[ModuleInfo]) -> str:
     for module in modules:
         if module.name in {"client", "bots"}:
             continue
-        lines.append(f"- [{module.name}](/api/{module.name}/)")
+        lines.append(f"- [{module.name}](/api/kbengine/{module.name}/)")
     lines.append("")
     return "\n".join(lines)
 
@@ -788,7 +788,7 @@ def build_resources_index() -> str:
         "> 本页仅汇总当前整理所依赖的仓库内资料。\n\n"
         "## 当前资料\n\n"
         "- 协议文件：`LICENSE.txt`\n"
-        "- API 中文文档：`docs/api/kbengine_api(cn).chm`\n"
+        "- API 中文文档：`docs/api/kbengine/kbengine_api(cn).chm`\n"
         "- WebConsole 中文文档：`docs/WebConsole_Guide(cn).pdf`\n"
         "- 仓库说明：`README.md`\n\n"
         "## 说明\n\n"
@@ -803,11 +803,11 @@ def build_vuepress_config(modules: Iterable[ModuleInfo]) -> str:
         if module.name in {"client", "bots"}:
             continue
 
-        children = [f"'/api/{module.name}/README.md'"]
+        children = [f"'/api/kbengine/{module.name}/README.md'"]
         if module.module_source:
-            children.append(f"'/api/{module.name}/KBEngine.md'")
+            children.append(f"'/api/kbengine/{module.name}/KBEngine.md'")
         for class_page in module.classes:
-            children.append(f"'/api/{module.name}/{Path(class_page).stem}.md'")
+            children.append(f"'/api/kbengine/{module.name}/{Path(class_page).stem}.md'")
 
         server_children.extend(children)
 
@@ -886,11 +886,11 @@ def build_vuepress_config(modules: Iterable[ModuleInfo]) -> str:
         "      '/api/': [\n"
         "        {\n"
         "          text: '核心概念',\n"
-        "          children: ['/api/README.md', '/api/basetypes.md', '/api/keywords.md'],\n"
+        "          children: ['/api/README.md', '/api/kbengine/basetypes.md', '/api/kbengine/keywords.md'],\n"
         "        },\n"
         "        {\n"
         "          text: '客户端',\n"
-        "          children: ['/api/client/README.md', '/api/client/KBEngine.md', '/api/client/Entity.md', '/api/bots/README.md', '/api/bots/KBEngine.md', '/api/bots/Entity.md', '/api/bots/PyClientApp.md'],\n"
+        "          children: ['/api/kbengine/client/README.md', '/api/kbengine/client/KBEngine.md', '/api/kbengine/client/Entity.md', '/api/kbengine/bots/README.md', '/api/kbengine/bots/KBEngine.md', '/api/kbengine/bots/Entity.md', '/api/kbengine/bots/PyClientApp.md'],\n"
         "        },\n"
         f"{server_sidebar}"
         "      ],\n"
@@ -956,7 +956,7 @@ def rebuild_docs() -> None:
                 "keywords.html": PurePosixPath("keywords.md"),
             }
             for module in modules:
-                source_to_output_map[module.intro_source.lower()] = PurePosixPath(f"{module.name}/README.md")
+                source_to_output_map[module.intro_source.lower()] = PurePosixPath(f"{module.name}/index.md")
                 if module.module_source:
                     source_to_output_map[module.module_source.lower()] = PurePosixPath(
                         f"{module.name}/KBEngine.md"
@@ -972,7 +972,7 @@ def rebuild_docs() -> None:
             converter.convert_page("keywords.html", "keywords.md")
 
             for module in modules:
-                converter.convert_page(module.intro_source, f"{module.name}/README.md")
+                converter.convert_page(module.intro_source, f"{module.name}/index.md")
                 if module.module_source:
                     converter.convert_page(module.module_source, f"{module.name}/KBEngine.md")
                 for class_page in module.classes:
