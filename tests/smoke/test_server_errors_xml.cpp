@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "common/platform.h"
 #include "common/md5.h"
 #include "resmgr/resmgr.h"
 #include "test_resmgr_environment.h"
