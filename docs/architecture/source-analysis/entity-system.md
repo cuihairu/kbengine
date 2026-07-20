@@ -114,6 +114,83 @@ return new(pyEntity) E(eid, sm);
 
 这里的关键点在于：C++ `Entity` 直接 placement-new 到 Python 对象持有的那块对象内存上。它不是两个对象互相引用，而是一体化构造。
 
+## 数据流架构：C++ 负责加载，Python 负责存储
+
+虽然实体是 C++/Python 一体化构造，但**数据加载**和**数据存储**的职责是分开的：
+
+### 各层职责分工
+
+| 层 | 职责 | 说明 |
+|---|---|---|
+| **C++ 层** | 数据加载、解析、序列化 | 从数据库读取流，解析属性值，执行IO操作 |
+| **Python 层** | 数据存储、业务逻辑 | 属性最终存储在 Python 对象上，脚本直接访问和修改 |
+
+### 数据流向
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    KBEngine 数据流架构                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐       │
+│  │   数据库      │ →  │  C++ 层      │ →  │  Python 层   │       │
+│  │  (MySQL等)   │    │ (数据加载)    │    │ (数据存储)   │       │
+│  └──────────────┘    └──────────────┘    └──────────────┘       │
+│                                                                  │
+│  数据流向：                                                       │
+│  1. 数据库 → C++ MemoryStream (读取、解析)                       │
+│  2. MemoryStream → Python字典 (createCellDataFromStream)        │
+│  3. Python字典 → Python对象属性 (createNamespace → PyObject_SetAttr) │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 源码证据
+
+在 `entity_macro.h` 的 `createNamespace` 中，数据最终通过 `PyObject_SetAttr` 设置到 Python 对象上：
+
+```cpp
+while(PyDict_Next(dictData, &pos, &key, &value))
+{
+    // 直接设置到Python对象上！
+    PyObject_SetAttr(this, key, value);  // ← 数据最终存储在Python层
+}
+```
+
+### 为什么这样设计？
+
+1. **C++ 负责性能敏感操作**：
+   - 网络IO、数据库读写
+   - 数据序列化/反序列化
+   - 内存管理、流操作
+
+2. **Python 负责业务逻辑**：
+   - 属性访问和修改（`self.hp = 200`）
+   - 游戏逻辑实现（`self.attack()`）
+   - 脚本回调（`onTimer()`、`onDeath()`）
+
+3. **一体化构造的优势**：
+   - 避免 C++/Python 对象互相引用的开销
+   - 属性访问直接在 Python 层完成，无需跨层调用
+   - 脚本开发者无需关心底层实现
+
+### 脚本层访问示例
+
+```python
+class Avatar(KBEngine.Entity):
+    def __init__(self):
+        KBEngine.Entity.__init__(self)
+        # 这些属性已经在C++层从数据库加载完毕
+        # 现在可以直接访问（数据存储在Python层）
+        print(f"HP: {self.hp}")  # 读取已加载的属性
+        self.hp = 200  # 修改属性（直接在Python层操作）
+    
+    def attack(self, target):
+        # 业务逻辑在Python层实现
+        damage = self.hp * 0.1
+        target.hp -= damage
+```
+
 ## 第四步：EntityApp::createEntity() 才是实例化总入口
 
 真正值得逐行跟读的代码在 `kbe/src/lib/server/entity_app.h`：
