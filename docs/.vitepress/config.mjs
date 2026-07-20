@@ -70,7 +70,7 @@ const config = defineConfig({
       { text: '源码学习', link: '/study/' },
       { text: '架构', link: '/architecture/' },
       { text: 'API', link: '/api/' },
-      { text: '资料', link: '/resources/' },
+      { text: '文档说明', link: '/resources/' },
       { text: '指南', link: '/guide/' },
     ],
     sidebar: {
@@ -182,9 +182,9 @@ const config = defineConfig({
           ],
         },
         {
-          text: 'KBEngine 源码学习',
+          text: '源码专题',
           items: [
-            { text: '源码学习首页', link: '/architecture/source-analysis/' },
+            { text: '专题总览', link: '/architecture/source-analysis/' },
             { text: '入口与引导', link: '/architecture/source-analysis/entry-and-bootstrap' },
             { text: '进程模型', link: '/architecture/source-analysis/process-model' },
             { text: '实体系统', link: '/architecture/source-analysis/entity-system' },
@@ -226,7 +226,15 @@ const config = defineConfig({
       '/guide/': [
         {
           text: '指南',
-          items: [{ text: '指南首页', link: '/guide/' }, { text: 'WebConsole', link: '/guide/webconsole' }],
+          items: [
+            { text: '指南首页', link: '/guide/' },
+            { text: 'WebConsole', link: '/guide/webconsole' },
+            { text: '工程指南', link: '/guide/engineering/' },
+            { text: '覆盖率与 Codecov', link: '/guide/engineering/coverage' },
+            { text: 'Python 3.12 升级', link: '/guide/engineering/python-3.12-upgrade' },
+            { text: 'vcpkg 迁移状态', link: '/guide/engineering/vcpkg-migration' },
+            { text: '网络层 I/O 调研', link: '/guide/engineering/network-io-research' },
+          ],
         },
       ],
       '/api/': [
@@ -291,11 +299,12 @@ const config = defineConfig({
       ],
       '/resources/': [
         {
-          text: '资料',
+          text: '文档说明',
           items: [
-            { text: '资料首页', link: '/resources/' },
-            { text: '来源', link: '/resources/provenance' },
+            { text: '说明首页', link: '/resources/' },
+            { text: '来源边界', link: '/resources/provenance' },
             { text: '验证状态', link: '/resources/verification-status' },
+            { text: '结构设计', link: '/resources/doc-structure' },
           ],
         },
       ],

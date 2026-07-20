@@ -1,6 +1,6 @@
 # API 总览
 
-> 本站同时整理 KBEngine 与 BigWorld。API 区域按引擎拆分，避免把同名但语义不同的脚本接口混在一起。
+> 这里是工具书入口，不是学习主线。需要系统理解时回到 [/study/](/study/)；需要看具体实现时回到 [/architecture/source-analysis/](/architecture/source-analysis/)。
 
 ## 引擎 API
 

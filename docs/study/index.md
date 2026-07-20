@@ -32,9 +32,9 @@ features:
 footer: 24 章 · 9 个 Part · 7 个附录 · 覆盖从基础设施到运维实战的完整技术栈
 ---
 
-> 这是本站唯一的源码学习主线。建议先按章节顺序读完整本书，再回到 `architecture` 或 `api` 做专题回查。
+> 这是本站唯一的学习主线。第一次阅读只走这里，按章节顺序建立完整心智模型；专题深挖和接口回查都放在主线之后。
 
-> 入口关系：这里是主首页；[详细目录](./table-of-contents.md) 用来按 Part 浏览；附录放在正文之后，作为查表和延伸阅读。
+> 配套入口：按 Part 浏览用 [详细目录](./table-of-contents.md)，回看源码细节用 [/architecture/source-analysis/](/architecture/source-analysis/)，接口回查用 [/api/](/api/)。
 
 ## 系统架构总览
 
@@ -161,3 +161,15 @@ graph TD
     style P8 fill:#1a1a2e,color:#e0e0e0
     style P9 fill:#e94560,color:#fff
 ```
+
+## 这条主线负责什么
+
+- 先解释问题背景，再解释架构为什么长这样。
+- 再把实现按依赖顺序串起来，而不是按组件列表分散展开。
+- 每章保留必要源码入口，但不承担函数级专题细挖。
+
+## 不负责什么
+
+- 不替代 API 文档做接口字典。
+- 不在每章里重复展开 `source-analysis/**` 已经细写过的调用链。
+- 不承担原始资料核对说明；这部分统一放到 [/resources/](/resources/)。

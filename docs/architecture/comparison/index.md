@@ -2,7 +2,9 @@
 
 > 本目录负责建立 BigWorld 概念框架与 KBEngine 实际实现之间的映射关系。
 
-## 建议顺序
+> 这里不是主线章节的重复版，而是独立对照区。主线中的第 23 章负责收束，全量映射和差异展开集中留在这里。
+
+## 页面范围
 
 1. [术语映射](/architecture/comparison/terminology.md)
 2. [架构对应关系](/architecture/comparison/architecture.md)

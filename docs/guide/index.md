@@ -1,13 +1,15 @@
 # 指南
 
-> 本目录汇总使用说明与阅读入口。
+> 本目录只放操作型指南，不再承担全站导航职责。
 
-## 阅读入口
+## 当前内容
 
-- [源码学习首页](/study/)
 - [WebConsole 指南](/guide/webconsole.md)
-- [架构总览](/architecture/)
-- [KBEngine 源码分析总览](/architecture/source-analysis/)
-- [BigWorld 学习入口](/architecture/bigworld/)
-- [API 总览](/api/)
-- [资料与说明](/resources/)
+- [工程指南](/guide/engineering/)
+
+## 其他入口
+
+- 学习主线：[/study/](/study/)
+- 架构与专题：[/architecture/](/architecture/)
+- API 参考：[/api/](/api/)
+- 文档说明：[/resources/](/resources/)
