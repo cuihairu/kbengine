@@ -405,6 +405,136 @@ void Entity::onGetCell(Network::Channel* pChannel, COMPONENT_ID componentID)
 
 也就是说，脚本桥接不是独立系统，而是实体定义系统的后半段。
 
+## `__init__` 的执行时机与设计原则
+
+### 执行顺序：先加载数据，后调用 `__init__`
+
+在 `entity_macro.h` 中，`initializeEntity()` 的实现揭示了关键的执行顺序：
+
+```cpp
+void initializeEntity(PyObject* dictData, bool persistentData = false)
+{
+    createNamespace(dictData, persistentData);  // 步骤1: 先加载持久化数据
+    initializeScript();                          // 步骤2: 后调用__init__
+}
+```
+
+其中 `initializeScript()` 会调用 Python 脚本的 `__init__` 方法：
+
+```cpp
+void initializeScript()
+{
+    // ... 组件初始化 ...
+    
+    if(PyObject_HasAttrString(this, "__init__"))
+    {
+        PyObject* pyResult = PyObject_CallMethod(this, "__init__", "");
+        // ...
+    }
+    
+    onInitializeScript();
+}
+```
+
+### 为什么这样设计？
+
+这个设计解决了**持久化数据恢复**与**运行时初始化**的冲突问题。
+
+考虑以下场景：
+
+```
+1. 玩家下线，数据库保存了 hp=50, level=10
+2. 玩家重新登录，从数据库加载数据
+3. 如果 __init__ 先执行，设置 hp=100, level=1
+4. 然后加载数据库数据，覆盖 hp=50, level=10
+5. 问题：__init__ 中的初始化逻辑被跳过了
+```
+
+KBEngine 的设计是**反过来**：
+
+```
+1. 先执行 createNamespace()，从数据库加载 hp=50, level=10
+2. 后执行 __init__()，此时数据已经加载完毕
+3. __init__() 中不应该设置持久化属性，只做运行时初始化
+```
+
+### 持久化属性 vs 运行时属性
+
+| 类型 | 定义位置 | 初始化时机 | 是否会被数据库加载覆盖 |
+|------|----------|------------|----------------------|
+| **持久化属性** | EntityDef (`.def` 文件) | EntityDef 默认值 → 数据库加载 | ✅ 会覆盖 |
+| **运行时属性** | `__init__()` | `__init__` 执行时 | ❌ 不会覆盖 |
+
+#### 持久化属性：在 EntityDef 中定义默认值
+
+```xml
+<!-- entity_defs/Avatar.def -->
+<Properties>
+    <hp>
+        <Type> UINT32 </Type>
+        <Default> 100 </Default>  <!-- 默认值在这里定义 -->
+    </hp>
+    <level>
+        <Type> UINT32 </Type>
+        <Default> 1 </Default>
+    </level>
+</Properties>
+```
+
+这些属性会被 `createNamespace()` 从数据库加载的数据覆盖。
+
+#### 运行时属性：在 `__init__` 中创建
+
+```python
+class Avatar(KBEngine.Entity):
+    def __init__(self):
+        KBEngine.Entity.__init__(self)
+        
+        # ✅ 正确：创建运行时状态对象（非持久化）
+        self.matchState = MatchState()
+        self.aiController = AIController()
+        self.tempData = {}
+        
+        # ❌ 错误：设置持久化属性会覆盖已加载的数据！
+        # self.hp = 200  # 这会覆盖数据库加载的 hp 值！
+```
+
+### 正确的使用方式
+
+```python
+# ❌ 错误做法：在 __init__ 中设置持久化属性
+class Avatar(KBEngine.Entity):
+    def __init__(self):
+        KBEngine.Entity.__init__(self)
+        self.hp = 200  # 会覆盖数据库加载的值！
+        self.level = 1  # 会覆盖数据库加载的值！
+
+# ✅ 正确做法：只创建运行时对象
+class Avatar(KBEngine.Entity):
+    def __init__(self):
+        KBEngine.Entity.__init__(self)
+        
+        # 运行时状态（数据库中没有这些属性）
+        self.matchState = MatchState()
+        self.aiController = AIController()
+        
+        # 如果需要修改持久化属性，应该调用方法
+        # self.addHP(10)  # 通过方法修改，而不是直接赋值
+```
+
+### 设计原则总结
+
+1. **持久化属性**：在 EntityDef 中定义，默认值也在那里设置，数据库加载时会覆盖
+2. **运行时属性**：在 `__init__` 中创建，不会被数据库加载覆盖（因为数据库中没有这些属性）
+3. **`__init__` 职责**：只做运行时初始化，不设置持久化属性
+4. **数据修改**：通过方法（如 `addHP()`）修改持久化属性，而不是在 `__init__` 中直接赋值
+
+### 相关源码
+
+- `kbe/src/lib/entitydef/entity_macro.h` → `initializeEntity()`, `initializeScript()`, `createNamespace()`
+- `kbe/src/server/cellapp/entity.cpp` → `initializeEntity()` 调用位置
+- `kbe/src/server/baseapp/entity.cpp` → `initializeEntity()` 调用位置
+
 ## 读源码的最短路径
 
 如果你准备在 IDE 里走一遍实体系统，建议只跟下面这条链：
