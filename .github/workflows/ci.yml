@@ -70,7 +70,7 @@ jobs:
       - name: Setup Ninja
         if: runner.os == 'Windows'
         timeout-minutes: 2
-        uses: seanmiddleditch/gha-setup-ninja@v5
+        uses: seanmiddleditch/gha-setup-ninja@v6
 
       - name: Verify macOS toolchain
         if: runner.os == 'macOS'
