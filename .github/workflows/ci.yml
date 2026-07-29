@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: Checkout
         timeout-minutes: 2
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
@@ -142,7 +142,7 @@ jobs:
     steps:
       - name: Checkout
         timeout-minutes: 2
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Linux coverage dependencies
         timeout-minutes: 8
