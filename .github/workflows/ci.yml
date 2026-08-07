@@ -6,10 +6,20 @@ on:
       - master
       - chore/python-3.12-support
       - chore/cmake-bootstrap
+    paths-ignore:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+      - '*.md'
+      - 'LICENSE'
   pull_request:
     branches:
       - master
       - chore/cmake-bootstrap
+    paths-ignore:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+      - '*.md'
+      - 'LICENSE'
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
