@@ -1,12 +1,12 @@
 /* KBEngine 游戏开发主题 */
 
-/* 主色调：深蓝+橙色，游戏开发风格 */
+/* 主色调：深蓝+青色，游戏开发风格 */
 :root {
-  /* 主色调 */
-  --vp-c-brand-1: #f97316;
-  --vp-c-brand-2: #ea580c;
-  --vp-c-brand-3: #c2410c;
-  --vp-c-brand-soft: rgba(249, 115, 22, 0.14);
+  /* 主色调 - 使用更自然的青色 */
+  --vp-c-brand-1: #0ea5e9;
+  --vp-c-brand-2: #0284c7;
+  --vp-c-brand-3: #0369a1;
+  --vp-c-brand-soft: rgba(14, 165, 233, 0.14);
 
   /* 背景色 */
   --vp-bg: #0f172a;
@@ -25,7 +25,7 @@
 
   /* 侧边栏 */
   --vp-sidebar-bg-color: #1e293b;
-  --vp-sidebar-item-active-bg: rgba(249, 115, 22, 0.1);
+  --vp-sidebar-item-active-bg: rgba(14, 165, 233, 0.1);
 }
 
 /* 亮色主题覆盖 */
@@ -43,7 +43,7 @@
   --vp-border-light: #cbd5e1;
 
   --vp-sidebar-bg-color: #f1f5f9;
-  --vp-sidebar-item-active-bg: rgba(249, 115, 22, 0.08);
+  --vp-sidebar-item-active-bg: rgba(14, 165, 233, 0.08);
 }
 
 /* 暗色主题 */
@@ -99,7 +99,7 @@ a:hover {
 /* 提示框样式 */
 .custom-block.tip {
   border-color: var(--vp-c-brand-1) !important;
-  background: rgba(249, 115, 22, 0.1) !important;
+  background: rgba(14, 165, 233, 0.1) !important;
 }
 
 .custom-block.warning {
@@ -150,7 +150,7 @@ a:hover {
 .VPFeature:hover {
   border-color: var(--vp-c-brand-1) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15) !important;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
 }
 
 /* 标题样式 */
