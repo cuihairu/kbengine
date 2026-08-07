@@ -317,140 +317,33 @@ createNamespace(dictData, persistentData)
 
 所以两者边界要分清：
 
-- `ScriptTimers` 解决“本地脚本定时执行”
-- `CallbackMgr` 解决“异步请求完成后按 ID 取回回调”
+- `ScriptTimers` 解决”本地脚本定时执行”
+- `CallbackMgr` 解决”异步请求完成后按 ID 取回回调”
 
 这两个机制都会回到 Python，但它们并不是同一个托管层。
 
-<a id="cell-entity-script-timers"></a>
-## Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射
+### 脚本定时器的底层实现
 
-CellApp API 里的 `Entity.addTimer()` 很容易被读成：
+脚本定时器（`Entity.addTimer` / `Entity.delTimer` / `Entity.onTimer`）的底层实现基于 `ScriptTimers`，它负责 `ScriptID ↔ TimerHandle` 的映射。
 
-- 直接把一个数字注册到底层时间轮
-- `onTimer()` 收到的就是底层原生定时器句柄
+**详细实现见**：[[非实体定时器#ScriptTimers：实体 timer 是怎么套上去的]]
 
-源码实际拆成了两层：
-
-- 脚本层看到的是 `ScriptID`
+**核心要点**：
+- 脚本层看到的是 `ScriptID`（整数）
 - 底层调度器保存的是 `TimerHandle`
+- `ScriptTimers` 负责两者的映射和转换
+- 实体迁移时，timer 信息会被序列化到流中，恢复时重建映射
 
-### 第一层：脚本调用 `addTimer()` 时，真正落到底层的是 `ScriptTimers`
+### 脚本定时器与回调管理器的区别
 
-`Entity` 的 `addTimer()` / `delTimer()` 不是手写在 `cellapp/entity.cpp` 里，而是通过实体宏展开到 `ScriptTimersUtil`：
+| 机制 | 用途 | 数据结构 | 生命周期 |
+|------|------|----------|----------|
+| `ScriptTimers` | 本地脚本定时执行 | `ScriptID → TimerHandle` | 跟随实体 |
+| `CallbackMgr` | 异步请求完成后按 ID 取回回调 | `callbackID → PyObjectPtr` | 跟随实体 |
 
-```cpp
-// 文件：kbe/src/lib/entitydef/entity_macro.h
-PyObject* CLASS::pyAddTimer(float interval, float repeat, int32 userArg)
-{
-    EntityScriptTimerHandler* pHandler = new EntityScriptTimerHandler(this);
-    ScriptTimers* pTimers = &scriptTimers_;
-    int id = ScriptTimersUtil::addTimer(&pTimers, interval, repeat, userArg, pHandler);
-    ...
-    return PyLong_FromLong(id);
-}
-```
+### 脚本定时器的序列化/反序列化
 
-这说明脚本层拿到的返回值 `id`，不是底层 `TimerHandle`，而是 `ScriptTimers` 自己分配出来的脚本侧 ID。
-
-### 第二层：`ScriptTimers` 会把秒数换算成 game tick，再生成底层 `TimerHandle`
-
-真正的注册逻辑在：
-
-- `kbe/src/lib/server/script_timers.cpp`
-
-```cpp
-// 文件：kbe/src/lib/server/script_timers.cpp
-ScriptID ScriptTimers::addTimer(float initialOffset, float repeatOffset, int userArg, TimerHandler* pHandler)
-{
-    int hertz = g_kbeSrvConfig.gameUpdateHertz();
-    int initialTicks = GameTime(g_pApp->time() + initialOffset * hertz);
-    int repeatTicks = 0;
-    ...
-
-    TimerHandle timerHandle = g_pApp->timers().add(
-        initialTicks, repeatTicks, pHandler, (void *)(intptr_t)userArg);
-
-    if (timerHandle.isSet())
-    {
-        int id = this->getNewID();
-        map_[id] = timerHandle;
-        return id;
-    }
-}
-```
-
-这里能得到几个很重要的结论：
-
-- 脚本层传入的是秒
-- 底层真正调度前会先按 `gameUpdateHertz` 换算成 tick
-- `repeatOffset <= 0` 时，底层重复间隔就是 `0`
-- 脚本层真正管理的是 `map_[ScriptID] = TimerHandle`
-
-因此 API 文档里更准确的说法应该是：
-
-- `addTimer()` 返回的是**脚本层 timerID**
-- 它只是映射到一个底层 `TimerHandle`
-
-### 第三层：`onTimer()` 收到的也是 `ScriptID`，不是底层句柄
-
-Cell 实体真正回调脚本时，走的是：
-
-```cpp
-// 文件：kbe/src/server/cellapp/entity.cpp
-void Entity::onTimer(ScriptID timerID, int useraAgs)
-{
-    bufferOrExeCallback("onTimer",
-        Py_BuildValue("(Ii)", timerID, useraAgs));
-}
-```
-
-也就是说，脚本里 `onTimer(self, timerHandle, userData)` 这个第一个参数，语义上更准确地说是：
-
-- **脚本侧 timerID**
-
-它不是底层调度器直接吐出来的 `TimerHandle`。
-
-### 第四层：`delTimer()` 删除的是脚本 ID 映射，不是直接面向时间轮枚举
-
-删除逻辑同样走 `ScriptTimers`：
-
-```cpp
-// 文件：kbe/src/lib/server/script_timers.cpp
-bool ScriptTimers::delTimer(ScriptID timerID)
-{
-    Map::iterator iter = map_.find(timerID);
-    if (iter != map_.end())
-    {
-        TimerHandle handle = iter->second;
-        handle.cancel();
-        return true;
-    }
-    return false;
-}
-```
-
-而实体宏还额外支持了一种脚本语义：
-
-```cpp
-// 文件：kbe/src/lib/entitydef/entity_macro.h
-if (PyUnicode_Check(pyargobj))
-{
-    if (strcmp(PyUnicode_AsUTF8AndSize(pyargobj, NULL), "All") == 0)
-    {
-        pobj->scriptTimers().cancelAll();
-    }
-}
-```
-
-所以 `delTimer()` 的真实边界是：
-
-- 传数字：按脚本侧 `timerID` 删除
-- 传 `"All"`：取消当前实体全部脚本定时器
-
-### 第五层：为什么实体迁移后 timerID 还能保持不变
-
-Cell 实体这边专门把脚本定时器做了序列化/反序列化：
+Cell 实体迁移时，脚本定时器会被序列化到流中：
 
 ```cpp
 // 文件：kbe/src/server/cellapp/entity.cpp
@@ -481,13 +374,13 @@ void Entity::createTimersFromStream(KBEngine::MemoryStream& s)
 }
 ```
 
-这里最关键的是：
-
-- 流里显式保存了 `tid`
+**关键点**：
+- 流里显式保存了 `tid`（ScriptID）
 - 恢复时会新建一个新的底层 `TimerHandle`
 - 但脚本层继续复用原来的 `tid`
+- 这就是为什么 Cell 实体迁移、恢复后，脚本代码里原来的 `timerID` 还能继续成立
 
-这就是为什么 Cell 实体迁移、恢复后，脚本代码里原来的 `timerID` 还能继续成立。
+**详细实现见**：[[非实体定时器#为什么实体迁移后 timerID 还能保持不变]]
 
 ## 第八层：`reloadScript` 更新的是定义、类型和入口回调，不是整个进程状态
 

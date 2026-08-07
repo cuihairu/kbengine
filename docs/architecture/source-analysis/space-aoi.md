@@ -1397,64 +1397,34 @@ void Entity::onGetWitness(bool fromBase)
 
 ## ghost：跨 Cell 边界时不能直接断链，所以需要副本
 
+> 关于 ghost 系统的详细机制（real/ghost 状态转换、GhostManager 消息缓冲、ghost 路由等），请参阅 [[17-ghost-system]]。
+> 这里只从空间/AOI角度补充 ghost 在空间同步中的作用。
+
 关键文件：
 
 - `kbe/src/server/cellapp/ghost_manager.h`
 - `kbe/src/server/cellapp/ghost_manager.cpp`
 - `kbe/src/server/cellapp/entity.cpp`
 
-从注释和接口看，`GhostManager` 负责两类事：
+从空间同步角度看，`GhostManager` 的核心职责是：
 
-- real 向 ghost 的同步
-- 实体迁移期间的临时消息路由
+- real 向 ghost 的同步（确保其他 Cell 上的副本能看到本 Cell 实体的最新状态）
+- 实体迁移期间的临时消息路由（确保跨 Cell 传送时消息不丢失）
 
 核心成员非常说明问题：
 
-- `realEntities_`
-- `ghost_route_`
-- `messages_`
+- `realEntities_`：当前 Cell 上所有 real 实体的 ghost 副本列表
+- `ghost_route_`：迁移期间的临时转发表
+- `messages_`：待同步的消息队列
 
-这意味着 ghost 不只是“远端副本”，还是跨 Cell 迁移时保持消息连续性的缓冲层。
-
-## real / ghost 关系在 Cell 侧是显式状态
-
-在 `kbe/src/server/cellapp/entity.h` / `entity.cpp` 里可以直接看到：
-
-- `ghostCell_`
-- `isReal()`
-- `changeToGhost()`
-- `changeToReal()`
-- `onUpdateGhostPropertys()`
-
-从实现语义上看：
-
-- real 是当前权威实体
-- ghost 是边界或迁移期间的副本
-- 属性变更会由 real 通过 `CellappInterface::onUpdateGhostPropertys` 推给 ghost
-
-所以 ghost 同步并不是“数据库复制”或“状态恢复”，而是空间权威在分布式 Cell 之间的在线复制。
-
-## GhostManager 的第二个职责：迁移后路由缝合
-
-`ghost_manager.h` 里的注释其实讲得很直白：
-
-- 某个实体迁移走后，本机短时间内可能还会收到发往旧地址的消息
-- 这时 `ghost_route_` 记录一个临时转发表
-- 收到包后继续转发到新的 real 或 ghost 所在 Cell
-
-这非常关键，因为它说明：
-
-- ghost 系统不仅是“可见性副本”
-- 还是“迁移期间的消息连续性机制”
-
-没有这层路由，跨 Cell 传送时就很容易出现旧消息直接丢失、链路断裂的情况。
+这意味着 ghost 不只是”远端副本”，还是跨 Cell 迁移时保持消息连续性的缓冲层。
 
 ```mermaid
 flowchart LR
-    A["real Entity on old Cell"] --> B["changeToGhost / 迁移"]
-    B --> C["ghost_route_ 临时转发表"]
-    C --> D["new real Entity on new Cell"]
-    D --> E["后续属性 / 消息由 new real 接管"]
+    A[“real Entity on old Cell”] --> B[“changeToGhost / 迁移”]
+    B --> C[“ghost_route_ 临时转发表”]
+    C --> D[“new real Entity on new Cell”]
+    D --> E[“后续属性 / 消息由 new real 接管”]
 ```
 
 <a id="cell-entity-move-controllers"></a>
@@ -1659,7 +1629,9 @@ else
 
 ### 第六层：移动控制器本身也参与实体迁移/恢复
 
-Cell 实体在序列化时会把控制器一并写入流：
+> 关于实体迁移时的完整序列化/恢复机制（包括事件、timer、callback等），请参阅 [[events#Cell 迁移时为什么事件还能恢复]]。
+
+Cell 实体在序列化时会把控制器一并写入流，这是迁移恢复的一部分：
 
 ```cpp
 // 文件：kbe/src/server/cellapp/entity.cpp
@@ -1685,7 +1657,7 @@ void Entity::createControllersFromStream(KBEngine::MemoryStream& s)
 }
 ```
 
-这说明移动/控制器语义不是一次性的脚本辅助对象，而是 Cell 实体运行时的一部分状态。
+这说明移动/控制器语义不是一次性的脚本辅助对象，而是 Cell 实体运行时的一部分状态，和 timer、event、callback 一样参与迁移恢复。
 
 <a id="cell-entity-callback-trigger-matrix"></a>
 ## Cell Entity 回调触发点矩阵

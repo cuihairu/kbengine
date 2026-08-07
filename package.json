@@ -8,6 +8,7 @@
     "docs:verify": "bash -lc \"bash tools/setup_doc_verifier.sh && DYLD_LIBRARY_PATH=.tmp/build/chmlib-install/lib ./.venv-docs/bin/python tools/verify_authoritative_docs.py\""
   },
   "devDependencies": {
+    "@binyamin/markdown-it-wikilinks": "^2.0.0",
     "@braintree/sanitize-url": "^7.1.2",
     "cytoscape": "^3.33.2",
     "cytoscape-cose-bilkent": "^4.1.0",

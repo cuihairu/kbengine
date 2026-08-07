@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
+import wikilinks from '@binyamin/markdown-it-wikilinks'
 
 const LARGE_CODE_BLOCK_RE = /```[\s\S]*?```/g
 const MERMAID_BLOCK_RE = /```mermaid[\s\S]*?```/g
@@ -20,6 +21,29 @@ const config = defineConfig({
   lang: 'zh-CN',
   title: 'KBEngine 文档',
   description: '基于 CHM 与 PDF 重建的 KBEngine 中文文档站点',
+
+  // 使用自定义主题
+  theme: './theme',
+
+  markdown: {
+    config: (md) => {
+      md.use(wikilinks, {
+        // 配置选项
+        baseURL: '/kbengine/',  // 基础路径
+        makeAllLinksAbsolute: true,
+        uriSuffix: '',  // 不添加 .html 后缀
+      })
+    }
+  },
+  // 忽略死链
+  ignoreDeadLinks: [
+    // 忽略 wikilink 相关的链接
+    /\[\[.+\]\]/,
+    // 忽略锚点链接
+    /#/,
+    // 忽略 /notes/ 路径的链接（wikilink 解析结果）
+    /\/notes\//,
+  ],
   vite: {
     build: {
       chunkSizeWarningLimit: 2500,

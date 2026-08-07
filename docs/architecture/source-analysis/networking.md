@@ -43,7 +43,7 @@ flowchart TD
 
 - `kbe/src/lib/network/event_dispatcher.h`
 
-从接口就能看出它的职责不是“只跑网络”，而是统一调度：
+从接口就能看出它的职责不是”只跑网络”，而是统一调度：
 
 - `processOnce()`
 - `processUntilBreak()`
@@ -58,9 +58,11 @@ flowchart TD
 - 定时器
 - 延迟任务
 
-三者统一挂在一个事件循环里，而不是“网络线程 + 逻辑线程 + 定时器线程”三套独立框架。
+三者统一挂在一个事件循环里，而不是”网络线程 + 逻辑线程 + 定时器线程”三套独立框架。
 
 因此游戏逻辑、网络回调、定时 tick 在主线程上能天然保持串行语义，这也是实体侧大量代码不依赖锁的前提。
+
+**关于 EventDispatcher 的详细定时器机制，见**：[[非实体定时器#EventDispatcher 是总驱动器]]
 
 ## 第二层：NetworkInterface 管的不是一个连接，而是一组连接
 
