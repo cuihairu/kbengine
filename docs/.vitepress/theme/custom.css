@@ -1,13 +1,7 @@
 /* KBEngine 游戏开发主题 */
 
-/* 主色调：深蓝+青色，游戏开发风格 */
+/* 主色调 */
 :root {
-  /* 主色调 - 使用更自然的青色 */
-  --vp-c-brand-1: #0ea5e9;
-  --vp-c-brand-2: #0284c7;
-  --vp-c-brand-3: #0369a1;
-  --vp-c-brand-soft: rgba(14, 165, 233, 0.14);
-
   /* 背景色 */
   --vp-bg: #0f172a;
   --vp-bg-alt: #1e293b;
@@ -25,7 +19,6 @@
 
   /* 侧边栏 */
   --vp-sidebar-bg-color: #1e293b;
-  --vp-sidebar-item-active-bg: rgba(14, 165, 233, 0.1);
 }
 
 /* 亮色主题覆盖 */
@@ -43,7 +36,6 @@
   --vp-border-light: #cbd5e1;
 
   --vp-sidebar-bg-color: #f1f5f9;
-  --vp-sidebar-item-active-bg: rgba(14, 165, 233, 0.08);
 }
 
 /* 暗色主题 */
@@ -60,11 +52,6 @@
   background: var(--vp-bg) !important;
 }
 
-.VPNavBarTitle .title {
-  font-weight: 700 !important;
-  color: var(--vp-c-brand-1) !important;
-}
-
 /* 侧边栏样式 */
 .VPSidebar {
   border-right: 1px solid var(--vp-border) !important;
@@ -72,21 +59,6 @@
 
 .VPSidebarItem .text {
   font-weight: 500 !important;
-}
-
-.VPSidebarItem.is-active > .item > .indicator {
-  background-color: var(--vp-c-brand-1) !important;
-}
-
-/* 链接样式 */
-a {
-  color: var(--vp-c-brand-1) !important;
-  text-decoration: none !important;
-  transition: color 0.2s !important;
-}
-
-a:hover {
-  color: var(--vp-c-brand-2) !important;
 }
 
 /* 代码块样式 */
@@ -98,7 +70,7 @@ a:hover {
 
 /* 提示框样式 */
 .custom-block.tip {
-  border-color: var(--vp-c-brand-1) !important;
+  border-color: #0ea5e9 !important;
   background: rgba(14, 165, 233, 0.1) !important;
 }
 
@@ -110,18 +82,6 @@ a:hover {
 .custom-block.danger {
   border-color: #ef4444 !important;
   background: rgba(239, 68, 68, 0.1) !important;
-}
-
-/* 按钮样式 */
-.VPButton.brand {
-  background: var(--vp-c-brand-1) !important;
-  border-color: var(--vp-c-brand-1) !important;
-  color: white !important;
-}
-
-.VPButton.brand:hover {
-  background: var(--vp-c-brand-2) !important;
-  border-color: var(--vp-c-brand-2) !important;
 }
 
 /* 表格样式 */
@@ -148,9 +108,8 @@ a:hover {
 }
 
 .VPFeature:hover {
-  border-color: var(--vp-c-brand-1) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* 标题样式 */
@@ -160,7 +119,7 @@ a:hover {
 }
 
 .VPDoc h1 {
-  border-bottom: 2px solid var(--vp-c-brand-1) !important;
+  border-bottom: 2px solid var(--vp-border) !important;
   padding-bottom: 12px !important;
 }
 
@@ -177,34 +136,6 @@ a:hover {
   border-radius: 8px !important;
   padding: 16px !important;
   margin: 16px 0 !important;
-}
-
-/* Wikilink 样式 */
-.wiki-link {
-  color: var(--vp-c-brand-1) !important;
-  font-weight: 500 !important;
-  border-bottom: 1px dashed var(--vp-c-brand-1) !important;
-}
-
-.wiki-link:hover {
-  color: var(--vp-c-brand-2) !important;
-  border-bottom-style: solid !important;
-}
-
-/* 页面过渡动画 */
-.page {
-  animation: fadeIn 0.3s ease-in-out !important;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* 滚动条样式 */
