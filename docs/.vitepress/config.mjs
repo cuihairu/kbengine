@@ -58,6 +58,9 @@ const config = defineConfig({
     editLink: false,
     contributors: false,
     lastUpdated: false,
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/cuihairu/kbengine' }
+    ],
     search: {
       provider: 'local',
       options: {
