@@ -480,7 +480,7 @@ TEST_F(EntityDefXmlLoadingTest, BaseDataTypeInitializeReturnsTrue)
   auto* root = xml.getRootNode();
   ASSERT_NE(root, nullptr);
 
-  KBEngine::IntType<uint8> data_type;
+  KBEngine::IntType<KBEngine::uint8> data_type;
   EXPECT_TRUE(data_type.initialize(&xml, root));
 }
 
@@ -789,14 +789,14 @@ TEST_F(EntityDefXmlLoadingTest, DataTypesManageAliasesAndDeletionPaths)
   EXPECT_FALSE(base_types.empty());
   EXPECT_NE(std::find(base_types.begin(), base_types.end(), "UINT8"), base_types.end());
 
-  auto* custom = new KBEngine::IntType<uint8>();
+  auto* custom = new KBEngine::IntType<KBEngine::uint8>();
   const auto custom_uid = custom->id();
   ASSERT_TRUE(KBEngine::DataTypes::addDataType("CustomUint8", custom));
   EXPECT_EQ(KBEngine::DataTypes::getDataType("CustomUint8"), custom);
   EXPECT_EQ(KBEngine::DataTypes::getDataType("CustomUint8", false), custom);
   EXPECT_EQ(KBEngine::DataTypes::getDataType(custom_uid), custom);
 
-  EXPECT_FALSE(KBEngine::DataTypes::addDataType("customuint8", new KBEngine::IntType<uint8>()));
+  EXPECT_FALSE(KBEngine::DataTypes::addDataType("customuint8", new KBEngine::IntType<KBEngine::uint8>()));
   EXPECT_FALSE(KBEngine::DataTypes::addDataType(custom_uid, custom));
 
   KBEngine::DataTypes::delDataType("CustomUint8");

@@ -144,14 +144,14 @@ TEST(ServerErrorsXmlTest, DigestMatchesLegacyDefaultsThenOverrideSequence)
 </root>)");
 
   KBEngine::KBE_MD5 actual_md5;
-  int32 actual_size = 0;
+  KBEngine::int32 actual_size = 0;
   ASSERT_TRUE(KBEngine::xml::appendServerErrorDescriptionsDigest(
       actual_md5, actual_size, "ServerErrorsXmlTest"));
 
   KBEngine::KBE_MD5 expected_md5;
-  int32 isize = 0;
-  int32 val = 1;
-  expected_md5.append((void*)&val, sizeof(int32));
+  KBEngine::int32 isize = 0;
+  KBEngine::int32 val = 1;
+  expected_md5.append((void*)&val, sizeof(KBEngine::int32));
   std::string name = "ACCOUNT_CREATE_FAILED";
   expected_md5.append((void*)name.c_str(), name.size());
   std::string descr = "default create failed";
@@ -159,16 +159,16 @@ TEST(ServerErrorsXmlTest, DigestMatchesLegacyDefaultsThenOverrideSequence)
   isize++;
 
   val = 2;
-  expected_md5.append((void*)&val, sizeof(int32));
+  expected_md5.append((void*)&val, sizeof(KBEngine::int32));
   name = "LOGIN_REJECTED";
   expected_md5.append((void*)name.c_str(), name.size());
   descr = "default login rejected";
   expected_md5.append((void*)descr.c_str(), descr.size());
   isize++;
-  expected_md5.append((void*)&isize, sizeof(int32));
+  expected_md5.append((void*)&isize, sizeof(KBEngine::int32));
 
   val = 1;
-  expected_md5.append((void*)&val, sizeof(int32));
+  expected_md5.append((void*)&val, sizeof(KBEngine::int32));
   name = "ACCOUNT_CREATE_FAILED_OVERRIDE";
   expected_md5.append((void*)name.c_str(), name.size());
   descr = "override create failed";
@@ -176,13 +176,13 @@ TEST(ServerErrorsXmlTest, DigestMatchesLegacyDefaultsThenOverrideSequence)
   isize++;
 
   val = 3;
-  expected_md5.append((void*)&val, sizeof(int32));
+  expected_md5.append((void*)&val, sizeof(KBEngine::int32));
   name = "PASSWORD_INVALID";
   expected_md5.append((void*)name.c_str(), name.size());
   descr = "password invalid";
   expected_md5.append((void*)descr.c_str(), descr.size());
   isize++;
-  expected_md5.append((void*)&isize, sizeof(int32));
+  expected_md5.append((void*)&isize, sizeof(KBEngine::int32));
 
   EXPECT_EQ(actual_size, isize);
   EXPECT_EQ(actual_md5.getDigestStr(), expected_md5.getDigestStr());
