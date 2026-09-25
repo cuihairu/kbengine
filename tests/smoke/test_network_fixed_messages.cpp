@@ -33,15 +33,30 @@ TEST(NetworkFixedMessagesBootstrapTest, FixedMessagesInstance)
   }
 
   KBEngine::Network::FixedMessages& fm = KBEngine::Network::FixedMessages::getSingleton();
+
+  // 单例可能已被 message_handler 的初始化提前创建；无论哪种状态，
+  // 加载不存在的文件都必须返回 false。
   const bool loaded = fm.loadConfig("nonexistent.xml", false);
-  if (created != nullptr)
+  EXPECT_FALSE(loaded);
+
+  // 绝对路径文件首载成功；重复加载命中已载文件集合，幂等返回 true。
+  const auto xml_path = make_temp_fixed_messages_path();
   {
-    EXPECT_FALSE(loaded);
+    std::ofstream out(xml_path);
+    out << R"(<root>
+  <Login>
+    <id>101</id>
+  </Login>
+</root>)";
   }
-  else
-  {
-    EXPECT_TRUE(loaded);
-  }
+
+  const bool first_load = fm.loadConfig(xml_path.string(), false);
+  EXPECT_TRUE(first_load);
+
+  const bool second_load = fm.loadConfig(xml_path.string(), false);
+  EXPECT_TRUE(second_load);
+
+  std::filesystem::remove(xml_path);
 
   delete created;
 }

@@ -261,10 +261,15 @@ TEST(ServerServerConfigBootstrapTest, LoadsDbMgrInterfacesMachineAddressesAndEma
 
   const std::vector<KBEngine::Network::Address> addrs = config->interfacesAddrs();
   ASSERT_EQ(addrs.size(), 2u);
-  EXPECT_STREQ(addrs[0].ipAsString(), "10.0.0.10");
-  EXPECT_EQ(addrs[0].port, 31001);
-  EXPECT_STREQ(addrs[1].ipAsString(), "10.0.0.11");
-  EXPECT_EQ(addrs[1].port, KBE_INTERFACES_TCP_PORT);
+  // Address::port 按网络字节序存储，裸比较主机序值在小端平台必错；
+  // 用 writeToString 取主机序可读形式整体断言。
+  char addrs_buf[32];
+  addrs[0].writeToString(addrs_buf, sizeof(addrs_buf));
+  EXPECT_STREQ(addrs_buf, "10.0.0.10:31001");
+  addrs[1].writeToString(addrs_buf, sizeof(addrs_buf));
+  const std::string addrs1_expect =
+      std::string("10.0.0.11:") + std::to_string(KBE_INTERFACES_TCP_PORT);
+  EXPECT_STREQ(addrs_buf, addrs1_expect.c_str());
 
   const KBEngine::DBInterfaceInfo* default_db = config->dbInterface("default");
   ASSERT_NE(default_db, nullptr);

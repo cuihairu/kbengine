@@ -1879,6 +1879,12 @@ target_link_libraries(kbe_entitydef
     KBEngine::pyscript
 )
 
+# entitydef 直接消费 KBEngine::XML（datatype/entitydef/scriptdef_module 等 TU），
+# 关闭 legacy xml 目标时该别名不存在，须带保护。
+if(KBE_BUILD_LEGACY_XML_TARGET)
+  target_link_libraries(kbe_entitydef PUBLIC KBEngine::xml)
+endif()
+
 target_include_directories(kbe_entitydef
   PUBLIC
     "${KBE_SOURCE_DIR}/lib"
