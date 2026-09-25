@@ -15,7 +15,7 @@ namespace
 std::string trimmedText(const tinyxml2::XMLElement* element)
 {
 	const char* text = element ? element->GetText() : nullptr;
-	return text ? strutil::kbe_trim(text) : "";
+	return text ? KBEngine::strutil::kbe_trim(text) : "";
 }
 }
 
