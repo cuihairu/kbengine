@@ -1,3 +1,5 @@
+> [English](CODE_COVERAGE_SETUP.en.md) | **中文**
+
 # 代码覆盖率配置指南
 
 > 该主题已收敛到 [工程指南 / 覆盖率与 Codecov](/guide/engineering/coverage.md)。

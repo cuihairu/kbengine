@@ -34,3 +34,5 @@ features:
     link: /resources/
 footer: 文档来源为仓库内已有资料，持续更新中
 ---
+
+> [English](index.en.md) | **中文**
