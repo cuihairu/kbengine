@@ -1,3 +1,5 @@
+> [English](index.en.md) | **中文**
+
 # API 总览
 
 > 这里是工具书入口，不是学习主线。需要系统理解时回到 [/study/](/study/)；需要看具体实现时回到 [/architecture/source-analysis/](/architecture/source-analysis/)。
@@ -11,6 +13,7 @@
 
 - KBEngine API 来自 `docs/api/kbengine/kbengine_api(cn).chm` 的中文 API 帮助文档。
 - BigWorld API 目前以 `BigWorld-Engine-14.4.1` 源码中的 `/*~ ... */` 脚本文档注释与 Python 绑定点为准，属于“源码抽取版 API”，不是 CHM 原文迁移。
+- KBEngine API 原始文件为仓库 `docs/api/kbengine/kbengine_api(cn).chm`（仅中文），未发布到文档站点。
 
 后续新增引用必须使用 `/api/kbengine/**` 或 `/api/bigworld/**`，不再保留旧的根级 KBEngine API 入口。
 

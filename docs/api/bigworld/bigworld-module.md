@@ -1,3 +1,5 @@
+> [English](bigworld-module.en.md) | **中文**
+
 # BigWorld 模块
 
 > 本页是 BigWorld `BigWorld` Python 模块的源码抽取入口，后续会按 BaseApp、CellApp、DBApp、Bots 等组件拆分具体函数。

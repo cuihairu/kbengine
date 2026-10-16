@@ -1,3 +1,5 @@
+> [English](process-model.en.md) | **中文**
+
 # BigWorld 进程模型
 
 > 本页用于理解 BigWorld 风格的服务器为什么被拆成多种长期运行的组件进程。

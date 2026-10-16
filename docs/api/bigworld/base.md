@@ -1,3 +1,5 @@
+> [English](base.en.md) | **中文**
+
 # BigWorld Base
 
 > BigWorld Base 是运行在 BaseApp 上的实体脚本对象，和 KBEngine 的 Base 实体同源，但 API 数量与运行时语义更丰富。

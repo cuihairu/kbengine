@@ -8,6 +8,10 @@
   来源：`docs/api/kbengine/kbengine_api(cn).chm`
 - `docs/guide/webconsole.md`
   来源：`docs/WebConsole_Guide(cn).pdf`
+- KBEngine 引擎概览：`docs/KBEngine overview(cn).pptx` /
+  `docs/KBEngine overview(en).pptx`
+- WebConsole 原始指南：`docs/WebConsole_Guide(cn).pdf` /
+  `docs/WebConsole_Guide(en).pdf`
 
 ## 站点导航与汇总页
 

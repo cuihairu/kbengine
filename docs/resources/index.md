@@ -12,6 +12,8 @@
 
 - KBEngine API 中文文档：`docs/api/kbengine/kbengine_api(cn).chm`
 - WebConsole 中文文档：`docs/WebConsole_Guide(cn).pdf`
+- KBEngine 引擎概览（仓库内二进制，未发布到文档站点）：`docs/KBEngine overview(cn).pptx`（中文）/ `docs/KBEngine overview(en).pptx`（英文）
+- WebConsole 原始指南（仓库内二进制，未发布到文档站点）：`docs/WebConsole_Guide(cn).pdf`（中文）/ `docs/WebConsole_Guide(en).pdf`（英文）
 - BigWorld 源码与资料：`BigWorld-Engine-14.4.1/`
 - 仓库说明：`README.md`
 

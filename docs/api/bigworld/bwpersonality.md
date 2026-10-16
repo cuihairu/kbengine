@@ -1,3 +1,5 @@
+> [English](bwpersonality.en.md) | **中文**
+
 # BigWorld BWPersonality
 
 > `BWPersonality` 是 BigWorld 服务端脚本的进程级回调入口，角色接近 KBEngine 各组件模块中的 `onInit`、`onReadyForLogin`、`on*AppReady`、`on*ShutDown` 等回调集合。
