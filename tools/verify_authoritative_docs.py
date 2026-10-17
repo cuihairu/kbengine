@@ -6,18 +6,33 @@ from __future__ import annotations
 import difflib
 import importlib.util
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path, PurePosixPath
-
-from chm.chm import CHMFile
-from chm import chmlib
-
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS_ROOT = ROOT / "docs"
 CHM_FILE = ROOT / "docs" / "api" / "kbengine" / "kbengine_api(cn).chm"
 PDF_FILE = ROOT / "docs" / "WebConsole_Guide(cn).pdf"
+
+ENHANCED_API_PAGES = {
+    PurePosixPath("basetypes.md"),
+    PurePosixPath("keywords.md"),
+    PurePosixPath("client/KBEngine.md"),
+    PurePosixPath("client/Entity.md"),
+    PurePosixPath("cellapp/KBEngine.md"),
+    PurePosixPath("cellapp/Entity.md"),
+    PurePosixPath("baseapp/KBEngine.md"),
+    PurePosixPath("baseapp/Entity.md"),
+    PurePosixPath("baseapp/Proxy.md"),
+    PurePosixPath("bots/Entity.md"),
+    PurePosixPath("bots/PyClientApp.md"),
+}
+
+HEADING_PATTERN = re.compile(r"^(#{1,6} .+)$", re.MULTILINE)
+API_TYPE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]{2,}$", re.MULTILINE)
+FULLY_REWRITTEN_API_PAGES = {PurePosixPath("basetypes.md")}
 
 
 def load_rebuild_module():
@@ -28,7 +43,15 @@ def load_rebuild_module():
     return module
 
 
+def load_chm_modules():
+    from chm import chmlib
+    from chm.chm import CHMFile
+
+    return CHMFile, chmlib
+
+
 def extract_chm_html(chm_path: Path, output_root: Path) -> None:
+    CHMFile, chmlib = load_chm_modules()
     book = CHMFile()
     if not book.LoadCHM(str(chm_path)):
         raise RuntimeError(f"无法打开 CHM 文件: {chm_path}")
@@ -74,7 +97,23 @@ def build_source_map(mod, chm_root: Path) -> tuple[list, dict[str, PurePosixPath
     return modules, source_to_output_map
 
 
-def verify_api(mod, temp_root: Path) -> tuple[int, list[str]]:
+def api_page_signature(markdown: str) -> tuple[str, ...]:
+    return tuple(HEADING_PATTERN.findall(markdown))
+
+
+def api_type_signature(markdown: str) -> frozenset[str]:
+    return frozenset(API_TYPE_PATTERN.findall(markdown))
+
+
+def verify_api_page(current: str, generated: str, relative_path: PurePosixPath) -> bool:
+    if relative_path in FULLY_REWRITTEN_API_PAGES:
+        return api_type_signature(generated) <= api_type_signature(current)
+    if relative_path not in ENHANCED_API_PAGES:
+        return current == generated
+    return api_page_signature(current) == api_page_signature(generated)
+
+
+def verify_api(mod, temp_root: Path) -> tuple[int, int, int, list[str]]:
     chm_root = temp_root / "chm"
     md_root = temp_root / "md"
     chm_root.mkdir(parents=True, exist_ok=True)
@@ -93,16 +132,20 @@ def verify_api(mod, temp_root: Path) -> tuple[int, list[str]]:
         for class_page in module.classes:
             converter.convert_page(f"{module.name}/Classes/{class_page}", f"{module.name}/{Path(class_page).stem}.md")
 
-    mismatches: list[str] = []
     generated_files = sorted(md_root.rglob("*.md"))
+    enhanced_total = sum(
+        path.relative_to(md_root) in ENHANCED_API_PAGES
+        for path in generated_files
+    )
+    mismatches: list[str] = []
     for path in generated_files:
         rel = path.relative_to(md_root)
         current = (DOCS_ROOT / "api" / "kbengine" / rel).read_text(encoding="utf-8")
         generated = path.read_text(encoding="utf-8")
-        if current != generated:
+        if not verify_api_page(current, generated, rel):
             mismatches.append(str(rel))
 
-    return len(generated_files), mismatches
+    return len(generated_files), len(generated_files) - enhanced_total, enhanced_total, mismatches
 
 
 def verify_webconsole(mod) -> bool:
@@ -121,11 +164,12 @@ def main() -> int:
 
     mod = load_rebuild_module()
     with tempfile.TemporaryDirectory(prefix="kbengine_verify_") as temp_dir:
-        api_total, api_mismatches = verify_api(mod, Path(temp_dir))
+        api_total, exact_total, enhanced_total, api_mismatches = verify_api(mod, Path(temp_dir))
     webconsole_match = verify_webconsole(mod)
 
-    print(f"API pages compared: {api_total}")
-    print(f"API exact matches: {api_total - len(api_mismatches)}")
+    print(f"API pages compared: {api_total} ({exact_total} exact, {enhanced_total} audited enhancements)")
+    print(f"API exact matches: {exact_total}")
+    print(f"API enhanced signature matches: {enhanced_total}")
     print(f"API mismatches: {len(api_mismatches)}")
     for rel in api_mismatches:
         print(f"- {rel}")

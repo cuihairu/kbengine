@@ -7,6 +7,7 @@
 ## Engine APIs
 
 - [KBEngine API](/api/kbengine/) — Chinese only for now, still generated from the CHM source
+- English access note: keep `api/kbengine/**` as the Chinese authoritative pages; add future `*.en.md` counterparts and expose them through this directory-level index.
 - [BigWorld API](/api/bigworld/) — English available
 
 ## Source boundary

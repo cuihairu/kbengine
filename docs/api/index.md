@@ -7,6 +7,7 @@
 ## 引擎 API
 
 - [KBEngine API](/api/kbengine/)
+- 英文版说明：`api/kbengine/**` 仍保留中文权威页；英文对应页后续以 `*.en.md` 新增，并通过本页目录级索引进入。
 - [BigWorld API](/api/bigworld/)
 
 ## 来源边界
