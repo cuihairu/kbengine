@@ -1,7 +1,7 @@
 KBEngine
 ========
 
-<p align="center">[English](README.md) | [中文](README.zh.md)</p>
+<p align="center"><a href="README.md">English</a> | <a href="README.zh.md">中文</a></p>
 
 > **⚠️ Development Fork Notice**
 >
