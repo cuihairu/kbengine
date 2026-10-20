@@ -335,29 +335,29 @@ const config = defineConfig({
 })
 
 
-// —— 双语接线（2026-10-20：root=中文笔记，/en/=英文对照页，可互相切换）——
-const prefixEn = (link) =>
-  typeof link === 'string' && link.startsWith('/') && !link.startsWith('/en/')
-    ? (link === '/' ? '/en/' : '/en' + link)
+// —— 官方国际化（vitepress locales，唯一方案；内容内不放语言头行）——
+const prefixZh = (link) =>
+  typeof link === 'string' && link.startsWith('/') && !link.startsWith('/zh/')
+    ? (link === '/' ? '/zh/' : '/zh' + link)
     : link
 const prefixItems = (items) =>
   (items || []).map((item) => ({
     ...item,
-    link: prefixEn(item.link),
+    link: prefixZh(item.link),
     ...(item.items ? { items: prefixItems(item.items) } : {})
   }))
 const rootTheme = config.themeConfig || {}
 config.locales = {
-  root: { label: '简体中文', lang: 'zh-CN' },
-  en: { label: 'English', lang: 'en-US', link: '/en/' }
+  root: { label: 'English', lang: 'en-US' },
+  zh: { label: '简体中文', lang: 'zh-CN' }
 }
 config.themeConfig = {
   ...rootTheme,
   locales: {
     '/': rootTheme,
-    '/en/': {
+    '/zh/': {
       ...rootTheme,
-      label: 'English',
+      label: '简体中文',
       nav: prefixItems(rootTheme.nav),
       sidebar:
         rootTheme.sidebar && typeof rootTheme.sidebar === 'object' && !Array.isArray(rootTheme.sidebar)

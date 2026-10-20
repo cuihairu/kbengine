@@ -1,19 +1,19 @@
-> **English** | [中文](concepts.md
+> [English](/architecture/bigworld/concepts | **中文**
 
-# BigWorld Core Concepts
+# BigWorld 核心概念
 
-> This page defines the core objects and terms that keep coming up while studying BigWorld and KBEngine.
+> 本页定义学习 BigWorld 与 KBEngine 时反复出现的核心对象与术语。
 
-## Topics to cover
+## 建议覆盖的主题
 
-- Entity: logical entity, Base entity, Cell entity, and the client-side representation
-- Space: scene container, space ownership, and cross-space migration
-- Cell: space partitioning, load splitting, and cross-Cell synchronization
-- Witness / View: vision, visible set, and client synchronization
-- Ghost: cross-boundary copies and cross-Cell observation
-- Manager components: coordination, load balancing, and process management
+- Entity：逻辑实体、Base 实体、Cell 实体、Client 表示
+- Space：场景容器、空间归属、跨空间迁移
+- Cell：空间切分、负载拆分、跨 Cell 同步
+- Witness / View：视野、可见集、客户端同步
+- Ghost：跨边界副本与跨 Cell 观察
+- Manager 组件：负责协调、负载与进程管理
 
-## How to write it
+## 编写方式
 
-- Define each term by "responsibility / which process hosts it / how it relates to other objects".
-- If KBEngine has a same-named or similar implementation, build the mapping later in `comparison/terminology.md`.
+- 每个术语单独定义“职责 / 所在进程 / 和其他对象的关系”。
+- 如果 KBEngine 中有同名或近似实现，后续在 `comparison/terminology.md` 建立映射。

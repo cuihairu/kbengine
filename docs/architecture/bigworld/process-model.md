@@ -1,17 +1,17 @@
-> **English** | [中文](process-model.md
+> [English](/architecture/bigworld/process-model | **中文**
 
-# BigWorld Process Model
+# BigWorld 进程模型
 
-> This page explains why a BigWorld-style server is split into several long-running component processes.
+> 本页用于理解 BigWorld 风格的服务器为什么被拆成多种长期运行的组件进程。
 
-## Topics to cover
+## 建议覆盖的主题
 
-- The basic responsibilities of Login / Base / Cell / DB
-- The control and load-coordination role of the Manager processes
-- Typical message flow between components
-- Why spatial logic and non-spatial logic are separated
-- Why the player proxy usually lives on the Base side
+- Login / Base / Cell / DB 的基本职责
+- Manager 进程的控制与负载协调作用
+- 组件之间的典型消息流转
+- 为什么空间逻辑与非空间逻辑要拆分
+- 为什么玩家代理通常落在 Base 侧
 
-## Value for studying KBEngine
+## 对 KBEngine 学习的价值
 
-- The goal is not to restate BigWorld history, but to provide a frame for understanding the multi-process structure in the KBEngine source.
+- 这页不是为了复述 BigWorld 历史，而是为了给 KBEngine 源码中的多进程结构提供理解框架。

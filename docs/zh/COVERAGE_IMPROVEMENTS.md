@@ -1,11 +1,13 @@
----
-head:
-  - - meta
-    - http-equiv: refresh
-      content: 0; url=/kbengine/COVERAGE_IMPROVEMENTS/
-  - - link
-    - rel: canonical
-      href: /kbengine/COVERAGE_IMPROVEMENTS/
----
+# Code Coverage Improvements Summary
 
-页面已并入中文主站 [点击跳转](/COVERAGE_IMPROVEMENTS)
+> This page used to record staged fixes to the coverage pipeline; it is now merged into [Engineering guide / Coverage & Codecov](guide/engineering/coverage.md).
+
+## Current role
+
+- This page stays as a historical compatibility entry.
+- Coverage configuration, CI collection issues, and long-term maintenance
+  conclusions have been consolidated on the new page.
+
+## Use instead
+
+- [Coverage & Codecov](guide/engineering/coverage.md)

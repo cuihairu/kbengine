@@ -1,11 +1,13 @@
----
-head:
-  - - meta
-    - http-equiv: refresh
-      content: 0; url=/kbengine/python-3.12-upgrade-notes/
-  - - link
-    - rel: canonical
-      href: /kbengine/python-3.12-upgrade-notes/
----
+# Python 3.12 Upgrade Notes
 
-页面已并入中文主站 [点击跳转](/python-3.12-upgrade-notes)
+> This topic has been consolidated into [Engineering guide / Python 3.12 upgrade](guide/engineering/python-3.12-upgrade.md).
+
+## Current role
+
+- This page stays as a compatibility entry.
+- The runtime baseline, upgrade blockers, and batch sequencing are collected on
+  the new page.
+
+## Use instead
+
+- [Python 3.12 upgrade](guide/engineering/python-3.12-upgrade.md)

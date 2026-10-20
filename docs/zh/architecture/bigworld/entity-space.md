@@ -1,11 +1,15 @@
----
-head:
-  - - meta
-    - http-equiv: refresh
-      content: 0; url=/kbengine/architecture/bigworld/entity-space/
-  - - link
-    - rel: canonical
-      href: /kbengine/architecture/bigworld/entity-space/
----
+# BigWorld Entities and Spaces
 
-页面已并入中文主站 [点击跳转](/architecture/bigworld/entity-space)
+> This page focuses on the most central BigWorld design group: Entity, Space, Cell, and Witness.
+
+## Topics to cover
+
+- The multi-sided representation of an Entity
+- How entities are organized inside a Space
+- The relationship between AOI and Witness
+- Cell partitioning and boundary synchronization
+- Why Ghost copies exist
+
+## Reading goal
+
+- After finishing this page, you should be able to read the KBEngine implementations of `Entity`, `Space`, `Witness`, and `CoordinateSystem` with concrete questions in hand.
