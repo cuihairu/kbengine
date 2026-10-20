@@ -1,12 +1,13 @@
-# 代码覆盖率配置指南
+# Code Coverage Setup Guide
 
-> 该主题已收敛到 [工程指南 / 覆盖率与 Codecov](/zh/guide/engineering/coverage.md。
+> This topic has been consolidated into [Engineering guide / Coverage & Codecov](guide/engineering/coverage.md).
 
-## 当前定位
+## Current role
 
-- 本页保留为兼容入口，避免旧链接失效。
-- CMake 覆盖率开关、`lcov` 收集方式、CI 故障排除已经统一归档到新页面。
+- This page stays as a compatibility entry so old links keep working.
+- The CMake coverage switches, `lcov` collection, and CI troubleshooting have been
+  archived together on the new page.
 
-## 请改用
+## Use instead
 
-- [覆盖率与 Codecov](/zh/guide/engineering/coverage.md
+- [Coverage & Codecov](guide/engineering/coverage.md)

@@ -1,13 +1,12 @@
 # Python 3.12 Upgrade Notes
 
-> This topic has been consolidated into [Engineering guide / Python 3.12 upgrade](guide/engineering/python-3.12-upgrade.md).
+> 该主题已收敛到 [工程指南 / Python 3.12 升级](/zh/guide/engineering/python-3.12-upgrade.md。
 
-## Current role
+## 当前定位
 
-- This page stays as a compatibility entry.
-- The runtime baseline, upgrade blockers, and batch sequencing are collected on
-  the new page.
+- 本页保留为兼容入口。
+- 运行时基线、升级阻塞、批次推进顺序已统一整理到新页面。
 
-## Use instead
+## 请改用
 
-- [Python 3.12 upgrade](guide/engineering/python-3.12-upgrade.md)
+- [Python 3.12 升级](/zh/guide/engineering/python-3.12-upgrade.md

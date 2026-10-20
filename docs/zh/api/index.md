@@ -1,22 +1,22 @@
-# API Overview
+# API 总览
 
-> This is a reference-desk entry, not the learning track. To build systematic understanding, go back to [/study/](); to read concrete implementations, go back to [/architecture/source-analysis/](architecture/).
+> 这里是工具书入口，不是学习主线。需要系统理解时回到 [/study/](/zh/study/；需要看具体实现时回到 [/architecture/source-analysis/](/zh/architecture/source-analysis/。
 
-## Engine APIs
+## 引擎 API
 
-- [KBEngine API](api/) — Chinese only for now, still generated from the CHM source
-- English access note: keep `api/kbengine/**` as the Chinese authoritative pages; add future `*.en.md` counterparts and expose them through this directory-level index.
-- [BigWorld API](api/) — English available
+- [KBEngine API](/zh/api/kbengine/
+- 英文版说明：`api/kbengine/**` 仍保留中文权威页；英文对应页后续以 `*.en.md` 新增，并通过本页目录级索引进入。
+- [BigWorld API](/zh/api/bigworld/
 
-## Source boundary
+## 来源边界
 
-- The KBEngine API comes from the Chinese API help CHM `docs/api/kbengine/kbengine_api(cn).chm`.
-- The BigWorld API is currently derived from the `/*~ ... */` script documentation comments and Python binding points in the `BigWorld-Engine-14.4.1` source. It is a "source-extracted API", not a migration of the CHM text.
-- The KBEngine API original file is the repository file `docs/api/kbengine/kbengine_api(cn).chm` (Chinese only), which is not published to the documentation site.
+- KBEngine API 来自 `docs/api/kbengine/kbengine_api(cn).chm` 的中文 API 帮助文档。
+- BigWorld API 目前以 `BigWorld-Engine-14.4.1` 源码中的 `/*~ ... */` 脚本文档注释与 Python 绑定点为准，属于“源码抽取版 API”，不是 CHM 原文迁移。
+- KBEngine API 原始文件为仓库 `docs/api/kbengine/kbengine_api(cn).chm`（仅中文），未发布到文档站点。
 
-New references must use `/api/kbengine/**` or `/api/bigworld/**`; the old root-level KBEngine API entry is no longer kept.
+后续新增引用必须使用 `/api/kbengine/**` 或 `/api/bigworld/**`，不再保留旧的根级 KBEngine API 入口。
 
-## Verification and source analysis
+## 核对与源码解析
 
-- [KBEngine API classification and audit checklist](kbengine/audit-checklist.md
-- [Source analysis topics](architecture/)
+- [KBEngine API 分类与核对清单](/zh/api/kbengine/audit-checklist.md
+- [源码解析专题](/zh/architecture/source-analysis/

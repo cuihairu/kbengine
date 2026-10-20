@@ -1,17 +1,17 @@
-# 架构总览
+# Architecture Overview
 
-> 这一页只做系统地图，不再承担结构设计提案。它回答的是“背景、专题、对照各放在哪里”，而不是“整站目录未来应该怎么重命名”。
+> This page is only a system map; it no longer carries structural design proposals. It answers "where background, deep dives, and comparison belong", not "how the site directories should be renamed".
 
-## 系统地图
+## System map
 
 ```mermaid
 flowchart TD
-    A["study/**\n主学习路径\n按主题递进建立整体理解"] --> B["architecture/\n架构总览与系统地图"]
-    A --> C["source-analysis/**\n源码学习专题\n按问题继续深挖"]
-    A --> D["api/kbengine/**\nKBEngine 接口契约\n保持 CHM 一致"]
-    A --> G["api/bigworld/**\nBigWorld 源码抽取版 API"]
-    B --> E["bigworld/**\n背景概念与设计来源"]
-    B --> F["comparison/**\nBigWorld / KBEngine 对照"]
+    A["study/**\nMain learning path\nProgressive topics build the whole picture"] --> B["architecture/\nArchitecture overview and system map"]
+    A --> C["source-analysis/**\nSource deep dives\nDrill further into concrete questions"]
+    A --> D["api/kbengine/**\nKBEngine interface contracts\nKept consistent with the CHM"]
+    A --> G["api/bigworld/**\nSource-extracted BigWorld API"]
+    B --> E["bigworld/**\nBackground concepts and design origins"]
+    B --> F["comparison/**\nBigWorld / KBEngine comparison"]
     C --> D
     C --> G
     C --> F
@@ -25,31 +25,31 @@ flowchart TD
     style G fill:#f8efe3,stroke:#9a6a2f,color:#4a2f12
 ```
 
-## 目录定位
+## Directory roles
 
-- `BigWorld` 用来建立概念模型，回答“这套架构为什么会这样设计”。
-- `源码专题` 用来追具体问题，回答“当前代码到底怎么实现”。
-- `对照分析` 用来回答“哪些思想继承了 BigWorld，哪些地方变成了 KBEngine 自己的实现”。
-- `重设计方案` 是附录性质的工程草案，不作为源码分析主线。
+- `BigWorld` builds the conceptual model and answers "why is the architecture designed this way".
+- `Source deep dives` chase concrete questions and answer "how is it actually implemented in the current code".
+- `Comparison` answers "which ideas came from BigWorld, and where KBEngine turned them into its own implementation".
+- `Redesign proposal` is an appendix-style engineering draft, not a main line for source analysis.
 
-这里不是第二套学习主线。按顺序系统学习时，仍然应先进入 [/study/](/zh/study/；这里负责背景地图、专题入口和对照分析。
+This is not a second learning track. For ordered systematic study, still enter [/study/]() first; this area provides the background map, deep-dive entries, and the comparison.
 
-## 推荐阅读顺序
+## Recommended reading order
 
-1. [BigWorld 学习入口](/zh/architecture/bigworld/
-2. [源码专题总览](/zh/architecture/source-analysis/
-3. [BigWorld / KBEngine 对照](/zh/architecture/comparison/
-4. [KBEngine 2.0 重设计方案](/zh/architecture/redesign.md
+1. [BigWorld learning entry](architecture/)
+2. [Source analysis overview](architecture/)
+3. [BigWorld / KBEngine comparison](architecture/)
+4. [KBEngine 2.0 redesign proposal](redesign.md
 
-## 当前编写原则
+## Current authoring rules
 
-- `architecture/` 负责系统地图、目录边界和阅读路线，不承担问题驱动的源码细节展开。
-- `source-analysis` 负责具体问题的源码学习，正文以源码路径、调用链、关键类为中心展开。
-- `bigworld` 目录提供概念背景，不替代对 KBEngine 代码的实际阅读。
-- `comparison` 目录只写有依据的对应关系，不写想当然的“继承关系”。
-- `redesign` 明确属于工程草案，与原始资料转写分开。
+- `architecture/` owns the system map, directory boundaries, and reading routes; it does not expand problem-driven source detail.
+- `source-analysis` owns concrete problem study, with the body organized around source paths, call chains, and key classes.
+- The `bigworld` directory provides conceptual background and does not replace reading the KBEngine code itself.
+- The `comparison` directory records only relationships that have evidence behind them, not assumed "inheritance".
+- `redesign` is explicitly an engineering draft, kept separate from source-material transcription.
 
-## 资料边界
+## Material boundary
 
-- 当前 `architecture` 目录不属于 CHM/PDF 的逐页转写结果。
-- 该目录中的分析结论应以仓库源码为主，BigWorld 仅作为参考框架。
+- The current `architecture` directory is not a page-by-page transcription of the CHM/PDF material.
+- Conclusions in this directory should be based primarily on the repository source, with BigWorld used only as a reference frame.

@@ -1,19 +1,19 @@
-# BigWorld Module
+# BigWorld 模块
 
-> This page is the source-extracted entry for the BigWorld `BigWorld` Python module. Concrete functions will later be split out by component: BaseApp, CellApp, DBApp, Bots, and so on.
+> 本页是 BigWorld `BigWorld` Python 模块的源码抽取入口，后续会按 BaseApp、CellApp、DBApp、Bots 等组件拆分具体函数。
 
-## Main source files
+## 主要来源文件
 
-| Component | Source location | Description |
-|-----------|-----------------|-------------|
-| BaseApp | `server/baseapp/bigworld.mpp` | Overview of the `BigWorld` module on the Base side |
-| BaseApp | `server/baseapp/script_bigworld.cpp` | Module functions for Base creation, DBID lookup, services, hotfix, and shutdown |
-| CellApp | `server/cellapp/bigworld.mpp` | Overview of the `BigWorld` module on the Cell side |
-| CellApp | `server/cellapp/cellapp.cpp` | Module functions for Cell-side entity creation, time, load, hotfix, and shutdown |
-| CellApp | `server/cellapp/space.cpp` | Space-level module functions for SpaceData, space geometry, recording, and time |
-| Common | `lib/server/app_script_timers.cpp` | App-level `BigWorld.addTimer()` / `BigWorld.delTimer()` |
+| 组件 | 源码位置 | 说明 |
+|------|----------|------|
+| BaseApp | `server/baseapp/bigworld.mpp` | `BigWorld` 模块在 Base 侧的总说明 |
+| BaseApp | `server/baseapp/script_bigworld.cpp` | Base 创建、DBID 查询、服务、热更新、关停等模块函数 |
+| CellApp | `server/cellapp/bigworld.mpp` | `BigWorld` 模块在 Cell 侧的总说明 |
+| CellApp | `server/cellapp/cellapp.cpp` | Cell 侧实体创建、时间、负载、热更新、关停等模块函数 |
+| CellApp | `server/cellapp/space.cpp` | SpaceData、空间几何、录制、时间等空间级模块函数 |
+| 通用 | `lib/server/app_script_timers.cpp` | App 级 `BigWorld.addTimer()` / `BigWorld.delTimer()` |
 
-## Function groups to fill in first
+## 优先补齐的函数组
 
 - `BigWorld.reloadScript(fullReload=True)`
 - `BigWorld.addTimer(initialOffset, repeatOffset, callback, userArg=0)`
@@ -23,6 +23,6 @@
 - `BigWorld.addSpaceData` / `delSpaceData` / `getSpaceData` / `setSpaceData`
 - `BigWorld.globalData` / `baseAppData` / `cellAppData`
 
-## Relationship to KBEngine
+## 与 KBEngine 的关系
 
-The BigWorld module is named `BigWorld`, while the KBEngine module is named `KBEngine`. Many function names are similar, but the implementation boundaries are not identical. In particular, app-level timers, `reloadScript`, global data, service registration, and SpaceData should be compared item by item instead of being mapped by name alone.
+BigWorld 的模块名是 `BigWorld`，KBEngine 的模块名是 `KBEngine`。两者函数名有不少相似处，但实现边界并不完全相同。尤其是 App 级 timer、`reloadScript`、全局数据、服务注册和 SpaceData，后续应逐项对照，不应只做名字映射。
