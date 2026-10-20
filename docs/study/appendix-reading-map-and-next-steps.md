@@ -5,4 +5,4 @@ head:
       content: 0; url=/kbengine/zh/study/appendix-reading-map-and-next-steps/
 ---
 
-Chinese-only section. [中文版](/zh/study/appendix-reading-map-and-next-steps/)
+Chinese-only section. [中文版](/zh/study/appendix-reading-map-and-next-steps)

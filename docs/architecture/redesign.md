@@ -5,4 +5,4 @@ head:
       content: 0; url=/kbengine/zh/architecture/redesign/
 ---
 
-Chinese-only section. [中文版](/zh/architecture/redesign/)
+Chinese-only section. [中文版](/zh/architecture/redesign)

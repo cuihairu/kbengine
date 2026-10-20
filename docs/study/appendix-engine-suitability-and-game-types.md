@@ -5,4 +5,4 @@ head:
       content: 0; url=/kbengine/zh/study/appendix-engine-suitability-and-game-types/
 ---
 
-Chinese-only section. [中文版](/zh/study/appendix-engine-suitability-and-game-types/)
+Chinese-only section. [中文版](/zh/study/appendix-engine-suitability-and-game-types)

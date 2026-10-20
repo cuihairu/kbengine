@@ -5,4 +5,4 @@ head:
       content: 0; url=/kbengine/zh/api/kbengine/client/KBEngine/
 ---
 
-Chinese-only section. [中文版](/zh/api/kbengine/client/KBEngine/)
+Chinese-only section. [中文版](/zh/api/kbengine/client/KBEngine)

@@ -5,4 +5,4 @@ head:
       content: 0; url=/kbengine/zh/book-legacy/plan-ch1/
 ---
 
-Chinese-only section. [中文版](/zh/book-legacy/plan-ch1/)
+Chinese-only section. [中文版](/zh/book-legacy/plan-ch1)
