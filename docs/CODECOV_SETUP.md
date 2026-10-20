@@ -1,14 +1,14 @@
-> [English](CODECOV_SETUP.en.md) | **中文**
+> **中文** | [English](/en/CODECOV_SETUP)
+# Codecov Setup Guide
 
-# Codecov 设置指南
+> This topic has been consolidated into [Engineering guide / Coverage & Codecov](guide/engineering/coverage.md).
 
-> 该主题已收敛到 [工程指南 / 覆盖率与 Codecov](/guide/engineering/coverage.md)。
+## Current role
 
-## 当前定位
+- This page stays as a compatibility entry so old links keep working.
+- Coverage builds, `lcov` collection, CI troubleshooting, and the Codecov upload
+  steps have been consolidated on the new page.
 
-- 本页保留为兼容入口，避免旧链接失效。
-- 覆盖率编译、`lcov` 收集、CI 故障排除、Codecov 上传说明已统一整理到新页面。
+## Use instead
 
-## 请改用
-
-- [覆盖率与 Codecov](/guide/engineering/coverage.md)
+- [Coverage & Codecov](guide/engineering/coverage.md)

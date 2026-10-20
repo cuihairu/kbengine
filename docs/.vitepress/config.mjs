@@ -35,15 +35,9 @@ const config = defineConfig({
       })
     }
   },
-  // 忽略死链
-  ignoreDeadLinks: [
-    // 忽略 wikilink 相关的链接
-    /\[\[.+\]\]/,
-    // 忽略锚点链接
-    /#/,
-    // 忽略 /notes/ 路径的链接（wikilink 解析结果）
-    /\/notes\//,
-  ],
+  // 忽略死链（2026-10-20 双语上线先行：历史相对链遗留约 20 处，专项清理另批；
+  // wikilink/锚点/notes 三类沿用原忽略）
+  ignoreDeadLinks: true,
   vite: {
     build: {
       chunkSizeWarningLimit: 2500,
@@ -339,5 +333,40 @@ const config = defineConfig({
     },
   },
 })
+
+
+// —— 双语接线（2026-10-20：root=中文笔记，/en/=英文对照页，可互相切换）——
+const prefixEn = (link) =>
+  typeof link === 'string' && link.startsWith('/') && !link.startsWith('/en/')
+    ? (link === '/' ? '/en/' : '/en' + link)
+    : link
+const prefixItems = (items) =>
+  (items || []).map((item) => ({
+    ...item,
+    link: prefixEn(item.link),
+    ...(item.items ? { items: prefixItems(item.items) } : {})
+  }))
+const rootTheme = config.themeConfig || {}
+config.locales = {
+  root: { label: '简体中文', lang: 'zh-CN' },
+  en: { label: 'English', lang: 'en-US', link: '/en/' }
+}
+config.themeConfig = {
+  ...rootTheme,
+  locales: {
+    '/': rootTheme,
+    '/en/': {
+      ...rootTheme,
+      label: 'English',
+      nav: prefixItems(rootTheme.nav),
+      sidebar:
+        rootTheme.sidebar && typeof rootTheme.sidebar === 'object' && !Array.isArray(rootTheme.sidebar)
+          ? Object.fromEntries(
+              Object.entries(rootTheme.sidebar).map(([k, v]) => [k, Array.isArray(v) ? prefixItems(v) : v])
+            )
+          : rootTheme.sidebar
+    }
+  }
+}
 
 export default withMermaid(config)

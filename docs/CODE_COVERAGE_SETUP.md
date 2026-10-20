@@ -1,14 +1,14 @@
-> [English](CODE_COVERAGE_SETUP.en.md) | **中文**
+> **中文** | [English](/en/CODE_COVERAGE_SETUP)
+# Code Coverage Setup Guide
 
-# 代码覆盖率配置指南
+> This topic has been consolidated into [Engineering guide / Coverage & Codecov](guide/engineering/coverage.md).
 
-> 该主题已收敛到 [工程指南 / 覆盖率与 Codecov](/guide/engineering/coverage.md)。
+## Current role
 
-## 当前定位
+- This page stays as a compatibility entry so old links keep working.
+- The CMake coverage switches, `lcov` collection, and CI troubleshooting have been
+  archived together on the new page.
 
-- 本页保留为兼容入口，避免旧链接失效。
-- CMake 覆盖率开关、`lcov` 收集方式、CI 故障排除已经统一归档到新页面。
+## Use instead
 
-## 请改用
-
-- [覆盖率与 Codecov](/guide/engineering/coverage.md)
+- [Coverage & Codecov](guide/engineering/coverage.md)

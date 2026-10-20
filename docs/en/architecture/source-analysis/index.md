@@ -1,0 +1,85 @@
+# 源码专题总览
+
+> 这里不是第二套正文，而是“带着问题继续下钻”的专题区。
+>
+> 进入顺序应该是：先读 [/study/](/en/zh/study/ 建立主线，再到这里追具体机制的源码落点。如果连系统地图都还不稳定，先回 [架构总览](/en/zh/architecture/。
+
+## 从问题进入专题
+
+```mermaid
+flowchart TD
+    Q["先有一个具体问题"] --> A{"问题更像哪一类?"}
+
+    A --> B["组件怎么启动\n进程怎么协作"]
+    A --> C["实体怎么定义\n怎么创建"]
+    A --> D["空间 / AOI / Witness\n为什么这样同步"]
+    A --> E["消息怎么发\nRPC 怎么落地"]
+    A --> F["数据怎么写库\n恢复怎么完成"]
+    A --> G["Python 宿主 / 定时器 / 热更新"]
+    A --> H["fireEvent / 事件边界"]
+    A --> I["某个 API 是否已有解析"]
+    A --> J["配置怎么覆盖\n路径怎么生效\nVector3 怎么联动底层"]
+
+    B --> B1["入口与引导流程\n进程模型"]
+    C --> C1["实体系统"]
+    D --> D1["空间、AOI 与视野同步"]
+    E --> E1["网络与消息系统"]
+    F --> F1["持久化与数据库"]
+    G --> G1["脚本运行时与热更新"]
+    G --> G2["通用运行时工具 API"]
+    G --> G3["非实体定时器与全局节拍"]
+    H --> H1["事件系统"]
+    I --> I1["API 覆盖矩阵"]
+    J --> J1["运行时配置与基础类型"]
+```
+
+## 专题入口
+
+1. [启动入口与引导流程](/en/zh/architecture/source-analysis/entry-and-bootstrap.md
+2. [进程模型与组件协作](/en/zh/architecture/source-analysis/process-model.md
+3. [实体系统](/en/zh/architecture/source-analysis/entity-system.md
+4. [类型系统与实体定义文件](/en/zh/architecture/source-analysis/entitydef-type-system.md
+5. [空间、AOI 与视野同步](/en/zh/architecture/source-analysis/space-aoi.md
+6. [网络与消息系统](/en/zh/architecture/source-analysis/networking.md
+7. [持久化与数据库](/en/zh/architecture/source-analysis/persistence.md
+8. [脚本运行时与热更新](/en/zh/architecture/source-analysis/scripting.md
+9. [事件系统：fireEvent 与事件总线](/en/zh/architecture/source-analysis/events.md
+10. [非实体定时器：EventDispatcher 与全局节拍](/en/zh/architecture/source-analysis/non-entity-timers.md
+11. [Base 实体生命周期](/en/zh/architecture/source-analysis/base-entity-lifecycle.md
+12. [BaseApp 运行时 API](/en/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md
+13. [Proxy 会话与流式传输 API](/en/zh/architecture/source-analysis/proxy-client-session-api.md
+14. [CellApp 空间运行时 API](/en/zh/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md
+15. [客户端登录、重登录与 SpaceData API](/en/zh/architecture/source-analysis/client-login-and-space-data-api.md
+16. [组件型脚本 API](/en/zh/architecture/source-analysis/component-script-api.md
+17. [通用运行时工具 API](/en/zh/architecture/source-analysis/runtime-utility-api.md
+18. [运行时配置与基础类型](/en/zh/architecture/source-analysis/runtime-config-and-types.md
+19. [API 到源码解析覆盖矩阵](/en/zh/architecture/source-analysis/api-coverage.md
+
+## 执行看板
+
+- [文档重构 TODO](/en/zh/architecture/source-analysis/todo.md：当前执行看板，后续推进以这张表为准，用来固定批次、状态和下一步，避免源码解析范围继续漂移。
+
+## 内容归属
+
+- `study/**`：主学习路径，负责主题递进、章节串联和阅读顺序。
+- `source-analysis/**`：源码学习专题，负责沿着具体问题继续深挖实现和边界。
+- `api/kbengine/**`：KBEngine 接口契约，保持和 CHM 一致，只在确认错误时修正。
+- `api/bigworld/**`：BigWorld 源码抽取版 API，按源码注释与 Python 绑定点逐项核对。
+- `comparison/**` 与 `bigworld/**`：负责对照和背景，不重复展开 KBEngine 的源码细节。
+
+## API 覆盖追踪
+
+[API 到源码解析覆盖矩阵](/en/zh/architecture/source-analysis/api-coverage.md 用来维护 `docs/api/kbengine/**` 和源码学习专题之间的对应关系。KBEngine API 页保持和 CHM 一致，覆盖矩阵只记录解析状态、源码落点和后续缺口。
+
+## 阅读原则
+
+- 优先记“代码怎么走”，其次才补“为什么这样设计”。
+- 记录尽量落到文件、类、函数、调用路径，而不是只停留在概念层。
+- 同一个问题只保留一个详细展开点，主线章节里以摘要和链接为主，避免重复写两遍。
+- BigWorld 只作为参考系，不替代对 KBEngine 源码本身的阅读记录。
+
+## 不负责什么
+
+- 不重新讲一遍 24 章学习顺序。
+- 不代替 `api/**` 充当接口字典。
+- 不代替 `resources/**` 解释资料来源和核对状态。

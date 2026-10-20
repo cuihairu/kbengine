@@ -1,26 +1,26 @@
-> [English](bwpersonality.en.md) | **中文**
+> **English** | [中文](bwpersonality.md
 
 # BigWorld BWPersonality
 
-> `BWPersonality` 是 BigWorld 服务端脚本的进程级回调入口，角色接近 KBEngine 各组件模块中的 `onInit`、`onReadyForLogin`、`on*AppReady`、`on*ShutDown` 等回调集合。
+> `BWPersonality` is the process-level callback entry for BigWorld server scripts. Its role is close to the `onInit`, `onReadyForLogin`, `on*AppReady`, and `on*ShutDown` callback sets found in the KBEngine component modules.
 
-## 主要来源文件
+## Main source files
 
-| 组件 | 源码位置 |
-|------|----------|
-| 通用 | `lib/server/bwpersonality.mpp` |
+| Component | Source location |
+|-----------|-----------------|
+| Common | `lib/server/bwpersonality.mpp` |
 | BaseApp | `server/baseapp/bwpersonality.mpp` |
 | CellApp | `server/cellapp/bwpersonality.mpp` |
 
-## 已识别的回调分组
+## Recognized callback groups
 
-- 通用生命周期：`onInit`、`onFini`
-- BaseApp：`onBaseAppReady`、`onAppReady`、`onBaseAppShuttingDown`、`onBaseAppShutDown`
-- CellApp：`onCellAppReady`、`onAppReady`、`onCellAppShuttingDown`
-- 组件死亡通知：`onBaseAppDeath`、`onCellAppDeath`、`onServiceAppDeath`
-- 全局数据：`onBaseAppData`、`onDelBaseAppData`、`onCellAppData`、`onDelCellAppData`、`onGlobalData`、`onDelGlobalData`
-- 空间事件：`onSpaceData`、`onSpaceDataDeleted`、`onSpaceGeometryLoaded`
+- Common lifecycle: `onInit`, `onFini`
+- BaseApp: `onBaseAppReady`, `onAppReady`, `onBaseAppShuttingDown`, `onBaseAppShutDown`
+- CellApp: `onCellAppReady`, `onAppReady`, `onCellAppShuttingDown`
+- Component death notifications: `onBaseAppDeath`, `onCellAppDeath`, `onServiceAppDeath`
+- Global data: `onBaseAppData`, `onDelBaseAppData`, `onCellAppData`, `onDelCellAppData`, `onGlobalData`, `onDelGlobalData`
+- Space events: `onSpaceData`, `onSpaceDataDeleted`, `onSpaceGeometryLoaded`
 
-## 后续处理
+## Next steps
 
-BigWorld `BWPersonality` 应作为进程级脚本入口单独整理，不应混进 `BigWorld` 模块函数页。这样才能清楚区分“主动调用的 API”和“引擎回调脚本的 hook”。
+The BigWorld `BWPersonality` should be organized as a process-level script entry of its own instead of being folded into the `BigWorld` module function page. That keeps the distinction clear between "APIs the script calls" and "hooks the engine calls into scripts".

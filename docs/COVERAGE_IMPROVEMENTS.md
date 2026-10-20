@@ -1,14 +1,14 @@
-> [English](COVERAGE_IMPROVEMENTS.en.md) | **中文**
+> **中文** | [English](/en/COVERAGE_IMPROVEMENTS)
+# Code Coverage Improvements Summary
 
-# 代码覆盖率改进摘要
+> This page used to record staged fixes to the coverage pipeline; it is now merged into [Engineering guide / Coverage & Codecov](guide/engineering/coverage.md).
 
-> 该页原本记录覆盖率链路的阶段性修复，现在已并入 [工程指南 / 覆盖率与 Codecov](/guide/engineering/coverage.md)。
+## Current role
 
-## 当前定位
+- This page stays as a historical compatibility entry.
+- Coverage configuration, CI collection issues, and long-term maintenance
+  conclusions have been consolidated on the new page.
 
-- 本页保留为历史兼容入口。
-- 覆盖率配置、CI 收集问题和长期维护结论已统一收敛到新页面。
+## Use instead
 
-## 请改用
-
-- [覆盖率与 Codecov](/guide/engineering/coverage.md)
+- [Coverage & Codecov](guide/engineering/coverage.md)

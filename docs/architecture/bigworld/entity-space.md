@@ -1,17 +1,17 @@
-> [English](entity-space.en.md) | **中文**
+> **English** | [中文](entity-space.md
 
-# BigWorld 实体与空间
+# BigWorld Entities and Spaces
 
-> 本页聚焦 BigWorld 最核心的一组设计：Entity、Space、Cell、Witness。
+> This page focuses on the most central BigWorld design group: Entity, Space, Cell, and Witness.
 
-## 建议覆盖的主题
+## Topics to cover
 
-- Entity 的多侧表示
-- Space 内实体组织方式
-- AOI 与 Witness 的关系
-- Cell 切分与边界同步
-- Ghost 副本的存在理由
+- The multi-sided representation of an Entity
+- How entities are organized inside a Space
+- The relationship between AOI and Witness
+- Cell partitioning and boundary synchronization
+- Why Ghost copies exist
 
-## 阅读目标
+## Reading goal
 
-- 读完本页后，应该能带着问题去看 KBEngine 中的 `Entity`、`Space`、`Witness`、`CoordinateSystem` 等实现。
+- After finishing this page, you should be able to read the KBEngine implementations of `Entity`, `Space`, `Witness`, and `CoordinateSystem` with concrete questions in hand.
