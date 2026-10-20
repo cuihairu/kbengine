@@ -63,4 +63,3 @@ if (typeof window !== 'undefined') {{
 </script>
 
 
-> [English](index.en.md) | **中文**

@@ -1,5 +1,3 @@
-> [English](/api/index | **中文**
-
 # API 总览
 
 > 这里是工具书入口，不是学习主线。需要系统理解时回到 [/study/](/zh/study/；需要看具体实现时回到 [/architecture/source-analysis/](/zh/architecture/source-analysis/。

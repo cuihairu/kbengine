@@ -1,5 +1,3 @@
-> [English](/COVERAGE_IMPROVEMENTS | **中文**
-
 # 代码覆盖率改进摘要
 
 > 该页原本记录覆盖率链路的阶段性修复，现在已并入 [工程指南 / 覆盖率与 Codecov](/zh/guide/engineering/coverage.md。

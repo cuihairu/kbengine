@@ -1,5 +1,3 @@
-> [English](/api/bigworld/index | **中文**
-
 # BigWorld API
 
 > 本目录用于整理 `BigWorld-Engine-14.4.1` 的脚本 API。当前仓库没有等价于 KBEngine CHM 的 BigWorld API 原文包，因此这里先建立“源码抽取版 API”入口，后续逐步从源码注释和 Python 绑定点补齐。

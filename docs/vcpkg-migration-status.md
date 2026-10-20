@@ -1,5 +1,3 @@
-> [English](/vcpkg-migration-status | **中文**
-
 # vcpkg Migration Status
 
 > 该主题已收敛到 [工程指南 / vcpkg 迁移状态](/zh/guide/engineering/vcpkg-migration.md。

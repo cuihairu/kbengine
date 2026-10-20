@@ -1,5 +1,3 @@
-> [English](/architecture/bigworld/index | **中文**
-
 # BigWorld 学习入口
 
 > 这一组文档用于建立理解 KBEngine 所需的 BigWorld 架构背景。

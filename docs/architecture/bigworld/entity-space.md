@@ -1,5 +1,3 @@
-> [English](/architecture/bigworld/entity-space | **中文**
-
 # BigWorld 实体与空间
 
 > 本页聚焦 BigWorld 最核心的一组设计：Entity、Space、Cell、Witness。

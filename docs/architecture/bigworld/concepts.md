@@ -1,5 +1,3 @@
-> [English](/architecture/bigworld/concepts | **中文**
-
 # BigWorld 核心概念
 
 > 本页定义学习 BigWorld 与 KBEngine 时反复出现的核心对象与术语。

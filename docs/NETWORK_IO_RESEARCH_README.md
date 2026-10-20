@@ -1,5 +1,3 @@
-> [English](/NETWORK_IO_RESEARCH_README | **中文**
-
 # KBEngine 网络层研究工作总结
 
 > 该主题已收敛到 [工程指南 / 网络层 I/O 调研](/zh/guide/engineering/network-io-research.md。

@@ -1,5 +1,3 @@
-> [English](/api/bigworld/entity | **中文**
-
 # BigWorld Cell Entity
 
 > BigWorld Cell Entity 是运行在 CellApp 上的空间实体对象。它和 KBEngine Cell Entity 同源，但 BigWorld 侧包含更多 AOI、控制器、导航和录制相关能力。
