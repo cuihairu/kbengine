@@ -5,4 +5,4 @@ head:
       content: 0; url=/kbengine/zh/study/appendix-terminology-quick-reference/
 ---
 
-Chinese-only section. [中文版](/zh/study/appendix-terminology-quick-reference)
+Chinese-only section. 中文版

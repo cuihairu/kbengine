@@ -51,7 +51,7 @@ import KBEngine
 
 ## 详细描述
 
-[Entity](./Entity.md类代表一个驻留在Baseapp上的实体。[Entity](./Entity.md实体可以通过KBEngine.createEntity函数(以及以createEntity为前缀的函数)创建。一个[Entity](./Entity.md实体也可以通过Cellapp的函数KBEngine.createEntityOnBaseApp远程创建。
+Entity创建。一个[Entity](./Entity.md实体也可以通过Cellapp的函数KBEngine.createEntityOnBaseApp远程创建。
 一个[Entity](./Entity.md实体可以在一个活动的cells里面链接到一个实体，还可以被用来在一个合适的cell上创建一个关联的实体。
 这个类允许你创建和销毁在cell上的实体或者在base实体上注册一个定时器也或者访问此对象的联系信息，
 还可以访问一个CellEntityCall，通过它这个base实体可以与它的cell实体通信（这个被关联的cell实体可以移动到不同cell上，作为该cell实体移动的结果KBEngine会进行负载均衡）。
@@ -261,7 +261,7 @@ destroyCellEntity请求销毁关联的cell实体。如果没有关联的cell实�
 ### def onDestroy(self):
 
 功能说明：
-如果这个函数在脚本中有实现，这个函数在调用[Entity](./Entity.md.[destroy](./Entity.md#destroy()后，在实际销毁之前被调用。
+如果这个函数在脚本中有实现，这个函数在调用Entity后，在实际销毁之前被调用。
 这个函数没有参数。
 
 <a id="onGetCell"></a>

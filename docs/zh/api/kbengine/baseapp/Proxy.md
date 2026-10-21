@@ -200,7 +200,7 @@ KBEngine.LOG_ON_WAIT_FOR_DESTROY：等待实体销毁后再进行客户端绑定
 
 ### def onStreamComplete(self, id, success):
 
-如果在脚本中实现了此回调，当用户使用[Proxy](./Proxy.md.[streamStringToClient](./Proxy.md#streamStringToClient()或[Proxy](./Proxy.md.[streamFileToClient](./Proxy.md#streamFileToClient()完成时，该回调被调用。
+如果在脚本中实现了此回调，当用户使用Proxy或Proxy完成时，该回调被调用。
 
 参数：
 

@@ -425,7 +425,6 @@ KBEngine 的 `EventDispatcher` 设计直接继承自 BigWorld 这一支（命名
 1. **主线**：[18. 钩子、回调、定时器与事件](/zh/study/18-hooks-callbacks-timers-and-events.md——先建立四类驱动机制的边界。
 2. **事件边界**：[事件系统、fireEvent 与事件总线](/zh/architecture/source-analysis/events.md——区分"网络事件循环"和"脚本业务事件"，timer 也遵循同样边界。
 3. **本文**：非实体 timer 的源码落点。
-4. **运行时工具**：[通用运行时工具 API](/zh/architecture/source-analysis/runtime-utility-api.md——`timestamp()`、`stampsPerSecond()` 等时间相关工具。
 5. **进程模型**：[启动入口与引导流程](/zh/architecture/source-analysis/entry-and-bootstrap.md、[进程模型与组件协作](/zh/architecture/source-analysis/process-model.md——`EventDispatcher` 在哪里被构造、被谁驱动。
 6. **热更风险**：[21. 热更新、容错与运维](/zh/study/21-hotupdate-fault-tolerance-and-ops.md——App 级 timer / callback 表热更时必须手工重绑。
 7. **时间附录**：[服务器时间管理与世界时钟](/zh/study/appendix-server-time-management-and-world-clock.md——`gameUpdateHertz` 怎么决定 timer 节拍。

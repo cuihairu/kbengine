@@ -1397,7 +1397,7 @@ void Entity::onGetWitness(bool fromBase)
 
 ## ghost：跨 Cell 边界时不能直接断链，所以需要副本
 
-> 关于 ghost 系统的详细机制（real/ghost 状态转换、GhostManager 消息缓冲、ghost 路由等），请参阅 [17-ghost-system](/zh/study/17-ghost-system.html)。
+> 关于 ghost 系统的详细机制（real/ghost 状态转换、GhostManager 消息缓冲、ghost 路由等），请参阅 17-ghost-system。
 > 这里只从空间/AOI角度补充 ghost 在空间同步中的作用。
 
 关键文件：

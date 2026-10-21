@@ -1,12 +1,10 @@
 # API Overview
 
-> This is a reference-desk entry, not the learning track. To build systematic understanding, go back to [/study/](); to read concrete implementations, go back to [/architecture/source-analysis/](architecture/).
+> This is a reference-desk entry, not the learning track. To build systematic understanding, go back to [/study/](); to read concrete implementations, go back to /architecture/source-analysis/.
 
 ## Engine APIs
 
-- [KBEngine API](api/) — Chinese only for now, still generated from the CHM source
 - English access note: keep `api/kbengine/**` as the Chinese authoritative pages; add future `*.en.md` counterparts and expose them through this directory-level index.
-- [BigWorld API](api/) — English available
 
 ## Source boundary
 
@@ -19,4 +17,3 @@ New references must use `/api/kbengine/**` or `/api/bigworld/**`; the old root-l
 ## Verification and source analysis
 
 - [KBEngine API classification and audit checklist](kbengine/audit-checklist.md
-- [Source analysis topics](architecture/)

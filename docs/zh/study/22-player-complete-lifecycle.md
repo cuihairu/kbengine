@@ -876,16 +876,8 @@ flowchart TD
 源码里其实存在两层信息：
 
 1. **网络层有一部分原因信息**
-   - `Channel` 有 `condemnReason()`，见 [channel.h](D:/workspaces/kbengine/kbe/src/lib/network/channel.h#L185)
-   - `Network::Reason` 里有 `REASON_INACTIVITY`、`REASON_CLIENT_DISCONNECTED`、`REASON_GENERAL_NETWORK`、`REASON_WEBSOCKET_ERROR` 等枚举，见 [common.h](D:/workspaces/kbengine/kbe/src/lib/network/common.h#L140)
-   - 例如超时会写入 `pChannel->condemn("timedout")`，见 [serverapp.cpp](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.cpp#L286)
-   - 例如 TCP 对端关闭会写入 `onGetError(pChannel, "disconnected")`，见 [tcp_packet_receiver.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_receiver.cpp#L105)
-   - 例如未知消息号会写入 `PacketReader::processMessages: not found msgID`，见 [packet_reader.cpp](D:/workspaces/kbengine/kbe/src/lib/network/packet_reader.cpp#L85)
 
 2. **但这些原因默认没有传到玩家脚本层**
-   - `Baseapp::onChannelDeregister()` 只拿 `pChannel->proxyID()` 找 `Proxy`，然后调用 `proxy->onClientDeath()`，见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L797)
-   - `Proxy::onClientDeath(void)` 没有参数，内部调用脚本 `onClientDeath` 也是 `SCRIPT_OBJECT_CALL_ARGS0`，见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L217)
-   - `Entity::onClientDeath()` 同样是无参脚本回调，见 [entity.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/entity.cpp#L1045)
 
 所以从默认脚本接口看：
 
@@ -1005,16 +997,13 @@ sequenceDiagram
 
 1. **连接层**
    - `ServerApp::onChannelTimeOut()`：超时后直接 `condemn -> deregister -> destroy`
-   - 见 [serverapp.cpp](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.cpp#L286)
 
 2. **服务器层**
    - `Baseapp::onChannelDeregister()`：当连接真正注销时，开始做“它关联了哪个实体”的翻译
-   - 见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L797)
 
 3. **Proxy 层**
    - 如果 `proxyID > 0`，找到对应 `Proxy`
    - 调用 `proxy->onClientDeath()`
-   - 见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L816)
 
 4. **脚本层**
    - `Proxy::onClientDeath()` 会：
@@ -1023,7 +1012,6 @@ sequenceDiagram
      - `addr = NONE`
      - `clientEnabled_ = false`
      - 调脚本 `onClientDeath`
-   - 见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L217)
 
 所以断线后的直接 hook，最值得记住的是：
 
@@ -1064,30 +1052,24 @@ sequenceDiagram
    - 校验 `entityID + rndUUID`
    - 旧连接如仍存在，则 `condemn("", true)`
    - 新连接绑定到原 `Proxy`
-   - 见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3974)
 
 2. **客户端重新启用**
    - `createClientProxies(proxy, true)`
    - 会重发 `onCreatedProxies`
    - 并在内部调用 `pEntity->onClientEnabled()`
-   - 见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3142)
 
 3. **Proxy 层 hook**
    - `Proxy::onClientEnabled()`
    - 设置 `clientEnabled_ = true`
    - 调脚本层 `onClientEnabled`
-   - 见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L174)
 
 4. **Cell/Witness 层恢复**
    - `Proxy::onGetWitness()` 通知 Cell 侧
-   - 见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L423)
    - Cell 侧进入 `Entity::onGetWitness(true)`
    - 若已有 witness，则执行 `pWitness_->onAttach(this)` 和 `resetViewEntities()`
-   - 见 [entity.cpp](D:/workspaces/kbengine/kbe/src/server/cellapp/entity.cpp#L2092)
 
 5. **Cell 脚本 hook**
    - `Entity::onGetWitness()` 最后会调脚本 `onGetWitness`
-   - 见 [entity.cpp](D:/workspaces/kbengine/kbe/src/server/cellapp/entity.cpp#L2175)
 
 所以重连成功后，最关键的 hook 序列是：
 

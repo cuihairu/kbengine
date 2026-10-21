@@ -684,7 +684,7 @@ for e in KBEngine.entities.values():
 
 3）已经保存到 timer、事件表、回调表里的旧 Python callable 不会自动重绑，需要业务在 `onInit(1)` 或统一 reload hook 中清理并重建。
 
-当这个方法完成时[KBEngine](./KBEngine.md.[onInit](./KBEngine.md#onInit(1) 被调用。
+当这个方法完成时KBEngine 被调用。
 
 参数：
 

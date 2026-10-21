@@ -36,9 +36,6 @@ This is not a second learning track. For ordered systematic study, still enter [
 
 ## Recommended reading order
 
-1. [BigWorld learning entry](architecture/)
-2. [Source analysis overview](architecture/)
-3. [BigWorld / KBEngine comparison](architecture/)
 4. [KBEngine 2.0 redesign proposal](redesign.md
 
 ## Current authoring rules

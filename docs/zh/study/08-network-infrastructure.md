@@ -612,20 +612,13 @@ flowchart TD
 分别对应：
 
 - **超时**
-  - `Channel::handleTimeout()` 调 `networkInterface().onChannelTimeOut(this)`，见 [channel.cpp](D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L660)
 - **对端主动断开 / recv 读到 EOF**
-  - `TCPPacketReceiver::processRecv()` 中 `len == 0`，随后进入 `onGetError(pChannel, "disconnected")`，见 [tcp_packet_receiver.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_receiver.cpp#L105)
 - **socket 读写错误**
-  - 读错误走 `TCPPacketReceiver::onGetError()`，见 [tcp_packet_receiver.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_receiver.cpp#L118)
-  - 发错误先走 `TCPPacketSender::onGetError()` 做 `condemn(err)`，再由后续主循环统一收束，见 [tcp_packet_sender.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_sender.cpp#L79)
 - **协议异常 / 非法包**
   - 例如未知 MessageID、消息长度超限、packet invalid、WebSocket frame error
-  - 典型入口见 [packet_reader.cpp](D:/workspaces/kbengine/kbe/src/lib/network/packet_reader.cpp#L85)、[channel.cpp](D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L1198)、[websocket_packet_filter.cpp](D:/workspaces/kbengine/kbe/src/lib/network/websocket_packet_filter.cpp#L207)
 - **业务主动下线**
-  - `Baseapp::logoutBaseapp()` 中直接对当前连接 `condemn("")`，见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3950)
 - **踢线 / 顶号 / 重连接管**
   - 这类不是“简单断线”，而是**旧连接退场，新连接接管**
-  - 典型入口见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4048) `kickChannel()` 和 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3974) `reloginBaseapp()`
 
 如果再把“是否会上抛到玩家层”压缩成一张矩阵，会更容易把边界看清楚：
 
@@ -658,11 +651,11 @@ flowchart TD
 这一层抽象在源码里有三处固定锚点：
 
 1. `ChannelTimeOutHandler / ChannelDeregisterHandler` 接口定义
-   见 [interfaces.h](D:/workspaces/kbengine/kbe/src/lib/network/interfaces.h#L27)
+   见 interfaces.h
 2. `NetworkInterface` 持有这两个 handler 指针
-   见 [network_interface.h](D:/workspaces/kbengine/kbe/src/lib/network/network_interface.h#L46)
+   见 network_interface.h
 3. `ServerApp` 继承并注册这两个 handler
-   见 [serverapp.h](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.h#L37) 和 [serverapp.cpp](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.cpp#L57)
+   见 serverapp.h 和 serverapp.cpp
 
 先把总链路看清楚：
 
@@ -699,7 +692,7 @@ class ServerApp :
 };
 ```
 
-对应源码见 [serverapp.h](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.h#L37)。
+对应源码见 serverapp.h。
 
 然后在构造函数里，`ServerApp` 显式把自己挂到 `NetworkInterface` 上：
 
@@ -708,7 +701,7 @@ networkInterface_.pChannelTimeOutHandler(this);
 networkInterface_.pChannelDeregisterHandler(this);
 ```
 
-对应源码见 [serverapp.cpp](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.cpp#L57)。
+对应源码见 serverapp.cpp。
 
 所以从这一刻开始：
 
@@ -727,7 +720,7 @@ networkInterface_.pChannelDeregisterHandler(this);
 this->networkInterface().onChannelTimeOut(this);
 ```
 
-见 [channel.cpp](D:/workspaces/kbengine/kbe/src/lib/network/channel.cpp#L660)。
+见 channel.cpp。
 
 这里很关键，因为 `Channel` 到这里为止只是说了一句话：
 
@@ -748,7 +741,7 @@ if (pChannelTimeOutHandler_)
 }
 ```
 
-见 [network_interface.cpp](D:/workspaces/kbengine/kbe/src/lib/network/network_interface.cpp#L417)。
+见 network_interface.cpp。
 
 也就是说，**`NetworkInterface` 只是事件中转站，它不做玩家逻辑。**
 
@@ -763,7 +756,7 @@ pChannel->destroy();
 Network::Channel::reclaimPoolObject(pChannel);
 ```
 
-见 [serverapp.cpp](D:/workspaces/kbengine/kbe/src/lib/server/serverapp.cpp#L286)。
+见 serverapp.cpp。
 
 注意这里的顺序：
 
@@ -791,7 +784,7 @@ else if(len == 0)
 }
 ```
 
-见 [tcp_packet_receiver.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_receiver.cpp#L100)。
+见 tcp_packet_receiver.cpp。
 
 #### 2. 读错误统一走 `onGetError()`
 
@@ -804,7 +797,7 @@ pChannel->destroy();
 Network::Channel::reclaimPoolObject(pChannel);
 ```
 
-见 [tcp_packet_receiver.cpp](D:/workspaces/kbengine/kbe/src/lib/network/tcp_packet_receiver.cpp#L118)。
+见 tcp_packet_receiver.cpp。
 
 可以看到，这条链**不会先经过 `onChannelTimeOut()`**，但依然会进入：
 
@@ -828,7 +821,7 @@ deregisterChannel()
 pChannel_->condemn("PacketReader::processMessages: not found msgID");
 ```
 
-见 [packet_reader.cpp](D:/workspaces/kbengine/kbe/src/lib/network/packet_reader.cpp#L85)。
+见 packet_reader.cpp。
 
 这里先只有 `condemn()`，还没有立刻通知上层。
 真正的清理发生在 `NetworkInterface::processChannels()`：
@@ -843,7 +836,7 @@ else if(pChannel->condemn() > 0)
 }
 ```
 
-见 [network_interface.cpp](D:/workspaces/kbengine/kbe/src/lib/network/network_interface.cpp#L443)。
+见 network_interface.cpp。
 
 所以这一类错误说明得更清楚一点就是：
 
@@ -896,7 +889,7 @@ if(pid > 0)
 }
 ```
 
-见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L797)。
+见 baseapp.cpp。
 
 这一步的意义是：
 
@@ -918,7 +911,7 @@ pOldChannel->proxyID(0);
 pOldChannel->condemn("", true);
 ```
 
-见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4008) 和 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4061)。
+见 baseapp.cpp 和 baseapp.cpp。
 
 这意味着旧连接之后即使完成 `deregister`，也不会再被翻译成“这个玩家离线了”。
 它更准确的语义其实是：
@@ -941,7 +934,7 @@ CALL_ENTITY_AND_COMPONENTS_METHOD(this,
     SCRIPT_OBJECT_CALL_ARGS0(pyTempObj, const_cast<char*>("onClientDeath"), GETERR));
 ```
 
-见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L217)。
+见 proxy.cpp。
 
 这说明 `Proxy` 层做了几件上层真正关心的事：
 
@@ -1089,7 +1082,7 @@ pEntity->addr(pChannel->addr());
 pEntity->onClientEnabled();
 ```
 
-见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3142)。
+见 baseapp.cpp。
 
 这意味着首次接入至少完成了三件事：
 
@@ -1112,7 +1105,7 @@ pChannel->proxyID(0);
 pChannel->condemn("", true);
 ```
 
-见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L4048)。
+见 baseapp.cpp。
 
 这里先把 `proxyID` 清成 `0` 很关键，因为这表示：
 
@@ -1142,7 +1135,7 @@ createClientProxies(proxy, true);
 proxy->onGetWitness();
 ```
 
-见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3974)。
+见 baseapp.cpp。
 
 这一段代码已经把“重连恢复”说得非常清楚了：
 
@@ -1175,17 +1168,13 @@ proxy->onGetWitness();
 1. `createClientProxies(proxy, true)`
    - 重发 `onCreatedProxies`
    - 内部会调用 `Proxy::onClientEnabled()`
-   - 见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3142)
 2. `Proxy::onClientEnabled()`
    - 设置 `clientEnabled_ = true`
    - 调脚本层 `onClientEnabled`
-   - 见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L174)
 3. `Proxy::onGetWitness()`
    - 向 Cell 发送 `onGetWitnessFromBase`
-   - 见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L423)
 4. `Entity::onGetWitness(true)`
    - 如果已有 witness，则执行 `pWitness_->onAttach(this)` 和 `resetViewEntities()`
-   - 见 [entity.cpp](D:/workspaces/kbengine/kbe/src/server/cellapp/entity.cpp#L2092)
 
 也就是说，真正完整的“重连恢复”不是一个 hook，而是下面这一串：
 
@@ -1247,12 +1236,8 @@ flowchart TD
 
 1. **断线**
    - `Channel` 被 `condemn/destroy`
-   - `Baseapp::onChannelDeregister()` 被调用，见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L797)
-   - 如果 `proxyID > 0`，则找到对应 `Proxy` 并调用 `proxy->onClientDeath()`，见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L816)
-   - `Proxy::onClientDeath()` 再清理 `clientEntityCall`、清地址、调脚本 hook，见 [proxy.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/proxy.cpp#L217)
 
 2. **重连**
-   - 新 `Channel` 进来后走 `Baseapp::reloginBaseapp()`，见 [baseapp.cpp](D:/workspaces/kbengine/kbe/src/server/baseapp/baseapp.cpp#L3974)
    - 这里不是让旧 `Channel` 复活，而是把**新连接重新绑定到原 `Proxy`**
    - 然后执行 `createClientProxies(proxy, true)`、`proxy->onGetWitness()`，让客户端与 Cell 表现层重建
    - `onClientEnabled()` 也在 `createClientProxies()` 中被触发

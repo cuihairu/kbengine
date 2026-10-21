@@ -701,7 +701,7 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 
 ### def onDestroy(self):
 
-如果这个函数在脚本中有实现，这个函数在调用[Entity](./Entity.md.[destroy](./Entity.md#destroy()后，在实际销毁之前被调用。
+如果这个函数在脚本中有实现，这个函数在调用Entity后，在实际销毁之前被调用。
 这个函数没有参数。
 
 <a id="onEnterTrap"></a>
