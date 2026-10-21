@@ -19,8 +19,8 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "docs-vuepress"
-CHM_FILE = ROOT / "docs" / "api" / "kbengine" / "kbengine_api(cn).chm"
-PDF_FILE = ROOT / "docs" / "WebConsole_Guide(cn).pdf"
+CHM_FILE = ROOT / "docs" / "zh" / "api" / "kbengine" / "kbengine_api(cn).chm"
+PDF_FILE = ROOT / "docs" / "zh" / "WebConsole_Guide(cn).pdf"
 LOGO_OUTPUT = OUTPUT_DIR / ".vuepress" / "public" / "logo.png"
 LOGO_GIT_PATH = "docs-vuepress/.vuepress/public/logo.png"
 
@@ -101,6 +101,7 @@ class HtmlConverter:
             output_relative=PurePosixPath(output_relative),
         ).strip()
         markdown = self._post_process_markdown(markdown)
+        markdown = markdown.replace("&amp;lt;", "&amp;amp;lt;").replace("&amp;gt;", "&amp;amp;gt;")
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(markdown + "\n", encoding="utf-8")
@@ -242,6 +243,17 @@ class HtmlConverter:
                 return ""
             return self._prefix_anchor(f"### {heading}", pending_anchor)
 
+        if tag.name == "p" and not (tag.get("class") or []):
+            return self._prefix_anchor(
+                self._render_children(
+                    tag,
+                    source_relative=source_relative,
+                    output_relative=output_relative,
+                    base_heading_level=base_heading_level,
+                ),
+                pending_anchor,
+            )
+
         if tag.name == "p" and "function_definition" not in (tag.get("class") or []):
             paragraph = self._render_children(
                 tag,
@@ -300,6 +312,7 @@ class HtmlConverter:
                     output_relative=output_relative,
                 ).strip()
                 cell_text = cell_text.replace("\n\n", "<br>").replace("\n", " ")
+                cell_text = cell_text.replace("<", "&lt;").replace(">", "&gt;")
                 rendered_row.append(self._normalize_inline(cell_text))
             if any(rendered_row):
                 rows.append(rendered_row)
@@ -437,6 +450,7 @@ class HtmlConverter:
         text = text.replace("\xa0", " ")
         text = re.sub(r"[ \t\r\f\v]+", " ", text)
         text = re.sub(r"\n\s*\n+", "\n", text)
+        text = re.sub(r"<([A-Za-z][A-Za-z0-9_-]*)>", r"&lt;\1&gt;", text)
         return text.strip()
 
     @staticmethod

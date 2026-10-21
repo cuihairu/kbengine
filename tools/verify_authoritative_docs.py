@@ -13,8 +13,8 @@ from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS_ROOT = ROOT / "docs"
-CHM_FILE = ROOT / "docs" / "api" / "kbengine" / "kbengine_api(cn).chm"
-PDF_FILE = ROOT / "docs" / "WebConsole_Guide(cn).pdf"
+CHM_FILE = ROOT / "docs" / "zh" / "api" / "kbengine" / "kbengine_api(cn).chm"
+PDF_FILE = ROOT / "docs" / "zh" / "WebConsole_Guide(cn).pdf"
 
 ENHANCED_API_PAGES = {
     PurePosixPath("basetypes.md"),
@@ -140,7 +140,7 @@ def verify_api(mod, temp_root: Path) -> tuple[int, int, int, list[str]]:
     mismatches: list[str] = []
     for path in generated_files:
         rel = path.relative_to(md_root)
-        current = (DOCS_ROOT / "api" / "kbengine" / rel).read_text(encoding="utf-8")
+        current = (DOCS_ROOT / "zh" / "api" / "kbengine" / rel).read_text(encoding="utf-8")
         generated = path.read_text(encoding="utf-8")
         if not verify_api_page(current, generated, rel):
             mismatches.append(str(rel))
@@ -149,7 +149,7 @@ def verify_api(mod, temp_root: Path) -> tuple[int, int, int, list[str]]:
 
 
 def verify_webconsole(mod) -> bool:
-    current = (DOCS_ROOT / "guide" / "webconsole.md").read_text(encoding="utf-8")
+    current = (DOCS_ROOT / "zh" / "guide" / "webconsole.md").read_text(encoding="utf-8")
     generated = mod.build_pdf_markdown(PDF_FILE)
     return current == generated
 

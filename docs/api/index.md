@@ -4,7 +4,7 @@
 
 ## Engine APIs
 
-- English access note: keep `api/kbengine/**` as the Chinese authoritative pages; add future `*.en.md` counterparts and expose them through this directory-level index.
+- English access note: `zh/api/kbengine/**` remains the Chinese authoritative source; the counterpart set now starts at [KBEngine API (English)](zh/api/kbengine/).
 
 ## Source boundary
 
