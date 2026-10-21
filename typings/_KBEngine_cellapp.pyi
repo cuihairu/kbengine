@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Tuple, Union, overload
 
 from _KBEngine_common import (
     Address,
@@ -13,6 +13,9 @@ from _KBEngine_common import (
 entities: Entities
 globalData: GlobalDataClient
 cellAppData: GlobalDataClient
+
+# baseapp/cellapp 模块面（lib/server/entity_app.h:423）
+def kbassert() -> None: ...
 
 def address() -> Address: ...
 def time() -> int: ...
@@ -33,10 +36,11 @@ def createEntity(
     direction: Vector3Like,
     params: Union[Dict[str, Any], None] = None,
 ) -> Union[Entity, None]: ...
+# 3-5 参且前 3 参实际必填（server/cellapp/spacememory.cpp:144-147、:152-230）
 def addSpaceGeometryMapping(
     spaceID: int,
-    mapper: Any = None,
-    path: str = "",
+    mapper: Any,
+    path: str,
     shouldLoadOnServer: bool = True,
     params: Union[Dict[int, str], None] = None,
 ) -> None: ...
@@ -44,6 +48,13 @@ def getSpaceGeometryMapping(spaceID: int) -> str: ...
 def setSpaceData(spaceID: int, key: str, value: str) -> None: ...
 def getSpaceData(spaceID: int, key: str) -> str: ...
 def delSpaceData(spaceID: int, key: str) -> None: ...
+# 3 或 4 参：3 参形式无 layer（layer 默认 0），
+# server/cellapp/cellapp.cpp:2139-2173
+@overload
+def raycast(
+    spaceID: int, src: Vector3Like, dst: Vector3Like
+) -> Tuple[Vector3Like, ...]: ...
+@overload
 def raycast(
     spaceID: int, layer: int, src: Vector3Like, dst: Vector3Like
-) -> Any: ...
+) -> Tuple[Vector3Like, ...]: ...

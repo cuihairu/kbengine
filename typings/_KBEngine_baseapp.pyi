@@ -3,10 +3,10 @@ from typing import Any, Dict, Tuple, Union
 
 from _KBEngine_common import (
     Address,
-    BaseEntityCall,
     Callback,
     Entities,
     Entity,
+    EntityCall,
     GlobalDataClient,
     WatcherValue,
 )
@@ -14,6 +14,9 @@ from _KBEngine_common import (
 entities: Entities
 globalData: GlobalDataClient
 baseAppData: GlobalDataClient
+
+# baseapp/cellapp 模块面（lib/server/entity_app.h:423）
+def kbassert() -> None: ...
 
 def address() -> Address: ...
 def time() -> int: ...
@@ -45,7 +48,7 @@ def createEntityAnywhere(
 ) -> None: ...
 def createEntityRemotely(
     entityType: str,
-    baseMB: BaseEntityCall,
+    baseMB: EntityCall,
     params: Union[Dict[str, Any], None] = None,
     callback: Union[Callback, None] = None,
 ) -> None: ...
@@ -64,15 +67,16 @@ def createEntityAnywhereFromDBID(
 def createEntityRemotelyFromDBID(
     entityType: str,
     dbID: int,
-    baseMB: BaseEntityCall,
+    baseMB: EntityCall,
     callback: Union[Callback, None] = None,
     dbInterfaceName: str = "default",
 ) -> None: ...
+# 恰 4 参，pycallback 不可省（server/baseapp/baseapp.cpp:3398-3403）
 def charge(
     ordersID: str,
     dbID: int,
     byteDatas: bytes,
-    pycallback: Union[Callback, None] = None,
+    pycallback: Callback,
 ) -> None: ...
 def deleteEntityByDBID(
     entityType: str,
