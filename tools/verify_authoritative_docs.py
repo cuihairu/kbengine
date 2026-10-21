@@ -28,6 +28,11 @@ ENHANCED_API_PAGES = {
     PurePosixPath("baseapp/Proxy.md"),
     PurePosixPath("bots/Entity.md"),
     PurePosixPath("bots/PyClientApp.md"),
+    PurePosixPath("bots/KBEngine.md"),
+    PurePosixPath("dbmgr/KBEngine.md"),
+    PurePosixPath("interfaces/KBEngine.md"),
+    PurePosixPath("logger/KBEngine.md"),
+    PurePosixPath("loginapp/KBEngine.md"),
 }
 
 HEADING_PATTERN = re.compile(r"^(#{1,6} .+)$", re.MULTILINE)
