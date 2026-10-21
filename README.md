@@ -17,6 +17,7 @@ KBEngine
 >
 > This fork does **NOT** provide stable releases or downloads.
 
+[![Status](https://img.shields.io/badge/status-in%20development-orange)](https://github.com/cuihairu/kbengine/releases)
 [![CI](https://github.com/cuihairu/kbengine/workflows/CI/badge.svg)](https://github.com/cuihairu/kbengine/actions)
 [![Coverage](https://codecov.io/gh/cuihairu/kbengine/branch/chore/cmake-bootstrap/graph/badge.svg)](https://codecov.io/gh/cuihairu/kbengine)
 [![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standard_version)

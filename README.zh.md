@@ -1,5 +1,7 @@
 # KBEngine
 
+[![Status](https://img.shields.io/badge/status-in%20development-orange)](https://github.com/cuihairu/kbengine/releases)
+
 > [English](README.md) | **中文**
 
 > 英文 README（开发分叉说明、构建指南、排障）见 [README.md](README.md)。
