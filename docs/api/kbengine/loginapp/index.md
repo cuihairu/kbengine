@@ -1,8 +1,4 @@
----
-head:
-  - - meta
-    - http-equiv: refresh
-      content: 0; url=/kbengine/zh/api/kbengine/loginapp/index/
----
+# Loginapp进程
 
-Chinese-only section. 中文版
+Loginapp进程主要负责处理实体的注册与登陆请求。
+注意：该进程脚本实现在scripts/login目录中。

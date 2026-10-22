@@ -1,8 +1,3 @@
----
-head:
-  - - meta
-    - http-equiv: refresh
-      content: 0; url=/kbengine/zh/api/kbengine/baseapp/index/
----
+# Baseapp进程
 
-Chinese-only section. 中文版
+Baseapp进程主要负责与客户端通讯、与空间或位置无关类游戏逻辑(公会管理器、聊天系统、游戏大厅、排行榜等等)、存档与备份等等。

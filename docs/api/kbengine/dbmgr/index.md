@@ -1,8 +1,4 @@
----
-head:
-  - - meta
-    - http-equiv: refresh
-      content: 0; url=/kbengine/zh/api/kbengine/dbmgr/index/
----
+# Dbmgr进程
 
-Chinese-only section. 中文版
+Dbmgr进程主要负责处理实体数据的存储与实体数据的加载查询等等。
+注意：该进程脚本实现在scripts/db目录中。

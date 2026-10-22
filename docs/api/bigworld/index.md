@@ -1,26 +1,26 @@
 # BigWorld API
 
-> This directory organizes the scripting API of `BigWorld-Engine-14.4.1`. The repository has no BigWorld API package equivalent to the KBEngine CHM, so this is a "source-extracted API" entry that will be filled in from source comments and Python binding points over time.
+> 本目录用于整理 `BigWorld-Engine-14.4.1` 的脚本 API。当前仓库没有等价于 KBEngine CHM 的 BigWorld API 原文包，因此这里先建立“源码抽取版 API”入口，后续逐步从源码注释和 Python 绑定点补齐。
 
-## Source boundary
+## 来源边界
 
-The priority sources for the BigWorld API are:
+BigWorld API 的优先来源是：
 
-- `/*~ module ... */`, `/*~ class ... */`, `/*~ function ... */`, and `/*~ attribute ... */` comments under `BigWorld-Engine-14.4.1/programming/bigworld/server/**`
-- Python binding macros such as `PY_AUTO_MODULE_FUNCTION`, `PY_METHOD`, `PY_ATTRIBUTE`, and `PY_RO_ATTRIBUTE_DECLARE`
-- The server whitepaper, installation guide, and build guide under `BigWorld-Engine-14.4.1/docs/pdf/**` are background material only, not per-item API source text
+- `BigWorld-Engine-14.4.1/programming/bigworld/server/**` 中的 `/*~ module ... */`、`/*~ class ... */`、`/*~ function ... */`、`/*~ attribute ... */` 注释
+- `PY_AUTO_MODULE_FUNCTION`、`PY_METHOD`、`PY_ATTRIBUTE`、`PY_RO_ATTRIBUTE_DECLARE` 等 Python 绑定宏
+- `BigWorld-Engine-14.4.1/docs/pdf/**` 中的服务器白皮书、安装指南、构建指南只作为背景资料，不当作逐项 API 原文
 
-## Module entries
+## 模块入口
 
-- [BigWorld module](bigworld-module.md
-- [Base entity](base.md
-- [Cell Entity](entity.md
-- [BWPersonality callbacks](bwpersonality.md
+- [BigWorld 模块](/zh/api/bigworld/bigworld-module.md
+- [Base 实体](/zh/api/bigworld/base.md
+- [Cell Entity](/zh/api/bigworld/entity.md
+- [BWPersonality 回调](/zh/api/bigworld/bwpersonality.md
 
-## How to read it
+## 阅读方式
 
-BigWorld and KBEngine share many concepts, such as Base/Cell, Mailbox/EntityCall, timers, SpaceData, and `reloadScript`. Do not carry KBEngine component names and semantics over directly while reading the BigWorld API; check the following at the same time:
+BigWorld 和 KBEngine 有大量同源概念，例如 Base/Cell、Mailbox/EntityCall、timer、SpaceData、`reloadScript`。阅读 BigWorld API 时不要直接套用 KBEngine 的组件名和语义，应同时参考：
 
-- [BigWorld / KBEngine comparison](study/23-bigworld-and-kbengine-comparison.md
-- [Hotfix](study/21-hotupdate-fault-tolerance-and-ops.md
-- [Scripting source analysis](architecture/source-analysis/scripting.md
+- [BigWorld / KBEngine 对照](/zh/study/23-bigworld-and-kbengine-comparison.md
+- [热更新](/zh/study/21-hotupdate-fault-tolerance-and-ops.md
+- [脚本层源码分析](/zh/architecture/source-analysis/scripting.md

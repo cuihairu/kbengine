@@ -34,9 +34,8 @@ const config = defineConfig({
       })
     }
   },
-  // 忽略死链（2026-10-20 双语上线先行：历史相对链遗留约 20 处，专项清理另批；
-  // wikilink/锚点/notes 三类沿用原忽略）
-  ignoreDeadLinks: true,
+  // 死链零容忍：build 即断（官方 locales 结构，root=中文 /en=英文）
+  ignoreDeadLinks: false,
   vite: {
     build: {
       chunkSizeWarningLimit: 2500,
@@ -67,17 +66,17 @@ const config = defineConfig({
           '/': {
             translations: {
               button: {
-                buttonText: 'Search docs',
-                buttonAriaLabel: 'Search docs'
+                buttonText: '搜索文档',
+                buttonAriaLabel: '搜索文档'
               },
               modal: {
-                noResultsText: 'No results',
-                resetButtonTitle: 'Reset search',
-                backButtonTitle: 'Close search',
+                noResultsText: '没有结果',
+                resetButtonTitle: '重置',
+                backButtonTitle: '关闭',
                 footer: {
-                  selectText: 'to select',
-                  navigateText: 'to navigate',
-                  closeText: 'to close'
+                  selectText: '选择',
+                  navigateText: '导航',
+                  closeText: '关闭'
                 }
               }
             }
@@ -323,30 +322,31 @@ const config = defineConfig({
 
 
 // —— 官方国际化（vitepress locales，唯一方案；内容内不放语言头行）——
-const prefixZh = (link) =>
-  typeof link === 'string' && link.startsWith('/') && !link.startsWith('/zh/')
-    ? (link === '/' ? '/zh/' : '/zh' + link)
+// 结构铁律（kbengine 例外）：root=中文，en=英文，路由 /en/...
+const prefixEn = (link) =>
+  typeof link === 'string' && link.startsWith('/') && !link.startsWith('/en/')
+    ? (link === '/' ? '/en/' : '/en' + link)
     : link
 const prefixItems = (items) =>
   (items || []).map((item) => ({
     ...item,
-    link: prefixZh(item.link),
+    link: prefixEn(item.link),
     ...(item.items ? { items: prefixItems(item.items) } : {})
   }))
 const rootTheme = config.themeConfig || {}
 config.locales = {
   root: {
-    label: 'English',
-    lang: 'en-US',
-    title: 'KBEngine Docs',
-    description: 'KBEngine documentation rebuilt from in-repository sources',
-    themeConfig: rootTheme
-  },
-  zh: {
     label: '简体中文',
     lang: 'zh-CN',
     title: 'KBEngine 文档',
     description: '基于 CHM 与 PDF 重建的 KBEngine 中文文档站点',
+    themeConfig: rootTheme
+  },
+  en: {
+    label: 'English',
+    lang: 'en-US',
+    title: 'KBEngine Docs',
+    description: 'KBEngine documentation rebuilt from in-repository sources',
     themeConfig: {
       ...rootTheme,
       nav: prefixItems(rootTheme.nav),
@@ -361,20 +361,20 @@ config.locales = {
         options: {
           ...rootTheme.search?.options,
           locales: {
-            '/zh/': {
+            '/en/': {
               translations: {
                 button: {
-                  buttonText: '搜索文档',
-                  buttonAriaLabel: '搜索文档'
+                  buttonText: 'Search docs',
+                  buttonAriaLabel: 'Search docs'
                 },
                 modal: {
-                  noResultsText: '没有结果',
-                  resetButtonTitle: '重置搜索',
-                  backButtonTitle: '关闭搜索',
+                  noResultsText: 'No results',
+                  resetButtonTitle: 'Reset',
+                  backButtonTitle: 'Close',
                   footer: {
-                    selectText: '选择',
-                    navigateText: '导航',
-                    closeText: '关闭'
+                    selectText: 'to select',
+                    navigateText: 'to navigate',
+                    closeText: 'to close'
                   }
                 }
               }

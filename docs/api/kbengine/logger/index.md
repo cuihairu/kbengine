@@ -1,8 +1,4 @@
----
-head:
-  - - meta
-    - http-equiv: refresh
-      content: 0; url=/kbengine/zh/api/kbengine/logger/index/
----
+# Logger进程
 
-Chinese-only section. 中文版
+Logger进程主要负责收集KBEngine服务器所输出的日志。
+注意：该进程脚本实现在scripts/logger目录中。
