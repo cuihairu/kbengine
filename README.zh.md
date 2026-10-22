@@ -1,6 +1,6 @@
 # KBEngine
 
-[![Status](https://img.shields.io/badge/status-in%20development-orange)](https://github.com/cuihairu/kbengine/releases)
+<p align="center">[![Status](https://img.shields.io/badge/status-in%20development-orange)](https://github.com/cuihairu/kbengine/releases)</p>
 
 > [English](README.md) | **中文**
 
