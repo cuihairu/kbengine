@@ -51,7 +51,7 @@ jobs:
     steps:
       - name: Checkout
         timeout-minutes: 2
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
 
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
@@ -75,7 +75,7 @@ jobs:
       - name: Setup MSVC environment
         if: runner.os == 'Windows'
         timeout-minutes: 3
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@v1.13.0
 
       - name: Setup Ninja
         if: runner.os == 'Windows'
@@ -152,7 +152,7 @@ jobs:
     steps:
       - name: Checkout
         timeout-minutes: 2
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
 
       - name: Install Linux coverage dependencies
         timeout-minutes: 8
@@ -278,7 +278,7 @@ jobs:
 
       - name: Upload to Codecov
         timeout-minutes: 3
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7.1.1
         with:
           files: ./coverage.info
           flags: unittests
