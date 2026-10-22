@@ -18,9 +18,8 @@ function stripSearchNoise(markdown) {
 const config = defineConfig({
   srcDir: '.',
   base: '/kbengine/',
-  lang: 'zh-CN',
-  title: 'KBEngine 文档',
-  description: '基于 CHM 与 PDF 重建的 KBEngine 中文文档站点',
+  title: 'KBEngine Docs',
+  description: 'KBEngine documentation rebuilt from in-repository sources',
 
   // 使用自定义主题
   theme: './theme',
@@ -68,17 +67,17 @@ const config = defineConfig({
           '/': {
             translations: {
               button: {
-                buttonText: '搜索文档',
-                buttonAriaLabel: '搜索文档'
+                buttonText: 'Search docs',
+                buttonAriaLabel: 'Search docs'
               },
               modal: {
-                noResultsText: '没有结果',
-                resetButtonTitle: '重置搜索',
-                backButtonTitle: '关闭搜索',
+                noResultsText: 'No results',
+                resetButtonTitle: 'Reset search',
+                backButtonTitle: 'Close search',
                 footer: {
-                  selectText: '选择',
-                  navigateText: '导航',
-                  closeText: '关闭'
+                  selectText: 'to select',
+                  navigateText: 'to navigate',
+                  closeText: 'to close'
                 }
               }
             }
@@ -87,249 +86,237 @@ const config = defineConfig({
       }
     },
     nav: [
-      { text: '首页', link: '/' },
-      { text: '源码学习', link: '/study/' },
-      { text: '架构', link: '/architecture/' },
+      { text: 'Home', link: '/' },
+      { text: 'Learning Track', link: '/study/' },
+      { text: 'Architecture', link: '/architecture/' },
       { text: 'API', link: '/api/' },
-      { text: '文档说明', link: '/resources/' },
-      { text: '指南', link: '/guide/' },
+      { text: 'Doc Notes', link: '/resources/' },
+      { text: 'Guide', link: '/guide/' },
     ],
     sidebar: {
       '/study/': [
         {
-          text: 'Part I 为什么长这样',
+          text: 'Overview',
           items: [
-            { text: '源码学习首页', link: '/study/' },
-            { text: '01 - 介绍与方法', link: '/study/01-introduction-and-method' },
-            { text: '02 - BigWorld 问题与模型', link: '/study/02-bigworld-problems-model-concepts' },
-            { text: '03 - KBEngine 系统全景', link: '/study/03-kbengine-system-panorama' },
-          ],
+            { text: 'Learning track home', link: '/study/' },
+            { text: 'Table of contents', link: '/study/table-of-contents' }
+          ]
         },
         {
-          text: 'Part II 运行骨架',
+          text: 'Part I - Why It Looks Like This',
           items: [
-            { text: '04 - 启动与进程模型', link: '/study/04-startup-and-process-model' },
-            { text: '05 - EntityDef 与实体定义', link: '/study/05-entitydef-and-entity-definition' },
-            { text: '06 - Python 运行时与脚本桥', link: '/study/06-python-runtime-and-script-bridge' },
-          ],
+            { text: '01 - Introduction and method', link: '/study/01-introduction-and-method' },
+            { text: '02 - BigWorld problems and model', link: '/study/02-bigworld-problems-model-concepts' },
+            { text: '03 - KBEngine system panorama', link: '/study/03-kbengine-system-panorama' }
+          ]
         },
         {
-          text: 'Part III 基础设施层',
+          text: 'Part II - Runtime Skeleton',
           items: [
-            { text: '07 - 并发、线程与内存', link: '/study/07-concurrency-threads-and-memory' },
-            { text: '08 - 网络基础设施', link: '/study/08-network-infrastructure' },
-            { text: '09 - 分布式基础', link: '/study/09-distributed-foundation' },
-          ],
+            { text: '04 - Startup and process model', link: '/study/04-startup-and-process-model' },
+            { text: '05 - EntityDef and entity definition', link: '/study/05-entitydef-and-entity-definition' },
+            { text: '06 - Python runtime and script bridge', link: '/study/06-python-runtime-and-script-bridge' }
+          ]
         },
         {
-          text: 'Part IV 通信与协作',
+          text: 'Part III - Infrastructure',
           items: [
-            { text: '10 - 序列化、Bundle 与消息', link: '/study/10-serialization-bundle-and-messages' },
-            { text: '11 - RPC、EntityCall 与通信模式', link: '/study/11-rpc-entitycall-and-communication-patterns' },
-            { text: '12 - 属性同步与广播', link: '/study/12-property-sync-and-broadcast' },
-            { text: '12.5 - cellData 与 Base-Cell 同步', link: '/study/12-celldata-and-base-cell-sync' },
-            { text: '13 - 数据库、DBMgr 与持久化', link: '/study/13-database-dbmgr-and-persistence' },
-          ],
+            { text: '07 - Concurrency, threads, and memory', link: '/study/07-concurrency-threads-and-memory' },
+            { text: '08 - Network infrastructure', link: '/study/08-network-infrastructure' },
+            { text: '09 - Distributed foundation', link: '/study/09-distributed-foundation' }
+          ]
         },
         {
-          text: 'Part V 空间、运动与拓扑',
+          text: 'Part IV - Communication and Coordination',
           items: [
-            { text: '14 - 空间、AOI 与视野系统', link: '/study/14-space-aoi-and-vision-system' },
-            { text: '15 - 空间拓扑与动态扩展', link: '/study/15-space-topology-and-dynamic-scaling' },
-            { text: '16 - 移动、寻路与导航', link: '/study/16-movement-pathfinding-and-navigation' },
-            { text: '17 - Ghost 系统', link: '/study/17-ghost-system' },
-          ],
+            { text: '10 - Serialization, bundles, and messages', link: '/study/10-serialization-bundle-and-messages' },
+            { text: '11 - RPC, EntityCall, and communication patterns', link: '/study/11-rpc-entitycall-and-communication-patterns' },
+            { text: '12 - Property sync and broadcast', link: '/study/12-property-sync-and-broadcast' },
+            { text: '12.5 - cellData and Base-Cell sync', link: '/study/12-celldata-and-base-cell-sync' },
+            { text: '13 - Database, DBMgr, and persistence', link: '/study/13-database-dbmgr-and-persistence' }
+          ]
         },
         {
-          text: 'Part VI 脚本层行为',
+          text: 'Part V - Spaces, Motion, and Topology',
           items: [
-            { text: '18 - Hooks、回调、定时器与事件', link: '/study/18-hooks-callbacks-timers-and-events' },
-          ],
+            { text: '14 - Spaces, AOI, and vision systems', link: '/study/14-space-aoi-and-vision-system' },
+            { text: '15 - Space topology and dynamic scaling', link: '/study/15-space-topology-and-dynamic-scaling' },
+            { text: '16 - Movement, pathfinding, and navigation', link: '/study/16-movement-pathfinding-and-navigation' },
+            { text: '17 - Ghost system', link: '/study/17-ghost-system' }
+          ]
         },
         {
-          text: 'Part VII 前后端交互',
+          text: 'Part VI - Lifecycle and Operations',
           items: [
-            { text: '19 - 客户端协议与交互', link: '/study/19-client-protocol-and-interaction' },
-          ],
+            { text: '18 - Hooks, callbacks, timers, and events', link: '/study/18-hooks-callbacks-timers-and-events' },
+            { text: '19 - Client protocol and interaction', link: '/study/19-client-protocol-and-interaction' },
+            { text: '20 - Observability, monitoring, and debugging', link: '/study/20-observability-monitoring-profiling-and-debugging' },
+            { text: '21 - Hot updates and fault-tolerant operations', link: '/study/21-hotupdate-fault-tolerance-and-ops' },
+            { text: '22 - Complete player lifecycle', link: '/study/22-player-complete-lifecycle' }
+          ]
         },
         {
-          text: 'Part VIII 运维、调试与稳定性',
+          text: 'Part VII - Comparison and Reading Map',
           items: [
-            { text: '20 - 可观测性、监控、分析与调试', link: '/study/20-observability-monitoring-profiling-and-debugging' },
-            { text: '21 - 热更新、容错与运维', link: '/study/21-hotupdate-fault-tolerance-and-ops' },
-          ],
-        },
-        {
-          text: 'Part IX 串联与实战',
-          items: [
-            { text: '22 - 玩家完整生命周期', link: '/study/22-player-complete-lifecycle' },
-            { text: '23 - BigWorld 与 KBEngine 对比', link: '/study/23-bigworld-and-kbengine-comparison' },
-            { text: '24 - 实战源码导读', link: '/study/24-practical-source-walkthroughs' },
-          ],
-        },
-        {
-          text: '阅读辅助',
-          items: [
-            { text: '目录', link: '/study/table-of-contents' },
-          ],
-        },
-        {
-          text: 'Appendix',
-          items: [
-            { text: '阅读地图与后续步骤', link: '/study/appendix-reading-map-and-next-steps' },
-            { text: '关键算法', link: '/study/appendix-key-algorithms' },
-            { text: '外部参考系统', link: '/study/appendix-external-reference-systems' },
-            { text: '术语速查', link: '/study/appendix-terminology-quick-reference' },
-            { text: '引擎适用性', link: '/study/appendix-engine-suitability-and-game-types' },
-            { text: '坐标系约定', link: '/study/appendix-coordinate-system-conventions' },
-            { text: '服务器时间管理', link: '/study/appendix-server-time-management-and-world-clock' },
-          ],
-        },
+            { text: '23 - BigWorld and KBEngine comparison', link: '/study/23-bigworld-and-kbengine-comparison' },
+            { text: '24 - Practical source walkthroughs', link: '/study/24-practical-source-walkthroughs' },
+            { text: 'Appendix - Coordinate system conventions', link: '/study/appendix-coordinate-system-conventions' },
+            { text: 'Appendix - Engine suitability and game types', link: '/study/appendix-engine-suitability-and-game-types' },
+            { text: 'Appendix - External reference systems', link: '/study/appendix-external-reference-systems' },
+            { text: 'Appendix - Key algorithms', link: '/study/appendix-key-algorithms' },
+            { text: 'Appendix - Reading map and next steps', link: '/study/appendix-reading-map-and-next-steps' },
+            { text: 'Appendix - Server time and world clock', link: '/study/appendix-server-time-management-and-world-clock' },
+            { text: 'Appendix - Terminology quick reference', link: '/study/appendix-terminology-quick-reference' }
+          ]
+        }
       ],
       '/architecture/': [
         {
-          text: '总览',
+          text: 'Architecture',
           items: [
-            { text: '架构首页', link: '/architecture/' },
-          ],
+            { text: 'Overview', link: '/architecture/' },
+            { text: 'Redesign', link: '/architecture/redesign' },
+            { text: 'BigWorld', link: '/architecture/bigworld/' },
+            { text: 'Comparison', link: '/architecture/comparison/' },
+            { text: 'Source deep dives', link: '/architecture/source-analysis/' }
+          ]
         },
         {
           text: 'BigWorld',
           items: [
-            { text: 'BigWorld 首页', link: '/architecture/bigworld/' },
-            { text: '概念', link: '/architecture/bigworld/concepts' },
-            { text: '进程模型', link: '/architecture/bigworld/process-model' },
-            { text: '实体与空间', link: '/architecture/bigworld/entity-space' },
-          ],
+            { text: 'Core concepts', link: '/architecture/bigworld/concepts' },
+            { text: 'Process model', link: '/architecture/bigworld/process-model' },
+            { text: 'Entities and spaces', link: '/architecture/bigworld/entity-space' }
+          ]
         },
         {
-          text: '源码专题',
+          text: 'Comparison',
           items: [
-            { text: '专题总览', link: '/architecture/source-analysis/' },
-            { text: '入口与引导', link: '/architecture/source-analysis/entry-and-bootstrap' },
-            { text: '进程模型', link: '/architecture/source-analysis/process-model' },
-            { text: '实体系统', link: '/architecture/source-analysis/entity-system' },
-            { text: '类型系统与实体定义文件', link: '/architecture/source-analysis/entitydef-type-system' },
-            { text: '空间与 AOI', link: '/architecture/source-analysis/space-aoi' },
-            { text: '网络层', link: '/architecture/source-analysis/networking' },
-            { text: '持久化', link: '/architecture/source-analysis/persistence' },
-            { text: '脚本层', link: '/architecture/source-analysis/scripting' },
-            { text: '事件系统', link: '/architecture/source-analysis/events' },
-            { text: '非实体定时器', link: '/architecture/source-analysis/non-entity-timers' },
-            { text: 'Base 实体生命周期', link: '/architecture/source-analysis/base-entity-lifecycle' },
-            { text: 'BaseApp 运行时 API', link: '/architecture/source-analysis/baseapp-kbengine-runtime-api' },
-            { text: 'Proxy 会话与流式传输 API', link: '/architecture/source-analysis/proxy-client-session-api' },
-            { text: 'CellApp 空间运行时 API', link: '/architecture/source-analysis/cellapp-kbengine-space-runtime-api' },
-            { text: '客户端登录、重登录与 SpaceData API', link: '/architecture/source-analysis/client-login-and-space-data-api' },
-            { text: '组件型脚本 API', link: '/architecture/source-analysis/component-script-api' },
-            { text: '通用运行时工具 API', link: '/architecture/source-analysis/runtime-utility-api' },
-            { text: '运行时配置与基础类型', link: '/architecture/source-analysis/runtime-config-and-types' },
-            { text: 'API 覆盖矩阵', link: '/architecture/source-analysis/api-coverage' },
-            { text: '文档重构 TODO', link: '/architecture/source-analysis/todo' },
-          ],
+            { text: 'Terminology', link: '/architecture/comparison/terminology' },
+            { text: 'Architecture', link: '/architecture/comparison/architecture' },
+            { text: 'Implementation differences', link: '/architecture/comparison/implementation-differences' }
+          ]
         },
         {
-          text: '对照分析',
+          text: 'Source deep dives',
           items: [
-            { text: '对照分析首页', link: '/architecture/comparison/' },
-            { text: '术语', link: '/architecture/comparison/terminology' },
-            { text: '架构', link: '/architecture/comparison/architecture' },
-            { text: '实现差异', link: '/architecture/comparison/implementation-differences' },
-          ],
-        },
-        {
-          text: '附录',
-          items: [
-            { text: '重新设计', link: '/architecture/redesign' },
-          ],
-        },
-      ],
-      '/guide/': [
-        {
-          text: '指南',
-          items: [
-            { text: '指南首页', link: '/guide/' },
-            { text: 'WebConsole', link: '/guide/webconsole' },
-            { text: '工程指南', link: '/guide/engineering/' },
-            { text: '覆盖率与 Codecov', link: '/guide/engineering/coverage' },
-            { text: 'Python 3.12 升级', link: '/guide/engineering/python-3.12-upgrade' },
-            { text: 'vcpkg 迁移状态', link: '/guide/engineering/vcpkg-migration' },
-            { text: '网络层 I/O 调研', link: '/guide/engineering/network-io-research' },
-          ],
-        },
+            { text: 'Overview', link: '/architecture/source-analysis/' },
+            { text: 'Entry and bootstrap', link: '/architecture/source-analysis/entry-and-bootstrap' },
+            { text: 'Process model', link: '/architecture/source-analysis/process-model' },
+            { text: 'Entity system', link: '/architecture/source-analysis/entity-system' },
+            { text: 'EntityDef type system', link: '/architecture/source-analysis/entitydef-type-system' },
+            { text: 'Networking', link: '/architecture/source-analysis/networking' },
+            { text: 'Events', link: '/architecture/source-analysis/events' },
+            { text: 'Scripting', link: '/architecture/source-analysis/scripting' },
+            { text: 'Persistence', link: '/architecture/source-analysis/persistence' },
+            { text: 'Non-entity timers', link: '/architecture/source-analysis/non-entity-timers' },
+            { text: 'Spaces and AOI', link: '/architecture/source-analysis/space-aoi' },
+            { text: 'API coverage', link: '/architecture/source-analysis/api-coverage' },
+            { text: 'Runtime configuration and types', link: '/architecture/source-analysis/runtime-config-and-types' },
+            { text: 'Runtime utility API', link: '/architecture/source-analysis/runtime-utility-api' },
+            { text: 'Component script API', link: '/architecture/source-analysis/component-script-api' },
+            { text: 'Base entity lifecycle', link: '/architecture/source-analysis/base-entity-lifecycle' },
+            { text: 'BaseApp runtime API', link: '/architecture/source-analysis/baseapp-kbengine-runtime-api' },
+            { text: 'CellApp and space runtime API', link: '/architecture/source-analysis/cellapp-kbengine-space-runtime-api' },
+            { text: 'Client login and space data API', link: '/architecture/source-analysis/client-login-and-space-data-api' },
+            { text: 'Proxy client session API', link: '/architecture/source-analysis/proxy-client-session-api' },
+            { text: 'Optimization plan', link: '/architecture/source-analysis/doc-optimization-plan' },
+            { text: 'Optimization summary', link: '/architecture/source-analysis/doc-optimization-summary' },
+            { text: 'TODO', link: '/architecture/source-analysis/todo' }
+          ]
+        }
       ],
       '/api/': [
         {
-          text: 'API 总览',
+          text: 'API Overview',
           items: [
-            { text: 'API 首页', link: '/api/' },
+            { text: 'API home', link: '/api/' },
             { text: 'KBEngine API', link: '/api/kbengine/' },
-            { text: 'BigWorld API', link: '/api/bigworld/' },
-          ],
+            { text: 'BigWorld API', link: '/api/bigworld/' }
+          ]
         },
         {
-          text: 'KBEngine 核心概念',
+          text: 'KBEngine Core Concepts',
           items: [
-            { text: '审计清单', link: '/api/kbengine/audit-checklist' },
-            { text: '基础类型', link: '/api/kbengine/basetypes' },
-            { text: '关键字', link: '/api/kbengine/keywords' },
-          ],
+            { text: 'Audit checklist', link: '/api/kbengine/audit-checklist' },
+            { text: 'Basic types', link: '/api/kbengine/basetypes' },
+            { text: 'Keywords', link: '/api/kbengine/keywords' }
+          ]
         },
         {
-          text: 'KBEngine 客户端',
+          text: 'KBEngine Client',
           items: [
-            { text: '客户端首页', link: '/api/kbengine/client/' },
+            { text: 'Client home', link: '/api/kbengine/client/' },
             { text: 'KBEngine', link: '/api/kbengine/client/KBEngine' },
             { text: 'Entity', link: '/api/kbengine/client/Entity' },
-            { text: 'Bots 首页', link: '/api/kbengine/bots/' },
+            { text: 'Bots home', link: '/api/kbengine/bots/' },
             { text: 'Bots KBEngine', link: '/api/kbengine/bots/KBEngine' },
             { text: 'Bots Entity', link: '/api/kbengine/bots/Entity' },
-            { text: 'PyClientApp', link: '/api/kbengine/bots/PyClientApp' },
-          ],
+            { text: 'PyClientApp', link: '/api/kbengine/bots/PyClientApp' }
+          ]
         },
         {
-          text: 'KBEngine 服务端组件',
+          text: 'KBEngine Server Components',
           items: [
-            { text: 'CellApp 首页', link: '/api/kbengine/cellapp/' },
+            { text: 'CellApp home', link: '/api/kbengine/cellapp/' },
             { text: 'CellApp KBEngine', link: '/api/kbengine/cellapp/KBEngine' },
             { text: 'CellApp Entity', link: '/api/kbengine/cellapp/Entity' },
-            { text: 'BaseApp 首页', link: '/api/kbengine/baseapp/' },
+            { text: 'BaseApp home', link: '/api/kbengine/baseapp/' },
             { text: 'BaseApp KBEngine', link: '/api/kbengine/baseapp/KBEngine' },
             { text: 'BaseApp Entity', link: '/api/kbengine/baseapp/Entity' },
             { text: 'BaseApp Proxy', link: '/api/kbengine/baseapp/Proxy' },
-            { text: 'LoginApp 首页', link: '/api/kbengine/loginapp/' },
+            { text: 'LoginApp home', link: '/api/kbengine/loginapp/' },
             { text: 'LoginApp KBEngine', link: '/api/kbengine/loginapp/KBEngine' },
-            { text: 'DBMgr 首页', link: '/api/kbengine/dbmgr/' },
+            { text: 'DBMgr home', link: '/api/kbengine/dbmgr/' },
             { text: 'DBMgr KBEngine', link: '/api/kbengine/dbmgr/KBEngine' },
-            { text: 'Interfaces 首页', link: '/api/kbengine/interfaces/' },
+            { text: 'Interfaces home', link: '/api/kbengine/interfaces/' },
             { text: 'Interfaces KBEngine', link: '/api/kbengine/interfaces/KBEngine' },
-            { text: 'Logger 首页', link: '/api/kbengine/logger/' },
-            { text: 'Logger KBEngine', link: '/api/kbengine/logger/KBEngine' },
-          ],
+            { text: 'Logger home', link: '/api/kbengine/logger/' },
+            { text: 'Logger KBEngine', link: '/api/kbengine/logger/KBEngine' }
+          ]
         },
         {
           text: 'BigWorld API',
           items: [
-            { text: 'BigWorld API 首页', link: '/api/bigworld/' },
-            { text: 'BigWorld 模块', link: '/api/bigworld/bigworld-module' },
-            { text: 'Base 实体', link: '/api/bigworld/base' },
-            { text: 'Cell Entity', link: '/api/bigworld/entity' },
-            { text: 'BWPersonality', link: '/api/bigworld/bwpersonality' },
-          ],
+            { text: 'BigWorld API home', link: '/api/bigworld/' },
+            { text: 'BigWorld module', link: '/api/bigworld/bigworld-module' },
+            { text: 'Base entities', link: '/api/bigworld/base' },
+            { text: 'Cell entities', link: '/api/bigworld/entity' },
+            { text: 'BWPersonality', link: '/api/bigworld/bwpersonality' }
+          ]
+        }
+      ],
+      '/guide/': [
+        {
+          text: 'Guide',
+          items: [
+            { text: 'Guide home', link: '/guide/' },
+            { text: 'WebConsole', link: '/guide/webconsole' },
+            { text: 'Engineering guide', link: '/guide/engineering/' }
+          ]
         },
+        {
+          text: 'Engineering',
+          items: [
+            { text: 'Coverage and Codecov', link: '/guide/engineering/coverage' },
+            { text: 'Python 3.12 upgrade', link: '/guide/engineering/python-3.12-upgrade' },
+            { text: 'vcpkg migration status', link: '/guide/engineering/vcpkg-migration' },
+            { text: 'Network I/O research', link: '/guide/engineering/network-io-research' }
+          ]
+        }
       ],
       '/resources/': [
         {
-          text: '文档说明',
+          text: 'Doc Notes',
           items: [
-            { text: '说明首页', link: '/resources/' },
-            { text: '来源边界', link: '/resources/provenance' },
-            { text: '验证状态', link: '/resources/verification-status' },
-            { text: '结构设计', link: '/resources/doc-structure' },
-          ],
-        },
+            { text: 'Notes home', link: '/resources/' },
+            { text: 'Source boundaries', link: '/resources/provenance' },
+            { text: 'Verification status', link: '/resources/verification-status' },
+            { text: 'Structure design', link: '/resources/doc-structure' }
+          ]
+        }
       ],
-      '/': [],
+      '/': []
     },
   },
 })
@@ -348,23 +335,53 @@ const prefixItems = (items) =>
   }))
 const rootTheme = config.themeConfig || {}
 config.locales = {
-  root: { label: 'English', lang: 'en-US' },
-  zh: { label: '简体中文', lang: 'zh-CN' }
-}
-config.themeConfig = {
-  ...rootTheme,
-  locales: {
-    '/': rootTheme,
-    '/zh/': {
+  root: {
+    label: 'English',
+    lang: 'en-US',
+    title: 'KBEngine Docs',
+    description: 'KBEngine documentation rebuilt from in-repository sources',
+    themeConfig: rootTheme
+  },
+  zh: {
+    label: '简体中文',
+    lang: 'zh-CN',
+    title: 'KBEngine 文档',
+    description: '基于 CHM 与 PDF 重建的 KBEngine 中文文档站点',
+    themeConfig: {
       ...rootTheme,
-      label: '简体中文',
       nav: prefixItems(rootTheme.nav),
       sidebar:
         rootTheme.sidebar && typeof rootTheme.sidebar === 'object' && !Array.isArray(rootTheme.sidebar)
           ? Object.fromEntries(
-              Object.entries(rootTheme.sidebar).map(([k, v]) => [k, Array.isArray(v) ? prefixItems(v) : v])
+              Object.entries(rootTheme.sidebar).map(([key, value]) => [key, Array.isArray(value) ? prefixItems(value) : value])
             )
-          : rootTheme.sidebar
+          : rootTheme.sidebar,
+      search: {
+        ...rootTheme.search,
+        options: {
+          ...rootTheme.search?.options,
+          locales: {
+            '/zh/': {
+              translations: {
+                button: {
+                  buttonText: '搜索文档',
+                  buttonAriaLabel: '搜索文档'
+                },
+                modal: {
+                  noResultsText: '没有结果',
+                  resetButtonTitle: '重置搜索',
+                  backButtonTitle: '关闭搜索',
+                  footer: {
+                    selectText: '选择',
+                    navigateText: '导航',
+                    closeText: '关闭'
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
