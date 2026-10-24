@@ -1,24 +1,24 @@
-# BigWorld 学习入口
+# BigWorld Learning Entry
 
-> 这一组文档用于建立理解 KBEngine 所需的 BigWorld 架构背景。
+> This group of documents builds the BigWorld architecture background needed to understand KBEngine.
 
-> 它不是 KBEngine 主线正文，而是背景区。真正按顺序阅读时，先走 [/study/](/zh/study/；需要补设计来源时，再回到这里。
+> It is a background area, not the KBEngine main text. For ordered reading, follow [/study/](/study/) first and come back here when you need the design origins.
 
-## 这一组回答什么问题
+## What this group answers
 
-- BigWorld 为什么采用多进程分布式架构？
-- Base / Cell / DB 的分工是怎么形成的？
-- Entity、Space、Witness 这些概念之间是什么关系？
-- 哪些思想直接影响了 KBEngine？
+- Why did BigWorld adopt a multi-process distributed architecture?
+- How did the Base / Cell / DB split come about?
+- How do Entity, Space, and Witness relate to each other?
+- Which ideas directly influenced KBEngine?
 
-## 页面范围
+## Page scope
 
-- [核心概念](/zh/architecture/bigworld/concepts.md
-- [进程模型](/zh/architecture/bigworld/process-model.md
-- [实体与空间](/zh/architecture/bigworld/entity-space.md
+- [Core concepts](concepts.md
+- [Process model](process-model.md
+- [Entities and spaces](entity-space.md
 
-## 编写原则
+## Authoring rules
 
-- 以概念框架和架构思想为主。
-- 不把 BigWorld 文档写成 KBEngine 实现细节页。
-- 后续与 KBEngine 的对应关系，统一放到 `comparison/`。
+- Focus on the conceptual frame and architectural ideas.
+- Do not turn the BigWorld documents into KBEngine implementation detail pages.
+- Later correspondence with KBEngine belongs in `comparison/`.

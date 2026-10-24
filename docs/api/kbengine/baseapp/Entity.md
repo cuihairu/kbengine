@@ -1,14 +1,14 @@
-# Entity类
+# Entity class
 
-[KBEngine模块]
+[KBEngine module]
 
-Entity是KBEngine模块的一部分。[更多...](#detailed_description)
+Entity is part of theKBEnginemodule.[More...](#detailed_description)
 
 ```python
 import KBEngine
 ```
 
-## 成员函数
+## Member functions
 
 - def [addTimer](#addTimer)( self, initialOffset, repeatOffset=0, userArg=0 ):
 - def [createCellEntity](#createCellEntity)( self, cellEntityCall ):
@@ -16,13 +16,13 @@ import KBEngine
 - def [delTimer](#delTimer)( self, id ):
 - def [destroy](#destroy)( self, deleteFromDB, writeToDB ):
 - def [destroyCellEntity](#destroyCellEntity)( self ):
+- def [writeToDB](#writeToDB)( self, callback, shouldAutoLoad, dbInterfaceName ):
 - def [getComponent](#getComponent)( self, componentName, all ):
 - def [fireEvent](#fireEvent)( self, eventName, *args ):
 - def [registerEvent](#registerEvent)( self, eventName, callback ):
 - def [deregisterEvent](#deregisterEvent)( self, eventName, callback ):
-- def [writeToDB](#writeToDB)( self, callback, shouldAutoLoad, dbInterfaceName ):
 
-## 回调函数
+## Callback functions
 
 - def [onCreateCellFailure](#onCreateCellFailure)( self ):
 - def [onDestroy](#onDestroy)( self ):
@@ -33,42 +33,50 @@ import KBEngine
 - def [onTimer](#onTimer)( self, timerHandle, userData ):
 - def [onWriteToDB](#onWriteToDB)( self, cellData ):
 
-## 属性
+## Attributes
 
-| [cell](#cell) | 只读CellEntityCall |
+| [cell](#cell) | Read-onlyCellEntityCall |
 | --- | --- |
 | [cellData](#cellData) | CELLDATADICT |
-| [className](#className) | 只读string |
-| [client](#client) | 只读ClientEntityCall |
-| [databaseID](#databaseID) | 只读int64 |
-| [databaseInterfaceName](#databaseInterfaceName) | 只读string |
-| [id](#id) | 只读int32 |
+| [className](#className) | Read-onlystring |
+| [client](#client) | Read-onlyClientEntityCall |
+| [databaseID](#databaseID) | Read-onlyint64 |
+| [databaseInterfaceName](#databaseInterfaceName) | Read-onlystring |
+| [id](#id) | Read-onlyint32 |
 | [isDestroyed](#isDestroyed) | bool |
 | [shouldAutoArchive](#shouldAutoArchive) | True, False orKBEngine.NEXT_ONLY |
 | [shouldAutoBackup](#shouldAutoBackup) | True, False orKBEngine.NEXT_ONLY |
 
 <a id="detailed_description"></a>
 
-## 详细描述
+## A detailed description
 
-Entity创建。一个[Entity](./Entity.md实体也可以通过Cellapp的函数KBEngine.createEntityOnBaseApp远程创建。
-一个[Entity](./Entity.md实体可以在一个活动的cells里面链接到一个实体，还可以被用来在一个合适的cell上创建一个关联的实体。
-这个类允许你创建和销毁在cell上的实体或者在base实体上注册一个定时器也或者访问此对象的联系信息，
-还可以访问一个CellEntityCall，通过它这个base实体可以与它的cell实体通信（这个被关联的cell实体可以移动到不同cell上，作为该cell实体移动的结果KBEngine会进行负载均衡）。
+ThisEntityclass represents anEntitythat resides on theBaseapp.Entitiescan be created using theKBEngine.createEntityfunction (as well as functions prefixed by createEntity).
+AnEntitycan also be remotely created using theCellappfunctionKBEngine.createEntityOnBaseApp.
+A baseEntitycan be linked to an activecellentity and can be used to create an associatedcellentity.
+This class allows you to create and destroycellentities, register a timer on the base entity, or access the contact
+information for this object.
+You can also access aCellEntityCallthrough which this base entity can communicate with itscellentity (the associatedcellentity
+can be moved to a differentcellwhen KBEngine performs load balancing as a result of the movement of thecellentity).
 
-## 成员函数文档
+## Member function documentation
 
 <a id="addTimer"></a>
 
 ### def addTimer(self, initialOffset, repeatOffset=0, userArg=0):
 
-功能说明：
-注册一个定时器，定时器由回调函数[onTimer](#onTimer)触发，回调函数将在"initialOffset"秒后被执行第1次，而后将每间隔"repeatOffset"秒执行1次，可设定一个用户参数"userArg"（仅限integer类型）。
-[onTimer](#onTimer)函数必须在entity的base部分被定义，且带有2个参数，第1个integer类型的是timer的id（可用于移除timer的"[delTimer](#delTimer)"函数），第2个是用户参数"userArg"。
-例子:
+Function description:
+Register a timer. The timer is triggered by the callback function[onTimer](#onTimer), which will be executed the first
+time after "initialOffset" seconds, and then executed once every "repeatOffset"
+seconds. A "userArg" parameter can be set (integer only).
+The[onTimer](#onTimer)function must be defined in the
+base part of the entity with two parameters. The first is an integer,
+the timer id (which can be used to remove the timer's "[delTimer](#delTimer)"
+function), and the second is the user parameter "userArg".
+Example:
 
 ```python
-# 这里是使用addTimer的一个例子
+# Here is an example of using addTimer
 import 
 KBEngine
 
@@ -86,273 +94,280 @@ KBEngine
 Entity
 .__init__( self )
  
-        # 增加一个定时器，5秒后执行第1次，而后每1秒执行1次，用户参数是9
+        # Add a timer, trigger for the first time after 5 seconds, and execute once per second afterwards. The user parameter is 9.
         self.addTimer( 5, 1, 9 )
  
-        # 增加一个定时器，1秒后执行，用户参数缺省是0
+        # Add a timer and execute it once after 1 second. The default user parameter is 0.
         self.addTimer( 1 )
  
     # 
 Entity
-的定时器回调"onTimer"被调用
+ timer callback "onTimer" is called
     def onTimer( self, id, userArg ):
         print "MyBaseEntity.onTimer called: id %i, userArg: %i" % ( id, userArg )
-        # if 这是不断重复的定时器，当不再需要该定时器的时候，调用下面函数移除:
+        # If this is a repeated timer, when the timer is no longer needed, call the following function to remove it:
         #     self.delTimer( id )
 ```
 
-参数：
+parameters:
 
-| initialOffset | float，指定定时器从注册到第一次回调的时间间隔（秒）。 |
+| initialOffset | float, specifies the time interval in seconds for the timer to trigger the first callback. |
 | --- | --- |
-| repeatOffset | float，指定第一次回调执行后每次执行的时间间隔（秒）。必须用函数[delTimer](#delTimer)移除定时器，否则它会一直重复下去。值小于等于0将被忽略。 |
-| userArg | integer，指定底层回调"[onTimer](#onTimer)"时的userArg参数值。 |
+| repeatOffset | float, specifies the time interval (in seconds) after each execution of the first callback execution. You must remove the timer with the function[delTimer](#delTimer), otherwise it will continue to repeat. Values less than or equal to 0 will be ignored. |
+| userArg | integer, specifies the value of the userArg parameter when invoking the "[onTimer](#onTimer)" callback. |
 
-返回:
+returns:Z
 
-- integer，该函数返回timer的内部id，这个id可用于[delTimer](#delTimer)移除定时器。
+- integer, the internal id of the timer. This id can be used to remove the timer using[delTimer](#delTimer).
 
 <a id="createCellEntity"></a>
 
 ### def createCellEntity(self, cellEntityCall):
 
-功能说明：
-请求在指定 `CellEntityCall` 所在的空间里创建当前 Base 实体对应的 cell 实体。
-它不是在 Base 进程里本地直接构造一个 cell 对象，而是由 Base 把 `entityType`、`baseapp componentID`、是否带客户端以及 `cellData` 序列化后发给目标 CellApp，再由对端完成真正的 Cell 实例创建。
-创建成功前 `cell` 属性仍不可用；Base 侧真正拿到直接 `cellEntityCall` 的时机，是后续收到回调并触发 [onGetCell](#onGetCell) 的时候。
+Function description:
+Requests to create an associated entity in acell.
+The information used to create thecellentity is stored in the entity's cellData attribute. The cellData attribute is a
+dictionary that corresponds to the default value in the entity's .def file,
+as well as the "position", "direction", and "spaceID" used to represent
+the entity's position and orientation (roll, pitch, yaw).
 
-源码解析：
+parameters:
 
-- [实体系统：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/zh/architecture/source-analysis/entity-system.html#base-entity-create-cell
-
-参数：
-
-| cellEntityCall | 一个可选的CellEntityCall参数， 指定哪个空间里创建这个cell实体的。 只能使用一个直接的CellEntityCall。如果你有一个实体的BaseEntityCall，你不可以使用baseEntityCall.cell传给这个函数。 你必须在这个实体的base上创建一个新的函数来回传这个直接的CellEntityCall。 例如： ```python baseEntityCallOfNearbyEntity.createCellNearSelf( self ) ``` 在实体的base上： ```python def createCellNearSelf( self, baseEntityCall ): baseEntityCall.createCellNearHere( self.cell ) ``` 在原实体的base上调用createCellNearSelf()方法： ```python def createCellNearHere( self. cellEntityCall ): self.createCellEntity( cellEntityCall ) ``` |
+| cellEntityCall | CellEntityCallparameter that specifies which space to create this cell entity in. Only a directCellEntityCallmay be used. If you have an entity'sBaseEntityCall, you cannot pass itsbaseEntityCall.cellto this function. Instead, you must create a new function on the current entity's base that accepts a directCellEntityCallas a parameter and then calls this function using it. E.g. ```python baseEntityCallOfNearbyEntity.createCellNearSelf( self ) ``` On the nearby entity's base: ```python def createCellNearSelf( self, baseEntityCall ): baseEntityCall.createCellNearHere( self.cell ) ``` On the current entity's base: ```python def createCellNearHere( self, cellEntityCall ): self.createCellEntity( cellEntityCall ) ``` |
 | --- | --- |
 
 <a id="createCellEntityInNewSpace"></a>
 
 ### def createCellEntityInNewSpace(self, cellappIndex):
 
-功能说明：
-在cellapp上创建一个空间(space)并且将该实体的cell创建到这个新的空间中，它请求通过cellappmgr来完成。
-用于创建cell实体的信息被存储在该实体的属性cellData里。这个属性是一个字典，对应实体的.def文件里的默认值同时还包括用于表示
-实体位置和方向(roll, pitch, yaw)的"position", "direction" 和 "spaceID"。
+Function description:
+Create a space on the cellapp and create thecellof this entity into the new space. It requests to complete through cellappmgr.
+The information used to create the cell entity is stored in the entity's cellData attribute. This property is a dictionary. The default values in the corresponding entity's .def file also include
+"position", "direction", and "spaceID" for representing the entity's position and orientation (roll, pitch, yaw).
 
-参数：
+parameters:
 
-| cellappIndex | integer，为None或者0则由引擎负载均衡进行动态选择，如果大于0则在指定的cellapp中创建space。 例子：假如预期会开启4个cellapp，那么cellappIndex需要指定时索引可以是1、2、3、4， 如果实际运行的cellapp不足4个，例如只有3个，那么cellappIndex输入4时由于数量溢出4代表1，如果输入5则代表2。 提示：此功能可以结合KBngine.setAppFlags(KBEngine.APP_FLAGS_NOT_PARTCIPATING_LOAD_BALANCING)来使用，例如：将大地图space放到几个固定的cellapp中，并将这些cellapp设置为不参与负载均衡，其他cellapp用于放置副本space。 创建副本space时cellappIndex设置为0或者None，副本地图的消耗将不会影响到大地图进程，从而保证了主场景的流畅。 |
+| cellappIndex | integer, if it is either None or 0, a cellapp is dynamically selected by the engine load balancer. If it is greater than 0, a space is created in the specified cellapp Example: If you expect to open four cellapps, then the cellappIndex needs to specify the index can be 1, 2, 3, 4, if the actual running cellapp is less than 4, for example, only 3, then the cellappIndex input 4 due to the number of overflow 4 1, 5 2. Tip: This feature can be used in conjunction with KBEngine.setAppFlags (KBEngine.APP_FLAGS_NOT_PARTCIPATING_LOAD_BALANCING), for example: placing large map spaces in several fixed cellapps and setting these cellapps to not participate in load balancing, and other cellapps to place copy space. When the copyspace is created and the cellappIndex is set to 0 or None, the consumption of the copy map will not affect the large map process, thus ensuring the smoothness of the main scene. |
 | --- | --- |
 
 <a id="delTimer"></a>
 
 ### def delTimer(self, id):
 
-功能说明：
-函数delTimer用于移除一个注册的定时器，移除后的定时器不再执行。只执行1次的定时器在执行回调后自动移除，不必要使用delTimer移除。
-如果delTimer函数使用一个无效的id（例如已经移除），将会产生错误。
-到[Entity](./Entity.md.[addTimer](./Entity.md#addTimer参考定时器的一个使用例子。
+Function description:
+The function delTimer is used to remove a registered timer. The removed
+timer is no longer executed. Single-shot timers are
+automatically removed after the callback is executed, and it is not
+necessary to use the delTimer to remove it. If the delTimer function
+uses an invalid id (for example, has been removed), it will generate an
+error.
+A usage example is with theEntity.addTimerfunction.
 
-参数：
+parameters:
 
-| id | integer，它指定要移除的定时器id。如果参数为字符串"All"，则一次性移除所有的定时器。 |
+| id | integer, which specifies the timer id to remove. If the parameter is the string "All", all timers are removed at once. |
 | --- | --- |
 
 <a id="destroy"></a>
 
 ### def destroy(self, deleteFromDB, writeToDB):
 
-功能说明：
-这个函数销毁该实体的base部分。如果实体存在cell部分，那么用户必须先销毁cell部分，否则将会产生错误。要销毁实体的cell部分，调用[Entity](./Entity.md.[destroyCellEntity](./Entity.md#destroyCellEntity。
-也许在onLoseCell回调里调用self.destroy更为恰当。这能保证实体的base部分被销毁。
+Function description:
+This function destroys the base parts of the entity. If the entity has a
+cell part, then the user must first destroy the cell part, otherwise it
+will generate an error. To destroy the cell part of the entity, call aEntity.destroyCellEntity.
+It may be more appropriate to call self.destroy in the onLoseCell callback.
+This ensures that the base part of the entity is destroyed.
 
-参数：
+parameters:
 
-| deleteFromDB | 如果是True，在数据库里与这个实体有关联的条目将会被删除，该参数默认为False。 |
+| deleteFromDB | If True, the entry associated with this entity in the database will be deleted. This parameter defaults to False. |
 | --- | --- |
-| writeToDB | 如果是True，与这个实体相关联的存档属性将会写入数据库。只有在这个实体是从数据库读取的或者是使用过[Entity](./Entity.md.[writeToDB](./Entity.md#writeToDB写入数据库才会被执行。这个参数默认为True，但当deleteFromDB为True的时候它将被忽略。 |
+| writeToDB | If True, the archived attributes associated with this entity will be written to the database. Only if this entity is read for the database or usesEntity.writeToDBwill it be written to the database. This parameter is True by default, but will be ignore when deleteFromDB is True. |
 
 <a id="destroyCellEntity"></a>
 
 ### def destroyCellEntity(self):
 
-功能说明：
-destroyCellEntity请求销毁关联的cell实体。如果没有关联的cell实体该方法将会产生错误。
+Function description:
+destroyCellEntityrequests destruction of the associated cell
+entity. This method will generate an error if there is no associated
+cell entity.
 
 <a id="writeToDB"></a>
 
 ### def writeToDB(self, callback, shouldAutoLoad, dbInterfaceName):
 
-功能说明：
-该函数保存这个实体的存档属性到数据库，使得以后需要的时候可以重新从数据库加载。
-实体也可以被标记为自动加载，这样当服务启动后实体将会被重新创建。
+Function description:
+This function saves the entity's archive attributes to the database so
+that it can be loaded again when needed.
+Entities can also be marked as automatically loaded so that the entity
+will be re-created when the service is started.
 
-参数：
+parameters:
 
-| callback | 这个可选参数是当数据库操作完成后的回调函数。 它有两个参数。第一个是boolean类型标志成功或失败，第二个是base实体。 |
+| callback | This optional parameter is a callback function when the database operation is complete. It has two parameters. The first is a success or failure boolean flag, and the second is the base entity. |
 | --- | --- |
-| shouldAutoLoad | 这个可选参数指定这个实体在服务启动的时候是否需要从数据库加载。 注意：服务器启动时自动加载实体，底层默认将会调用createEntityAnywhereFromDBID将实体创建到一个负载最小的baseapp上，整个过程将会在第一个启动的baseapp调用onBaseAppReady之前完成。 脚本层可以在个性化脚本(kbengine_defaults.xml->baseapp->entryScriptFile定义)中重新实现实体的创建方法，例如： def onAutoLoadEntityCreate(entityType, dbid): KBEngine.createEntityFromDBID(entityType, dbid) |
-| dbInterfaceName | string，可选参数，指定由某个数据库接口来完成, 默认使用"default"接口。数据库接口由kbengine_defaults.xml->dbmgr->databaseInterfaces中定义。 |
+| shouldAutoLoad | This optional parameter specifies whether this entity needs to be loaded from the database when the service is started. Note: The entity is automatically loaded when the server starts. The default is to call createEntityAnywhereFromDBID to create an entity to a minimally loaded baseapp. The entire process will be completed before the first started baseapp calls onBaseAppReady. The script layer can reimplement the entity creation method in the personalization script (kbengine_defaults.xml->baseapp->entryScriptFile definition), for example: def onAutoLoadEntityCreate(entityType, dbid): KBEngine.createEntityFromDBID(entityType, dbid) |
+| dbInterfaceName | string, optional parameter, specified by a database interface, default is to use the "default" interface. Database interfaces are defined in kbengine_defaults.xml->dbmgr->databaseInterfaces. |
 
 <a id="getComponent"></a>
 
 ### def getComponent(self, componentName, all):
 
-功能说明：
-该函数用于获取实体所绑定的某一类组件实例。
+Function description:
+Gets a component instance of the specified type attached to the entity.
 
-参数：
+parameters:
 
-| componentName | string，组件类型名称，组件的模块名称。 |
+| componentName | string, The component type name. |
 | --- | --- |
-| all | bool，如果为True，返回所有同类组件实例，否则只返回第一个或空列表。 |
+| all | bool, if True, Returns all instances of the same type of component, otherwise only returns the first or empty list. |
 
 <a id="fireEvent"></a>
 
 ### def fireEvent(self, eventName, *args):
 
-功能说明：
-该函数用于触发实体事件。
+Function description:
+Trigger entity events.
 
-参数：
+parameters:
 
-| eventName | string，要触发的事件名称。 |
+| eventName | string, the name of the event to trigger. |
 | --- | --- |
-| args | 要附带的事件数据，可变参数。 |
+| args | The event datas to be attached, variable parameters. |
 
 <a id="registerEvent"></a>
 
 ### def registerEvent(self, eventName, callback):
 
-功能说明：
-该函数用于注册实体事件。
+Function description:
+Register entity events.
 
-参数：
+parameters:
 
-| eventName | string，要注册监听的事件名称。 |
+| eventName | string, the name of the event to be registered for listening. |
 | --- | --- |
-| callback | 当事件触发时，用于响应该事件的回调方法。 |
+| callback | The callback method used to respond to the event when the event fires. |
 
 <a id="deregisterEvent"></a>
 
 ### def deregisterEvent(self, eventName, callback):
 
-功能说明：
-该函数用于注销监听实体事件。
+Function description:
+Deregister entity events.
 
-参数：
+parameters:
 
-| eventName | string，要注销监听的事件名称。 |
+| eventName | string, the name of the event to be deregister. |
 | --- | --- |
-| callback | 要注销监听的回调方法。 |
+| callback | The callback method to deregister of the listener. |
 
-## 回调函数文档
+## Callback functions documentation
 
 <a id="onCreateCellFailure"></a>
 
 ### def onCreateCellFailure(self):
 
-功能说明：
-如果这个函数在脚本中有实现，这个函数在cell实体创建失败的时候被调用。
-这个函数没有参数。
+Function description:
+If this function is implemented in the script, this function is called when the cell entity fails to create. This function has no parameters.
 
 <a id="onDestroy"></a>
 
 ### def onDestroy(self):
 
-功能说明：
-如果这个函数在脚本中有实现，这个函数在调用Entity后，在实际销毁之前被调用。
-这个函数没有参数。
+Function description:
+If this callback function is implemented in a script, it is called afterEntity.destroy()
+actually destroys the entity. This function has no parameters.
 
 <a id="onGetCell"></a>
 
 ### def onGetCell(self):
 
-功能说明：
-如果这个函数在脚本中有实现，这个函数会在 Base 侧收到 cell 创建成功回调、并补齐当前实体的直接 `cellEntityCall` 后被调用。
-底层会先结束 `creatingCell` 状态并销毁一次性的 `cellData` 启动数据，然后才进入这个脚本回调；恢复路径 `restoreCell()` 不会触发它。
-
-源码解析：
-
-- [实体系统：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/zh/architecture/source-analysis/entity-system.html#base-entity-create-cell
-
-这个函数没有参数。
+Function description:
+If this function is implemented in the script, this function is called when it gets a cell entity. This function has no parameters.
 
 <a id="onLoseCell"></a>
 
 ### def onLoseCell(self):
 
-功能说明：
-如果这个函数在脚本中有实现，这个函数在它关联的cell实体销毁之后被调用。
-这个函数没有参数。
+Function description:
+If this function is implemented in the script, this function is called after its associated cell entity is destroyed. This function has no parameters.
 
 <a id="onPreArchive"></a>
 
 ### def onPreArchive(self):
 
-功能说明：
-如果这个函数在脚本中有实现，这个函数在该实体自动写入数据库之前被调用。这个回调在[Entity](./Entity.md.[onWriteToDB](./Entity.md#onWriteToDB回调之前被调用。
-如果该回调返回False，该归档操作中止。这个回调应该返回True使得操作继续。如果这个回调不存在，则归档操作继续进行。
+Function description:
+If this function is implemented in a script, it is called before the
+entity is automatically written to the database. This callback is called
+before theEntity.onWriteToDBcallback. If the callback returns False, the archive operation is aborted.
+This callback should return True to continue the operation. If this
+callback does not exist, the archiving operation continues.
 
 <a id="onRestore"></a>
 
 ### def onRestore(self):
 
-功能说明：
-如果这个函数在脚本中有实现，这个函数在[Entity](./Entity.md应用程序崩溃后在其它[Entity](./Entity.md应用程序上
-重新创建该实体时被调用。
-这个函数没有参数。
+Function description:
+If this function is implemented in a script, it is called when thisEntity's
+application crashes and theEntityis recreated on
+other applications. This function has no parameters.
 
 <a id="onTimer"></a>
 
 ### def onTimer(self, timerHandle, userData):
 
-功能说明：
-这个函数当一个与此实体关联的定时器触发的时候被调用。
-一个定时器可以使用[Entity](./Entity.md.[addTimer](./Entity.md#addTimer函数添加。
+Function description:
+This function is called when a timer associated with this entity is
+triggered. A timer can be added using theEntity.addTimerfunction.
 
-参数：
+parameters:
 
-| timerHandle | 定时器的id。 |
+| timerHandle | The id of the timer. |
 | --- | --- |
-| userData | 传进[Entity](./Entity.md.[addTimer](./Entity.md#addTimer的integer用户数据。 |
+| userData | integer, User data passed in onEntity.addTimer. |
 
 <a id="onWriteToDB"></a>
 
 ### def onWriteToDB(self, cellData):
 
-功能说明：
-如果这个函数在脚本中有实现，这个函数在实体数据将要写进数据库的时候被调用。
-需要注意的是在该回调里调用writeToDB会导致无限循环。
+Function description:
+If this function is implemented in the script, this function is called when the entity data is to be written into the database.
+Note that calling writeToDB in this callback will result in an infinite loop.
 
-参数：
+parameters:
 
-| cellData | 包含将要存进数据库的cell属性。[cellData](./Entity.md#cellData是一个字典。 |
+| cellData | Contains the cell properties that will be stored in the database.cellDatais a dictionary. |
 | --- | --- |
 
-## 属性文档
+## Attributes documentation
 
 <a id="cell"></a>
 
 cell
 
-说明：
-cell是用于联系cell实体的ENTITYCALL。这个属性是只读的，且如果这个base实体没有关联的cell时属性是None。
+Description:
+cell is theENTITYCALLused to
+contact the cell entity. This property is read-only, and the property is
+set to None if this base entity has no associated cell.
 
-类型：
+Type:
 
-- 只读ENTITYCALL
+- Read-onlyENTITYCALL
 
 <a id="cellData"></a>
 
 cellData
 
-说明：
-cellData是一个字典属性。每当base实体没有创建它的cell实体时，cell实体的属性会保存在这里。
-如果cell实体被创建，这些用到的值和[cellData](#cellData)属性将被删除。除了cell实体在实体定义文件里指定的属性外，它还包含position, direction and
-spaceID。
+Description:
+cellData is a dictionary property. Whenever the base entity does not
+create its cell entity, the attributes of the cell entity are stored here.
+If the cell entity is created, these used values and[cellData](#cellData)attributes will be deleted. In addition to the attributes that the cell
+entity specifies in the entity definition file, it also contains position,
+direction, and spaceID.
 
-类型：
+Type:
 
 - CELLDATADICT
 
@@ -360,66 +375,71 @@ spaceID。
 
 className
 
-说明：
-实体的类名。
+Description:
+The class name of the entity.
 
-类型：
+Type:
 
-- 只读，string
+- Read-only string
 
 <a id="client"></a>
 
 client
 
-说明：
-client是用于联系客户端的EntityCall。这个属性是只读的，且如果这个base实体没有关联的客户端时属性是None。
+Description:
+client is the EntityCall used to contact the client. This attribute is
+read-only and is set to None if this base entity has no associated client.
 
-类型：
+Type:
 
-- 只读ENTITYCALL
+- Read-onlyENTITYCALL
 
 <a id="databaseID"></a>
 
 databaseID
 
-说明：
-databaseID是实体的永久ID(数据库id)。这个id是uint64类型且大于0，如果是0则表示该实体不是永久的。
+Description:
+databaseID is the entity's permanent ID (database id). This id is of type
+uint64 and is greater than 0. If it is 0 then the entity is not permanent.
 
-类型：
+Type:
 
-- 只读 int64
+- Read-only int64
 
 <a id="databaseInterfaceName"></a>
 
 databaseInterfaceName
 
-说明：
-databaseInterfaceName是实体持久化所在的数据库接口名称，该接口名称在kbengine_defaults->dbmgr中配置。实体必须持久化过（databaseID>0）该属性才可用，否则返回空字符串。
+Description:
+databaseInterfaceName is the database interface name where the entity
+persists. The interface name is configured in kbengine_defaults->dbmgr.
+The entity must be persistent (databaseID>0) for this attribute to be
+available, otherwise an empty string is returned.
 
-类型：
+Type:
 
-- 只读 string
+- Read-only string
 
 <a id="id"></a>
 
 id
 
-说明：
-id是实体的对象id。这个id是一个整型，在base，cell和client相关联的实体之间是相同的。
-这个属性是只读的。
+Description:
+id is the object id of the entity. This id is an integer that is the same between base, cell, and client associated entities. This attribute is read-only.
 
-类型：
+Type:
 
-- 只读 int32
+- Read-only int32
 
 <a id="isDestroyed"></a>
 
 isDestroyed
 
-说明：
-如果该[Entity](./Entity.md实体已经被销毁了，这个属性为True。
+Description:
+This attribute is True if theEntityhas been
+destroyed.
 
-类型：
+Type:
 
 - bool
 
@@ -427,12 +447,14 @@ isDestroyed
 
 shouldAutoArchive
 
-说明：
-这个属性决定了自动存档的策略。如果设为True，自动存档将可用，如果设为False，自动存档将不可用。
-如果设为KBEngine.NEXT_ONLY，自动存档将在下一个预定的时间可用，
-在下一次存档后，这个属性将置为False。
+Description:
+This attribute determines the automatic archiving strategy. If set to True,
+AutoArchive will be available, if set to False AutoArchive will not be available.
+If set toKBEngine.NEXT_ONLY,
+automatic archiving will be available at the next scheduled time. This
+attribute will be set to false after the next archiving.
 
-类型：
+Type:
 
 - True, False orKBEngine.NEXT_ONLY
 
@@ -440,11 +462,13 @@ shouldAutoArchive
 
 shouldAutoBackup
 
-说明：
-这个属性决定了自动备份的策略。如果设为True，自动备份将可用，如果设为False，自动备份将不可用。
-如果设为KBEngine.NEXT_ONLY，自动备份将在下一个预定的时间可用，
-在下一次备份后，这个属性将置为False。
+Description:
+This attribute determines the automatic bacup strategy. If set to True,
+automatic backup will be available, if set to False, automatic backup
+will not be available. If set toKBEngine.NEXT_ONLY,
+automatic backup will be done at the next available predetermined time.
+After the next backup, this attribute will be set to False.
 
-类型：
+Type:
 
 - True, False orKBEngine.NEXT_ONLY

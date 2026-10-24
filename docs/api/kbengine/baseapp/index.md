@@ -1,3 +1,5 @@
-# Baseapp进程
+# Baseapp process
 
-Baseapp进程主要负责与客户端通讯、与空间或位置无关类游戏逻辑(公会管理器、聊天系统、游戏大厅、排行榜等等)、存档与备份等等。
+The Baseapp process is mainly responsible for communication with the client,
+location independent game logic (guild manager, chat system, leaderboard, etc.),
+archiving, backup, and so on.

@@ -1,25 +1,37 @@
-# 关键词释义
+# Keywords Used
 
 <a id="EntityCall"></a>
 
 ### EntityCall:
 
-脚本层与实体远程交互的常规手段(其他参考：[allClients](./cellapp/Entity.md#allClients、[otherClients](./cellapp/Entity.md#otherClients、[clientEntity](./cellapp/Entity.md#clientEntity)。
-EntityCall对象在C++底层实现非常简单，它只包含了实体的ID、目的地的地址、实体类型、EntityCall类型。当用户请求一次远程交互时，底层首先能够通过实体类型找到实体定义的描述，
-通过实体定义的描述对用户输入的数据进行检查，如果检查合法那么底层将数据打包并发往目的地，目的地进程根据协议进行解包最终调用到脚本层。
-注意: EntityCall只能调用其对应def文件中声明过的方法，不能访问实体的属性以及其他任何信息。
-一个实体最多可以包含三个部分：
-client： 当实体包括客户端部分时(通常为玩家)，在服务端可以访问实体的client(EntityCall)属性。
-base：当实体的一部分创建在Baseapp时，在非当前Baseapp中可以访问实体的base(EntityCall)属性。
-cell：当实体的一部分创建在Cellapp时，在非当前Cellapp中可以访问实体的cell(EntityCall)属性。
-举例:
-Avatar.def中定义client远程方法:
+This is the conventional means of remote interaction between entities in
+the script layer. (other references:allClients,otherClients,clientEntity).
+The EntityCall object is very simple to implement in the underlying C++, it contains only the ID of the entity,
+the address of the destination, the entity type, and type of EntityCall.
+When a remote call is requested by the user,
+the engine first finds a description of the entity definition through the entity type,
+and checks the data input by the user against the description of the entity definition.
+If the check is legal, then the data is packaged and sent to the destination
+according to the protocol.
+Note: An EntityCall can only be used to call methods declared in its corresponding
+def file. It cannot call any of KBEngine's basic Entity class functions or
+access entity attributes.
+An Entity can contain up to three parts:
+Client: When an entity includes a client part (usually a
+player), the entity's client (EntityCall) property can be accessed on the
+server side.
+Base: When an entity includes a baseapp part, the base (EntityCall)
+attribute of the entity can be accessed in a non-current baseapp.
+Cell: When an entity includes a cellapp part, the cell (EntityCall)
+attribute of the entity can be accessed in a non-current cellapp.
+Example:
+Client remote method defined in Avatar.def:
 
 ```python
-	<ClientMethods>
-		<hello>
-		</hello>
-	</ClientMethods>
+	[ClientMethods]
+		[hello]
+		[/hello]
+	[/ClientMethods]
 ```
 
 client\Avatar.py
@@ -30,149 +42,178 @@ client\Avatar.py
 			print("hello")
 ```
 
-在GUIConsole工具的Debug页输入框中输入(请先在左边列表中勾选要调试的进程)：
-首先在服务端Baseapp的日志找到玩家实体(Avatar)的ID, 然后通过实体ID获得玩家实体(Avatar)或者EntityCall:
->>> KBEngine.entities[玩家ID].client.hello()
-此时客户端log文件中将输出"hello", 一次远程调用过程完成。
+Enter in the Debug page input box of the GUIConsole tool (check the
+process to be debugged first in the list on the left):
+First find the ID of the player entity (Avatar) in the log of the server's
+Baseapp, and then get the player entity (Avatar) or EntityCall through
+the entity ID:
+>>> KBEngine.entities[Player ID].client.hello()
+At this point, the client log file will output "hello" and a remote call
+process will be completed.
 
 <a id="KBE_ROOT"></a>
 
 ### KBE_ROOT:
 
-这是一个KBEngine的环境变量，描述的是KBEngine所在的根目录。
+This is a KBEngine environment variable that describes the root directory
+where KBEngine is located.
 
 <a id="KBE_RES_PATH"></a>
 
 ### KBE_RES_PATH:
 
-这是一个KBEngine的环境变量，描述的是KBEngine引擎能够读取到的资源目录。
+This is a KBEngine environment variable that describes the resource
+directory that KBEngine engine can read.
 
 <a id="KBE_HYBRID_PATH"></a>
 
 ### KBE_HYBRID_PATH:
 
-这是一个KBEngine的环境变量，描述的是KBEngine引擎可执行文件所在的目录。
+This is a KBEngine environment variable that describes the directory
+where the KBEngine engine executable file is located.
 
 <a id="entities.xml"></a>
 
 ### entities.xml:
 
-服务端所有有效的实体类型必须在此进行注册，引擎初始化时会根据此处依次加载实体的描述信息。
+All valid entity types on the server must be registered here. When the
+engine is initialized, the description of the entity is loaded according
+to the order.
 
 <a id="kbengine_defaults.xml"></a>
 
 ### kbengine_defaults.xml:
 
-服务端默认配置，在此用户可以修改[cellapp](./cellapp/)、[baseapp](./baseapp/)、loginapp等所有的组件配置。
-注意：你可能经常需要对引擎进行升级，直接修改此处可能在升级时产生冲突，另外也不适合多个项目放在同一KBEngine环境的情况。
-建议在[kbengine.xml](#kbengine.xml)中进行重载修改，你只需要对想修改的部分按照格式在xml中重写就可以了。
+Server-side default configuration, where users can modify all component
+configurations such as[cellapp](./cellapp/index.md),[baseapp](./baseapp/index.md), and[loginapp](./loginapp/index.md).
+Note: You may often need to upgrade the engine. Modifying directly may
+cause conflicts during the upgrade, and it is not suitable for multiple
+projects in the same KBEngine environment.
+It is recommended that you modify the overload in[kbengine.xml](#kbengine.xml). You only need to rewrite the
+parts you want to modify according to the format in xml.
 
 <a id="kbengine.xml"></a>
 
 ### kbengine.xml:
 
-服务端配置，在此用户可以修改[cellapp](./cellapp/)、[baseapp](./baseapp/)、loginapp等所有的组件配置。
-详细请参考[kbengine_defaults.xml](#kbengine_defaults.xml)
+Server configuration file, where users can modify all component configurations
+such as[cellapp](./cellapp/index.md),[baseapp](./baseapp/index.md), and[loginapp](./loginapp/index.md).
+For details, please refer to[kbengine_defaults.xml](#kbengine_defaults.xml)
 
-<a id="cn_entity"></a>
-
-### 实体
-
-实体被定义为服务端最基本的对象，类似Python的基础对象object。
-什么时候需要定义实体? 请参见[http://www.kbengine.org/docs/programming/entitydef.html](http://www.kbengine.org/docs/programming/entitydef.html)
-
-<a id="entity"></a>
+<a id="Entity"></a>
 
 ### entity
 
-参见:[实体](#cn_entity)
+Entity is defined as the most basic object of the server, similar to
+Python's base object.
+When and how should you define an entity? See[http://www.kbengine.org/docs/programming/entitydef.html](http://www.kbengine.org/docs/programming/entitydef.html)
 
 <a id="View"></a>
 
 ### View
 
-每一个连接到服务器的客户端实体都将拥有一个View，View类似一种视图，让客户端能够对自身View内的事件传达给客户端。
-View与空间相关，每个View都能够设定独立的大小范围。
-注意：这里描述的空间是一种抽象的概念，不一定需要和物理空间概念绑定（MMORPG除外），对于一个卡牌游戏的核心玩法，也可以认为一个房间内的玩家在一个逻辑空间中。
-事件包括: 实体移动、客户端广播类型的属性改变、死亡销毁等等。
+Each client entity connected to the server will have a View. It allows
+the client entity to communicate events in its View to its own client.
+View is related to space, and each View can be set to an independent size
+range.
+Note: The space described here is an abstract concept and does not
+necessarily need to be bound to the concept of physical space (except
+for MMORPGs). For the core gameplay of a card game, players in a room can
+also be considered to be in a logical space.
+Events include: entity movement, property change of client broadcast type,
+destruction on death, and so on.
 
 <a id="Witness"></a>
 
 ### Witness
 
-目击者。
-只有绑定了Witness的[cell](#cell)实体View才能产生作用，换句话来说witness就是客户端的一个[cell](#cell)代理，cellapp将View内的信息不断的通过Witness同步给客户端。
-服务端一个NPC被目击者目击时会调用实体的onWitness回调，服务端可以依赖于此特性降低CPU的消耗，当一个实体
-没有被目击时，用户可以停止它的任何行为。
+Eyewitness.
+Only Witnesses bound to[cell](#cell)entity Views take effect.
+In other words, Witness is a[cell](#cell)proxy of the client.
+The cellapp continuously synchronizes the information in the View to the
+client through the Witness.
+When an NPC on the server is seen by a witness, it call the onWitness
+callback of the entity. The server can rely on this feature to reduce CPU
+consumption. When an entity is not witnessed, the server can stop any of
+its behavior.
 
 <a id="Space"></a>
 
 ### Space
 
-空间，KBEngine在cellapp上分配一个空间，这个空间与其他空间隔离，View、陷阱、实体碰撞等等只在当前空间相互影响。
-空间具体是什么由用户来定义，它可以是一个场景、副本、房间...
-
-<a id="cn_Space"></a>
-
-### 空间
-
-参见:[Space](#Space)
+A space KBEngine allocates on the cellapp, which is isolated
+from other spaces. Views, traps, entity collisions, etc. only interact with each
+other in the current space. The space is defined by the user. It can be
+a scene, copy, room...
 
 <a id="cell"></a>
 
 ### cell
 
-cell在文档中存在二个不同的意思。
-通常如果描述的是[Entity.cell](./baseapp/Entity.md#cell属性， 此时实际是在描述实体的[CellEntityCall](#EntityCall)。
-如果是在cellapp上有关cell的描述通常是在描述一个[空间](#cn_Space)的一部分，一个空间在[cellapp](./cellapp/)进行负载平衡时有可能被分割成N份，每一份称之为一个cell，每个cell由不同进程维护。
+There are two different meanings of cell in this documentation.
+Usually, when referring to theEntity.cellattribute, you are actually describing the entity's[CellEntityCall](#EntityCall).
+If a cell is described as part of a[space](#Space), it refers to[cellapp](./cellapp/index.md)'s load
+balancing technique. A space in the cellapp may be divided into n parts,
+each called a cell, and each cell is maintained by a different process.
 
 <a id="base"></a>
 
 ### base
 
-通常是指[baseapp](./baseapp/)上的Base实体或者是一个指向Base实体的[BaseEntityCall](#EntityCall), 例如：[Entity.base](./cellapp/Entity.md#base。
+Usually refers to the Base entity on the[baseapp](./baseapp/index.md)or a[BaseEntityCall](#EntityCall)that points to the Base entity.
+For example:Entity.base
 
 <a id="client"></a>
 
 ### client
 
-通常是指客户端或者是一个指向客户端实体的[EntityCall](#EntityCall), 例如：[Entity.client](./baseapp/Entity.md#client。
+Usually refers to the client or an[EntityCall](#EntityCall)that points to the client entity.
+For example:Entity.client
 
 <a id="cellapp"></a>
 
 ### cellapp
 
-Cellapp进程主要负责与位置有关类游戏逻辑、View、AI、场景房间等等。
-参见:[cellapp](./cellapp/)
+The Cellapp process in mainly responsible for position-related game logic,
+View, AI, scene rooms, and so on.
+See also:[cellapp](./cellapp/index.md)
 
 <a id="baseapp"></a>
 
 ### baseapp
 
-Baseapp进程主要负责与客户端通讯、与位置无关类游戏逻辑(公会管理器、聊天系统、游戏大厅、排行榜等等)、存档与备份等等。
-参见:[baseapp](./baseapp/)
+The Baseapp process is mainly responsible for communication with the client,
+position-independent game logic (guild manager, chat system, game lobby,
+leaderboard, etc.), archiving, backup, and so on.
+See also:[baseapp](./baseapp/index.md)
 
 <a id="real"></a>
 
 ### real
 
-指的是一个cell上的实体，这个实体是真实存在于当期cell上的（有一种实体只是另一个cell广播过来的影像，参见：[ghost](#ghost)）。
+Refers to an entity in a cell that is actually present in the cell at that
+time. (As opposed to a[ghost](#ghost)entity broadcast there by another cell)
 
 <a id="ghost"></a>
 
 ### ghost
 
-这种实体其实是由于cellapp动态负载均衡机制将一个完整的space分割成N份并交给不同的进程中的cell共同维护从而产生的一种边界区影像实体。
-由于space被分割成多个区域，所以space存在边界。要让客户端无法感知到边界的存在我们将每个cell边界区域一定范围内的实体同步一份到另一个边邻的cell上，
-这样就不会在边界区域时无法和另一个边界区的实体进行交互了。而这种实体只有部分数据被同步过来(CELL_PUBLIC等cell广播类型的属性)。
-非ghost实体我们称为[real](#real)实体。
+This kind of entity is a projected copy generated by cellapp's dynamic load
+balancing mechanism which divides a space into N shares and splits the cells
+between different processes.
+Space is divided into multiple regions. To make the client unable to
+perceive the existence of the boundaries between them, we synchronize a
+certain range of entities in each cell's boundary to an adjacent cell's
+boundary. The entity has a part of its data synchronized over
+(CELL_PUBLIC, cell broadcast types of attributes) to a ghost entity. In
+this way the entity can interact seamlessly with the other side of the boundary
+and both cells simultaneously.
+Non-ghost entities are called[real](#real)entities.
 
 <a id="vector3"></a>
 
 ### vector3
 
-描述和管理3D空間的向量。
-其中有x，y，z三个属性代表不同的轴向。
-脚本中使用的例子：
-import Math
-v = Math.Vector3()
+Describe and manage 3D space vectors.
+There are three properties of x, y, and z that represent different axial directions.
+Example in script: import Math v = Math.Vector3()

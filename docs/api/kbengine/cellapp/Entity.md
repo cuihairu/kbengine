@@ -1,14 +1,14 @@
-# Entity类
+# Entity
 
-[KBEngine模块]
+[KBEngine module]
 
-Entity是KBEngine模块的一部分。[更多...](#detailed_description)
+Entity is part of theKBEnginemodule.[More...](#detailed_description)
 
 ```python
 import KBEngine
 ```
 
-## 成员函数
+## Member functions
 
 - def [accelerate](#accelerate)( self, accelerateType, acceleration ):
 - def [addYawRotator](#addYawRotator)( self, targetYaw, velocity, userArg ):
@@ -40,7 +40,7 @@ import KBEngine
 - def [registerEvent](#registerEvent)( self, eventName, callback ):
 - def [deregisterEvent](#deregisterEvent)( self, eventName, callback ):
 
-## 回调函数
+## Callbacks
 
 - def [onDestroy](#onDestroy)( self ):
 - def [onEnterTrap](#onEnterTrap)( self, entity, rangeXZ, rangeY, controllerID, userArg ):
@@ -64,142 +64,158 @@ import KBEngine
 - def [onWitnessed](#onWitnessed)( self, isWitnessed ):
 - def [onWriteToDB](#onWriteToDB)( self ):
 
-## 属性
+## Attributes
 
-| [allClients](#allClients) | 只读 PyClient |
+| [allClients](#allClients) | Read-only PyClient |
 | --- | --- |
-| [base](#base) | 只读BaseEntityCall |
-| [client](#client) | 只读ClientEntityCall |
+| [base](#base) | Read-onlyBaseEntityCall |
+| [client](#client) | Read-onlyClientEntityCall |
 | [controlledBy](#controlledBy) | BaseEntityCall |
-| [className](#className) | 只读string |
+| [className](#className) | Read-onlystring |
 | [direction](#direction) | Tuple of 3 floats as (roll, pitch, yaw) |
 | [hasWitness](#hasWitness) | boolean |
-| [id](#id) | 只读 Integer |
-| [isDestroyed](#isDestroyed) | 只读 bool |
-| [isWitnessed](#isWitnessed) | 只读 bool |
+| [id](#id) | Read-only Integer |
+| [isDestroyed](#isDestroyed) | Read-only bool |
+| [isWitnessed](#isWitnessed) | Read-only bool |
 | [layer](#layer) | int8 |
-| [otherClients](#otherClients) | 只读 PyClient |
+| [otherClients](#otherClients) | Read-only PyClient |
 | [position](#position) | Vector3 |
-| [spaceID](#spaceID) | 只读 uint32 |
+| [spaceID](#spaceID) | Read-only uint32 |
 | [topSpeed](#topSpeed) | float |
 | [topSpeedY](#topSpeedY) | float |
 | [volatileInfo](#volatileInfo) | float |
 
 <a id="detailed_description"></a>
 
-## 详细描述
+## A detailed description
 
-类Entity的实例代表着在cell上的游戏对象。一个Entity可以是"real"或者"ghosted"的，一个"ghost"Entity是一个存活在邻近的cell上
-的"real"Entity的拷贝。对于每一个实体来说有一个唯一的"real"Entity实例，和有0个
-或者更多的"ghost"Entity实例。
-一个Entity实例操控着实体的位置数据，包括他的空间和旋转。它还控制着这些数据发给
-客户端的频率（如果可以）。位置的数据可以被唯一的客户端所更新，被控制器对象，被teleport成员函数修改。
-控制器是非python对象，可以适用在cell实体上随着时间的过去来改变它们的位置数据，它们通过成员函数如"trackEntity"和"turnToYaw"来
-添加到Entity，可以通过"cancelController"移除。
-感兴趣的范围，或"View"对于所有属于客户端的KBEngine实体来说是一个重要的概念。
-一个实体的View是围绕这个实体的客户端（如果它有）所能感知的区域。这用于选择发给客户端的数据量。View的实际
-形状由x轴和z轴上的距离范围定义，还有一个类似形状向外延伸的滞后区域。一个Entity进入
-另一个Entity的View，但不会离开它直到它离开滞后区域。一个Entity可以
-通过"setViewRadius"修改它的View大小。
-可以通过"entitiesInRange"找到一个具体距离之内的所有实体，通过"addProximity"设置一个陷阱捕获进入陷阱的所有实体。
-cellApp上新的Entity可以使用KBEngine.createEntity创建。一个实体还可以通过baseApp远程调用KBEngine.createCellEntity函数
-来创建。
-一个Entity可以通过ENTITYCALL访问在base和client应用程序上的等价的实体。这需要
-一组远程调用的函数（在实体的.def文件里指定）。
+Instances of classEntityrepresent
+game objects in the cell.
+AnEntitycan either be "real" or "ghosted".
+A "ghost"Entityis a copy of a
+"real"Entityliving on a neighboring cell.
+There is a unique "real"Entityinstance for each entity, and 0 or more "ghost"Entityinstances.
+AnEntityinstance controls the location
+data of the entity, including its position and rotation. It also controls
+how often this data is sent to the client (if possible). The location data
+can be updated by a unique client and modified by the controller object
+using the teleport member function. Controllers are non-python objects
+that can be used to change the location data over time on cell entities.
+They are added toEntitythrough
+member functions such as "trackEntity" and "turnToYaw" and can be removed
+via "cancelController".
+Area of Interest or "View" is an important concept for allKBEngineentities that belong to a client. The view of an entity is the area that
+the client (if it has a client) can perceive around this entity.
+This is used to select the amount of data sent to the client. The actual
+shape of the View is defined by the range of distances on the x-axis and
+around the z-axis, and there is a lag region that extends outward
+like a shape. AnEntityenters
+anotherEntity's view, but does
+not leave it until it leaves the lag area. AnEntitycan modify its View size via "setViewRadius". You can find all entities
+within a specific distance with "entitiesInRange" and set traps to capture
+all entities that enter the trap with "addProximity".
+The newEntityon cellapp can be
+created usingKBEngine.createEntity.
+An entity can also be created by the baseapp remote calls to theKBEngine.createCellEntityfunction.
+AnEntitycan access it equivalent
+entities on the base and client applications viaENTITYCALL.
+This requires a set of remotely-invoked functions (specified in the entity's .def file)
 
-## 成员函数文档
+## Member function documentation
 
 <a id="accelerate"></a>
 
 ### def accelerate(self, accelerateType, acceleration):
 
-功能说明：
-加速实体当前运动。
+Function description:
+Accelerate the current movement of the entity.
 
-可影响的运动包括：
+The activities that can be accelerated include:
 
-- Entity.[moveToEntity](./Entity.md#moveToEntity
-- Entity.[moveToPoint](./Entity.md#moveToPoint
-- Entity.[navigate](./Entity.md#navigate
-- Entity.[addYawRotator](./Entity.md#addYawRotator
+- Entity.moveToEntity
+- Entity.moveToPoint
+- Entity.navigate
+- Entity.addYawRotator
 
-参数：
+parameters:
 
-| accelerateType | string，影响的运动类型，如：Movement、Turn。 |
+| accelerateType | string, the type of movement affected such as: "Movement", "Turn". |
 | --- | --- |
-| velocity | float，每秒的加速度，如果传入的是负值则表示减速度。 |
+| velocity | float, acceleration per second, use negative to decelerate |
 
-返回：
+returns:
 
-- 影响后的实体当前速度。
+- The current speed of the affected entity.
 
 <a id="addYawRotator"></a>
 
 ### def addYawRotator(self, targetYaw, velocity, userArg):
 
-功能说明：
-控制实体绕yaw旋转，旋转完成将会通过Entity.[onTurn](./Entity.md#onTurn通知。
-使用Entity.[cancelController](./Entity.md#cancelController带上控制器ID或者使用Entity.[cancelController("Movement")](./Entity.md#cancelController来删除它。
+Function description:
+The control entity rotates around yaw.Entity.onTurnis called when the rotation completes.
+To remove it, useEntity.cancelControllerwith the controller ID or useEntity.cancelController("Movement")to remove it.
 
-参看：
+See:
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.cancelController
 
-参数：
+parameters:
 
-| targetYaw | float，给定的目标yaw弧度。 |
+| targetYaw | float, the given target yaw radians. |
 | --- | --- |
-| velocity | float，旋转时每秒的弧度。 |
-| userArg | 是一个可选的整型，所有控制器共有。如果这个值不为0则传给回调函数。建议 在回调原型里设置默认值为0。 |
+| velocity | float, the arc per second when rotated. |
+| userArg | Optional integer that is common to all controllers. If this value is not 0, it is passed to the callback function. It is recommended to set the default value to 0 in the callback prototype. |
 
 <a id="addProximity"></a>
 
 ### def addProximity(self, rangeXZ, rangeY, userArg):
 
-功能说明：
-创建一个范围触发器，当有其它实体进入或离开这个触发器区域的时候会通知这个Entity。这个区域是一个方形（为了效率）。如果
-其它实体在x轴和z轴上均在给定的距离里面，则实体被视为在这个范围里面。这个Entity通过onEnterTrap和onLeaveTrap函数被
-通知，这两个函数可以如下定义：
+Function description:
+Create an area trigger that will notify theEntitywhen other entities enter or leave the trigger area. This area is a square (for efficiency).
+If another entity is within a given distance on the x-axis and z-axis,
+it is considered to be within the range. ThisEntityis notified via the onEnterTrap and onLeaveTrap functions, which can be
+defined as follows:
 
 ```python
 	def onEnterTrap( self, entityEntering, rangeXZ, rangeY, controllerID, userArg = 0 ):
 	def onLeaveTrap( self, entityLeaving, rangeXZ, rangeY, controllerID, userArg = 0 ):
 ```
 
-由于这个范围触发器是一个控制器，使用Entity.[cancelController](./Entity.md#cancelController带上控制器ID来删除它。
-需要注意的是回调有可能会立刻被触发，即使在addProximity()调用返回之前。
+Because the scope trigger is a controller, useEntity.cancelControllerwith the controller ID to delete it.
+It should be noted that the callback may be triggered immediately, even
+before the call to addProximity() returns.
 
-参看：
+See:
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.cancelController
 
-参数：
+parameters:
 
-| rangeXZ | float，给定触发器xz轴区域的大小，必须大于等于0。 |
+| rangeXZ | float, the size of the xz axis area of the trigger, must be greater than or equal to zero. |
 | --- | --- |
-| rangeY | float，给定触发器y轴高度，必须大于等于0。 需要注意的是，这个参数要生效必须开放kbengine_defaults.xml->cellapp->coordinate_system->rangemgr_y 开放y轴管理会带来一些消耗，因为一些游戏大量的实体都在同一y轴高度或者在差不多水平线高度，此时碰撞变得非常密集。 3D太空类游戏或者小房间类实体较少的游戏比较适合开放此选项。 |
-| userArg | 是一个可选的整型，所有控制器共有。如果这个值不为0则传给回调函数。建议 在回调原型里设置默认值为0。 |
+| rangeY | float, the height of the y-axis of the trigger, must be greater than or equal to zero. It should be noted that for this parameter to take effectkbengine_defaults.xml->cellapp->coordinate_system->rangemgr_y must be set to true. Open y-axis management will increase CPU consumption, because some games have a large number of entities at the same y-axis height or all on the ground which is almost completely flat. Because of this, the collision becomes very dense. 3D space games or small room-type games are more suitable for this option. |
+| userArg | Optional integer that is common to all controllers. If this value is not 0, it is passed to the callback function. It is recommended to set the default value to 0 in the callback prototype. |
 
-返回：
+returns:
 
-- 返回创建控制器的id。
+- The ID of the created controller.
 
 <a id="addTimer"></a>
 
 ### def addTimer(self, start, interval=0.0, userData=0):
 
-功能说明：
-注册一个定时器，定时器由回调函数[onTimer](#onTimer)触发，回调函数将在"initialOffset"秒后被执行第1次，而后将每间隔"repeatOffset"秒执行1次，可设定一个用户参数"userArg"（仅限integer类型）。
-[onTimer](#onTimer)函数必须在entity的cell部分被定义，且带有2个参数，第1个integer类型的是timer的id（可用于移除timer的"[delTimer](#delTimer)"函数），第2个是用户参数"userArg"。
-这里返回的是脚本层 `timerID`，不是底层 `TimerHandle`；Cell 实体迁移或恢复时，引擎会按这个 `timerID` 重新建立底层定时器映射，因此脚本层看到的 ID 可以保持不变。
-
-源码解析：
-
-- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers
-例子:
+Function description:
+Register a timer. The timer triggers the callback function[onTimer](#onTimer)The callback function will be executed the first time after "initialOffset"
+seconds, and then it will be executed once every "repeatOffset" seconds
+with the "userArg" parameter. (integer only)
+The[onTimer](#onTimer)function must be defined in the
+cell part of the entity with two parameters. The first is an integer, the
+timer's ID (which can be used to remove the timer's "[delTimer](#delTimer)"
+function), and the second is the user parameter "userArg".
+Example:
 
 ```python
-# 这里是使用addTimer的一个例子
+# Here is an example of using addTimer
 import 
 KBEngine
 
@@ -217,81 +233,83 @@ KBEngine
 Entity
 .__init__( self )
  
-        # 增加一个定时器，5秒后执行第1次，而后每1秒执行1次，用户参数是9
+        # Add a timer, perform the first time after 5 seconds, and execute once every 1 second. The user parameter is 9.
         self.addTimer( 5, 1, 9 )
  
-        # 增加一个定时器，1秒后执行，用户参数缺省是0
+        # Add a timer and execute it after 1 second. The default user parameter is 0.
         self.addTimer( 1 )
  
     # 
 Entity
-的定时器回调"onTimer"被调用
+ timer callback "onTimer" is called
     def onTimer( self, id, userArg ):
         print "MyCellEntity.onTimer called: id %i, userArg: %i" % ( id, userArg )
-        # if 这是不断重复的定时器，当不再需要该定时器的时候，调用下面函数移除:
+        # if this is a repeated timer, when it is no longer needed, call the following function to remove it:
         #     self.delTimer( id )
 ```
 
-参数：
+parameters:
 
-| initialOffset | float，指定定时器从注册到第一次回调的时间间隔（秒）。 |
+| initialOffset | float, specifies the time interval (in seconds) for the timer to execute the first callback. |
 | --- | --- |
-| repeatOffset | float，指定第一次回调执行后每次执行的时间间隔（秒）。必须用函数[delTimer](#delTimer)移除定时器，否则它会一直重复下去。值小于等于0将被忽略。 |
-| userArg | integer，指定底层回调"[onTimer](#onTimer)"时的userArg参数值。 |
+| repeatOffset | float, specifies the time interval (in seconds) between each callback after the first callback. The timer must be removed with the function[delTimer](#delTimer), otherwise it will be repeated. Values less than or equal to 0 will be ignored. |
+| userArg | integer, specifies the value of the "userArg" parameter when calling "[onTimer](#onTimer)". |
 
-返回:
+returns:
 
-- integer，该函数返回timer的内部id，这个id可用于[delTimer](#delTimer)移除定时器。
+- integer, returns the internal ID of the timer. This ID can be used to remove the timer using[delTimer](#delTimer).
 
 <a id="cancelController"></a>
 
 ### def cancelController(self, controllerID):
 
-功能说明：
-函数cancelController停止一个控制器对Entity的影响。它只能在一个real实体上被调用。
-需要注意，字符串 `"Movement"` 是一个特殊入口，它会直接停止当前移动/转向控制链；如果传入的数值 ID 恰好就是当前移动控制器或转向控制器的 ID，底层也会走同样的 `stopMove()` 逻辑，而不是只删除单个对象。
+Function description:
+The function cancelController stops the effect of a controller onEntity.
+It can only be called on arealentity.
 
-源码解析：
+parameters:
 
-- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers
-
-参数：
-
-| controllerID | controllerID是要取消的控制器的索引，它是一个整型。一个专用的控制器类型的字符串也可以作为它的类型。 例如，一次只有一个移动/导航控制器可以被激活，这可以用entity.cancelController( "Movement" )取消。 |
+| controllerID | integer, the index of the controller to cancel. A special controller type string can also be used as its type. For example, only one mobile/navigation controller can be activated at a time. This can be cancelled with entity.cancelController( "Movement" ). |
 | --- | --- |
 
 <a id="clientEntity"></a>
 
 ### def clientEntity(self, destID):
 
-功能说明：
-通过这个方法可以访问自己客户端（当前实体必须绑定了客户端）中某个实体的方法，只有在View范围内的实体才会同步到客户端。它只能在一个real实体上被调用。
+Function description:
+This method can access the method of an entity in its own client
+(the current entity must be bound to the client). Only the entities in
+the View scope will be synchronized to the client. It can only be called
+on arealentity.
 
-参数：
+parameters:
 
-| destID | 目标实体的ID。 |
+| destID | integer, the ID of the target entity. |
 | --- | --- |
 
 <a id="canNavigate"></a>
 
 ### def canNavigate(self):
 
-功能说明：
-通过这个方法判断当前实体是否可以使用导航（Entity.[navigate](./Entity.md#navigate）功能。它只能在一个real实体上被调用。
-通常当实体所在Space使用Entity.[addSpaceGeometryMapping](./Entity.md#addSpaceGeometryMapping加载过有效的导航用的碰撞数据（Navmesh或者2D的tile数据）并且实体在有效导航区域该功能可用。
+Function description:
+This method determines whether the current entity can use the navigation (Entity.navigate)
+feature. It can only be called on arealentity.
+Usually it can use navigation when the entity's Space usesKBENgine.addSpaceGeometryMappingto load valid navigation collision data (Navmesh or 2D tile data) and the
+entity is available in the effective navigation area.
 
-返回：
+returns:
 
-- bool， 如果实体可在当前Space中使用导航功能返回True，否则返回False。
+- bool, returns True if the entity can use the Navigate function in the current space, otherwise it returns False.
 
 <a id="debugView"></a>
 
 ### def debugView(self):
 
-功能说明：
-debugView输出Entity的View的详细信息到cell的调试日志。
-一份View系统工作的描述可以在Entity类文档中找到。
-一份样品信息如下：
+Function description:
+debugView outputs theEntity's View
+details to the cell's debug log. A description of the workings of the View
+system can be found in theEntityclass documentation.
+A sample of information is as follows:
 
 ```python
   INFO cellapp [0x00001a1c] [2014-11-04 00:28:41,409] - Avatar::debugView: 100 size=4, Seen=4, Pending=0, ViewRadius=50.000, ViewHyst=5.000
@@ -301,112 +319,122 @@ debugView输出Entity的View的详细信息到cell的调试日志。
   INFO cellapp [0x00001a1c] [2014-11-04 00:28:41,409] - Avatar::debugView: 100 Avatar(106), position(771.586.211.002.776.55), dist=0
 ```
 
-信息的第一行告诉我们：
+The first line of information tells us:
 
-- 实体#1000的数据
-- 有4个实体在它的View区域并且已经同步给客户端。
-- 有0个实体在它的View区域，正在等待同步到客户端。
-- View的半径是 50.000
-- View的滞后区域向外延伸了5.000
+- It is entity #1000's data.
+- There are 4 entities in its View area and all have been synchronized to the client.
+- There are 0 entities in its view Area that are waiting to be synchronized to the client.
+- The radius of the View is 50.000
+- The lag area of the View extends 5.000 outward.
 
 <a id="delTimer"></a>
 
 ### def delTimer(self, id):
 
-功能说明：
-函数delTimer用于移除一个注册的定时器，移除后的定时器不再执行。只执行1次的定时器在执行回调后自动移除，不必要使用delTimer移除。
-除了传入数值 `timerID` 之外，底层还支持传入字符串 `"All"` 一次性清空当前实体的所有脚本定时器。
+Function description:
+The delTimer function is used to remove a registered timer. The removed
+timer is no longer executed. Single shot timers are
+automatically removed after the callback is executed, and it is not
+necessary to use the delTimer to remove it. If the delTimer function
+uses an invalid ID (for example, it has been removed), an error will be
+generated.
 
-源码解析：
+parameters:
 
-- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers
-
-参数：
-
-| id | integer，它指定要移除的定时器id。如果参数为字符串"All"，则一次性移除所有的定时器。 |
+| id | integer, which specifies the timer ID to remove. If the parameter is the string "All", all timers are removed at once. |
 | --- | --- |
 
 <a id="destroy"></a>
 
 ### def destroy(self):
 
-功能说明：
-这个函数销毁它的本地Entity实例，如果实体在其他进程上存在ghost部分也会同时通知销毁。
-这个函数最好由实体自己调用，如果这个实体是一个ghost则会抛出一个异常。如果回调函数onDestroy()被实现则被调用。
+Function description:
+This function destroys its localEntityinstance. If the entity has aghostpart on other processes, it will also notify for their destruction. This
+function is best called by the entity itself, and throws an exception if
+the entity is aghost. If the
+callback function onDestroy() is implemented, it is executed.
 
 <a id="destroySpace"></a>
 
 ### def destroySpace(self):
 
-功能说明：
-销毁这个实体所在的空间。
+Function description:
+Destroys thespacethis entity is in.
 
 <a id="entitiesInView"></a>
 
 ### def entitiesInView(self, pending):
 
-功能说明：
-获得这个实体的View范围内的实体列表。
+Function description:
+Get a list of entities in theViewscope of this entity.
 
-参数：
+parameters:
 
-| pending | bool，可选参数，默认值为False，只返回客户端可见的所有实体，否则返回服务端可见但未同步到客户端的所有实体。 |
+| pending | bool, optional parameter, the default is False, only all entities visible to the client are returned, otherwise all entities visible to the server but not synchronized to the client are returned. |
 | --- | --- |
 
 <a id="entitiesInRange"></a>
 
 ### def entitiesInRange(self, range, entityType=None, position=None):
 
-功能说明：
-在给定的距离内搜索[实体](./Entity.md。这是一个球形的搜索，3个轴的距离
-都要测量。这可以找到在这个[实体](./Entity.md的View范围之外的实体，但不能找到其他cell的实体。
-例子：
+Function description:
+Search forentitieswithin a given distance.
+This is a spherical search. The distances of the three axes must be
+measured. This can findentitiesthat are
+outside theViewscope of this
+entity, but cannot find entities in othercells.
+Example:
 
 ```python
   self.entitiesInRange( 100, 'Creature', (100, 0, 100) )
 ```
 
-搜索到‘Creature’类型的实体列表（‘Creature’的子类实例化的实体）。中心点是(100, 0, 100)，搜索半径是100米。
+Searches for a list of entities of type 'Creature' (an instantiated entity
+of a subclass of 'Creature'). The center point is (100, 0, 100) and the
+search radius is 100 meters.
 
 ```python
   [ e for e in self.entitiesInRange( 100, None, (100,0,100) ) if isinstance( e, BaseType ) ]
 ```
 
-将给出一个来自‘BaseType’或‘BaseType’的子类实例化的实体列表。
+Gives a list of entities instantiated from subclasses of 'BaseType'.
 
-参数：
+parameters:
 
-| range | 围绕这个实体搜索的距离，float类型 |
+| range | Search distance around this entity, float type |
 | --- | --- |
-| entityType | 一个可选的字符串参数，实体的类型名称，用于匹配实体。如果实体类型是一个有效的类名（ 有效的实体类型在/scripts/entities.xml列出 ）， 则只有这个类型的实体会被返回，否则将这个范围的所有实体都返回。 |
-| position | 一个可选的Vector3类型参数，作为搜索半径的中心, 默认以实体自身为中心。 |
+| entityType | An optional string parameter, the entity's type name, used to match entities. If the entity type is a valid class name (valid entities are ones listed in/scripts/entities.xml) only this type of entity will be returned, otherwise all entities in this range will be returned. |
+| position | OptionalVector3type parameter, which is the center of the search radius is centered on the entity itself by default. |
 
-返回：
+returns:
 
-- 在给定范围内的Entity对象列表。
+- A list ofEntityobjects in a given range.
 
 <a id="isReal"></a>
 
 ### def isReal(self):
 
-功能说明：
-这个函数返回这个Entity是real的还是一个ghost的。
-这个函数很少被用到但对调试很有用。
+Function description:
+This function returns whether theEntityisrealor aghost.
+This function is rarely used but is useful for debugging.
 
-返回：
+returns:
 
-- bool， 如果是real实体返回True，否则返回False。
+- bool, True if real, otherwise False.
 
 <a id="moveToEntity"></a>
 
 ### def moveToEntity(self, destEntityID, velocity, distance, userData, faceMovement, moveVertically, offsetPos):
 
-功能说明：
-直线移动[实体](./Entity.md到另一个Entity位置。
-任何[实体](./Entity.md，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
-调用后函数将返回一个可以用于取消这次移动的控制器ID。
-例如，Entity.[cancelController](./Entity.md#cancelController( movementID )。
-移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController( "Movement" )。当移动被取消之后回调通知方法将不被调用。
+Function description:
+Moves theEntitystraight to anotherEntityposition.
+AnyEntitycan only have one motion controller
+at any time. Repeatedly calling any move function will terminate the previous
+move controller.
+This function will return a controller ID that can be used to cancel this move.
+For example,Entity.cancelController( movementID ).
+You can also cancel the move usingEntity.cancelController( "Movement" ).
+The callback function will not be called if the move is cancelled.
 
 ```python
 	def onMove( self, controllerID, userData ):
@@ -414,39 +442,42 @@ debugView输出Entity的View的详细信息到cell的调试日志。
 	def onMoveFailure( self, controllerID, userData ):
 ```
 
-参考:
+References:
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.cancelController
 
-参数：
+parameters:
 
-| destEntityID | int，目标Entity的ID |
+| destEntityID | int, the ID of the targetEntity |
 | --- | --- |
-| velocity | float，Entity移动的速度，单位m/s |
-| distance | float，距离目标小于该值停止移动，如果该值为0则移动到目标位置。 |
-| userData | object，可选参数，回调通知被调用时其中userData参数将为此值。 |
-| faceMovement | bool，可选参数，如果实体面向移动方向则为true。如果是其它机制则为false。 |
-| moveVertically | bool，可选参数，设为True指移动为直线移动，设为False指贴着地面直线移动。 |
-| offsetPos | Vector3，可选参数，设置一定的偏移值，例如使移动目标位置位于实体的左侧。 |
+| velocity | float, speed of theEntitymove, in m/s |
+| distance | float, distance target that when reached the entity will stop moving, if the value is 0, it moves to the target position. |
+| userData | object, optional parameter, when the callback function is invoked the userData parameter will be this value. |
+| faceMovement | bool, optional parameter, True if the entity faces the direction of the move. If it is other mechanism, it is False. |
+| moveVertically | bool, optional parameter, set to True to move in a straight line, set to False means to move in a straight line parallel to the ground. |
+| offsetPos | Vector3, optional parameter, Set a certain offset value, such as moving the target position to the left of the entity. |
 
-返回：
+returns:
 
-- int，新创建的控制器ID。
+- int, newly created controller ID.
 
 <a id="moveToPoint"></a>
 
 ### def moveToPoint(self, destination, velocity, distance, userData, faceMovement, moveVertically):
 
-功能说明：
-直线移动Entity到给定的坐标点，成功或失败会调用回调函数。
-任何[实体](./Entity.md，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
-底层会先停止当前移动/转向控制链，再创建一个新的 `MoveController + MoveToPointHandler` 组合，由 CellApp 在后续 tick 中持续推进位置与朝向。
-返回一个可以用于取消这次移动的控制器ID。
-例如：
-Entity.[cancelController](./Entity.md#cancelController( movementID )。
-移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController( "Movement" )。当移动被取消之后通知方法将
-不被调用。
-回调函数如下定义：
+Function description:
+Move theEntityto the given
+coordinate point in a straight line. The callback function is invoked on
+success or failure.
+AnyEntitycan only have one motion controller
+at any time. Repeatedly calling any move function will terminate the
+previous move controller.
+Returns a controller ID that can be used to cancel this move.
+For example:
+Entity.cancelController( movementID ).
+You can also cancel the move withEntity.cancelController( "Movement" ).
+The callback function will not be called if the move is cancelled.
+The callback function is defined as follows:
 
 ```python
 	def onMove( self, controllerID, userData ):
@@ -454,86 +485,84 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 	def onMoveFailure( self, controllerID, userData ):
 ```
 
-参看：
+See:
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.cancelController
 
-源码解析：
+parameters:
 
-- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers
-
-参数：
-
-| destination | Vector3，Entity要移动到的目标位置点 |
+| destination | Vector3, the target point to which theEntityis to be moved |
 | --- | --- |
-| velocity | float，Entity的移动速度，单位m/s |
-| distance | float，距离目标小于该值停止移动，如果该值为0则移动到目标位置。 |
-| userData | object，传给通知函数的数据 |
-| faceMovement | bool，如果实体面向移动方向则为true。如果是其它机制则为false。 |
-| moveVertically | bool，设为true指移动为直线移动，设为false指贴着地面移动。 |
+| velocity | float,Entity's moving speed, in m/s |
+| distance | float, distance target that when reached the entity will stop moving, if the value is 0, it moves to the target position. |
+| userData | object, data passed to the callback function |
+| faceMovement | bool, True if the entity faces the direction of the move. If it is other mechanism, it is false. |
+| moveVertically | bool, set to True to move in a straight line, set to False means to move in a straight line parallel to the ground. |
 
-返回：
+returns:
 
-- int，新创建的控制器ID。
+- int, newly created controller ID.
 
 <a id="getViewRadius"></a>
 
 ### def getViewRadius(self):
 
-功能说明：
-这个函数返回这个Entity当前的View半径值。
-数据可以通过Entity.[setViewRadius](./Entity.md#setViewRadius( radius, hyst )设置。
+Function description:
+This function returns the current View radius value of thisEntity.
+Data can be set viaEntity.setViewRadius( radius, hyst ).
 
-返回：
+returns:
 
-- float， View半径。
+- float, View radius
 
 <a id="getViewHystArea"></a>
 
 ### def getViewHystArea(self):
 
-功能说明：
-这个函数返回这个Entity的View当前滞后区域值。
-数据可以通过Entity.[setViewRadius](./Entity.md#setViewRadius( radius, hyst )设置。
+Function description:
+This function returns the current lag area value of thisEntityView.
+Data can be set viaEntity.setViewRadius( radius, hyst ).
 
-返回：
+returns:
 
-- float， View当前滞后区域值。
+- float, The current lag area value of this Entity's View.
 
 <a id="getRandomPoints"></a>
 
 ### def getRandomPoints(self, centerPos, maxRadius, maxPoints, layer):
 
-功能说明：
-这个函数用于获取以某个坐标点为中心一定区域内Entity.[navigate](./Entity.md#navigate可到达的随机坐标点。
+Function description:
+This function is used to get an array of random coordinate point thatEntity.navigatecan reach in a certain area centered on a certain coordinate point.
 
-参数：
+parameters:
 
-| centerPos | Vector3，Entity中心坐标点 |
+| centerPos | Vector3,Entitycenter coordinates |
 | --- | --- |
-| maxRadius | float，最大的搜索半径 |
-| maxPoints | uint32，最多返回的随机坐标点数量。 |
-| layer | int8，使用某个层的navmesh来搜索。 |
+| maxRadius | float, the maximum search radius |
+| maxPoints | uint32, the maximimum number of random coordinate points returned. |
+| layer | int8, layer of navmesh to search. |
 
-返回：
+returns:
 
-- tuple，包含一个或者多个坐标的数组。
+- tuple, an array of one or more coordinates.
 
 <a id="navigate"></a>
 
 ### def navigate(self, destination, velocity, distance, maxMoveDistance, maxSearchDistance, faceMovement, layer, userData):
 
-功能说明：
-使用导航系统来使这个Entity向一个目标点移动，成功或失败会调用回调函数。
-KBEngine可以有数个预先生成好的导航网格，不同的网格大小（会导致不同的导航路径）。
-任何[实体](./Entity.md，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
-它会先根据当前 `space` 的导航句柄计算路径点；如果路径为空，则直接返回 `0`，不会创建控制器。
-返回一个可以用于取消这次移动的控制器ID。
-例如：
-Entity.[cancelController](./Entity.md#cancelController( movementID )。
-移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController( "Movement" )。当移动被取消之后通知方法将
-不被调用。
-回调函数如下定义：
+Function description:
+Use the navigation system to move thisEntityto a target point. A callback will be invoked on success or failure.
+KBEnginecan have several pre-generated
+navigation meshes with different mesh sizes (leading to different navigation paths).
+AnyEntitycan only have one motion controller
+at any time. Repeatedly calling any move function will terminate the
+previous move controller.
+Returns a controller ID that can be used to cancel this move.
+For example:
+Entity.cancelController( movementID ).
+You can also cancel the movement controller withEntity.cancelController( "Movement" ).
+The callback function will not be called if the move is cancelled.
+The callback functions are defined as follows:
 
 ```python
 	def onMove( self, controllerID, userData ):
@@ -541,63 +570,58 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 	def onMoveFailure( self, controllerID, userData ):
 ```
 
-参看：
+See:
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.cancelController
 
-源码解析：
+parameters:
 
-- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers
-
-参数：
-
-| destination | Vector3，Entity移向的目标点。 |
+| destination | Vector3, the target point where theEntitymoves. |
 | --- | --- |
-| velocity | float，Entity的移动速度，单位m/s |
-| distance | float，距离目标小于该值停止移动，如果该值为0则移动到目标位置。 |
-| maxMoveDistance | float，最大的移动距离。 |
-| maxSearchDistance | float，从导航数据中最大搜索距离。 |
-| faceMovement | bool，如果实体面向移动方向则为true（默认）。如果是其它机制则为false。 |
-| layer | int8，使用某个层的navmesh来寻路。 |
-| userData | object，传给通知函数的数据。 |
+| velocity | float,Entity's move speed, in m/s |
+| distance | float, distance target that when reached the entity will stop moving, if the value is 0, it moves to the target position. |
+| maxMoveDistance | float, the maximum move distance |
+| maxSearchDistance | float, the maximum search distance from the navigatio ndata. |
+| faceMovement | bool, True if the entity faces the direction of the move (default). Otherwise False. |
+| layer | int8, navmesh layer to search |
+| userData | object, the data passed to the callback function |
 
-返回：
+returns:
 
-- int，成功时返回新创建的控制器ID；如果导航层没有得到可用路径则返回 `0`。
+- int, the newly created controller ID.
 
 <a id="navigatePathPoints"></a>
 
 ### def navigatePathPoints(self, destination, maxSearchDistance, layer):
 
-功能说明：
-这个函数返回有当前Entity的位置到destination位置所经过的路径点列表。
+Function description:
+This functions returns a list of path points from the currentEntitylocation to the destination.
 
-参数：
+parameters:
 
-| destination | Vector3，Entity移向的目标点 |
+| destination | Vector3, target point where theEntitymoves |
 | --- | --- |
-| maxSearchDistance | float，最大的搜索距离 |
-| layer | int8，使用某个层的navmesh来查找路径列表。 |
+| maxSearchDistance | float, the maximum search distance |
+| layer | int8, navmesh layer to search for a path on. |
 
 <a id="setViewRadius"></a>
 
 ### def setViewRadius(self, radius, hyst=5):
 
-功能说明：
-指定Entity的感兴趣的区域大小。
-这个函数只能用于有Witness关联的实体。
-注意：
-你可以通过设置kbengine.xml配置选项'cellapp/defaultViewRadius'来设置默认的View半径。
-View半径默认是不能大于500.0的。详情请看kbengine_defaults.xml配置选项'cellapp/entity_posdir_updates'。
-数据可以通过Entity.[getViewRadius](./Entity.md#getViewRadius( )与Entity.[getViewHystArea](./Entity.md#getViewHystArea( )获得。
+Function description:
+Specifies the size of theEntity'sView.
+This function can only be used byWitnessrelated entities.
+Note: You can set the default View radius by setting thekbengine.xmlconfiguration option 'cellapp/defaultViewRadius'.
+The View radius can't be greater than 500.0 by default. For details, please see thekbengine_defaults.xmlconfiguration option 'cellapp/entity_posdir_updates'.
+Data can be obtained withEntity.getViewRadius( ) andEntity.getViewHystArea( ).
 
-参数：
+parameters:
 
-| radius | float，radius指定View区域的半径 |
+| radius | float, specifies the radius of the View area |
 | --- | --- |
-| hyst | float，指定超过View区域的滞后区域的大小。合理的设定滞后区域将能够降低View碰撞的敏感度从而提高CPU执行效率。 一个实体进入另一个实体的View必须跨越View半径区域，但实体离开View区域则需要移出View半径区域包括滞后区域。 |
+| hyst | float, specifies the size of the lag area of the View. A reasonable setting of the lag area will reduce the sensitivity of View collisions and reduce CPU consumption. Views where one entity enters another entity must span the View radius area, but entities that leave the View area need to move out of the View radius area including the lag area. |
 
-返回：
+returns:
 
 - None
 
@@ -605,372 +629,417 @@ View半径默认是不能大于500.0的。详情请看kbengine_defaults.xml配�
 
 ### def teleport(self, nearbyMBRef, position, direction):
 
-功能说明：
-瞬间移动一个Entity到一个指定的空间。这个函数允许指定实体移动后的位置与朝向。
-如果需要在不同空间跳转（ 通常用于不同场景或者房间跳转 ），可以传一个CellEntityCall给这个函数（ 这个entityCall所对应的实体必须在目的空间中 ）。
-这个函数只能在real的实体上被调用。
+Function description:
+Instantly move anEntityto a
+specified space. This function allows you to specify the position and
+orientation of the entity after is has been moved.
+If you need to jump in differentspaces(usually for different scene or room jumps), you can pass aCellEntityCallto this function (the entity corresponding to the entityCall must be
+in the destinationSpace).
+This function can only be called onrealentities.
 
-参数：
+parameters:
 
-| nearbyMBRef | 一个决定Entity跳往哪个Space的CellEntityCall（ 这个entityCall所对应的实体必须在目的Space中 ），它被认为是传送目的地。 这个可以设为None，在这种情形下它会在当前的cell完成瞬移。 |
+| nearbyMBRef | ACellEntityCall(the entity corresponding to this entityCall must be in the destinationSpace) that determines whichSpaceanEntityis to jump to. It is considered to be the transfer destination. This can be set to None, in which case it will teleport on the current cell. |
 | --- | --- |
-| position | Entity瞬移后的坐标，是一个有3个float(x, y, z)组成的序列。 |
-| direction | Entity瞬移后的朝向，是一个由3个float组成的序列(roll,pitch, yaw)。 |
+| position | A sequence of 3 floats (x, y, z), the coordinates of where to teleport theEntity. |
+| direction | A sequence of 3 floats (roll, pitch, yaw), the orientation of theEntityafter teleportation. |
 
 <a id="writeToDB"></a>
 
 ### def writeToDB(self, shouldAutoLoad, dbInterfaceName):
 
-功能说明：
-这个函数保存与这个实体相关的数据到数据库，包括base实体的数据。在数据确认传到数据库之前base实体的onWriteToDB函数会被调用。
-cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时数据是最新的。
-这个函数只能在real实体且实体必须存在base部分时才允许被调用。
+Function description:
+This function saves the data related to this entity to the database,
+including the data of the base entity. The onWriteToDB function of the
+base entity is called before the data is passed to the database.
+The data of the cell entity is also backed up in the base entity to
+ensure that the data is up-to-date when crash recovery data is encountered
+This function can only be called onrealentities, and the entity must exist in the base section.
 
-参数：
+parameters:
 
-| shouldAutoLoad | 这个可选参数指定这个实体在服务启动的时候是否需要从数据库加载。 注意：服务器启动时自动加载实体，底层默认将会调用createEntityAnywhereFromDBID将实体创建到一个负载最小的baseapp上，整个过程将会在第一个启动的baseapp调用onBaseAppReady之前完成。 脚本层可以在个性化脚本(kbengine_defaults.xml->baseapp->entryScriptFile定义)中重新实现实体的创建方法，例如： def onAutoLoadEntityCreate(entityType, dbid): KBEngine.createEntityFromDBID(entityType, dbid) |
+| shouldAutoLoad | bool, optional parameter, specifies whether this entity needs to be loaded from the database when the service starts. Note: The entity is automatically loaded when the server starts. The default is to call createEntityAnywhereFromDBID to create an entity to a minimally loaded baseapp. The entire process will be completed before the first started baseapp calls onBaseAppReady. The script layer can reimplement the entity creation method in a customized script (kbengine_defaults.xml->baseapp->entryScriptFile definition), for example: def onAutoLoadEntityCreate(entityType, dbid): KBEngine.createEntityFromDBID(entityType, dbid) |
 | --- | --- |
-| dbInterfaceName | string，可选参数，指定由某个数据库接口来完成, 默认使用"default"接口。数据库接口由kbengine_defaults.xml->dbmgr->databaseInterfaces中定义。 |
+| dbInterfaceName | string, optional parameter, specified by a database interface, uses the interface name "default" by default. The database interface is defined in kbengine_defaults.xml->dbmgr->databaseInterfaces. |
 
 <a id="getWitnesses"></a>
 
 ### def getWitnesses(self):
 
-功能说明：
-这个函数返回观察该Entity的所有观察者(玩家)。
+Function description:
+This function returns all other entities(Players) that observe thisEntity.
 
-返回：
+returns:
 
-- tuple， 包含零个或者多个Entity的数组。
+- tuple, an array of zero or moreEntity.
 
 <a id="getComponent"></a>
 
 ### def getComponent(self, componentName, all):
 
-功能说明：
-该函数用于获取实体所绑定的某一类组件实例。
+Function description:
+Gets a component instance of the specified type attached to the entity.
 
-参数：
+parameters:
 
-| componentName | string，组件类型名称，组件的模块名称。 |
+| componentName | string, The component type name. |
 | --- | --- |
-| all | bool，如果为True，返回所有同类组件实例，否则只返回第一个或空列表。 |
+| all | bool, if True, Returns all instances of the same type of component, otherwise only returns the first or empty list. |
 
 <a id="fireEvent"></a>
 
 ### def fireEvent(self, eventName, *args):
 
-功能说明：
-该函数用于触发实体事件。
+Function description:
+Trigger entity events.
 
-参数：
+parameters:
 
-| eventName | string，要触发的事件名称。 |
+| eventName | string, the name of the event to trigger. |
 | --- | --- |
-| args | 要附带的事件数据，可变参数。 |
+| args | The event datas to be attached, variable parameters. |
 
 <a id="registerEvent"></a>
 
 ### def registerEvent(self, eventName, callback):
 
-功能说明：
-该函数用于注册实体事件。
+Function description:
+Register entity events.
 
-参数：
+parameters:
 
-| eventName | string，要注册监听的事件名称。 |
+| eventName | string, the name of the event to be registered for listening. |
 | --- | --- |
-| callback | 当事件触发时，用于响应该事件的回调方法。 |
+| callback | The callback method used to respond to the event when the event fires. |
 
 <a id="deregisterEvent"></a>
 
 ### def deregisterEvent(self, eventName, callback):
 
-功能说明：
-该函数用于注销监听实体事件。
+Function description:
+Deregister entity events.
 
-参数：
+parameters:
 
-| eventName | string，要注销监听的事件名称。 |
+| eventName | string, the name of the event to be deregister. |
 | --- | --- |
-| callback | 要注销监听的回调方法。 |
+| callback | The callback method to deregister of the listener. |
 
-## 回调函数文档
+## Callback functions documentation
 
 <a id="onDestroy"></a>
 
 ### def onDestroy(self):
 
-如果这个函数在脚本中有实现，这个函数在调用Entity后，在实际销毁之前被调用。
-这个函数没有参数。
+If this function is implemented in a
+script, it is called afterEntity.destroy()
+destroys this entity. This function has no parameters.
 
 <a id="onEnterTrap"></a>
 
 ### def onEnterTrap(self, entity, rangeXZ, rangeY, controllerID, userArg):
 
-当注册了使用Entity.[addProximity](./Entity.md#addProximity注册了一个范围触发器，有其他实体进入触发器时，该回调函数被调用。
+When a scope trigger is registered usingEntity.addProximityand another entity enters the trigger, this callback function is called.
 
-参数：
+parameters:
 
-| entity | 已经进入了范围的实体。 |
+| entity | Entity that has entered the area |
 | --- | --- |
-| rangeXZ | float，给定触发器xz轴区域的大小，必须大于等于0。 |
-| rangeY | float，给定触发器y轴高度，必须大于等于0。 需要注意的是，这个参数要生效必须开放kbengine_defaults.xml->cellapp->coordinate_system->rangemgr_y 开放y轴管理会带来一些消耗，因为一些游戏大量的实体都在同一y轴高度或者在差不多水平线高度，此时碰撞变得非常密集。 3D太空类游戏或者小房间类实体较少的游戏比较适合开放此选项。 |
-| controllerID | 这个触发器的控制器id。 |
-| userArg | 这个参数的值由用户调用[addProximity](./Entity.md#addProximity时给出，用户可以根据此参数对当前行为做一些判断。 |
+| rangeXZ | float, the size of the xz axis of the trigger, must be greater than or equal to zero. |
+| rangeY | float, the size of the y-axis height of the trigger, must be greater than or equal to zero. It should be noted that for this parameter to take effect you must enablekbengine_defaults.xml->cellapp->coordinate_system->rangemgr_y Opening y-axis management will increase CPU consumption, because some games have a large number of entities at the same y-axis height or on the ground at nearly the same height. Because of this, the collision becomes very dense. 3D space games or small room-type games are more suitable for enabling this option. |
+| controllerID | The controller id of this trigger. |
+| userArg | The value of the parameter given by the user when callingaddProximity, the user can decide how to use this parameter. |
 
 <a id="onEnteredView"></a>
 
 ### def onEnteredView(self, entity):
 
-如果这个函数在脚本中有实现，当一个实体进入了当前实体的View范围，该回调被触发。
+If this function is implemented in a
+script, when an entity enters theViewscope of the current entity, this callback is triggered.
 
-参数：
+parameters:
 
-| entity | 进入View范围的实体。 |
+| entity | The entity which has entered the View scope. |
 | --- | --- |
 
 <a id="onGetWitness"></a>
 
 ### def onGetWitness(self):
 
-如果这个函数在脚本中有实现，当实体绑定了Witness时被调用。
-也可以访问实体属性[Entity.hasWitness](#hasWitness)得到实体当前的状态。
+If this function is implemented in a script,
+it is called when the entity has aWitnessbound to it.
+You can also access the entity property[Entity.hasWitness](#hasWitness)to get the current state of the entity.
 
 <a id="onLeaveTrap"></a>
 
 ### def onLeaveTrap(self, entity, rangeXZ, rangeY, controllerID, userArg):
 
-如果这个函数在脚本中有实现，当实体离开了当前实体注册的范围触发器区域时被触发，范围触发器由Entity.[addProximity](#addProximity)注册。
+If this function is implemented in a
+script, it is triggered when an entity leaves the trigger area registered
+by the current entity. The scope trigger is registered withEntity.[addProximity](#addProximity).
 
-参数：
+parameters:
 
-| entity | 已经离开触发器区域的实体。 |
+| entity | The entity that has left the trigger area. |
 | --- | --- |
-| rangeXZ | float，给定触发器xz轴区域的大小，必须大于等于0。 |
-| rangeY | float，给定触发器y轴高度，必须大于等于0。 需要注意的是，这个参数要生效必须开放kbengine_defaults.xml->cellapp->coordinate_system->rangemgr_y 开放y轴管理会带来一些消耗，因为一些游戏大量的实体都在同一y轴高度或者在差不多水平线高度，此时碰撞变得非常密集。 3D太空类游戏或者小房间类实体较少的游戏比较适合开放此选项。 |
-| controllerID | 这个触发器的控制器ID。 |
-| userArg | 这个参数的值由用户调用[addProximity](./Entity.md#addProximity时给出，用户可以根据此参数对当前行为做一些判断。 |
+| rangeXZ | float, the size of the xz axis of the trigger, must be greater than or equal to zero. |
+| rangeY | float, the size of the y-axis height of the trigger, must be greater than or equal to zero. It should be noted that for this parameter to take effect you must enablekbengine_defaults.xml->cellapp->coordinate_system->rangemgr_y Opening y-axis management will increase CPU consumption, because some games have a large number of entities at the same y-axis height or on the ground at nearly the same height. Because of this, the collision becomes very dense. 3D space games or small room-type games are more suitable for enabling this option. |
+| controllerID | The controller ID of this trigger. |
+| userArg | The value of the parameter given by the user when callingaddProximity, the user can decide how to use this parameter. |
 
 <a id="onLoseControlledBy"></a>
 
 ### def onLoseControlledBy(self, id):
 
-如果这个函数在脚本中有实现，当Entity.[controlledBy](./Entity.md#controlledBy所关联的实体丢失时改回调方法被调用。
+If this function is implemented in a
+script, this callback is triggered when this entity loses theEntity.controlledByentity.
 
-参数：
+parameters:
 
-| id | controlledBy实体的ID。 |
+| id | ID of the controlledBy entity. |
 | --- | --- |
 
 <a id="onLoseWitness"></a>
 
 ### def onLoseWitness(self):
 
-如果这个函数在脚本中有实现，当实体解除Witness时，该回调被触发。
-也可以访问实体属性[Entity.hasWitness](#hasWitness)得到实体当前的状态。
+If this function is implemented in a
+script, the callback is triggered whe this entity loses aWitness.
+You can also access that[Entity.hasWitness](#hasWitness)property
+to get the current state.
 
 <a id="onMove"></a>
 
 ### def onMove(self, controllerID, userData):
 
-如果这个函数在脚本中有实现，相关的Entity.[moveToPoint](./Entity.md#moveToPoint与Entity.[moveToEntity](./Entity.md#moveToEntity还有Entity.[navigate](./Entity.md#navigate方法被调用并且成功后底层每帧移动都会回调此函数。
+If this function is implemented in the
+script, the callback is invoked each frame when moved after a call toEntity.moveToPoint,Entity.moveToEntity, orEntity.navigate.
 
-参数：
+parameters:
 
-| controllerID | 与某个移动相关的控制器ID。 |
+| controllerID | The controller ID associated with the move. |
 | --- | --- |
-| userData | 这个参数值由用户在请求移动相关接口时给出。 |
+| userData | The parameter given by the user when requesting to move the entity. |
 
 <a id="onMoveOver"></a>
 
 ### def onMoveOver(self, controllerID, userData):
 
-如果这个函数在脚本中有实现，相关的Entity.[moveToPoint](./Entity.md#moveToPoint与Entity.[moveToEntity](./Entity.md#moveToEntity还有Entity.[navigate](./Entity.md#navigate方法被调用后到达指定目标点时会回调此函数。
+If this callback function is implemented in a
+script, it is invoked after a call toEntity.moveToPoint,Entity.moveToEntity, orEntity.navigatewhen this entity reaches the target point.
 
-参数：
+parameters:
 
-| controllerID | 与某个移动相关的控制器ID。 |
+| controllerID | The controller ID associated with the move. |
 | --- | --- |
-| userData | 这个参数值由用户在请求移动相关接口时给出。 |
+| userData | This parameter value is given by the user when requesting to move an entity. |
 
 <a id="onMoveFailure"></a>
 
 ### def onMoveFailure(self, controllerID, userData):
 
-如果这个函数在脚本中有实现，相关的Entity.[moveToPoint](./Entity.md#moveToPoint与Entity.[moveToEntity](./Entity.md#moveToEntity还有Entity.[navigate](./Entity.md#navigate方法被调用并且失败时会回调此函数。
+If this function is implemented in the
+script, this callback is invoked after a call toEntity.moveToPoint,Entity.moveToEntity, orEntity.navigateif the movement has failed.
 
-参数：
+parameters:
 
-| controllerID | 与某个移动相关的控制器ID。 |
+| controllerID | The controller ID associated with the move. |
 | --- | --- |
-| userData | 这个参数值由用户在请求移动相关接口时给出。 |
+| userData | This parameter value is given by the user when requesting to move an entity. |
 
 <a id="onRestore"></a>
 
 ### def onRestore(self):
 
-如果这个函数在脚本中有实现，这个函数在Cell应用程序崩溃后在其它Cell应用程序上重新创建该实体时被调用。这个函数没有参数。
+If this callback function is implemented in a
+script, it is invoked when the Cell application crashes and recreates
+the entity on another cellapp. This function has no arguments.
 
 <a id="onSpaceGone"></a>
 
 ### def onSpaceGone(self):
 
-如果这个函数在脚本中有实现，当前实体所在的Space将要销毁时触发 。这个函数没有参数。
+If this callback function is implemented in the
+script, it will be called when the current entity'sSpaceis destroyed. This function has no parameters.
 
 <a id="onTurn"></a>
 
 ### def onTurn(self, controllerID, userData):
 
-如果这个函数在脚本中有实现，相关的Entity.[addYawRotator](./Entity.md#addYawRotator方法被调用后到达指定yaw时会回调此函数。
+If this callback function is implemented
+in a script, it will be called after reaching the specified yaw. (related toEntity.addYawRotator)
 
-参数：
+parameters:
 
-| controllerID | Entity.[addYawRotator](./Entity.md#addYawRotator返回的控制器ID。 |
+| controllerID | The controller ID returned byEntity.addYawRotator. |
 | --- | --- |
-| userData | 这个参数值由用户在请求移动相关接口时给出。 |
+| userData | This parameter value is given by user when requesting to move an entity. |
 
 <a id="onTeleport"></a>
 
 ### def onTeleport(self):
 
-如果这个函数在脚本中有实现，在通过baseapp的Entity.teleport调用发生的实体传送中，实体(Real entity)被传送之前的时刻此方法会被调用。
-请注意，在cell上调用实体的teleport并不会回调此接口，如果你需要这个功能请在Entity.[teleport](./Entity.md#teleport之后调用此回调。
-
-<a id="onTimer"></a>
-
-### def onTimer(self, timerHandle, userData):
-
-功能说明：
-这个函数当一个与此实体关联的定时器触发的时候被调用。
-一个定时器可以使用Entity.[addTimer](#addTimer)函数添加。
-这里的 `timerHandle` 实际上是脚本层 `timerID`，不是底层调度器里的原生 `TimerHandle`。
-
-源码解析：
-
-- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers
-
-参数：
-
-| timerHandle | 定时器的id。 |
-| --- | --- |
-| userData | 传进Entity.[addTimer](#addTimer)的integer用户数据。 |
+If this callback function is implemented
+in a script, it will be called at the moment before the (Real) entity is
+transmitted in the entity transfer that occurs through the baseapp's
+Entity.teleport call.
+Note: Calling teleport on the entity's cell section does not trigger
+this callback, if you need this feature please invoke this callback after
+a call toEntity.teleport.
 
 <a id="onTeleportFailure"></a>
 
 ### def onTeleportFailure(self):
 
-如果这个函数在脚本中有实现，当用户调用Entity.[teleport](./Entity.md#teleport失败时该回调被调用。
+If this callback function is implemented in a
+script, it will be called after a call toEntity.teleportif the teleport has failed.
 
 <a id="onTeleportSuccess"></a>
 
 ### def onTeleportSuccess(self, nearbyEntity):
 
-如果这个函数在脚本中有实现，当用户调用Entity.[teleport](./Entity.md#teleport成功时该回调被调用。
+If this callback function is implemented
+in a script, it is invoked after a succesful call toEntity.teleport
 
-参数：
+parameters:
 
-| nearbyEntity | 这个参数由用户调用Entity.[teleport](./Entity.md#teleport时给出。这是一个real实体。 |
+| nearbyEntity | This parameter is given by the user when callingEntity.teleport. This is a real entity. |
 | --- | --- |
+
+<a id="onTimer"></a>
+
+### def onTimer(self, timerHandle, userData):
+
+Function description:
+This function is called when a timer associated with this entity is triggered.
+A timer can be added using theEntity.[addTimer](#addTimer)function.
+
+parameters:
+
+| timerHandle | The ID of the timer. |
+| --- | --- |
+| userData | integer, given by the user when callingEntity.[addTimer](#addTimer). |
 
 <a id="onUpdateBegin"></a>
 
 ### def onUpdateBegin(self):
 
-当同步一帧开始时被调用。
+Invoked when a synchronization frame begins.
 
 <a id="onUpdateEnd"></a>
 
 ### def onUpdateEnd(self):
 
-当同步一帧结束时被调用。
+Invoked after a synchronization frame
+has completed.
 
 <a id="onWitnessed"></a>
 
 ### def onWitnessed(self, isWitnessed):
 
-如果这个函数在脚本中有实现，如果当前实体进入了另一个绑定了Witness的实体的View范围（也可以理解为一个实体被观察者观察到了），则该实体的回调函数被调用。
-可以利用这个函数在实体被观察时激活实体的AI，实体停止被观察时可以停止AI的执行，这样可以降低服务端的计算量从而提升效率。
+If this callback function is implemented
+in a script, it is called when this entity enters the View area of
+another entity bound to a Witness (also can be understood as when this
+entity is observed by a client). This function can be used to activate
+the entity's AI when it is observed, and stopping AI execution when the
+entity ceases to be observed, thus reducing CPU consumption of the server
+to increase efficiency.
 
-参数：
+parameters:
 
-| isWitnessed | bool，实体被观察时为True，实体被停止观察时是False。 也可以访问实体属性[Entity.isWitnessed](#isWitnessed)得到实体当前的状态。 |
+| isWitnessed | bool, True if the entity is observed and False when the entity is not observed. You can also access the entity property[Entity.isWitnessed](#isWitnessed)to get the current state of the entity. |
 | --- | --- |
 
 <a id="onWriteToDB"></a>
 
 ### def onWriteToDB(self):
 
-如果这个函数在脚本中有实现，这个函数在实体将要存档到数据库时被调用。
+If this callback function is implemented
+in a script, it is called when the entity is about to be archived into
+the database.
 
-## 属性文档
+## Attributes documentation
 
 <a id="allClients"></a>
 
 allClients
 
-通过这个属性调用实体的客户端远程方法，引擎会将这个消息广播给实体View范围内所有的其他绑定了客户端的实体(包括自己的客户端，绑定了客户端的实体通常为玩家)。
-例子：
-avatar的View范围内有玩家A和玩家B以及怪物C。
-avatar.allClients.attack(monsterID，skillID, damage)
-此时，玩家自己和玩家A还有玩家B的客户端都会调用到该实体attack方法，在他们的客户端可以调用指定技能的攻击动作做表现。
+By calling the entity's remote client
+methods through this attribute, the engine broadcasts the message to all
+other entities bound to a client that are within this entity's View area
+(including its own client, and the entity bound to the client is usually
+the player)
+Example:
+Avatar has player A, player B, and monster C in the View range.
+avatar.allClients.attack(monsterID, skillID, damage)
+At this point, the player himself, player A's, and player B's clients will
+all call the entity's attack method, and their client can invoke the
+specified skill's attack action to perform.
 
-其他参考：
+Other references:
 
-- Entity.[clientEntity](./Entity.md#clientEntity Entity.[otherClients](./Entity.md#otherClients
+- Entity.clientEntity Entity.otherClients
 
 <a id="base"></a>
 
 base
 
-base是用于联系Entity实体的entityCall。这个属性是只读的，且如果这个实体没有关联的Entity实体时属性是None。
+base is the entityCall used to contact
+the baseEntity. This attribute
+is read-only and is None if the entity has no associated baseEntity.
 
-其他参考：
+Other references:
 
-- Entity.[clientEntity](./Entity.md#clientEntity Entity.[allClients](./Entity.md#allClients Entity.[otherClients](./Entity.md#otherClients
+- Entity.clientEntity Entity.allClients Entity.otherClients
 
-类型：
+Type:
 
-- 只读的，ENTITYCALL
+- Read-only,ENTITYCALL
 
 <a id="className"></a>
 
 className
 
-实体的类名。
+The class name of the entity.
 
-类型：
+Type:
 
-- 只读，string
+- Read-only, string
 
 <a id="client"></a>
 
 client
 
-client是用于联系客户端的entityCall。这个属性是只读的，且如果这个实体没有关联的客户端时属性是None。
+client is the entityCall used to contact
+associated client. This attribute is read-only, and is None if this entity
+does not have an associated client.
 
-其他参考：
+Other references:
 
-- Entity.[clientEntity](./Entity.md#clientEntity Entity.[allClients](./Entity.md#allClients Entity.[otherClients](./Entity.md#otherClients
+- Entity.clientEntity Entity.allClients Entity.otherClients
 
-类型：
+Type:
 
-- 只读的，ENTITYCALL
+- Read-only,ENTITYCALL
 
 <a id="controlledBy"></a>
 
 controlledBy
 
-该属性如果设置为某个客户端所关联的服务端实体的BaseEntityCall，那么该实体由对应的客户端来控制移动，如果该属性为None则实体由服务端移动。
-当客户端登陆后调用giveClientTo到该实体时，该属性会自动的设置为自己的BaseEntityCall。
-脚本可以灵活的控制该实体由服务端控制移动或是由客户端（自己的客户端或是其他客户端）控制移动。
+If this attribute is set to the
+BaseEntityCall of the server-side entity associated with a client, this
+entity is controlled by the corresponding client to move. If the attribute
+is None, the entity is moved by the server. When the client logs in and
+calls giveClientTo on this entity, this attribute is automatically set to
+its own BaseEntityCall.
+Scripts can flexibly control the movement of the entity by the server or
+by the client (its own client or give control to other clients).
 
-其他参考：
+Other references:
 
-- Entity.[onLoseControlledBy](./Entity.md#onLoseControlledBy
-- [源码解析：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
+- Entity.onLoseControlledBy
 
-类型：
+Type:
 
 - BaseEntityCall
 
@@ -978,78 +1047,91 @@ controlledBy
 
 direction
 
-这个属性描述的是Entity在世界空间中的朝向，用户可以改变这个属性，数据会同步到客户端。
+This attribute describes the orientation
+of theEntityin world space. Users
+can change this attribute and the data will be synchronized to the client.
 
-例子：
+Example:
 self.direction.y = 1.0
 self.direction.z = 1.0
 
-类型：
+Type:
 
-- Vector3, 其中包含(roll, pitch, yaw)，以弧度表示。
+- Vector3, which contains (roll, pitch, yaw) in radians.
 
 <a id="hasWitness"></a>
 
 hasWitness
 
-这个只读属性如果为True，表示实体已经绑定了一个Witness，绑定了Witness的实体则客户端可以通过实体获得实体View范围内的信息。否则为False。
+If this read-only attribute is True,
+it means that the entity has already bound aWitness.
+If the entity is bound toWitness,
+the client can obtain information from the entity's view scope. Otherwise, False.
 
-类型：
+Type:
 
-- 只读的， bool
+- Read-only, bool
 
 <a id="id"></a>
 
 id
 
-id是Entity的对象id。这个id是一个整型，在base，cell和client相关联的实体之间是相同的。 这个属性是只读的。
+id is the id of theEntityobject. This id is an integer that is the same between base, cell,
+and client associated entities. This attribute is read-only.
 
-类型：
+Type:
 
-- 只读的，int32
+- Read-only, int32
 
 <a id="isDestroyed"></a>
 
 isDestroyed
 
-如果这个属性的值为True，Entity则已经被销毁了。
+If this attribute is True, thisEntityhas already been destroyed.
 
-类型：
+Type:
 
-- 只读的， bool
+- Read-only, bool
 
 <a id="isOnGround"></a>
 
 isOnGround
 
-如果这个属性的值为True，Entity在地面上，否则为False。
+If the value of this attribute is True,
+theEntityis on the ground, otherwise
+it is False.
 
-类型：
+Type:
 
-- 只读的， bool
+- Read-only, bool
 
 <a id="isWitnessed"></a>
 
 isWitnessed
 
-如果当前实体进入了另一个绑定了Witness的实体的View范围（也可以理解为一个实体被观察者观察到了, 这个属性值为True，否则为False。
-参考：
-Entity.[onWitnessed](./Entity.md#onWitnessed
+If the current entity is in the View
+scope of another entity bound to Witness (can also be understood as an
+entity observed by a client), this property is True, otherwise it is False.
+Other references:
 
-类型：
+- Entity.onWitnessed
 
-- 只读的， bool
+Type:
+
+- Read-only, bool
 
 <a id="layer"></a>
 
 layer
 
-一个space可以同时加载多个navmesh数据，不同的navmesh在不同的layer中，不同的layer可被抽象成地面、水面等等。
-通过这个属性决定一个实体存在于哪个layer中。
-参考：
+A space can load multiple navmesh data
+at the same time. Different navmesh can be in different layers. Different
+layers can be abstracted into the ground, the water surface, and so on.
+This attribute determines which layer an entity exists in.
+Reference:
 KBEngine.addSpaceGeometryMapping
 
-类型：
+Type:
 
 - int8
 
@@ -1057,29 +1139,37 @@ KBEngine.addSpaceGeometryMapping
 
 otherClients
 
-通过这个属性调用实体的客户端远程方法，引擎会将这个消息广播给实体View范围内所有的其他绑定了客户端的实体(不包括自己的客户端，绑定了客户端的实体通常为玩家)。
-例子：
-avatar的View范围内有玩家A和玩家B以及怪物C。
-avatar.otherClients.attack(monsterID，skillID, damage)
-此时，玩家A与玩家B的客户端都会调用到该实体attack方法，在他们的客户端可以调用指定技能的攻击动作做表现。
+By calling the entity's remote client
+methods through this property, the engine broadcasts the message to all
+other entities bound to the cliend within this entity's View scope (Not
+including its own client. The entity bound to the client is usually the player.).
+Example:
+avatar has player A, player B, and monster C in the View range.
+avatar.otherClients.attack(monsterID, skillID, damage)
+At this point, player A's and player B's client will call the entity
+attack method, and their client can invoke the specified skill's attack
+action to perform.
 
-其他参考：
+Other references:
 
-- Entity.[clientEntity](./Entity.md#clientEntity Entity.[otherClients](./Entity.md#otherClients
+- Entity.clientEntity Entity.otherClients
 
 <a id="position"></a>
 
 position
 
-这个实体在世界空间中的坐标(x, y, z)，这个属性可以被用户改变，改变后会同步到客户端。
-需要注意的是，不要引用这个属性，引用这个属性很有可能错误的修改了实体的真实坐标。
-例子：
+The coordinates of this entity in world
+space (x, y, z). This attribute can be changed by the user and will be
+synchronized to the client after the change. It is important to note that this
+attribute should not be referenced. Referencing this attribute is likely
+to incorrectly modify the real coordinates of the entity.
+Example:
 
 ```python
 self.position.y = 10.0
 ```
 
-如果你想拷贝这个属性值可以使用如下方式：
+If you want to copy this attribute value you can do the following:
 
 ```python
 	import Math
@@ -1088,7 +1178,7 @@ Vector3
 ( self.position )
 ```
 
-类型：
+Type:
 
 - Vector3
 
@@ -1096,23 +1186,27 @@ Vector3
 
 spaceID
 
-这个属性是实体所在的空间的ID，cell与客户端这个值都保持一致。
+This attribute is the ID of thespacein which the entity is located. The cell and client ids are the same.
 
-类型：
+Type:
 
-- 只读的，Integer
+- Read-only, Integer
 
 <a id="topSpeed"></a>
 
 topSpeed
 
-实体的最大xz轴移动速度（米/秒），这个属性通常要比实际移动速度要大一些，服务端通过这个属性检查客户端的移动合法性，如果移动距离超出速度限制则被强制拉回上一个坐标位置。
+The maximum xz movement speed
+of the entity (m/s). This attribute is usually larger than the actualy
+movement speed. The server checks the client's movement legality through
+this attribute. If the movement distance excedes the speed limit, it is
+forced back to the previous position.
 
-其他参考：
+Other references:
 
-- Entity.[topSpeedY](./Entity.md#topSpeedY
+- Entity.topSpeedY
 
-类型：
+Type:
 
 - float
 
@@ -1120,13 +1214,17 @@ topSpeed
 
 topSpeedY
 
-实体的最大y轴移动速度（米/秒），这个属性通常要比实际移动速度要大一些，服务端通过这个属性检查客户端的移动合法性，如果移动距离超出速度限制则被强制拉回上一个坐标位置。
+The maximum y-axis movement speed
+of the entity (m/s). This attribute is usually larger than the actualy
+movement speed. The server checks the client's movement legality through
+this attribute. If the movement distance excedes the speed limit, it is
+forced back to the previous position.
 
-其他参考：
+Other references:
 
-- Entity.[topSpeed](./Entity.md#topSpeed
+- Entity.topSpeed
 
-类型：
+Type:
 
 - float
 
@@ -1134,22 +1232,34 @@ topSpeedY
 
 volatileInfo
 
-这个属性指定Entity的易变类数据同步到客户端的策略。
-易变类数据包括实体的坐标position和实体的朝向direction，易变类数据由于极易改变的特性，引擎底层使用了一套优化的方案将其同步到客户端。
-这个属性是四个float（position，yaw，pitch，roll）代表距离值，当一个实体靠近当前实体达到距离则服务端向其同步相关数据。如果距离值大于View半径则代表总是同步。
-还有一个特殊的bool属性optimized，它的作用是控制服务器同步时是否进行优化，目前主要的优化是Y轴。
-如果为true，在一些行为(如：navigate)导致服务器能确定实体在地面时，服务器不同步实体的Y轴坐标，当同步大量实体时能节省大量带宽，默认为true。
-用户也可以在.def制定不同实体的同步策略：
+This attribute specifies theEntity's
+volatile data synchronization policy.
+Volatile data includes the coordinate position of the entity and the
+orientation of the entity. Since volatile data is easily changed, the
+engine uses a set of optimized solutions to synchronize it to the
+client.
+This attribute is four floats (position, yaw, pitch, roll) that represents
+the distance value, and the server synchronizes the relevant data to it
+when an entity reaches a close distance. If the distance value is larger
+than the View radius, it means that it is always synchronized
+There is also a special bool attribute that is optimized. Its role is to
+control whether or not the server is optimized for synchronization. The
+current main optimization is the Y axis.
+If true, the server does not synchronize the y-axis coordinates of the
+entity when some actions (e.g., navigate) cause the server to determine
+the entity is on the ground. This can save a lot of bandwidth when
+synchronizing a large number of entities. The default is true.
+Users can also set the synchronization policies for different entities in .def:
 
 ```python
 <Volatile>
-    <position/>           <!-- 总是同步 -->
-    <yaw/>                <!-- 总是同步 -->
-    <pitch>20</pitch>     <!-- 相距20米或以内同步     -->
+    <position/>           <!-- always synchronize -->
+    <yaw/>                <!-- always synchronize -->
+    <pitch>20</pitch>     <!-- synchronize within 20m or less -->
     <optimized> true </optimized>   
-</Volatile>               <!-- roll未指明则总是同步  -->
+</Volatile>               <!-- roll is always synchronized if not specified  -->
 ```
 
-类型：
+Type:
 
-- sequence， 四个浮点数(float, float, float, float)
+- sequence, four floats (float, float, float, float)

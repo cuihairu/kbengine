@@ -1,4 +1,5 @@
-# Loginapp进程
+# Loginapp process
 
-Loginapp进程主要负责处理实体的注册与登陆请求。
-注意：该进程脚本实现在scripts/login目录中。
+The Loginapp process is primarily responsible for handling entity
+registration and login requests.
+Note: This process script is implemented in the scripts/login directory.

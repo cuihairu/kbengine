@@ -1,0 +1,185 @@
+# WebConsole 指南
+
+> 本页依据 `docs/WebConsole_Guide(cn).pdf` 重新整理，保留文字说明，省略截图编号。
+
+## 环境配置
+
+### 1. 运行环境
+
+Python版本：Python3.X (建议3.3 或3.3以上版本）
+
+Django版本：1.8.9
+
+### 2. 使用方法
+
+#### 1) 请自行为你所使用的python安装与之匹配的django模块，如果不想安装
+
+django，有另外两个选择:-
+
+如果使用的是python2.6.6，可进入“kbe/tools/server/django_packages”目录，并在该目录下解压Django-1.6.11.tar.gz 文件（解压到当前目录）；
+
+-
+
+如果使用的是python2.7或以上，可进入“kbe/tools/server/django_packages”
+
+目录，并在该目录下解压Django-1.8.9.tar.gz 文件（解压到当前目录）。
+
+#### 2) 修改sync_db.bat、sync_db.sh以及run_server.bat、run_server.sh，使其正确
+
+指向你所使用的python的路径，第一次使用，需要初始化数据：
+
+- windows 下python3.3 + django 1.8.9，运行“sync_db.bat”命令；
+- linux下python3.3 + django 1.8.9，运行“sync_db.sh”命令；
+- linux下python2.6 + django 1.6.11，运行“sync_db_dj-1.6.sh”命令；
+- windows 下python2.6 + django 1.6.11，请参考“sync_db_dj-1.6.sh”自行创 建.bat文件。
+
+## 运行步骤
+
+### 1. 启动服务器
+
+- Linux：执行 run_server.sh 脚本，或者部署到 nginx 上，浏览器打开地址 “http://xxx.xxx.xxx.xxx:8000/wc/”进行访问，其中“xxx.xxx.xxx.xxx”为运 行webconsole的机器IP； - Windows：运行run_server.bat(需将run_server.bat 中的python文件夹改为 自 己 的 python 文 件 夹 ) ， 之 后 在 浏 览 器 打 开 地 址 “http://xxx.xxx.xxx.xxx:8000/wc/”进行访问，其中“xxx.xxx.xxx.xxx”为运 行webconsole的机器IP。
+
+### 2. 登录系统
+
+初次登陆需用默认用户名密码登入用户管理界面，并新建管理用户。
+
+注意事项：-
+
+第一次使用此控制台时，默认的登录账号为“Admin”，默认密码为“123456”，此账号也是后台唯一的管理账号，登录后请及时修改密码；
+
+- 第一次使用 Admin 进入后台，需要根据自己启动服务器的用户账号名和 用户uid创建新的控制用户，创建完成后，需要退出Admin使用新用户登 录才能进行实际的后台操作；
+- 此后台的开发环境为python3.3 + django 1.8.9，在linux下使用python2.6.6 + django-1.6.11测试通过； - 此工具所有的操作都源于Machine，因此，想要使用这个工具的功能，必 须确保machine进程正确运行； - 有任何使用问题，请在KBEngine官方平台上提出。
+
+## 功能板块说明
+
+### 1. 用户管理界面
+
+#### 1) 账号管理
+
+在这个页面可对使用webconsole的用户进行管理，也可对管理员账户进行管理。
+
+#### 2) 新建管理用户
+
+-
+
+账号：登陆用的账号；
+
+-
+
+昵称：登陆后显示的名称；
+
+-
+
+登录密码：任意字母数字组合；
+
+-
+
+确认密码：再输入一遍密码；
+
+-
+
+操作系统用户：Linux系统的用户名称，Windows 下开发调试请无视；
+
+-
+
+操作系统用户uid：Linux 系统用户uid，Windows 下开发需与被管理的KBE的uid相同，否则无法管理该KBE；
+
+-
+
+KBE_ROOT：被管理的KBE 的KBE_ROOT目录，默认为当前webconsole所在的KBE的KBE_ROOT路径(可为空)；
+
+-
+
+KBE_RES_PATH：被管理的KBE的KBE_RES_PATH目录，默认为当前webconsole
+
+所在的KBE的KBE_RES_PATH路径(可为空)；
+
+-
+
+KBE_BIN_PATH：被管理的KBE的KBE_BIN_PATH目录，默认为当前webconsole
+
+所在的KBE的KBE_BIN_PATH路径(可为空)。
+
+注：因一台服务器上可同时存在多个 KBE，故每个被管理的 KBE 的系统用户、UID、KBE_ROOT、KBE_RES_PATH、KBE_BIN_PATH都不能与其他用户的参数重复。
+
+#### 3) 修改资料
+
+输入新的用户参数，点击确认修改即可。
+
+#### 4) 修改密码
+
+输入新的密码两次并点击修改。
+
+### 2. 集群管理
+
+#### 1) 服务器管理
+
+在“服务器管理”页面，你可以对已启动的KBE进程进行管理和资源消耗查看。
+
+- STOP操作：停止当前进程；
+- KILL操作：杀死当前进程；
+- 启动新组件：启动新的KBE服务组件；
+- 停止服务器：停止当前KBE服务器所有进程；
+- 保存当前服务器运行配置：保存当前KBE服务器进程的数量配置信息。
+
+#### 2) 启动新组件
+
+在该页面，你可以在服务器群内新建任意数量的组件进程。
+
+#### 3) 所有守护进程状态
+
+在当前界面，你可以查看当前服务器群内所有KBE 的Machine信息和资源占用情况。
+
+#### 4) 服务器运行配置
+
+在这个页面，你可以对之前保存的服务器配置进行加载和删除操作。
+
+### 3. 性能分析
+
+在这个页面，选择你想进行分析查看的操作
+
+#### 1) TickProfile
+
+在这个页面，你可以进行 TickProfile 的查询操作，查询时长为空，即默认查询时长为10秒，通过点击柱条可查看相关详细信息
+
+#### 2) Cprofile
+
+在该界面，你可以进行 cprofile 的性能分析查询，查询时长为空，即默认查询时长为10秒。
+
+#### 3) Pyprofile
+
+在该界面，你可以进行pyprofile的信息查询分析，查询时长为空，即默认查询时长为10秒。
+
+#### 4) Eventprofile
+
+在该界面，你可以进行 eventprofile 的信息查询分析，查询时长为空，即默认查询时长为10秒。
+
+#### 5) Networkprofile
+
+在该界面，你可以进行网络性能的信息查询分析，查询时长为空，即默认查询时长为10秒。
+
+### 4. 日志查看
+
+#### 1) 实时日志
+
+该页面提供实时日志的查看和筛选，点击上方的箭头可下拉筛选菜单，默认为查看所有进程和所有类型的日志数据。
+
+### 5. 状态图
+
+状态图页面提供给开发者查看当前 cellapp 和 baseapp 的运行状态线性图表，点击名称可查看单个组件进程的状态线形图。
+
+### 6. Python 控制台
+
+在该功能下，你可以选择对单个进程使用控制台功能（Telnet形式），点击“连接到控制台”进入该进程控制台，在下方输入框输入命令，点击执行。
+
+### 7. Watcher
+
+Watcher 功能提供给开发者一个查看单个组件进程的所有状态信息（网络信息、响应速度等），并实时更新数据到进程Watcher页面。
+
+### 8. SpaceViewer
+
+在SpaceViewer中，你可以查看游戏当中所有Space中的entity 的分布情况，左边的 space 列表会随着 space 的产生而更新，右边实时显示该 space 的 entity的运动情况和分布情况。
+
+注：因暂时无法获取space地图的大小，所以该SpaceViewer的XY轴的值为所有
+
+entity 中最大X值和最大 Y值。

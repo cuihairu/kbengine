@@ -1,4 +1,5 @@
-# Logger进程
+# Logger process
 
-Logger进程主要负责收集KBEngine服务器所输出的日志。
-注意：该进程脚本实现在scripts/logger目录中。
+The Logger process is responsible for collecting logs output by the
+KBEngine server.
+Note: This process script is implemented in the scripts/logger directory.

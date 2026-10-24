@@ -1,13 +1,15 @@
-# KBEngine模块
+# KBEngine module
 
-[KBEngine](./KBEngine.md模块提供了Python脚本访问实体的部分，特别是它提供了定时器的注册与移除，
-以及实体的创建。
+ThisKBEnginemodule provides
+the Python script access to theentity's
+cell part, in particular it provides the registration and removal of timers,
+as well as the creation ofentities.
 
-## 类
+## Classes
 
 - Entity
 
-## 成员函数
+## Member functions
 
 - def [addSpaceGeometryMapping](#addSpaceGeometryMapping)( spaceID, mapper, path, shouldLoadOnServer, params ):
 - def [addWatcher](#addWatcher)( path, dataType, getFunction ):
@@ -43,7 +45,7 @@
 - def [time](#time)( ):
 - def [urlopen](#urlopen)( url, callback, postData, headers ):
 
-## 回调函数
+## Callback
 
 - def [onCellAppData](#onCellAppData)( key, value ):
 - def [onCellAppDataDel](#onCellAppDataDel)( key ):
@@ -55,7 +57,7 @@
 - def [onAllSpaceGeometryLoaded](#onAllSpaceGeometryLoaded)( spaceID, isBootstrap, mapping ):
 - def [onReadyForLogin](#onReadyForLogin)( isBootstrap ):
 
-## 属性
+## Attributes
 
 | [LOG_TYPE_DBG](#LOG_TYPE_DBG) |  |
 | --- | --- |
@@ -65,46 +67,55 @@
 | [LOG_TYPE_WAR](#LOG_TYPE_WAR) |  |
 | [NEXT_ONLY](#NEXT_ONLY) |  |
 | [cellAppData](#cellAppData) |  |
-| [component](#component) | 只读string |
+| [component](#component) | Read-onlystring |
 | [entities](#entities) | Entities |
 | [globalData](#globalData) | GlobalDataClient |
 
-## 成员函数文档
+## Member functions documentation
 
 <a id="addSpaceGeometryMapping"></a>
 
 ### def addSpaceGeometryMapping(spaceID, mapper, path, shouldLoadOnServer, params):
 
-功能说明：
-关联一个给定空间的几何映射，函数调用之后服务端和客户端都会加载相应的几何体数据。
-在服务端上，从给定目录里加载所有的几何数据到指定的空间。这些数据可能被分成很多区块，不同区块是异步加载的，当所有的几何数据加载
-完成的时候下面的通知方法会被调用：
+Function description:
+Associate a geometric mapping of a given space. After the function is
+called, the server and client will load the corresponding geometry data.
+On the server, all geometry data is loaded from the given directory into
+the specified space. These data may be divided into many blocks. Different
+blocks are loaded asynchronously. The following callback methods are
+called when all the geometry data is loaded:
 
 ```python
 	def onAllSpaceGeometryLoaded( self, spaceID, mappingName ):
 ```
 
-服务端仅加载场景的几何数据提供给导航和碰撞功能使用，客户端除了几何数据外还会加载纹理等数据。
-3D场景当前默认使用的是recastnavigation插件所导出的数据，2D场景当前默认使用的是MapEditor编辑器导出的数据。
-有一种可能会导致onAllSpaceGeometryLoaded()不被调用，就是如果在某一个
-时刻多个CellApp同时调用这个方法来添加几何到相同的空间的时候CellAppMgr崩溃了。
+The server only loads the geometric data of the scene for use by the
+navigation and collision functions. In addition to the geometric data,
+the client also loads data such as textures.
+3D scenes currently use the data exported by the recastnavigation
+plugin-in by default. 2D scenes currently use the data exported by
+MapEditor by default.
+There is a possibility that onAllSpaceGeometryLoaded() will not be
+invoked, that is, if multiple Cellapps call this method at the same time
+to add geometry to the same space, cellappmgr crashes.
 
-参数：
+parameters:
 
-| spaceID | uint32，空间的ID，指定在哪个空间操作 |
+| spaceID | uint32, ID of the space, specifies in which space to operate |
 | --- | --- |
-| mapper | 目前填None |
-| path | 包含几何数据的目录路径 |
-| shouldLoadOnServer | 可选的boolean参数，指定是否在服务端上加载几何。默认为True |
-| params | 可选的PyDict参数，指定不同layer所使用的navmesh，例如： KBEngine.addSpaceGeometryMapping(self.spaceID, None, resPath, True, {0 : "srv_xinshoucun_1.navmesh", 1 : "srv_xinshoucun.navmesh"}) |
+| mapper | Not yet implemented |
+| path | Directory path containing geometry data |
+| shouldLoadOnServer | Optional boolean parameter that specifies whether to load geometry on the server. Default is True. |
+| params | Optional PyDict parameter, specifies the navmesh used by different layers, for example: KBEngine.addSpaceGeometryMapping(self.spaceID, None, resPath, True, {0 : "srv_xinshoucun_1.navmesh", 1 : "srv_xinshoucun.navmesh"}) |
 
 <a id="addWatcher"></a>
 
 ### def addWatcher(path, dataType, getFunction):
 
-功能说明：
-与调试监视系统交互，允许用户向监视系统注册一个监视变量。
-例：
+Function description:
+Interacts with the debug monitoring system to allow users to register
+a monitoring variable with the monitoring system.
+Example:
 
 ```python
 >>> def countPlayers( ):
@@ -121,31 +132,35 @@ addWatcher
 ( "players", "UINT32", countPlayers )
 ```
 
-这个函数添加一个监视变量在"scripts/players"监视路径之下。函数countPlayers在观察者观察时被调用。
+This function adds a watch variable under the "scripts/players" watch path.
+The function countPlayers is called when the watcher observes a change.
 
-参数：
+parameters:
 
-| path | 创建监视的路径。 |
+| path | The path to create a watcher. |
 | --- | --- |
-| dataType | 监视变量的值类型。参考:基本类型 |
-| getFunction | 这个函数当观察者检索该变量时调用。 这个函数不带参数返回一个代表监视变量的值。 |
+| dataType | The value type of the monitored variable. Reference:Basic data types |
+| getFunction | This function is called when the observer retrieves the variable. This function returns a value representing a watch variable without arguments. |
 
 <a id="address"></a>
 
 ### def address():
 
-功能说明：
-返回内部网络接口的地址。
+Function description:
+Returns the address of the internal network interface.
 
 <a id="MemoryStream"></a>
 
 ### def MemoryStream():
 
-功能说明：
-返回一个新的MemoryStream对象。
-MemoryStream对象存储的是二进制信息，提供这个类型是为了让用户能够方便的序列化与反序列化Python基本类型同时能与KBEngine底层序列化规则相同。
-例如：你可以使用这个对象构造一个KBEngine能解析的网络数据包。
-用法：
+Function description:
+Return a new MemoryStream object.
+The MemoryStream object stores binary information. This type is provided
+to allow the user to easily serialize and deserialize the Python base types
+following the same KBEngine underlying serialization rules.
+For example, you can use this object to construct a network packet that
+KBEngine can parse.
+Usage:
 
 ```python
 >>> s = KBEngine.MemoryStream()
@@ -156,19 +171,23 @@ MemoryStream对象存储的是二进制信息，提供这个类型是为了让�
 >>> 1
 ```
 
-目前MemoryStream能够支持的类型仅为基本数据类型。参考:基本类型
+The types that MemoryStream currently supports are only basic data types.
+Reference:Basic data types
 
 <a id="createEntity"></a>
 
 ### def createEntity(entityType, spaceID, position, direction, params):
 
-功能说明：
-createEntity在当前进程指定space中创建一个新的实体。
-这个函数需要指定要创建的实体的类别，位置和方向，还可以选择性地设置实体的任意属性（属性在实体的.def文件里描述）。
-例子：
+Function description:
+createEntity creates a new entity in the specified space of the current
+process.
+When calling this function you must specifiy the type, location, and direction
+of the entity to be created. Optionally, any attribute of the entity can
+be set with the params Python dictionary parameter. (the attributes are described in the entity's .def file).
+Example:
 
 ```python
-# 创建一个打开的门的实体与"thing"实体的位置一样
+# Create an open Door entity in the same space as the "thing" entity
 direction = ( 0, 0, thing.yaw )
 properties = { "open":1 }
 
@@ -179,27 +198,28 @@ createEntity
                        properties )
 ```
 
-参数：
+parameters:
 
-| entityType | string，要创建的实体名称，在/scripts/entities.xml文件里声明。 |
+| entityType | string, the name of the entity to create, declared in the/scripts/entities.xmlfile. |
 | --- | --- |
-| spaceID | int32，要放置实体的空间的ID。 |
-| position | 由3个float组成的序列，指定新实体的出生点，在世界中的坐标。 |
-| direction | 由3个float组成的序列，指定新实体的初始朝向(roll, pitch, yaw)，相对于世界坐标系。 |
-| params | 可选参数, 一个Python字典对象。 如果一个指定的键是一个Entity属性，他的值会用来初始化这个Entity实体的属性。 |
+| spaceID | int32, the ID of the space to place the entity |
+| position | A sequence of 3 floats that specify the creation point of the new entity, in world coordinates. |
+| direction | A sequence of 3 floats that specify the initial orientation (roll, pitch, yaw) of the new entity in world coordinates. |
+| params | Optional parameters, a Python dictionary object. If a specified key is anEntityattribute, its value will be used to initialize the properties of the newEntity. |
 
-返回：
+returns:
 
-- 新实体。
+- The newEntity.
 
 <a id="debugTracing"></a>
 
 ### def debugTracing():
 
-功能说明：
-输出当前KBEngine追踪的Python扩展对象计数器。
-扩展对象包括：固定字典、固定数组、Entity、EntityCall...
-在服务端正常关闭时如果计数器不为零，此时说明泄露已存在，日志将会输出错误信息。
+Function description:
+Outputs the Python extension object counter that outputs KBEngine trace.
+Extended objects include: fixed dictionary, fixed array, Entity, EntityCall...
+If the counter is not zero when the server is shut down normally, it means
+that the leak already exists and the log will output an error message.
 ERROR cellapp [0x0000cd64] [2014-11-12 00:38:07,300] - PyGC::debugTracing(): FixedArray : leaked(128)
 ERROR cellapp [0x0000cd64] [2014-11-12 00:38:07,300] - PyGC::debugTracing(): EntityCall : leaked(8)
 
@@ -207,303 +227,314 @@ ERROR cellapp [0x0000cd64] [2014-11-12 00:38:07,300] - PyGC::debugTracing(): Ent
 
 ### def delSpaceData(spaceID, key):
 
-功能说明：
-删除指定key的space数据（如果space分割成多个部分，将进行同步删除）。
-space数据由用户通过[setSpaceData](#setSpaceData)设置。
+Function description:
+Deletes the space data of the specified key (if space is divided into
+multiple parts, it will be deleted synchronously).
+The space data is set by the user via[setSpaceData](#setSpaceData).
 
-参数：
+parameters:
 
-| spaceID | int32，空间的ID。 |
+| spaceID | int32, the ID of the space |
 | --- | --- |
-| key | string，一个字符串关键字。 |
+| key | string, a string keyword |
 
 <a id="delWatcher"></a>
 
 ### def delWatcher(path):
 
-功能说明：
-与调试监视系统交互，允许用户在脚本删除监视的变量。
+Function description:
+Interacts with the debug monitoring system, allowing users to delete
+watcher variables in the script.
 
-参数：
+parameters:
 
-| path | 要删除的变量的路径。 |
+| path | The path of the variable to delete. |
 | --- | --- |
 
 <a id="deregisterReadFileDescriptor"></a>
 
 ### def deregisterReadFileDescriptor(fileDescriptor):
 
-功能说明：
-注销已经通过[KBEngine](./KBEngine.md.[registerReadFileDescriptor](./KBEngine.md#registerReadFileDescriptor注册的回调。
-例子:
+Function description:
+Deregisters the callback registered withKBEngine.registerReadFileDescriptor.
+Example:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
-参数：
+parameters:
 
-| fileDescriptor | socket描述符/文件描述符。 |
+| fileDescriptor | Socket descriptor/file descriptor |
 | --- | --- |
 
 <a id="deregisterWriteFileDescriptor"></a>
 
 ### def deregisterWriteFileDescriptor(fileDescriptor):
 
-功能说明：
-注销已经通过[KBEngine](./KBEngine.md.[registerWriteFileDescriptor](./KBEngine.md#registerWriteFileDescriptor注册的回调。
-例子:
+Function description:
+Deregisters the callback registered withKBEngine.registerWriteFileDescriptor.
+Example:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
-参数：
+parameters:
 
-| fileDescriptor | socket描述符/文件描述符。 |
+| fileDescriptor | Socket descriptor/file descriptor |
 | --- | --- |
 
 <a id="executeRawDatabaseCommand"></a>
 
 ### def executeRawDatabaseCommand(command, callback, threadID, dbInterfaceName):
 
-功能说明：
-这个脚本函数在数据库上执行原始数据库命令，该命令将直接由相关数据库进行解析。
-请注意使用该函数修改实体数据可能不生效，因为如果实体已经检出，被修改过的实体数据将仍会被实体存档而导致覆盖。
-强烈不推荐这个函数用于读取或修改实体数据。
+Function description:
+This script function executes a database command on the database,
+which will be directly parsed by the relevant database.
+Please note that using this function to modify the entity data may not
+be effective because if the entity has been checked out, the modified
+entity data will still be archived by the entity and cause overwriting.
+This function is strongly not recommended for reading or modifying entity data.
 
-参数：
+parameters:
 
-| command | 这个数据库命令将会因为不同数据库配置方案而不同。对于方案为MySQL数据库它是一个SQL查询语句。 |
+| command | This database command will be different for different database configurations. For MySQL databases it will be an SQL query statement. |
 | --- | --- |
-| callback | 可选参数，带有命令执行结果的回调对象（比如说是一个函数）。这个回调带有4个参数：结果集合，影响的行数，自増长值，错误信息。 声明样例： def sqlcallback(result, rows, insertid, error): print(result, rows, insertid, error) 如同上面的例子所示，result参数对应的就是“结果集合”，这个结果集合参数是一个行列表。 每一行是一个包含字段值的字符串列表。 命令执行没有返回结果集合（比如说是DELETE命令）， 或者 命令执行有错误时这个结果集合为None。 rows参数则是“影响的行数”，它是一个整数，表示命令执行受影响的行数。这个参数只和不返回结果结合的命令（如DELETE）相关。 如果有结果集合返回或者命令执行有错误时这个参数为None。<br>insertid对应的是“自増长值”，类似于实体的databaseID，当成功的向一张带有自増长类型字段的表中插入数据时，它返回该数据在插入时自増长字段所被赋于的值。 更多的信息可以参阅mysql的mysql_insert_id()方法。另外，此参数仅在数据库类型为mysql时有意义。 error则对应了“错误信息”，当命令执行有错误时，这个参数是一个描述错误的字符串。命令执行没有发生错误时这个参数为None。 |
-| threadID | int32，可选参数，指定一个线程来处理本条命令。用户可以通过这个参数控制某一类命令的执行先后顺序（dbmgr是多线程处理的），默认是不指定，如果threadID是实体的ID， 那么将加入到该实体的存档队列中由线程逐条写入。 |
-| dbInterfaceName | string，可选参数，指定由某个数据库接口来完成, 默认使用"default"接口。数据库接口由kbengine_defaults.xml->dbmgr->databaseInterfaces中定义。 |
+| callback | Optional parameter, callbacks object (for example, a function) with the command's execution result. This callback has 4 parameters: result set, number of rows affected, auto value, and error message. Example: def sqlcallback(result, rows, insertid, error): print(result, rows, insertid, error) As the above example shows, the result parameter corresponds to the "result set", and the result set parameter is a row. List. Each line is a list of strings containing field values. The command execution does not return a result set (for example, a DELETE command), or the result set is None if the command execution has an error. The rows parameter is the "number of rows affected", which is an integer indicating the number of rows affected by the command execution. This parameter is only relevant for commands that do not return results (such as DELETE). This parameter is None if there is a result set return or if there is an error in the command execution. The insertid corresponds to a "long value", similar to the entity's databaseID. When successfully inserting data into a table with an auto long type field, it returns the data at the time of insertion. Assigned value. More information can be found in mysql's mysql_insert_id() method. In addition, this parameter is only meaningful when the database type is mysql. error corresponds to the "error message", when the command execution error, this parameter is a string describing the error. This parameter is None when the command execution has not occurred.threadIDint32, optional parameter, specifies a thread to process this command. Users can use this parameter to control the execution order of certain commands (dbmgr is multi-threaded). The default is not specified. If threadID is the ID of the entity, it will be added to the entity's archive queue and written by the thread one by one. dbInterfaceNamestring, optional parameter, specified by a database interface, defaults to "default" interface. The database interface is defined by kbengine_defaults.xml->dbmgr->databaseInterfaces. |
 
 <a id="genUUID64"></a>
 
 ### def genUUID64():
 
-功能说明：
-该函数生成一个64位的唯一ID。
-注意：这个函数依赖于Cellapps服务进程启动参数gus，请正确设置启动参数保持唯一性。
-另外如果gus超过65535则该函数只能在当前进程上保持唯一性。
-用途：
-多个服务进程上产生唯一物品ID并且在合服时不会产生冲突。
-多个服务进程上产生一个房间ID，不需要进行唯一性校验。
+Function description:
+This function generates a 64-bit unique ID.
+Note: This function is dependent on the 'gus' startup argument of the
+Cellapp service process. Please set the startup arguments to be unique.
+In addition, if gus exceeds 65535, this function can only remain unique
+on the current process.
+Usage
+A unique item ID is generated on multiple service processes and there is
+no conflict when combined.
+A room ID is generated on multiple service processes and no uniqueness
+verification is required.
 
-返回：
+returns:
 
-- 返回一个64位的integer。
+- 64-bit integer
 
 <a id="getResFullPath"></a>
 
 ### def getResFullPath(res):
 
-功能说明：
-获取资源的绝对路径。
-注意：资源必须在KBE_RES_PATH之下才可以访问到。
+Function description:
+Get the absolute path of the resource.
+Note: Resoures must be accessible underKBE_RES_PATH.
 
-参数：
+parameters:
 
-| res | string，如果存在返回资源的绝对路径，否则返回空。 |
+| res | string, if there is an absolute path to return the resource, otherwise it returns null. |
 | --- | --- |
 
-返回：
+returns:
 
-- string，资源的绝对路径。
+- string, the absolute path to the resource.
 
 <a id="getSpaceData"></a>
 
 ### def getSpaceData(spaceID, key):
 
-功能说明：
-获取指定key的space数据。
-space数据由用户通过[setSpaceData](#setSpaceData)设置。
+Function description:
+Get the space data of the specified key.
+The space data is set by the user via[setSpaceData](#setSpaceData).
 
-参数：
+parameters:
 
-| spaceID | int32，空间的ID。 |
+| spaceID | int32, the ID of the space |
 | --- | --- |
-| key | string，一个字符串关键字。 |
+| key | string, a string keyword |
 
-返回：
+returns:
 
-- string，指定key的字符串数据。
+- string, string data for the given key
 
 <a id="getSpaceGeometryMapping"></a>
 
 ### def getSpaceGeometryMapping(spaceID):
 
-功能说明：
-返回一个指定空间的几何映射名称。
+Function description:
+Returns the geometry map name of a specified space.
 
-参数：
+parameters:
 
-| spaceID | 要查询的空间的id。 |
+| spaceID | The ID of the space to be queried |
 | --- | --- |
 
-返回：
+returns:
 
-- string，几何映射名称。
+- string, the name of the geometry map.
 
 <a id="getWatcher"></a>
 
 ### def getWatcher(path):
 
-功能说明：
-从KBEngine调试系统中获取一个监视变量的值。
-例子：在baseapp1的Python命令行输入:
+Function description:
+Gets the value of a watch variable from the KBEngine debug system.
+Example: In the baseapp1 Python console, enter:
 >>>KBEngine.getWatcher("/root/stats/runningTime")
 12673648533
 >>>KBEngine.getWatcher("/root/scripts/players")
 32133
 
-参数：
+parameters:
 
-| path | string，该变量的绝对路径包括变量名(可以在GUIConsole的watcher页查看)。 |
+| path | string, the absolute path of the variable including the variable name (can be viewed on the GUIConsole watcher page). |
 | --- | --- |
 
-返回：
+returns:
 
-- 该变量的值。
+- The value of the variable.
 
 <a id="getWatcherDir"></a>
 
 ### def getWatcherDir(path):
 
-功能说明：
-从KBEngine调试系统中获取一个监视目录下的元素列表(目录、变量名)。
-例子：在baseapp1的Python命令行输入:
+Function description:
+Get a list of elements (directories, variable names) under the watch
+directory from the KBEngine debugging system.
+Example: In baseapp1 Python console, enter:
 >>>KBEngine.getWatcher("/root")
 ('stats', 'objectPools', 'network', 'syspaths', 'ThreadPool', 'cprofiles', 'scripts', 'numProxices', 'componentID', 'componentType', 'uid', 'numClients', 'globalOrder', 'username', 'load', 'gametime', 'entitiesSize', 'groupOrder')
 
-参数：
+parameters:
 
-| path | string，该变量的绝对路径(可以在GUIConsole的watcher页查看)。 |
+| path | string, the absolute path of the variable including the variable name (can be viewed on the GUIConsole watcher page). |
 | --- | --- |
 
-返回：
+returns:
 
-- 监视目录下的元素列表(目录、变量名)。
+- The list of elements (directory, variable name) under the Watch directory.
 
 <a id="getAppFlags"></a>
 
 ### def getAppFlags():
 
-功能说明：
-获取当前引擎APP的标记, 参考:[KBEngine](./KBEngine.md.[setAppFlags](./KBEngine.md#setAppFlags。
+Function description:
+Get the flags of the current engine APP, Reference:KBEngine.setAppFlags��
 
-返回：
+returns:
 
-- KBEngine.APP_FLAGS_*。
+- KBEngine.APP_FLAGS_*
 
 <a id="hasRes"></a>
 
 ### def hasRes(res):
 
-功能说明：
-使用这个接口可以判断一个相对路径的资源是否存在。
-注意：资源必须在KBE_RES_PATH之下才可以访问到。
-例子:
+Function description:
+Use this interface to determine if a relative path exists.
+Note: Resources must be accessible underKBE_RES_PATH.
+Example:
 >>>KBEngine.hasRes("scripts/entities.xml")
 True
 
-参数：
+parameters:
 
-| res | string，资源的相对路径。 |
+| res | string, the relative path of the resource |
 | --- | --- |
 
-返回：
+returns:
 
-- BOOL, 存在返回True，否则返回False。
+- BOOL, if it exists return True, otherwise False.
 
 <a id="isShuttingDown"></a>
 
 ### def isShuttingDown():
 
-功能说明：
-返回服务端是否正在关闭中。在onBaseAppShuttingDown回调函数被调用后，这个函数返回True。
+Function description:
+Returns whether the server is shutting down. After the onBaseAppShuttingDown
+callback function is called, this function returns True.
 
-返回：
+returns:
 
-- 系统正在关闭返回True，否则返回False。
+- BOOL, if the server is shutting down True, otherwise False.
 
 <a id="listPathRes"></a>
 
 ### def listPathRes(path, extension):
 
-功能说明：
-获得一个资源目录下的资源列表。
-注意：资源必须在KBE_RES_PATH之下才可以访问到。
-例子:
+Function description:
+Get a list of resources in a resource directory
+Note: Resources must be accesible underKBE_RES_PATH.
+Example:
 >>>KBEngine.listPathRes("scripts/cell/interfaces")
-('/home/kbe/kbengine/demo/res/scripts/cell/interfaces/AI.py', '/home/kbe/kbengine/demo/res/scripts/cell/interfaces/新建文本文档.txt')
+('/home/kbe/kbengine/demo/res/scripts/cell/interfaces/AI.py', '/home/kbe/kbengine/demo/res/scripts/cell/interfaces/New Text Document.txt')
 >>>KBEngine.listPathRes("scripts/cell/interfaces", "txt")
-('/home/kbe/kbengine/demo/res/scripts/cell/interfaces/新建文本文档.txt')
+('/home/kbe/kbengine/demo/res/scripts/cell/interfaces/New Text Document.txt')
 >>>KBEngine.listPathRes("scripts/cell/interfaces", "txt|py")
-('/home/kbe/kbengine/demo/res/scripts/cell/interfaces/AI.py', '/home/kbe/kbengine/demo/res/scripts/cell/interfaces/新建文本文档.txt')
+('/home/kbe/kbengine/demo/res/scripts/cell/interfaces/AI.py', '/home/kbe/kbengine/demo/res/scripts/cell/interfaces/New Text Document.txt')
 >>>KBEngine.listPathRes("scripts/cell/interfaces", ("txt", "py"))
-('/home/kbe/kbengine/demo/res/scripts/cell/interfaces/AI.py', '/home/kbe/kbengine/demo/res/scripts/cell/interfaces/新建文本文档.txt')
+('/home/kbe/kbengine/demo/res/scripts/cell/interfaces/AI.py', '/home/kbe/kbengine/demo/res/scripts/cell/interfaces/New Text Document.txt')
 
-参数：
+parameters:
 
-| res | string，资源的相对路径。 |
+| res | string, the relative path of the resource. |
 | --- | --- |
-| extension | string，可选参数，扩展名。 |
+| extension | string, optional parameter, file extension. |
 
-返回：
+returns:
 
-- Tuple, 资源列表。
+- Tuple, resource list.
 
 <a id="matchPath"></a>
 
 ### def matchPath(res):
 
-功能说明：
-使用相对路径的资源获得资源的绝对路径。
-注意：资源必须在KBE_RES_PATH之下才可以访问到。
-例子:
+Function description:
+Use the relative path of the resource to get its absolute path.
+Note: Resources must be accessible underKBE_RES_PATH.
+Example:
 >>>KBEngine.matchPath("scripts/entities.xml")
 '/home/kbe/kbengine/demo/res/scripts/entities.xml'
 
-参数：
+parameters:
 
-| res | string，资源的相对路径(包括资源名称)。 |
+| res | string, the relative path to the resource (including the resource name) |
 | --- | --- |
 
-返回：
+returns:
 
-- string, 资源的绝对路径。
+- string, the absolute path of the resource.
 
 <a id="open"></a>
 
 ### def open(res, mode, encoding):
 
-功能说明：
-使用这个接口可以使用相对路径来打开相关资源。
-注意：资源必须在KBE_RES_PATH之下才可以访问到。
+Function description:
+Use this interface to open resources using relative paths.
+Note: Resources must be accessible underKBE_RES_PATH.
 
-参数：
+parameters:
 
-| res | string，资源的相对路径。 |
+| res | string, the relative path of the resource. |
 | --- | --- |
-| mode | string，可选参数，默认值是'r'，文件操作模式： r 以只读方式打开， w 以写方式打开， a 以追加模式打开 (从 EOF 开始, 必要时创建新文件) r+ 以读写模式打开 w+ 以读写模式打开 (参见 w ) a+ 以读写模式打开 (参见 a ) rb 以二进制读模式打开 wb 以二进制写模式打开 (参见 w ) ab 以二进制追加模式打开 (参见 a ) rb+ 以二进制读写模式打开 (参见 r+ ) wb+ 以二进制读写模式打开 (参见 w+ ) ab+ 以二进制读写模式打开 (参见 a+ ) |
-| encoding | string，可选参数，用于解码或编码文件的编码的名称，默认编码与平台相关。 |
+| mode | string, optional parameter, the default is 'r', file operation mode: r Open in only read mode, w Open in write mode, a Open in append mode (Start from EOF, create new file if necessary) r+ Open w+ in read/write mode Open in read/write mode (see w) a+ Open in read/write mode (See a) rb Opens wb in binary read mode Opens in binary write mode (see w) ab Opens in binary append mode (see a) rb+ Opens in binary read and write mode (see r+) wb+ Opens in binary read and write mode (see w+ ) ab+ Open in binary read/write mode (see a+) |
+| encoding | string, optional parameter, the name of the encoding used to decode or encode the file, the default encoding is platform dependent. |
 
 <a id="publish"></a>
 
 ### def publish():
 
-功能说明：
-这个接口返回当前服务端发行模式。
+Function description:
+This interface returns the current server release mode.
 
-返回：
+returns:
 
-- int8，0：debug，1：release，其它可自定义。
+- int8, 0: debug, 1: release, others can be customized.
 
 <a id="raycast"></a>
 
 ### def raycast(spaceID, layer, src, dst):
 
-功能说明：
-在指定的space中指定的layer中由源坐标向目的坐标射出一道射线，返回碰撞到的坐标点。
-注意：space必须使用[addSpaceGeometryMapping](#addSpaceGeometryMapping)加载过几何数据。
-下面是一个例子:
+Function description:
+In the specified layer of the specified space, a ray is emitted from the
+source coordinates to the destination coordinates, and the collided
+coordinate point is returned.
+Note: Space must load geometry using[addSpaceGeometryMapping](#addSpaceGeometryMapping).
+Below is an example:
 
 ```python
 	>>> KBEngine.raycast( spaceID, entity.layer, (0, 10, 0), (0,-10,0) )
@@ -511,407 +542,390 @@ True
 	(4.0000, 0.0000, 0.0000), (4.0000, 0.0000, 4.0000)), 0)
 ```
 
-参数：
+parameters:
 
-| spaceID | int32, space的id。 |
+| spaceID | int32, space ID |
 | --- | --- |
-| layer | int8，几何层。一个space可以同时加载多个navmesh数据，不同的navmesh在不同的layer中，不同的layer可被抽象成地面、水面等等。 |
+| layer | int8, geometric layer. A space can load multiple navmesh data at the same time. Different navmesh can be in different layers. Different layers can be abstracted into the ground, the water surface and so on. |
 
-返回：
+returns:
 
-- list， 碰撞到的坐标点列表。
+- list, list of coordinate points collided
 
 <a id="registerReadFileDescriptor"></a>
 
 ### def registerReadFileDescriptor(fileDescriptor, callback):
 
-功能说明：
-注册一个回调函数，这个回调函数当文件描述符可读时被调用。
-例子:
+Function description:
+Registers a callback function that is called when the file descriptor is readable.
+Example:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
-参数：
+parameters:
 
-| fileDescriptor | socket描述符/文件描述符。 |
+| fileDescriptor | Socket descriptor/file descriptor |
 | --- | --- |
-| callback | 一个回调函数，socket描述符/文件描述符作为它的唯一参数。 |
+| callback | A callback function with the socket descriptor/file descriptor as its only parameter. |
 
 <a id="registerWriteFileDescriptor"></a>
 
 ### def registerWriteFileDescriptor(fileDescriptor, callback):
 
-功能说明：
-注册一个回调函数，这个回调函数当socket描述符/文件描述符可写时被调用。
-例子:
+Function description:
+Registers a callback function that is called when the socket descriptor/file descriptor is writable.
+Example:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
-参数：
+parameters:
 
-| fileDescriptor | socket描述符/文件描述符。 |
+| fileDescriptor | Socket descriptor/file descriptor |
 | --- | --- |
-| callback | 一个回调函数，socket描述符/文件描述符作为它的唯一参数。 |
+| callback | A callback function with the socket descriptor/file descriptor as its only parameter. |
 
 <a id="reloadScript"></a>
 
 ### def reloadScript(fullReload):
 
-功能说明：
-重新加载与实体和自定义数据类型相关的Python模块。当前实体类会设置为新加载的类。
-这个方法应该只用于开发模式，对于产品模式不合适。下面几点应该注意：
-
-1）本次调用只影响当前 CellApp 进程，用户应该确保所有相关服务端组件都执行热更新。
-2）自定义类型在热更新后应该确保内存中已经实例化的对象也被更新，下面是一个例子:
+Function description:
+Reloads Python modules related to entity and custom data types.
+The current entity class is set to the newly loaded class.
+This method should only be used for development mode and not for
+product mode. The following points should be noted:
+1) The overloaded script can only be executed onCellapp.
+The user should ensure that all server components are loaded.
+2) The custom type should ensure that the objects already instantiated
+in memory are updated after the script is reloaded. Here is an example:
 
 ```python
-for e in KBEngine.entities.values():
+for e in 
+KBEngine
+.
+entities
+.values():
    if type( e ) is Avatar.Avatar:
       e.customData.__class__ = CustomClass
 ```
 
-3）已经保存到 timer、事件表、回调表里的旧 Python callable 不会自动重绑，需要业务在 `onInit(1)` 或统一 reload hook 中清理并重建。
+When this method completesKBEngine.onInit( True )
+is called.
 
-当这个方法完成时KBEngine 被调用。
+parameters:
 
-参数：
-
-| fullReload | 可选的boolean参数，指定是否同时重新加载实体定义。如果这个参数为False，则实体定义不会被重新加载。默认为True。 |
+| fullReload | Optional boolean parameter that specifies whether to reload entity definitions at the same time. If this parameter is False, the entity definition will not be reloaded. The default is True. |
 | --- | --- |
 
-返回：
+returns:
 
-- 无返回值（`None`）。热更新过程中的错误通过 Python 异常或日志输出。
+- True if the reload succeeds, False otherwise.
 
 <a id="scriptLogType"></a>
 
 ### def scriptLogType(logType):
 
-功能说明：
-设置当前Python.print输出的信息类型(参考: KBEngine.LOG_TYPE_*)。
+Function description:
+Set the type of information output by the current Python.print (Reference: KBEngine.LOG_TYPE_*).
 
 <a id="setAppFlags"></a>
 
 ### def setAppFlags(flags):
 
-功能说明：
-设置当前引擎APP的标记。
-KBEngine.APP_FLAGS_NONE // 默认的(未设置标记)
-KBEngine.APP_FLAGS_NOT_PARTCIPATING_LOAD_BALANCING //不参与负载均衡
-例如：
+Function description:
+Set the flags of the current engine APP.
+KBEngine.APP_FLAGS_NONE // Default (not set)
+KBEngine.APP_FLAGS_NOT_PARTCIPATING_LOAD_BALANCING // Do not participate in load balancing
+Example:
 KBEngine.setAppFlags(KBEngine.APP_FLAGS_NOT_PARTCIPATING_LOAD_BALANCING | KBEngine.APP_FLAGS_*)
 
 <a id="setSpaceData"></a>
 
 ### def setSpaceData(spaceID, key, value):
 
-功能说明：
-设置指定key的space数据。
-space数据可以通过[getSpaceData](#getSpaceData)获取。
+Function description:
+Sets the space data for the specified key.
+The space data can be obtained via[getSpaceData](#getSpaceData).
 
-参数：
+parameters:
 
-| spaceID | int32，空间的ID。 |
+| spaceID | int32, the ID of the space. |
 | --- | --- |
-| key | string，一个字符串关键字。 |
-| value | string，字符串值。 |
+| key | string, a string keyword |
+| value | string, the string value. |
 
 <a id="time"></a>
 
 ### def time():
 
-功能说明：
-这个方法返回当前游戏的时间（周期数）。
+Function description:
+This method returns the current game time (number of cycles).
 
-返回：
+returns:
 
-- uint32，当前游戏的时间，这里指周期数，周期受频率影响，频率由配置文件kbengine.xml或者kbengine_defaults.xml->gameUpdateHertz决定。
+- uint32, the current time of the game. This refers to the number of cycles. The period is affected by the frequency. The frequency is determined by the configuration filekbengine.xmlorkbengine_defaults.xml-> gameUpdateHertz.
 
 <a id="urlopen"></a>
 
 ### def urlopen(url, callback, postData, headers):
 
-功能说明：
-这个脚本函数在提供对外HTTP/HTTPS异步请求。
+Function description:
+This script function is providing an external HTTP/HTTPS asynchronous request.
 
-参数：
+parameters:
 
-| url | 有效的HTTP/HTTPS网址，字符串类型。 |
+| url | A valid HTTP/HTTPS URL. |
 | --- | --- |
-| callback | 可选参数，带有请求执行结果的回调对象（比如说是一个函数）。这个回调带有5个参数：HTTP请求返回码（如：200)，返回的内容，返回的HTTP协议头，是否成功，请求的网址。 声明样例： def onHttpCallback(httpcode, data, headers, success, url): print(httpcode, data, headers, success, url) 如同上面的例子所示:<br>httpcode:参数对应的就是“HTTP请求返回码”，这个结果集合参数是一个整形值。<br>data:参数则是“返回的内容”，它是一个字符串。<br>headers:参数是“服务器返回的HTTP协议头”，如：{"Content-Type": "application/x-www-form-urlencoded"}，它是一个字典。<br>success:则对应了“执行是否成功”，当请求执行有错误时，为False，可以通过httpcode进一步判断错误信息。<br>url:是“请求所用的网址。 |
-| postData | 可选参数，默认是GET方式请求服务器，如果需要POST方式请提供需要POST的内容，引擎将自动使用POST方式请求服务器，它是一个bytes。 |
-| headers | 可选参数，请求时使用的HTTP头，如：{"Content-Type": "application/x-www-form-urlencoded"}，它是一个字典。 |
+| callback | Optional parameter with a callback object (for example, a function) that requests execution results. This callback takes five parameters: the HTTP request return code (eg: 200), the returned content, the returned HTTP protocol header, whether it succeeded, and the requested URL. Example: def onHttpCallback(httpcode, data, headers, success, url): print(httpcode, data, headers, success, url) As the above example shows:&lt;br&gt;httpcode:The parameter corresponds to the "HTTP request return code", is an integer.&lt;br&gt;data:The parameter is “ returned content & rdquo;, it is a string.&lt;br&gt;headers:The parameter is the HTTP protocol header returned by the server, such as:{"Content-Type": "application/x-www-form-urlencoded"}, is an dict.&lt;br&gt;success:Whether the execution is successful or not, when the request execution has an error, it is False, and the error information can be further judged by httpcode.&lt;br&gt;url:Is the URL used by the request. |
+| postData | Optional parameter, the default is GET mode request server. If you need POST mode, please provide the content that needs POST. The engine will automatically request the server using POST, is an bytes. |
+| headers | Optional parameter, HTTP header used when requesting, such as：{"Content-Type": "application/x-www-form-urlencoded"}, is an dict. |
 
-## 回调函数文档
+## Callback functions documentation
 
 <a id="onCellAppData"></a>
 
 ### def onCellAppData(key, value):
 
-功能说明：
-当前 `CellApp` 在收到其他 `CellApp` 对 `KBEngine.cellAppData` 的广播，或在启动阶段从 `dbmgr` 回放已有键值时，如果某个顶层 `key` 被新增或覆盖，就会回调此函数。
-当前进程自己直接执行 `KBEngine.cellAppData[key] = value` 时，不会额外再回调一次本函数。
+Function description:
+This function is called back when KBEngine.cellAppData changes.
+Note: This callback interface must be implemented in the portal
+module (kbengine_defaults.xml->entryScriptFile ).
 
-注意：
+parameters:
 
-- 该回调接口必须实现在入口模块(`kbengine_defaults.xml -> entryScriptFile`)中。
-- 只有顶层 `key -> value` 的新增或整体改写会触发；`value` 内部可变对象的局部修改不会触发。
-
-源码解析：
-
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
-
-参数：
-
-| key | 被改变数据的键。 |
+| key | The key of the changed data. |
 | --- | --- |
-| value | 被改变数据的值。 |
+| value | The value of the changed data. |
 
 <a id="onCellAppDataDel"></a>
 
 ### def onCellAppDataDel(key):
 
-功能说明：
-当前 `CellApp` 在收到其他 `CellApp` 对 `KBEngine.cellAppData` 的删除广播时，会在对应顶层 `key` 从本地字典移除后回调此函数。
-当前进程自己直接执行 `del KBEngine.cellAppData[key]` 时，不会额外再回调一次本函数。
+Function description:
+This function is called back when KBEngine.cellAppData is deleted.
+Note: This callback interface must be implemented in the portal module (kbengine_defaults.xml->entryScriptFile).
 
-注意：
+parameters:
 
-- 该回调接口必须实现在入口模块(`kbengine_defaults.xml -> entryScriptFile`)中。
-- 只对应顶层 `key` 的删除同步。
-
-源码解析：
-
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
-
-参数：
-
-| key | 被删除数据的键。 |
+| key | Deleted data key. |
 | --- | --- |
 
 <a id="onGlobalData"></a>
 
 ### def onGlobalData(key, value):
 
-功能说明：
-当前 `CellApp` 在收到其他 `BaseApp` 或 `CellApp` 对 `KBEngine.globalData` 的广播，或在启动阶段从 `dbmgr` 回放已有键值时，如果某个顶层 `key` 被新增或覆盖，就会回调此函数。
-当前进程自己直接执行 `KBEngine.globalData[key] = value` 时，不会额外再回调一次本函数。
+Function description:
+This function is called back when KBEngine.globalData changes.
+Note: This callback interface must be implemented in the portal moodule (kbengine_defaults.xml->entryScriptFile).
 
-注意：
+parameters:
 
-- 该回调接口必须实现在入口模块(`kbengine_defaults.xml -> entryScriptFile`)中。
-- 只有顶层 `key -> value` 的新增或整体改写会触发；`value` 内部可变对象的局部修改不会触发。
-
-源码解析：
-
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
-
-参数：
-
-| key | 被改变数据的键。 |
+| key | The key of the changed data. |
 | --- | --- |
-| value | 被改变数据的值。 |
+| value | The value of the changed data. |
 
 <a id="onGlobalDataDel"></a>
 
 ### def onGlobalDataDel(key):
 
-功能说明：
-当前 `CellApp` 在收到其他 `BaseApp` 或 `CellApp` 对 `KBEngine.globalData` 的删除广播时，会在对应顶层 `key` 从本地字典移除后回调此函数。
-当前进程自己直接执行 `del KBEngine.globalData[key]` 时，不会额外再回调一次本函数。
+Function description:
+This function is called back when KBEngine.globalData is deleted.
+Note: This callback interface must be implemented in the portal module (kbengine_defaults.xml->entryScriptFile).
 
-注意：
+parameters:
 
-- 该回调接口必须实现在入口模块(`kbengine_defaults.xml -> entryScriptFile`)中。
-- 只对应顶层 `key` 的删除同步。
-
-源码解析：
-
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
-
-参数：
-
-| key | 被删除数据的键。 |
+| key | Deleted data key. |
 | --- | --- |
 
 <a id="onInit"></a>
 
 ### def onInit(isReload):
 
-功能说明：
-当引擎启动后初始化完所有的脚本后这个接口被调用。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+This interface is called after all scripts have been initialized since
+the engine started.
+Note: This callback interface must be implemented in the portal module (kbengine_defaults.xml->entryScriptFile).
 
-参数：
+parameters:
 
-| isReload | bool，是否是被重写加载脚本后触发的。 |
+| isReload | Bool, whether it was triggered after reloading the loading the script. |
 | --- | --- |
 
 <a id="onSpaceData"></a>
 
 ### def onSpaceData(spaceID, key, value):
 
-功能说明：
-当space数据有改变的时候被调用。
-space数据由用户通过[setSpaceData](#setSpaceData)设置。
+Function description:
+Called when there is a change in the space data.
+The space data is set by the user via[setSpaceData](#setSpaceData).
 
-参数：
+parameters:
 
-| spaceID | 空间的ID。 |
+| spaceID | The ID of the space. |
 | --- | --- |
-| key | 被改变数据的键。 |
-| value | 被改变数据的值。 |
+| key | The key of the changed data. |
+| value | The value of the changed data. |
 
 <a id="onSpaceGeometryLoaded"></a>
 
 ### def onSpaceGeometryLoaded(spaceID, mapping):
 
-功能说明：
-空间所需求的网格碰撞等数据加载完毕。
-由用户通过[addSpaceGeometryMapping](#addSpaceGeometryMapping)设置。
+Function description:
+The space required by the grid collision data is loaded.
+Set by user through[addSpaceGeometryMapping](#addSpaceGeometryMapping).
 
-参数：
+parameters:
 
-| spaceID | 空间的ID。 |
+| spaceID | The ID of the space. |
 | --- | --- |
-| mapping | 网格碰撞数据的映射值。 |
+| mapping | The map value of the grid collision data. |
 
 <a id="onAllSpaceGeometryLoaded"></a>
 
 ### def onAllSpaceGeometryLoaded(spaceID, isBootstrap, mapping):
 
-功能说明：
-空间所需求的网格碰撞等数据全部加载完毕。
-由用户通过[addSpaceGeometryMapping](#addSpaceGeometryMapping)设置。
+Function description:
+The space required for grid collision and other data is completely loaded.
+Set by user through[addSpaceGeometryMapping](#addSpaceGeometryMapping).
 
-参数：
+parameters:
 
-| spaceID | 空间的ID。 |
+| spaceID | The ID of the space. |
 | --- | --- |
-| isBootstrap | 如果一个空间被分割由多个cell共同负载，那么isBootstrap描述的是是否为加载请求的发起cell。 |
-| mapping | 网格碰撞数据的映射值。 |
+| isBootstrap | If a space is partitioned by multiple cells, isBootstrap describes whether it is the originating cell of the loading request. |
+| mapping | The map value of grid collision data. |
 
 <a id="onReadyForLogin"></a>
 
 ### def onReadyForLogin(isBootstrap):
 
-功能说明：
-当引擎启动并初始化完成后会一直调用此接口询问脚本层是否准备完毕，如果脚本层准备完毕则loginapp允许客户端登录。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+When the engine is started and initialized, it will always call this function
+to ask whether the script layer is ready. If the script layer is ready,
+loginapp allows the client to log in.
+Note: This callback function must be implemented in the portal module (kbengine_defaults.xml->entryScriptFile).
 
-参数：
+parameters:
 
-| isBootstrap | bool，是否为第一个启动的Cellapp。 |
+| isBootstrap | bool, True if this is the firstCellappstarted. |
 | --- | --- |
 
-返回：
+returns:
 
-- 返回值大于等于1.0则脚本层准备完成，否则返回准备的进度值0.0~1.0。
+- If the return value is greater than or equal to 1.0, the script layer is ready; otherwise, return a value from 0 to less than 1.0.
 
-## 属性文档
+## Attribute documentation
 
 <a id="LOG_TYPE_DBG"></a>
 
 LOG_TYPE_DBG
 
-说明：
-日志输出类型为调试类型。
-由[scriptLogType](#scriptLogType)设置。
+Description:
+The log output type is debug.
+Set by[scriptLogType](#scriptLogType).
 
 <a id="LOG_TYPE_ERR"></a>
 
 LOG_TYPE_ERR
 
-说明：
-日志输出类型为错误类型。
-由[scriptLogType](#scriptLogType)设置。
+Description:
+The log output type is error.
+Set by[scriptLogType](#scriptLogType).
 
 <a id="LOG_TYPE_INFO"></a>
 
 LOG_TYPE_INFO
 
-说明：
-日志输出类型为常规信息类型。
-由[scriptLogType](#scriptLogType)设置。
+Description:
+The log output type is general information.
+Set by[scriptLogType](#scriptLogType).
 
 <a id="LOG_TYPE_NORMAL"></a>
 
 LOG_TYPE_NORMAL
 
-说明：
-日志输出类型为常规类型。
-由[scriptLogType](#scriptLogType)设置。
+Description:
+The log output type is normal.
+Set by[scriptLogType](#scriptLogType).
 
 <a id="LOG_TYPE_WAR"></a>
 
 LOG_TYPE_WAR
 
-说明：
-日志输出类型为警告类型。
-由[scriptLogType](#scriptLogType)设置。
+Description:
+The log output type is warning.
+Set by[scriptLogType](#scriptLogType).
 
 <a id="NEXT_ONLY"></a>
 
 NEXT_ONLY
 
-说明：
-这个常量目前在Cellapp未被使用。
+Description:
+This constant is currently unused in Cellap.
 
 <a id="cellAppData"></a>
 
 cellAppData
 
-说明：
-`CellApp` 进程级共享字典，只在所有 `CellApp` 之间同步。
-脚本执行 `KBEngine.cellAppData[key] = value` 或 `del KBEngine.cellAppData[key]` 时，请求会先发往 `dbmgr` 持有的权威副本，再广播给其他 `CellApp`。
-写入方本地值会在本次脚本赋值/删除流程中直接更新，不会再收到一次自己的回环广播；其他 `CellApp` 收到广播后，才会触发 [onCellAppData](./KBEngine.md#onCellAppData 或 [onCellAppDataDel](./KBEngine.md#onCellAppDataDel。
-新启动的 `CellApp` 在登录 `dbmgr` 时，还会收到当前全量快照，不只是后续增量。
-键和值都必须能在目标组件上完成 `pickle/unpickle`。
-
-源码解析：
-
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
-
-例子：
+Description:
+This property contains a dictionary-like object that is automatically
+synchronized across all CellApps. When a value in the dictionary is
+modified, this change is broadcast to all Cellapps.
+Example:
 
 ```python
-KBEngine.cellAppData["hello"] = "there"
+KBEngine
+.
+cellAppData
+[ "hello" ] = "there"
 ```
 
-其余 `CellApp` 可以读取：
+The rest of Cellap can access the following:
 
 ```python
-print(KBEngine.cellAppData["hello"])
+print 
+KBEngine
+.
+cellAppData
+[ "hello" ]
 ```
 
-参看：[KBEngine](./KBEngine.md.[onCellAppData](./KBEngine.md#onCellAppData 和 [KBEngine](./KBEngine.md.[onCellAppDataDel](./KBEngine.md#onCellAppDataDel。
-
-注意：
-
-- 同步粒度是顶层 `key -> value`；只改 `value` 内部元素不会广播。
-- 它不会同步到 `BaseApp`。
-- 不要做下面这种“局部改列表元素”的写法：
+Keys and values can be of any type, but these types must be encapsulated
+and unpacked on all target components.
+When a value is changed or deleted, a callback function is called on all
+components. See:KBEngine.onCellAppDataandKBEngine.onDelCellAppData.
+Note: Only the top-level value will be broadcast. If you have a value
+(such as a list) that changes the internal value (such as just changing
+a number), this information will not be broadcast.
+Do not do the following:
 
 ```python
-KBEngine.cellAppData["list"] = [1, 2, 3]
+KBEngine
+.
+cellAppData
+[ "list" ] = [1, 2, 3]
 
-KBEngine.cellAppData["list"][1] = 7
+KBEngine
+.
+cellAppData
+[ "list" ][1] = 7
 ```
 
-这样本地看到的是 `[1, 7, 3]`，其他 `CellApp` 仍然是 `[1, 2, 3]`。
+This will cause the local access to read [1, 7, 3] and the remote [1, 2, 3]
 
 <a id="component"></a>
 
 component
 
-说明：
-这是正运行在当前Python环境的组件。（至今为止）可能值有'cellapp', 'baseapp', 'client', 'dbmgr', 'bots' 和 'editor'。
+Description:
+This is the component that is running in the current Python environment. (So far) Possible values are 'cellapp', 'baseapp', 'client', 'dbmgr', 'bots' and 'editor'.
 
 <a id="entities"></a>
 
 entities
 
-说明：
-entities是一个字典对象，包含当前进程上所有的实体，包括ghost实体。
-调试泄露的实体（调用过destroy却没有释放内存的实体，通常是由于被引用导致无法释放）：
+Description:
+entities is a dictinary object that contains all entities in the current
+process, includingghostentities.
+Debugging leaked entities: (instances that call destroy without releasing
+memory, usually as a result of the reference not being released)
 
 ```python
 >>> KBEngine.entities.garbages.items()
@@ -925,10 +939,10 @@ entities是一个字典对象，包含当前进程上所有的实体，包括gho
 ]
 ```
 
-调试泄露的KBEngine封装的Python对象：
+Debugging a leaked KBEngine-encapsulated Python object:
 [KBEngine.debugTracing](#debugTracing)
 
-类型：
+Types:
 
 - Entities
 
@@ -936,42 +950,47 @@ entities是一个字典对象，包含当前进程上所有的实体，包括gho
 
 globalData
 
-说明：
-`BaseApp` 与 `CellApp` 共享的进程级字典。
-脚本执行 `KBEngine.globalData[key] = value` 或 `del KBEngine.globalData[key]` 时，请求会先进入 `dbmgr` 持有的权威副本，再由 `dbmgr` 广播给所有其他 `BaseApp` 和 `CellApp`。
-这里的权威方是 `dbmgr`，不是 `CellAppMgr`。
-写入方本地不会收到一遍自己的同步回调；其他组件在完成反序列化和本地落地后，才会触发 [onGlobalData](./KBEngine.md#onGlobalData 或 [onGlobalDataDel](./KBEngine.md#onGlobalDataDel。
-新启动的 `BaseApp` 或 `CellApp` 也会在登录 `dbmgr` 后收到当前全量快照。
-键和值都必须能在目标组件上完成 `pickle/unpickle`。
-
-源码解析：
-
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
-
-例子：
+Description:
+This attribute contains a dictionary-like object that is automatically
+copied between all BaseApps and CellApps. When a value in a dictionary is
+modified, this change is broadcast to all BaseApps and CellApps.
+CellAppMgr solves completion conditions and ensures the authority of
+information replication.
+Example:
 
 ```python
-KBEngine.globalData["hello"] = "there"
+KBEngine
+.
+globalData
+[ "hello" ] = "there"
 ```
 
-其余 `CellApp` 或 `BaseApp` 可以读取：
+The rest ofCellapporBaseappcan access the following:
 
 ```python
-print(KBEngine.globalData["hello"])
+print 
+KBEngine
+.
+globalData
+[ "hello" ]
 ```
 
-参看：[KBEngine](./KBEngine.md.[onGlobalData](./KBEngine.md#onGlobalData 和 [KBEngine](./KBEngine.md.[onGlobalDataDel](./KBEngine.md#onGlobalDataDel。
-
-注意：
-
-- 同步粒度是顶层 `key -> value`；只改 `value` 内部元素不会广播。
-- 它同步给所有 `BaseApp` 和 `CellApp`，但不会同步到 `loginapp`、`interfaces` 这类其他组件。
-- 不要做下面这种“局部改列表元素”的写法：
+Keys and values can be of any type, but these types must be encapsulated and unpacked on all target components.
+When a value is changed or deleted, a callback function is called on all components.
+See:KBEngine.onGlobalDataandKBEngine.onGlobalDataDel.
+Note: Only the top-level value will be broadcast. If you have a volatile value (such as a list) that changes the internal value (such as just changing a number), this information will not be broadcast.
+Do not do the following:
 
 ```python
-KBEngine.globalData["list"] = [1, 2, 3]
+KBEngine
+.
+globalData
+[ "list" ] = [1, 2, 3]
 
-KBEngine.globalData["list"][1] = 7
+KBEngine
+.
+globalData
+[ "list" ][1] = 7
 ```
 
-这样本地看到的是 `[1, 7, 3]`，远端组件仍然是 `[1, 2, 3]`。
+This will cause the local access to read [1, 7, 3] and the remote [1, 2, 3]

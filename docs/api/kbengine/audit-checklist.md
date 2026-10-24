@@ -1,280 +1,212 @@
-﻿# API 分类与核对清单
+# API Classification and Audit Checklist
 
-> 这份清单用于把 `docs/api/kbengine` 下的页面按职责分层，并按分类逐批核对 API 文案、参数语义、返回值、同步边界与源码实现。
+> This checklist organizes the pages under `docs/zh/api/kbengine` by responsibility and audits API wording, parameter semantics, return values, synchronization boundaries, and source implementation by category.
 
-## 核对原则
+## Audit principles
 
-- 先核对接口真实语义，再核对参数、返回值与调用边界。
-- API 页只保留接口说明、注意点与跳转；复杂机制统一下沉到 `architecture/source-analysis`。
-- 对 `Player 身份`、`控制权`、`可见性`、`ownerOnly`、`同步/广播`、`异步回调` 这些容易混淆的概念，必须拆开说明。
-- CHM 原文、现有文案、源码行为三者冲突时，以源码实际行为为准，并在 API 页补充“源码解析”跳转。
+- Verify the actual API semantics first, then parameters, return values, and call boundaries.
+- API pages should retain only interface descriptions, cautions, and links; complex mechanisms belong in `architecture/source-analysis`.
+- When the CHM source text, existing wording, and actual source behavior conflict, actual source behavior takes precedence, and the API page should link to the relevant source analysis.
+- Concepts that are easy to confuse—`player identity`, `control`, `visibility`, `ownerOnly`, `sync/broadcast`, and `asynchronous callback`—must be explained separately.
 
-## 分类总览
+## Classification overview
 
-| 分类 | 页面范围 | 当前重点 | 状态 |
+| Category | Page scope | Current focus | Status |
 | --- | --- | --- | --- |
-| 核心概念层 | [api/kbengine](/zh/api/kbengine/、[basetypes](/zh/api/kbengine/basetypes.md、[keywords](/zh/api/kbengine/keywords.md | 基础类型、关键词、EntityCall/属性描述术语统一 | 未开始 |
-| 客户端运行时层 | [client/KBEngine](/zh/api/kbengine/client/KBEngine.md、[client/Entity](/zh/api/kbengine/client/Entity.md、[bots/KBEngine](/zh/api/kbengine/bots/KBEngine.md、[bots/Entity](/zh/api/kbengine/bots/Entity.md、[bots/PyClientApp](/zh/api/kbengine/bots/PyClientApp.md | `player`、`isPlayer`、`isControlled`、可见性回调、客户端移动与 ownerOnly 边界 | 进行中 |
-| 服务端实体层 | [baseapp/Entity](/zh/api/kbengine/baseapp/Entity.md、[baseapp/Proxy](/zh/api/kbengine/baseapp/Proxy.md、[cellapp/Entity](/zh/api/kbengine/cellapp/Entity.md | Base/Cell 实体职责、`controlledBy`、控制器、AOI、持久化、客户端绑定 | 进行中 |
-| 服务端全局入口层 | [baseapp/KBEngine](/zh/api/kbengine/baseapp/KBEngine.md、[cellapp/KBEngine](/zh/api/kbengine/cellapp/KBEngine.md、[loginapp/KBEngine](/zh/api/kbengine/loginapp/KBEngine.md、[dbmgr/KBEngine](/zh/api/kbengine/dbmgr/KBEngine.md、[interfaces/KBEngine](/zh/api/kbengine/interfaces/KBEngine.md、[logger/KBEngine](/zh/api/kbengine/logger/KBEngine.md | 全局函数、全局数据字典、进程级回调、组件边界 | 进行中 |
-| 交叉专题层 | 跨多个 API 页的同名概念 | 玩家身份/控制权、生命周期、计时器、全局数据、属性同步、空间与控制器 | 进行中 |
+| Core concepts | [API overview](/api/kbengine/), [basic types](/api/kbengine/basetypes), [keywords](/api/kbengine/keywords) | Unify basic types and terms such as EntityCall and property descriptors | Not started |
+| Client runtime | [client/KBEngine](/api/kbengine/client/KBEngine), [client/Entity](/api/kbengine/client/Entity), [bots/KBEngine](/api/kbengine/bots/KBEngine), [bots/Entity](/api/kbengine/bots/Entity), [bots/PyClientApp](/api/kbengine/bots/PyClientApp) | `player`, `isPlayer`, `isControlled`, visibility callbacks, client movement, and the `ownerOnly` boundary | In progress |
+| Server entities | [baseapp/Entity](/api/kbengine/baseapp/Entity), [baseapp/Proxy](/api/kbengine/baseapp/Proxy), [cellapp/Entity](/api/kbengine/cellapp/Entity) | Base/Cell entity responsibilities, `controlledBy`, controllers, AOI, persistence, and client binding | In progress |
+| Server global entries | [baseapp/KBEngine](/api/kbengine/baseapp/KBEngine), [cellapp/KBEngine](/api/kbengine/cellapp/KBEngine), [loginapp/KBEngine](/api/kbengine/loginapp/KBEngine), [dbmgr/KBEngine](/api/kbengine/dbmgr/KBEngine), [interfaces/KBEngine](/api/kbengine/interfaces/KBEngine), [logger/KBEngine](/api/kbengine/logger/KBEngine) | Global functions, global data dictionaries, process callbacks, and component boundaries | In progress |
+| Cross-cutting topics | Concepts shared by multiple API pages | Player identity/control, lifecycle, timers, global data, property sync, spaces, and controllers | In progress |
 
-## 推荐核对顺序
+## Recommended audit order
 
-1. 客户端运行时层
-2. 服务端实体层
-3. 服务端全局入口层
-4. 核心概念层
+1. Client runtime
+2. Server entities
+3. Server global entries
+4. Core concepts
 
-这样排的原因很直接：
+The order is direct:
 
-- 客户端 API 最容易出现“名字像控制权、实际是身份判断”的误读。
-- 服务端实体层决定了客户端 API 的真实语义，第二批跟进最合适。
-- 进程级 `KBEngine` 入口多，但大多是围绕实体、数据字典与回调展开，放在实体层之后核对更稳。
-- `basetypes` 和 `keywords` 更像统一术语表，适合作为最后的收口整理。
+- Client APIs are most likely to be misread because a name resembles control semantics when it is actually an identity check.
+- Server-entity APIs determine the real semantics of client APIs, so auditing them second is most useful.
+- Process-level `KBEngine` entries are numerous but mostly concern entities, data dictionaries, and callbacks, so they belong after entity APIs.
+- `basetypes` and `keywords` are shared glossaries, best saved for final consolidation.
 
-## 分类明细
+## Classification details
 
-### 1. 核心概念层
+### 1. Core concepts
 
-页面：
+Pages:
 
-- [API 总览](/zh/api/
-- [基本数据类型](/zh/api/kbengine/basetypes.md
-- [关键词释义](/zh/api/kbengine/keywords.md
+- [API overview](/api/kbengine/)
+- [Basic data types](/api/kbengine/basetypes)
+- [Keyword definitions](/api/kbengine/keywords)
 
-重点核对：
+Audit focus:
 
-- 基础类型定义是否和 `.def`、脚本桥接、序列化实现一致
-- `ENTITYCALL`、`CELLDATADICT`、`PyClient` 等术语是否只讲“表面名词”，没有交代运行时语义
-- 关键词之间是否存在重复解释或互相矛盾
+- Whether basic type definitions agree with `.def`, the script bridge, and serialization implementation
+- Whether terms such as `ENTITYCALL`, `CELLDATADICT`, and `PyClient` are treated as surface names without runtime semantics
+- Whether keyword definitions overlap or contradict one another
 
-建议关联源码解析：
+Related source analysis:
 
-- [Entity 与实体系统](/zh/architecture/source-analysis/entity-system.html
-- [脚本系统与 Python 桥接](/zh/architecture/source-analysis/scripting.html
+- [Entities and the entity system](/architecture/source-analysis/entity-system)
+- [Scripting and the Python bridge](/architecture/source-analysis/scripting)
 
-### 2. 客户端运行时层
+Current progress: the terminology matrix has not started yet.
 
-页面：
+### 2. Client runtime
 
-- [client/KBEngine](/zh/api/kbengine/client/KBEngine.md
-- [client/Entity](/zh/api/kbengine/client/Entity.md
-- [bots/KBEngine](/zh/api/kbengine/bots/KBEngine.md
-- [bots/Entity](/zh/api/kbengine/bots/Entity.md
-- [bots/PyClientApp](/zh/api/kbengine/bots/PyClientApp.md
+Pages:
 
-重点核对：
+- [client/KBEngine](/api/kbengine/client/KBEngine)
+- [client/Entity](/api/kbengine/client/Entity)
+- [bots/KBEngine](/api/kbengine/bots/KBEngine)
+- [bots/Entity](/api/kbengine/bots/Entity)
+- [bots/PyClientApp](/api/kbengine/bots/PyClientApp)
 
-- `player()`、`isPlayer()` 与 `controlledBy` / `isControlled` 的边界
-- `onEnterWorld()`、`onLeaveWorld()`、`onEnterSpace()`、`onLeaveSpace()` 的真实触发语义
-- `baseCall()`、`cellCall()` 的调用限制与“只能访问玩家实体”这类边界条件
-- `isOnGround`、移动接口、客户端可写属性的同步方向
-- `ownerOnly` 属性在客户端的可见性与回调行为
+Audit focus:
 
-建议关联源码解析：
+- The boundary between `player()`, `isPlayer()`, `controlledBy`, and `isControlled`
+- The actual trigger semantics of `onEnterWorld()`, `onLeaveWorld()`, `onEnterSpace()`, and `onLeaveSpace()`
+- Call restrictions for `baseCall()` and `cellCall()`, including the “only player entities can access them” boundary
+- `isOnGround`, movement APIs, client-writable property direction, and synchronization
+- Client visibility and callback behavior for `ownerOnly` properties
 
-- [网络与消息系统](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
-- [空间、AOI 与视野系统](/zh/architecture/source-analysis/space-aoi.html
+Related source analysis:
 
-当前已完成：
+- [Networking and messaging](/architecture/source-analysis/networking#client-entity-isplayer-control)
+- [Spaces, AOI, and visibility](/architecture/source-analysis/space-aoi)
 
-- [client/KBEngine.player](/zh/api/kbengine/client/KBEngine.md#player
-- [client/KBEngine.findEntity](/zh/api/kbengine/client/KBEngine.md#findEntity
-- [client/KBEngine.entities](/zh/api/kbengine/client/KBEngine.md#entities
-- [client/KBEngine.entity_id](/zh/api/kbengine/client/KBEngine.md#entity_id
-- [client/KBEngine.spaceID](/zh/api/kbengine/client/KBEngine.md#spaceID
-- [client/Entity.baseCall](/zh/api/kbengine/client/Entity.md#baseCall
-- [client/Entity.cellCall](/zh/api/kbengine/client/Entity.md#cellCall
-- [client/Entity.isPlayer](/zh/api/kbengine/client/Entity.md#isPlayer
-- [client/Entity.onEnterWorld](/zh/api/kbengine/client/Entity.md#onEnterWorld
-- [client/Entity.onLeaveWorld](/zh/api/kbengine/client/Entity.md#onLeaveWorld
-- [client/Entity.onEnterSpace](/zh/api/kbengine/client/Entity.md#onEnterSpace
-- [client/Entity.onLeaveSpace](/zh/api/kbengine/client/Entity.md#onLeaveSpace
-- [client/Entity.base](/zh/api/kbengine/client/Entity.md#base
-- [client/Entity.cell](/zh/api/kbengine/client/Entity.md#cell
-- [client/Entity.clientapp](/zh/api/kbengine/client/Entity.md#clientapp
-- [client/Entity.isOnGround](/zh/api/kbengine/client/Entity.md#isOnGround
-- [client/Entity.inWorld](/zh/api/kbengine/client/Entity.md#inWorld
-- [bots/PyClientApp.player](/zh/api/kbengine/bots/PyClientApp.md#player
-- [bots/PyClientApp.id](/zh/api/kbengine/bots/PyClientApp.md#id
-- [bots/PyClientApp.entities](/zh/api/kbengine/bots/PyClientApp.md#entities
-- [bots/Entity.isPlayer](/zh/api/kbengine/bots/Entity.md#isPlayer
-- [bots/Entity.onEnterWorld](/zh/api/kbengine/bots/Entity.md#onEnterWorld
-- [bots/Entity.onLeaveWorld](/zh/api/kbengine/bots/Entity.md#onLeaveWorld
-- [bots/Entity.onEnterSpace](/zh/api/kbengine/bots/Entity.md#onEnterSpace
-- [bots/Entity.onLeaveSpace](/zh/api/kbengine/bots/Entity.md#onLeaveSpace
-- [bots/Entity.base](/zh/api/kbengine/bots/Entity.md#base
-- [bots/Entity.cell](/zh/api/kbengine/bots/Entity.md#cell
-- [bots/Entity.clientapp](/zh/api/kbengine/bots/Entity.md#clientapp
-- [bots/Entity.moveToPoint](/zh/api/kbengine/bots/Entity.md#moveToPoint
-- [bots/Entity.cancelController](/zh/api/kbengine/bots/Entity.md#cancelController
-- [bots/Entity.isOnGround](/zh/api/kbengine/bots/Entity.md#isOnGround
+Current progress: the identity/control semantic matrix is in progress; world/space callbacks and handle-table semantics have source-analysis links.
 
-下一批待核对：
+### 3. Server entities
 
-- `cellapp/Entity.addTimer()` / `delTimer()`
-- `cellapp/Entity.moveToPoint()` / `navigate()` / `cancelController()`
+Pages:
 
-### 3. 服务端实体层
+- [baseapp/Entity](/api/kbengine/baseapp/Entity)
+- [baseapp/Proxy](/api/kbengine/baseapp/Proxy)
+- [cellapp/Entity](/api/kbengine/cellapp/Entity)
 
-页面：
+Audit focus:
 
-- [baseapp/Entity](/zh/api/kbengine/baseapp/Entity.md
-- [baseapp/Proxy](/zh/api/kbengine/baseapp/Proxy.md
-- [cellapp/Entity](/zh/api/kbengine/cellapp/Entity.md
+- Base entity creation of Cell entities, Base→Cell handoff, and callback ordering
+- Whether `controlledBy`, `isControlled`, and client binding explain actual control transfer
+- Proximity, movement, navigation, and controller ownership and cancellation semantics
+- Persistence timing, database callbacks, and failure paths
+- The client handoff and Witness-chain semantics behind `Proxy.giveClientTo()`
 
-重点核对：
+Related source analysis:
 
-- Base / Cell / Proxy 各自职责边界
-- `controlledBy`、`giveClientTo`、客户端迁移与控制权切换
-- 控制器接口、导航接口、AOI / Witness / View 回调
-- `writeToDB()`、cell 备份、灾难恢复与真实持久化链路
+- [Base entity lifecycle](/architecture/source-analysis/base-entity-lifecycle)
+- [Entity system](/architecture/source-analysis/entity-system)
+- [Networking and messaging](/architecture/source-analysis/networking)
+- [Spaces, AOI, and visibility](/architecture/source-analysis/space-aoi)
 
-建议关联源码解析：
+Current progress: `baseapp/Entity` and `baseapp/Proxy` have source-analysis links; `cellapp/Entity` movement/controller links are in progress.
 
-- [Entity 与实体系统](/zh/architecture/source-analysis/entity-system.html
-- [空间、AOI 与视野系统](/zh/architecture/source-analysis/space-aoi.html
-- [持久化](/zh/architecture/source-analysis/persistence.html
+### 4. Server global entries
 
-当前已完成：
+Pages:
 
-- [cellapp/Entity.controlledBy](/zh/api/kbengine/cellapp/Entity.md#controlledBy
-- [baseapp/Entity.createCellEntity](/zh/api/kbengine/baseapp/Entity.md#createCellEntity
-- [baseapp/Entity.onGetCell](/zh/api/kbengine/baseapp/Entity.md#onGetCell
-- [baseapp/Proxy.giveClientTo](/zh/api/kbengine/baseapp/Proxy.md#giveClientTo
-- [cellapp/Entity.addTimer](/zh/api/kbengine/cellapp/Entity.md#addTimer
-- [cellapp/Entity.delTimer](/zh/api/kbengine/cellapp/Entity.md#delTimer
-- [cellapp/Entity.moveToPoint](/zh/api/kbengine/cellapp/Entity.md#moveToPoint
-- [cellapp/Entity.navigate](/zh/api/kbengine/cellapp/Entity.md#navigate
-- [cellapp/Entity.cancelController](/zh/api/kbengine/cellapp/Entity.md#cancelController
+- [baseapp/KBEngine](/api/kbengine/baseapp/KBEngine)
+- [cellapp/KBEngine](/api/kbengine/cellapp/KBEngine)
+- [loginapp/KBEngine](/api/kbengine/loginapp/KBEngine)
+- [dbmgr/KBEngine](/api/kbengine/dbmgr/KBEngine)
+- [interfaces/KBEngine](/api/kbengine/interfaces/KBEngine)
+- [logger/KBEngine](/api/kbengine/logger/KBEngine)
 
-优先核对：
+Audit focus:
 
-- `baseapp/Entity.writeToDB()`
-- `baseapp/Entity.destroy()`
-- `cellapp/Entity.addProximity()`
-- `cellapp/Entity.writeToDB()`
+- Entity creation, locality, callbacks, and failure semantics
+- Global and process data dictionaries, synchronization timing, and callback dispatch
+- Account, login, database, third-party integration, and logging boundaries
+- Timer IDs, arguments, and cleanup constraints at the process level
 
-### 4. 服务端全局入口层
+Related source analysis:
 
-页面：
+- [Entry and bootstrap](/architecture/source-analysis/entry-and-bootstrap)
+- [Process model](/architecture/source-analysis/process-model)
+- [Networking and messaging](/architecture/source-analysis/networking)
+- [Persistence](/architecture/source-analysis/persistence)
 
-- [baseapp/KBEngine](/zh/api/kbengine/baseapp/KBEngine.md
-- [cellapp/KBEngine](/zh/api/kbengine/cellapp/KBEngine.md
-- [loginapp/KBEngine](/zh/api/kbengine/loginapp/KBEngine.md
-- [dbmgr/KBEngine](/zh/api/kbengine/dbmgr/KBEngine.md
-- [interfaces/KBEngine](/zh/api/kbengine/interfaces/KBEngine.md
-- [logger/KBEngine](/zh/api/kbengine/logger/KBEngine.md
+Current progress: BaseApp global-data entries and Proxy client handoff have source-analysis links; LoginApp, DBMgr, Interfaces, and Logger are in progress.
 
-重点核对：
+### 5. Cross-cutting topics
 
-- 每个进程级 `KBEngine` 模块到底提供哪些“只在本组件可用”的接口
-- `globalData`、`baseAppData`、`cellAppData` 的同步方向、回调时机与使用边界
-- 账号、数据库、外部接口、日志相关 API 的真实职责
+This layer advances by concepts that span multiple components rather than page by page.
 
-建议关联源码解析：
+Current topics:
 
-- [网络与消息系统](/zh/architecture/source-analysis/networking.html
-- [持久化](/zh/architecture/source-analysis/persistence.html
+- Player identity and control
+- Entity lifecycle and visibility
+- Timers and callbacks
+- Global data dictionary synchronization
+- Property sync, broadcast, and `ownerOnly`
+- Movement, controllers, and navigation
 
-当前已完成：
+Openings already connected:
 
-- [baseapp/KBEngine.baseAppData](/zh/api/kbengine/baseapp/KBEngine.md#baseAppData
-- [baseapp/KBEngine.globalData](/zh/api/kbengine/baseapp/KBEngine.md#globalData
-- [baseapp/KBEngine.onBaseAppData](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppData
-- [baseapp/KBEngine.onBaseAppDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppDataDel
-- [baseapp/KBEngine.onGlobalData](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalData
-- [baseapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalDataDel
-- [cellapp/KBEngine.cellAppData](/zh/api/kbengine/cellapp/KBEngine.md#cellAppData
-- [cellapp/KBEngine.globalData](/zh/api/kbengine/cellapp/KBEngine.md#globalData
-- [cellapp/KBEngine.onCellAppData](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppData
-- [cellapp/KBEngine.onCellAppDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppDataDel
-- [cellapp/KBEngine.onGlobalData](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalData
-- [cellapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalDataDel
+- [client/KBEngine.player](/api/kbengine/client/KBEngine#player)
+- [client/KBEngine.findEntity](/api/kbengine/client/KBEngine#findEntity)
+- [client/Entity.baseCall](/api/kbengine/client/Entity#baseCall)
+- [client/Entity.cellCall](/api/kbengine/client/Entity#cellCall)
+- [client/Entity.isPlayer](/api/kbengine/client/Entity#isPlayer)
+- [client/Entity.onEnterWorld](/api/kbengine/client/Entity#onEnterWorld)
+- [client/Entity.onEnterSpace](/api/kbengine/client/Entity#onEnterSpace)
+- [client/Entity.base](/api/kbengine/client/Entity#base)
+- [client/Entity.cell](/api/kbengine/client/Entity#cell)
+- [client/Entity.clientapp](/api/kbengine/client/Entity#clientapp)
+- [client/Entity.isOnGround](/api/kbengine/client/Entity#isOnGround)
+- [client/Entity.inWorld](/api/kbengine/client/Entity#inWorld)
+- [bots/PyClientApp.player](/api/kbengine/bots/PyClientApp#player)
+- [bots/PyClientApp.entities](/api/kbengine/bots/PyClientApp#entities)
+- [bots/Entity.isPlayer](/api/kbengine/bots/Entity#isPlayer)
+- [bots/Entity.onEnterWorld](/api/kbengine/bots/Entity#onEnterWorld)
+- [bots/Entity.onEnterSpace](/api/kbengine/bots/Entity#onEnterSpace)
+- [bots/Entity.base](/api/kbengine/bots/Entity#base)
+- [bots/Entity.cell](/api/kbengine/bots/Entity#cell)
+- [bots/Entity.clientapp](/api/kbengine/bots/Entity#clientapp)
+- [bots/Entity.moveToPoint](/api/kbengine/bots/Entity#moveToPoint)
+- [bots/Entity.cancelController](/api/kbengine/bots/Entity#cancelController)
+- [bots/Entity.isOnGround](/api/kbengine/bots/Entity#isOnGround)
+- [client/KBEngine.entity_id](/api/kbengine/client/KBEngine#entity_id)
+- [client/KBEngine.spaceID](/api/kbengine/client/KBEngine#spaceID)
+- [baseapp/Entity.createCellEntity](/api/kbengine/baseapp/Entity#createCellEntity)
+- [baseapp/Entity.onGetCell](/api/kbengine/baseapp/Entity#onGetCell)
+- [cellapp/Entity.controlledBy](/api/kbengine/cellapp/Entity#controlledBy)
+- [cellapp/Entity.addTimer](/api/kbengine/cellapp/Entity#addTimer)
+- [cellapp/Entity.delTimer](/api/kbengine/cellapp/Entity#delTimer)
+- [cellapp/Entity.moveToPoint](/api/kbengine/cellapp/Entity#moveToPoint)
+- [cellapp/Entity.navigate](/api/kbengine/cellapp/Entity#navigate)
+- [cellapp/Entity.cancelController](/api/kbengine/cellapp/Entity#cancelController)
+- [baseapp/KBEngine.baseAppData](/api/kbengine/baseapp/KBEngine#baseAppData)
+- [baseapp/KBEngine.globalData](/api/kbengine/baseapp/KBEngine#globalData)
+- [baseapp/KBEngine.onBaseAppData](/api/kbengine/baseapp/KBEngine#onBaseAppData)
+- [baseapp/KBEngine.onBaseAppDataDel](/api/kbengine/baseapp/KBEngine#onBaseAppDataDel)
+- [baseapp/KBEngine.onGlobalData](/api/kbengine/baseapp/KBEngine#onGlobalData)
+- [baseapp/KBEngine.onGlobalDataDel](/api/kbengine/baseapp/KBEngine#onGlobalDataDel)
+- [cellapp/KBEngine.cellAppData](/api/kbengine/cellapp/KBEngine#cellAppData)
+- [cellapp/KBEngine.globalData](/api/kbengine/cellapp/KBEngine#globalData)
+- [cellapp/KBEngine.onCellAppData](/api/kbengine/cellapp/KBEngine#onCellAppData)
+- [cellapp/KBEngine.onCellAppDataDel](/api/kbengine/cellapp/KBEngine#onCellAppDataDel)
+- [cellapp/KBEngine.onGlobalData](/api/kbengine/cellapp/KBEngine#onGlobalData)
+- [cellapp/KBEngine.onGlobalDataDel](/api/kbengine/cellapp/KBEngine#onGlobalDataDel)
+- [Source analysis: `Entity.createCellEntity()` is a Base→Cell handoff, not local object creation](/architecture/source-analysis/entity-system#base-entity-create-cell)
+- [Source analysis: relationships among `isPlayer()`, `player()`, and `controlledBy()`](/architecture/source-analysis/networking#client-entity-isplayer-control)
+- [Source analysis: client entity world/space callbacks](/architecture/source-analysis/networking#client-entity-world-space-callbacks)
+- [Source analysis: real restrictions on `baseCall()` and `cellCall()`](/architecture/source-analysis/networking#client-entity-remote-calls)
+- [Source analysis: client `moveToPoint()`, `cancelController()`, and `isOnGround` synchronization](/architecture/source-analysis/networking#client-entity-move-ground-sync)
+- [Source analysis: client handle tables and entity-container semantics](/architecture/source-analysis/networking#client-entity-handles-table)
+- [baseapp/Proxy.giveClientTo](/api/kbengine/baseapp/Proxy#giveClientTo)
+- [Source analysis: `Proxy.giveClientTo()` transfers client binding and the Witness chain](/architecture/source-analysis/space-aoi#proxy-give-client-to)
+- [Source analysis: Cell entity `addTimer()` / `delTimer()` operate the `ScriptID -> TimerHandle` mapping](/architecture/source-analysis/scripting#cell-entity-script-timers)
+- [Source analysis: Cell `moveToPoint()` / `navigate()` / `cancelController()` share one controller chain](/architecture/source-analysis/space-aoi#cell-entity-move-controllers)
+- [Source analysis: synchronization chains and callback dispatch for `baseAppData` / `globalData` / `cellAppData`](/architecture/source-analysis/networking#global-data-dicts-sync)
 
-优先核对：
+## Current execution strategy
 
-- `loginapp/KBEngine` 入口回调与账号流程接口
-- `dbmgr/KBEngine` 数据库入口与回调接口
-- `interfaces/KBEngine` 外部接口桥接
-- `logger/KBEngine` 进程日志入口
-
-### 5. 交叉专题层
-
-这一层不按单页推进，而是按“同一个概念横跨多个组件”推进。
-
-当前专题：
-
-- 玩家身份与控制权
-- 实体生命周期与视野可见性
-- 定时器与回调
-- 全局数据字典同步
-- 属性同步、广播与 `ownerOnly`
-- 移动、控制器与导航
-
-已打通的专题入口：
-
-- [client/KBEngine.player](/zh/api/kbengine/client/KBEngine.md#player
-- [client/KBEngine.findEntity](/zh/api/kbengine/client/KBEngine.md#findEntity
-- [client/Entity.baseCall](/zh/api/kbengine/client/Entity.md#baseCall
-- [client/Entity.cellCall](/zh/api/kbengine/client/Entity.md#cellCall
-- [client/Entity.isPlayer](/zh/api/kbengine/client/Entity.md#isPlayer
-- [client/Entity.onEnterWorld](/zh/api/kbengine/client/Entity.md#onEnterWorld
-- [client/Entity.onEnterSpace](/zh/api/kbengine/client/Entity.md#onEnterSpace
-- [client/Entity.base](/zh/api/kbengine/client/Entity.md#base
-- [client/Entity.cell](/zh/api/kbengine/client/Entity.md#cell
-- [client/Entity.clientapp](/zh/api/kbengine/client/Entity.md#clientapp
-- [client/Entity.isOnGround](/zh/api/kbengine/client/Entity.md#isOnGround
-- [client/Entity.inWorld](/zh/api/kbengine/client/Entity.md#inWorld
-- [bots/PyClientApp.player](/zh/api/kbengine/bots/PyClientApp.md#player
-- [bots/PyClientApp.entities](/zh/api/kbengine/bots/PyClientApp.md#entities
-- [bots/Entity.isPlayer](/zh/api/kbengine/bots/Entity.md#isPlayer
-- [bots/Entity.onEnterWorld](/zh/api/kbengine/bots/Entity.md#onEnterWorld
-- [bots/Entity.onEnterSpace](/zh/api/kbengine/bots/Entity.md#onEnterSpace
-- [bots/Entity.base](/zh/api/kbengine/bots/Entity.md#base
-- [bots/Entity.cell](/zh/api/kbengine/bots/Entity.md#cell
-- [bots/Entity.clientapp](/zh/api/kbengine/bots/Entity.md#clientapp
-- [bots/Entity.moveToPoint](/zh/api/kbengine/bots/Entity.md#moveToPoint
-- [bots/Entity.cancelController](/zh/api/kbengine/bots/Entity.md#cancelController
-- [bots/Entity.isOnGround](/zh/api/kbengine/bots/Entity.md#isOnGround
-- [client/KBEngine.entity_id](/zh/api/kbengine/client/KBEngine.md#entity_id
-- [client/KBEngine.spaceID](/zh/api/kbengine/client/KBEngine.md#spaceID
-- [baseapp/Entity.createCellEntity](/zh/api/kbengine/baseapp/Entity.md#createCellEntity
-- [baseapp/Entity.onGetCell](/zh/api/kbengine/baseapp/Entity.md#onGetCell
-- [cellapp/Entity.controlledBy](/zh/api/kbengine/cellapp/Entity.md#controlledBy
-- [cellapp/Entity.addTimer](/zh/api/kbengine/cellapp/Entity.md#addTimer
-- [cellapp/Entity.delTimer](/zh/api/kbengine/cellapp/Entity.md#delTimer
-- [cellapp/Entity.moveToPoint](/zh/api/kbengine/cellapp/Entity.md#moveToPoint
-- [cellapp/Entity.navigate](/zh/api/kbengine/cellapp/Entity.md#navigate
-- [cellapp/Entity.cancelController](/zh/api/kbengine/cellapp/Entity.md#cancelController
-- [baseapp/KBEngine.baseAppData](/zh/api/kbengine/baseapp/KBEngine.md#baseAppData
-- [baseapp/KBEngine.globalData](/zh/api/kbengine/baseapp/KBEngine.md#globalData
-- [baseapp/KBEngine.onBaseAppData](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppData
-- [baseapp/KBEngine.onBaseAppDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppDataDel
-- [baseapp/KBEngine.onGlobalData](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalData
-- [baseapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalDataDel
-- [cellapp/KBEngine.cellAppData](/zh/api/kbengine/cellapp/KBEngine.md#cellAppData
-- [cellapp/KBEngine.globalData](/zh/api/kbengine/cellapp/KBEngine.md#globalData
-- [cellapp/KBEngine.onCellAppData](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppData
-- [cellapp/KBEngine.onCellAppDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppDataDel
-- [cellapp/KBEngine.onGlobalData](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalData
-- [cellapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalDataDel
-- [源码解析：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/zh/architecture/source-analysis/entity-system.html#base-entity-create-cell
-- [源码解析：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
-- [源码解析：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks
-- [源码解析：`baseCall()` 与 `cellCall()` 的真实限制条件](/zh/architecture/source-analysis/networking.html#client-entity-remote-calls
-- [源码解析：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/zh/architecture/source-analysis/networking.html#client-entity-move-ground-sync
-- [源码解析：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table
-- [baseapp/Proxy.giveClientTo](/zh/api/kbengine/baseapp/Proxy.md#giveClientTo
-- [源码解析：`Proxy.giveClientTo()` 转移的是客户端绑定与 Witness 链路](/zh/architecture/source-analysis/space-aoi.html#proxy-give-client-to
-- [源码解析：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers
-- [源码解析：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers
-- [源码解析：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
-
-## 当前执行策略
-
-- 先把“一个术语在多个页面写法不一致”的问题收敛掉
-- 再把每个分类里最容易误解的 API 按“API 页简述 + 源码解析页深讲 + API 页跳转”补齐
-- 最后再回到 `basetypes`、`keywords` 做统一术语清理
-
+- First eliminate inconsistent wording for the same term across pages.
+- Next, complete the APIs most easily misunderstood in each category as “brief API page + deeper source-analysis page + API-page link.”
+- Finally, return to `basetypes` and `keywords` for terminology cleanup.

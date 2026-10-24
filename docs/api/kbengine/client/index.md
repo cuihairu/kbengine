@@ -1,5 +1,16 @@
-# client插件
+# Client Plugins
 
-KBEngine是一个开源的游戏服务端引擎，不包含完整的客户端部分，但我们提供了能与服务端快速对接的客户端插件部分。客户端插件包含了与服务端的通讯、注册账号、登录接口、Entity基础类等等。
-插件与客户端表现层之间通过一种机制进行交互，表现层获得插件的数据进行表现(例如：血量变化，实体进入View)，插件获得表现层的输入进行改变(例如：角色位置与朝向)。
-KBEngine在不同的前端技术下实现了不同的客户端插件，但每种插件都遵循本API文档中列出的方法与属性，根据该文档不同的客户端插件都拥有了一个实现标准。
+KBEngine is an open source game server engine that does not include the
+complete client part, but we provide multiple client plug-ins that can quickly
+interface with the server. Client plug-ins handle communication with
+the server, registering accounts, login interface, provide an Entity base class, and
+so on. The plug-in layer and the client UI layer interface with each other to
+form a complete game client.
+The plug-in provides the UI layer updated data for display received from
+the server (eg, HP changes, the entities entering the clients View),
+and the UI layer provides the plug-in layer with updated data to send back to the
+server based on the clients input (e.g., the position and orientation of the character).
+KBEngine implements different client plug-ins under different front-end
+technologies, but each plug-in follows the methods and attributes listed
+in this section of the API documentation. All plug-ins follow the same implementation standard
+outlined here in the "Client Plugins" section of the documentation.

@@ -1,18 +1,18 @@
-# Proxy类
+# Proxy class
 
-[KBEngine模块]
+[KBEngine module]
 
-Proxy是KBEngine模块的一部分。[更多...](#detailed_description)
+Proxy is part of theKBEnginemodule.[More...](#detailed_description)
 
 ```python
 import KBEngine
 ```
 
-## 父类
+## Parent
 
-[Entity](./Entity.md
+Entity
 
-## 成员函数
+## Member function
 
 - def [disconnect](#disconnect)( self ):
 - def [getClientType](#getClientType)( self ):
@@ -21,7 +21,7 @@ import KBEngine
 - def [streamFileToClient](#streamFileToClient)( self, resourceName, desc="", id=-1 ):
 - def [streamStringToClient](#streamStringToClient)( self, data, desc="", id=-1 ):
 
-## 回调函数
+## Callbacks
 
 - def [onClientDeath](#onClientDeath)( self ):
 - def [onClientGetCell](#onClientGetCell)( self ):
@@ -30,226 +30,239 @@ import KBEngine
 - def [onLogOnAttempt](#onLogOnAttempt)( self, ip, port, password ):
 - def [onStreamComplete](#onStreamComplete)( self, id, success ):
 
-## 属性
+## Attributes
 
-| [__ACCOUNT_NAME__](#__ACCOUNT_NAME__) | 只读string |
+| [__ACCOUNT_NAME__](#__ACCOUNT_NAME__) | Read-onlystring |
 | --- | --- |
-| [__ACCOUNT_PASSWORD__](#__ACCOUNT_PASSWORD__) | 只读string |
-| [clientAddr](#clientAddr) | 只读 |
-| [clientEnabled](#clientEnabled) | 只读bool |
-| [hasClient](#hasClient) | 只读bool |
-| [roundTripTime](#roundTripTime) | 只读 |
-| [timeSinceHeardFromClient](#timeSinceHeardFromClient) | 只读 |
+| [__ACCOUNT_PASSWORD__](#__ACCOUNT_PASSWORD__) | Read-onlystring |
+| [clientAddr](#clientAddr) | Read-only |
+| [clientEnabled](#clientEnabled) | Read-onlybool |
+| [hasClient](#hasClient) | Read-onlybool |
+| [roundTripTime](#roundTripTime) | Read-only |
+| [timeSinceHeardFromClient](#timeSinceHeardFromClient) | Read-only |
 
 <a id="detailed_description"></a>
 
-## 详细描述
+## A detailed description
 
-[Proxy](./Proxy.md是[Entity](./Entity.md的一个特殊类型，它继承自Entity，它有一个关联的客户端。本身来说，
-它就是一个代理客户端的实体，操控所有服务端向客户端的更新。不能在脚本直接创建[Proxy](./Proxy.md类对象。
+AProxyis a special type ofEntity.
+It inherits fromEntityand has an associated client. By itself, it is a
+proxy client entity that handles all server-to-client updates. Cannot
+createProxyclass objects directly script.
 
-## 成员函数文档
+## Member functions documentation
 
 <a id="disconnect"></a>
 
 ### def disconnect(self):
 
-断开客户端连接。
+Disconnect the client.
 
 <a id="getClientType"></a>
 
 ### def getClientType(self):
 
-功能说明：
-这个函数返回客户端类型。
+Function description:
+This function returns the client type.
 
-返回:
+returns:
 
-- UNKNOWN_CLIENT_COMPONENT_TYPE = 0,
+- UNKNOWN_CLIENT_COMPONENT_TYPE = 0, CLIENT_TYPE_MOBILE = 1, // Mobile phone CLIENT_TYPE_WIN = 2, // PC, typically EXE clients CLIENT_TYPE_LINUX = 3 // Linux Application program CLIENT_TYPE_MAC = 4 // Mac Application program CLIENT_TYPE_BROWSER = 5, // Web applications, HTML5, Flash CLIENT_TYPE_BOTS = 6, // bots CLIENT_TYPE_MINI = 7, // Mini-Client CLIENT_TYPE_END = 8 // end
 
 <a id="getClientDatas"></a>
 
 ### def getClientDatas(self):
 
-功能说明：
-这个函数返回客户端登录时和注册时所附带的数据。
-此数据可用于运营系统扩展，如果连接了第三方账号服务，此数据会经过interfaces进程发往第三方服务系统。
+Function description:
+This function returns the data attached to the client when logging in and
+registering.
+This data can be used to expand the operating system. If a third-party
+account service is connected, this data is sent to the third-party service
+system through the interfaces process.
 
-返回:
+returns:
 
-- tuple, 固定为2个元素的tuple(登陆数据bytes，注册数据bytes)，第一个元素为登陆时客户端调用登陆时传入的datas参数， 第二个元素为注册时客户端调用注册所传入的datas参数。由于可以存储任意二进制数据，因此他们都是以bytes类型存在。
+- tuple, a tuple of 2 elements (login data bytes, registration data bytes), the first element is the datas parameter passed in when the client invokes the login, and the second element is passed in when the client registers. Since they can store arbitrary binary data, they all exist as bytes.
 
 <a id="giveClientTo"></a>
 
 ### def giveClientTo(self, proxy):
 
-功能说明：
-将当前 Proxy 绑定的客户端连接转交给另一个 Proxy。
-它转移的不只是一个“控制标记”，而是整条客户端绑定链：旧 Proxy 会失去 `clientEntityCall`；如果旧 Proxy 已经有 cell，还会通知 cell 侧丢失 Witness；客户端随后销毁旧控制实体；目标 Proxy 接手同一条客户端通道并重新下发 `onCreatedProxies()`，如果目标已经有 cell，则继续重建 Witness、可见集和客户端控制链路。
+Function description:
+The client's controller is transferred to another Proxy, the current Proxy
+must have a client and the target Proxy must have no associated client,
+otherwise it will cause an error.
 
-注意：
+See also:
 
-- 当前 Proxy 必须已经绑定客户端。
-- 目标 Proxy 不能为空、不能是自身、不能已经绑定客户端。
-- 如果目标 Proxy 还没有 cell，迁移完成后只会先完成 Base 侧绑定，后续仍要等它获得 cell 才会恢复视野同步。
-- 源码里虽然接受 `None` 并转成 `NULL`，但该路径不会真正执行迁移，实际使用应传有效目标 Proxy。
+- Proxy.onGiveClientToFailure
 
-源码解析：
+parameters:
 
-- [空间、AOI 与视野同步：`Proxy.giveClientTo()` 转移的其实是客户端绑定与 Witness 链路](/zh/architecture/source-analysis/space-aoi.html#proxy-give-client-to
-
-参看：
-
-- [Proxy](./Proxy.md.[onGiveClientToFailure](./Proxy.md#onGiveClientToFailure
-
-参数：
-
-| proxy | 控制权将转交给这个实体。 |
+| proxy | Control will be transferred to this entity. |
 | --- | --- |
 
 <a id="streamFileToClient"></a>
 
 ### def streamFileToClient(self, resourceName, desc="", id=-1):
 
-功能说明：
-这个函数类似于[streamStringToClient()](./Proxy.md#streamStringToClient，将一个资源文件发送给客户端。发送过程在不同的线程上操作，因此不会危及主线程。
+Function description:
+This function is similar tostreamStringToClient()and sends a resource file to the client. The sending process operates
+on different threads so it does not compromise the main thread.
 
-参看：
+See also:
 
-- [Proxy](./Proxy.md.[onStreamComplete](./Proxy.md#onStreamComplete
+- Proxy.onStreamComplete
 
-参数：
+parameters:
 
-| resourceName | 要发送的资源名称，包含路径。 |
+| resourceName | The name of the resource to send, including the path. |
 | --- | --- |
-| desc | 一个可选的字符串，发送给客户端的资源描述。 |
-| id | 一个16位的id，它的值完全取决于调用者。如果传入-1系统将会在队列里面选择一个没有在用的id。可以在客户端根据这个id做资源判断。 |
+| desc | An optional string that describes the resource sent to the client. |
+| id | A 16-bit id whose value depends entirely on the caller. If the incoming -1 system will select an unused id in the queue. The client can make resource judgments based on this id. |
 
-返回：
+returns:
 
-- 与这个下载关联的id。
+- The id associated with this download.
 
 <a id="streamStringToClient"></a>
 
 ### def streamStringToClient(self, data, desc="", id=-1):
 
-功能说明：
-发送一些数据到当前实体绑定的客户端。如果客户端端口则数据被清除，
-当客户端再次绑定到实体的时候才可调用这个函数。16位的id完全取决于调用者。
-如果调用者没有指定这个ID则系统会分配一个未用过的id。可以在客户端根据这个id做资源判断。
-你可以在Proxy的派生类中定义回调函数（onStreamComplete），所有数据成功发送给客户端时或下载失败时会调用这个回调函数。
-参看：[Proxy](./Proxy.md.[onStreamComplete](./Proxy.md#onStreamComplete与客户端实体Entity.onStreamDataStarted和Entity.onStreamDataRecv还有Entity.onStreamDataCompleted。
+Function description:
+Sends some data to the client bound to the current entity. If the client
+port data is cleared, this function can only be called when the client
+binds to the entity again. The 16-bit id is entirely up to the caller.
+If the caller does not specify this ID then the system will allocate an unused id. The client can make resource judgments based on this id.
+You can define a callback function (onStreamComplete) in a Proxy-derived class. This callback function is called when all data is successfully sent to the client or when the download fails.
+See also:Proxy.onStreamComplete, clientEntity.onStreamDataStarted,Entity.onStreamDataRecv, andEntity.onStreamDataCompleted.
 
-参数：
+parameters:
 
-| data | 要发送的字符串。 |
+| data | The string to send |
 | --- | --- |
-| desc | 一个可选的字符串，发送给客户端的描述。 |
-| id | 一个16位的id，它的值完全取决于调用者。如果传入-1系统将会在队列里面选择一个没有在用的id。 |
+| desc | An optional description string sent. |
+| id | A 16-bit id whose value depends entirely on the caller. If the incoming -1 system will select an unused id in the queue. |
 
-返回：
+returns:
 
-- 与这个下载关联的id。
+- The id associated with this download.
 
-## 回调函数文档
+## Callback functions documentation
 
 <a id="onClientDeath"></a>
 
 ### def onClientDeath(self):
 
-如果在脚本中实现了此回调，这个方法将在客户端断开连接时被调用。 这个方法没有参数。
+If this callback is implemented in a script, this method will be called when the client disconnects. This method has no parameters.
 
 <a id="onClientGetCell"></a>
 
 ### def onClientGetCell(self):
 
-如果在脚本中实现了此回调，当客户端能够调用实体的cell属性时，该回调被调用。
+If this callback is implemented in a script,
+the callback is called when the client can call the entity'scellattribute
 
 <a id="onClientEnabled"></a>
 
 ### def onClientEnabled(self):
 
-如果在脚本中实现了此回调，当实体可用时（ 各种初始化完毕并且可以与客户端通讯 ）该回调被调用。 这个方法没有参数。
-注意：giveClientTo将控制权赋给了该实体时也会导致该回调被调用。
+If this callback is implemented in the
+script, it is invoked when the entity is available (various initializations
+and communication with the client). This method has no parameters.
+Note: giveClientTo also assigns control to the entity and causes the callback to be called.
 
 <a id="onGiveClientToFailure"></a>
 
 ### def onGiveClientToFailure(self):
 
-如果在脚本中实现了此回调，当实体调用[giveClientTo](#giveClientTo)失败时，该回调被调用。这个方法没有参数。
+If this callback is implemented in a script, it is called when the entity
+fails to call[giveClientTo](#onStreamComplete).
+This method has no parameters.
 
 <a id="onLogOnAttempt"></a>
 
 ### def onLogOnAttempt(self, ip, port, password):
 
-如果在脚本中实现了此回调，这个函数在客户端尝试使用当前账号实体进行登录时触发回调。
-这种情况通常是实体存在于内存中处于有效状态，最明显的例子是用户A使用此账号登录了，用户B使用同一账号进行登录，此时回调触发。
-这个回调函数可以返回如下常量值：
-KBEngine.LOG_ON_ACCEPT：允许新的客户端与实体进行绑定，如果实体已经绑定了一个客户端，之前的客户端将被踢出。
-KBEngine.LOG_ON_REJECT：拒绝新的客户端与实体绑定。
-KBEngine.LOG_ON_WAIT_FOR_DESTROY：等待实体销毁后再进行客户端绑定。
+If this callback is implemented in a
+script, it is invoked when a client attempts to log in using the current
+account entity.
+This situation usually happens when the entity that exists in memory is in a valid
+state, the most obvious example is user A logs in with this account,
+and user B tries to use the same account to log in, triggering this callback.
+This callback function can return the following constant values:
+KBEngine.LOG_ON_ACCEPT:
+Allows the new client to bind to the entity. If the entity has bound a
+client, the previous client will be kicked out.
+KBEngine.LOG_ON_REJECT:
+Reject new client entity binding.
+KBEngine.LOG_ON_WAIT_FOR_DESTROY:
+Wait for the entity to be destroyed before the client binds.
 
-参数：
+parameters:
 
-| ip | 尝试登录的客户端IP地址。 |
+| ip | The IP address of the client trying to log in. |
 | --- | --- |
-| port | 尝试登录的客户端连接的端口。 |
-| password | 用户登录时使用的MD5密码。 |
+| port | The port to which the client attempted to log in. |
+| password | The MD5 password used when the user logs in. |
 
 <a id="onStreamComplete"></a>
 
 ### def onStreamComplete(self, id, success):
 
-如果在脚本中实现了此回调，当用户使用Proxy或Proxy完成时，该回调被调用。
+If you implement this callback in a
+script, when a user usesProxy.streamStringToClient()
+orProxy.streamFileToClient()
+and is completed, this callback is invoked.
 
-参数：
+parameters:
 
-| id | 与下载关联的id。 |
+| id | The id associated with the download. |
 | --- | --- |
-| success | 成功与否。 |
+| success | Success or failure |
 
-## 属性文档
+## Attributes documentation
 
 <a id="__ACCOUNT_NAME__"></a>
 
 __ACCOUNT_NAME__
 
-说明：
-如果proxy是帐号则可以访问__ACCOUNT_NAME__得到帐号名。
+Note:
+If the proxy is an account, you can access __ACCOUNT_NAME__ to get the account name.
 
 <a id="__ACCOUNT_PASSWORD__"></a>
 
 __ACCOUNT_PASSWORD__
 
-说明：
-如果proxy是帐号则可以访问__ACCOUNT_PASSWORD__得到帐号MD5密码。
+Note:
+If the proxy is an account, you can access __ACCOUNT_PASSWORD__ to get the MD5 password.
 
 <a id="clientAddr"></a>
 
 clientAddr
 
-这是一个tuple对象，包含了客户端的ip与端口。
+This is a tuple object that contains the client's ip and port.
 
 <a id="clientEnabled"></a>
 
 clientEnabled
 
-实体是否已经可用。在实体可用之前脚本不能与客户端进行通讯。
+Whether the entity is already available. The script cannot communicate with the client until the entity is available.
 
 <a id="hasClient"></a>
 
 hasClient
 
-Proxy是否绑定了一个客户端连接。
+Proxy is bound to a client connection.
 
 <a id="roundTripTime"></a>
 
 roundTripTime
 
-在一段时间内服务器与这个Proxy绑定的客户端通讯平均往返时间。这个属性只在Linux下生效。
+The average round-trip time for client communication between the server and this Proxy over a period of time. This property only takes effect under Linux.
 
 <a id="timeSinceHeardFromClient"></a>
 
 timeSinceHeardFromClient
 
-最后一次收到客户端数据包时到目前为止所过去的时间（秒）。
+The time (in seconds) that has passed since the client packet was last received.

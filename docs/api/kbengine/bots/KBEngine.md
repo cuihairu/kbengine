@@ -1,13 +1,15 @@
-# KBEngine模块
+# KBEngine module
 
-[KBEngine](./KBEngine.md模块提供了逻辑脚本层访问实体的部分, 以及当前进程其他客户端的数据等等。
+ThisKBEnginemodule provides the parts of the
+logical script layer access toEntity,
+as well as the data of other clients in the current process, and so on.
 
-## 类
+## Classes
 
 - Entity
 - PyClientApp
 
-## 成员函数
+## Member functions
 
 - def [addBots](#addBots)( reqCreateAndLoginTotalCount, reqCreateAndLoginTickCount=0, reqCreateAndLoginTickTime=0 ):
 - def [callback](#callback)( initialOffset, callbackObj ):
@@ -18,203 +20,213 @@
 - def [scriptLogType](#scriptLogType)( logType ):
 - def [urlopen](#urlopen)( url, callback, postData, headers ):
 
-## 回调函数
+## Callbacks
 
 - def [onInit](#onInit)( isReload ):
 - def [onFinish](#onFinish)( ):
 
-## 属性
+## Attributes
 
-| [bots](#bots) | bots[component](#component)只读string |
+| [bots](#bots) | bots[component](#component)Read-onlystring |
 | --- | --- |
 
-## 成员函数文档
+## Member functions documentation
 
 <a id="addBots"></a>
 
 ### def addBots(reqCreateAndLoginTotalCount, reqCreateAndLoginTickCount=0, reqCreateAndLoginTickTime=0):
 
-功能说明：
-向服务端添加机器人。
-例子:
+Function description:
+Add a bot to the server.
+Example:
 
 ```python
-# 这里是使用addBots的一个例子
+# Here is an example of using addBots
         import 
 KBEngine
 
  
-        # 一次性向服务器添加5个机器人（瞬时完成）
+        # Add 5 robots to the server at one time (instantaneously).
         KBEngine.addBots( 5 )
  
-        # 一共向服务器添加1000个机器人，每次添加5个，每次添加所用时间(s)
+        # Add a total of 1000 robots to the server, 5 at a time, at an interval of 10 seconds.
         KBEngine.addBots( 1000, 5, 10 )
 ```
 
-参数：
+parameters:
 
-| reqCreateAndLoginTotalCount | integer，向服务器添加的机器人总数。 |
+| reqCreateAndLoginTotalCount | integer, integer, the total number of bots to add to the server. |
 | --- | --- |
-| reqCreateAndLoginTickCount | integer，每次向服务器添加的机器人数量。 |
-| reqCreateAndLoginTickTime | integer，每次添加所用时间(秒)。 |
+| reqCreateAndLoginTickCount | integer, the number of bots added to the server each interval |
+| reqCreateAndLoginTickTime | integer, the interval of time (in seconds) between adding bots. |
 
 <a id="callback"></a>
 
 ### def callback(initialOffset, callbackObj):
 
-功能说明：
-注册一个回调，回调函数callbackObj触发，回调函数将在"initialOffset"秒后被执行。
-例子:
+Function description:
+Registers a callback, on the callbackObj function, which will be executed
+once after "initialOffset" seconds.
+Example:
 
 ```python
-# 这里是使用callback的一个例子
+# Here is an example of using callback
         import 
 KBEngine
 
  
-        # 增加一个定时器，1秒后执行
+        # Add a timer and execute it after 1 second
         KBEngine.callback( 1, onCallbackfun )
  
     def onCallbackfun( ):
-        print "onCallbackfun called“
+        print "onCallbackfun called"
 	
 ```
 
-参数：
+parameters:
 
-| initialOffset | float，指定回调从注册到回调的时间间隔（秒）。 |
+| initialOffset | float, time, in seconds, to wait before triggering the callback. |
 | --- | --- |
-| callbackObj | function，指定的回调函数对象。 |
+| callbackObj | function, the specified callback function object. |
 
-返回:
+returns:
 
-- integer，该函数返回callback的内部id，这个id可用于[cancelCallback](#cancelCallback)移除回调。
+- integer, this function returns the internal id of the callback. This id can be used with[cancelCallback](#cancelCallback)to remove the callback.
 
 <a id="cancelCallback"></a>
 
 ### def cancelCallback(id):
 
-功能说明：
-函数cancelCallback用于移除一个注册但还未触发的回调，移除后的回调不再执行。
-如果cancelCallback函数使用一个无效的id（例如已经移除），将会产生错误。
-到KBEngine.callback参考回调的一个使用例子。
+Function description:
+This function is used to remove a registered but not yet triggered callback.
+The removed callback will not be executed. If this function is passed an
+invalid id (for example, timer was removed), an error will be generated.
+A use case is in the KBEngine.[callback](#callback)example.
 
-参数：
+parameters:
 
-| id | integer，它指定要移除的回调id。 |
+| id | integer, specifies the callback id to remove. |
 | --- | --- |
 
 <a id="genUUID64"></a>
 
 ### def genUUID64():
 
-功能说明：
-该函数生成一个64位的唯一ID。
-注意：这个函数依赖于Cellapps服务进程启动参数gus，请正确设置启动参数保持唯一性。
-另外如果gus超过65535则该函数只能在当前进程上保持唯一性。
-用途：
-多个服务进程上产生唯一物品ID并且在合服时不会产生冲突。
-多个服务进程上产生一个房间ID，不需要进行唯一性校验。
+Function description:
+This function generates a 64-bit unique ID.
+Note: This function is dependent on the startup argument 'gus' of the
+Cellapps service process. Please set the startup arguments to be unique.
+In addition, if gus exceeds 65535, the function can only remain unique on
+the current process.
+Usage:
+Unique item IDs are generated on multiple service processes and do not
+conflict when combined.
+A room ID is generated on multiple service process and no uniqueness
+verification is required.
 
-返回：
+returns:
 
-- 返回一个64位的integer。
+- A 64-bit integer.
 
 <a id="getWatcher"></a>
 
 ### def getWatcher(path):
 
-功能说明：
-从KBEngine调试系统中获取一个监视变量的值。
-例子：在baseapp1的Python命令行输入:
+Function description:
+Gets the value of a watch variable from the KBEngine debug system.
+Example: In the Python console of baseapp1 enter:
 >>>KBEngine.getWatcher("/root/stats/runningTime")
 12673648533
 >>>KBEngine.getWatcher("/root/scripts/players")
 32133
 
-参数：
+parameters:
 
-| path | string，该变量的绝对路径包括变量名(可以在GUIConsole的watcher页查看)。 |
+| path | string, the absolute path of the variable including the variable name (can be viewed on the GUIConsole watcher page). |
 | --- | --- |
 
-返回：
+returns:
 
-- 该变量的值。
+- The value of the variable.
 
 <a id="getWatcherDir"></a>
 
 ### def getWatcherDir(path):
 
-功能说明：
-从KBEngine调试系统中获取一个监视目录下的元素列表(目录、变量名)。
-例子：在baseapp1的Python命令行输入:
+Function description:
+Get a list of elements (directories, variable names) under the watch
+directory from the KBEngine debugging system.
+Example: In the Python console of baseapp1 enter::
 >>>KBEngine.getWatcher("/root")
 ('stats', 'objectPools', 'network', 'syspaths', 'ThreadPool', 'cprofiles', 'scripts', 'numProxices', 'componentID', 'componentType', 'uid', 'numClients', 'globalOrder', 'username', 'load', 'gametime', 'entitiesSize', 'groupOrder')
 
-参数：
+parameters:
 
-| path | string，该变量的绝对路径(可以在GUIConsole的watcher页查看)。 |
+| path | string, the absolute path of the variable including the variable name (can be viewed on the GUIConsole watcher page). |
 | --- | --- |
 
-返回：
+returns:
 
-- 监视目录下的元素列表(目录、变量名)。
+- A list of elements in the directory (directories, variable names).
 
 <a id="scriptLogType"></a>
 
 ### def scriptLogType(logType):
 
-功能说明：
-设置当前Python.print输出的信息类型(参考: KBEngine.LOG_TYPE_*)。
+Function description:
+Sets the type of information output by the current Python.print
+(Reference: KBEngine.LOG_TYPE_*)
 
 <a id="urlopen"></a>
 
 ### def urlopen(url, callback, postData, headers):
 
-功能说明：
-这个脚本函数在提供对外HTTP/HTTPS异步请求。
+Function description:
+This script function is providing an external HTTP/HTTPS asynchronous request.
 
-参数：
+parameters:
 
-| url | 有效的HTTP/HTTPS网址，字符串类型。 |
+| url | A valid HTTP/HTTPS URL. |
 | --- | --- |
-| callback | 可选参数，带有请求执行结果的回调对象（比如说是一个函数）。这个回调带有5个参数：HTTP请求返回码（如：200)，返回的内容，返回的HTTP协议头，是否成功，请求的网址。 声明样例： def onHttpCallback(httpcode, data, headers, success, url): print(httpcode, data, headers, success, url) 如同上面的例子所示:<br>httpcode:参数对应的就是“HTTP请求返回码”，这个结果集合参数是一个整形值。<br>data:参数则是“返回的内容”，它是一个字符串。<br>headers:参数是“服务器返回的HTTP协议头”，如：{"Content-Type": "application/x-www-form-urlencoded"}，它是一个字典。<br>success:则对应了“执行是否成功”，当请求执行有错误时，为False，可以通过httpcode进一步判断错误信息。<br>url:是“请求所用的网址。 |
-| postData | 可选参数，默认是GET方式请求服务器，如果需要POST方式请提供需要POST的内容，引擎将自动使用POST方式请求服务器，它是一个bytes。 |
-| headers | 可选参数，请求时使用的HTTP头，如：{"Content-Type": "application/x-www-form-urlencoded"}，它是一个字典。 |
+| callback | Optional parameter with a callback object (for example, a function) that requests execution results. This callback takes five parameters: the HTTP request return code (eg: 200), the returned content, the returned HTTP protocol header, whether it succeeded, and the requested URL. Example: def onHttpCallback(httpcode, data, headers, success, url): print(httpcode, data, headers, success, url) As the above example shows:&lt;br&gt;httpcode:The parameter corresponds to the "HTTP request return code", is an integer.&lt;br&gt;data:The parameter is “ returned content & rdquo;, it is a string.&lt;br&gt;headers:The parameter is the HTTP protocol header returned by the server, such as:{"Content-Type": "application/x-www-form-urlencoded"}, is an dict.&lt;br&gt;success:Whether the execution is successful or not, when the request execution has an error, it is False, and the error information can be further judged by httpcode.&lt;br&gt;url:Is the URL used by the request. |
+| postData | Optional parameter, the default is GET mode request server. If you need POST mode, please provide the content that needs POST. The engine will automatically request the server using POST, is an bytes. |
+| headers | Optional parameter, HTTP header used when requesting, such as：{"Content-Type": "application/x-www-form-urlencoded"}, is an dict. |
 
-## 回调函数文档
+## Callback functions documentation
 
 <a id="onInit"></a>
 
 ### def onInit(isReload):
 
-功能说明：
-当引擎启动后初始化完所有的脚本后这个接口被调用。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+This function is called after all scripts have been initialized since
+the engine started.
+Note: This callback function must be implemented in the portal module (kbengine_defaults.xml->entryScriptFile).
 
-参数：
+parameters:
 
-| isReload | bool，是否是被重写加载脚本后触发的。 |
+| isReload | bool, whether it was triggered after rewriting the loading script. |
 | --- | --- |
 
 <a id="onFinish"></a>
 
 ### def onFinish():
 
-功能说明：
-进程关闭会回调此函数。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+This function is called back when the process shuts down.
+Note: This callback function must be implemented in the portal module (kbengine_defaults.xml->entryScriptFile).
 
-## 属性文档
+## Attributes documentation
 
 <a id="bots"></a>
 
 bots
 
-说明：
-bots是一个字典对象，包含当前进程上所有的客户端对象。
+Description:
+bots is a dictionary object that contains all client objects on the current
+process.
 
-类型：
+Types:
 
 - PyBots
 
@@ -222,5 +234,7 @@ bots是一个字典对象，包含当前进程上所有的客户端对象。
 
 component
 
-说明：
-这是正运行在当前脚本环境的组件。（至今为止）可能值有'cellapp', 'baseapp', 'client', 'dbmgr', 'bots' 和 'editor'。
+Description:
+This is the component that is running in the current scripting environment.
+(So far) Possible values are 'cellapp', 'baseapp', 'client', 'dbmgr', 'bots',
+and 'editor'.

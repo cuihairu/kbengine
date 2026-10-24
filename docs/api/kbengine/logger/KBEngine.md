@@ -1,129 +1,138 @@
-# KBEngine模块
+# KBEngine module
 
-[KBEngine](./KBEngine.md模块提供了Python脚本控制对特定类型的日志进行分析和转储等能力。
+ThisKBEnginemodule provides
+Python scripts the ability to control, analyze, and dump certain types
+of logs.
 
-## 成员函数
+## Member functions
 
 - def [addTimer](#addTimer)( initialOffset, repeatOffset=0, callbackObj=None ):
 - def [delTimer](#delTimer)( id ):
 - def [urlopen](#urlopen)( url, callback, postData, headers ):
 
-## 回调函数
+## Callbacks
 
 - def [onLoggerAppReady](#onLoggerAppReady)( ):
 - def [onLoggerAppShutDown](#onLoggerAppShutDown)( ):
 - def [onLogWrote](#onLogWrote)( datas ):
 - def [onReadyForShutDown](#onReadyForShutDown)( ):
 
-## 成员函数文档
+## Member functions documentation
 
 <a id="addTimer"></a>
 
 ### def addTimer(initialOffset, repeatOffset=0, callbackObj=None):
 
-功能说明：
-注册一个定时器，定时器由回调函数callbackObj触发，回调函数将在"initialOffset"秒后被执行第1次，而后将每间隔"repeatOffset"秒执行1次。
-例子:
+Function description:
+Registers a timer. The timer triggers the callback function callbackObj.
+The callback function will be executed the first time after "initialOffset"
+seconds, and then will be executed once every "repeatOffset" seconds.
+Example:
 
 ```python
-# 这里是使用addTimer的一个例子
+# Here is an example of using addTimer
         import 
 KBEngine
 
  
-        # 增加一个定时器，5秒后执行第1次，而后每1秒执行1次，用户参数是9
+        # Add a timer, perform the first time after 5 seconds, and execute once every 1 second. The user parameter is 9
         KBEngine.addTimer( 5, 1, onTimer_Callbackfun )
  
-        # 增加一个定时器，1秒后执行，用户参数缺省是0
+        # Add a timer and execute it after 1 second. The default user parameter is 0.
         KBEngine.addTimer( 1, onTimer_Callbackfun )
  
     def onTimer_Callbackfun( id ):
         print "onTimer_Callbackfun called: id %i" % ( id )
-        # if 这是不断重复的定时器，当不再需要该定时器的时候，调用下面函数移除:
+        # If this is a repeated timer, it is no longer needed, call the following function to remove: 
         #     KBEngine.delTimer( id )
 ```
 
-参数：
+parameters:
 
-| initialOffset | float，指定定时器从注册到第一次回调的时间间隔（秒）。 |
+| initialOffset | float, specifies the time interval in seconds for the timer to register from the first callback. |
 | --- | --- |
-| repeatOffset | float，指定第一次回调执行后每次执行的时间间隔（秒）。必须用函数[delTimer](#delTimer)移除定时器，否则它会一直重复下去。值小于等于0将被忽略。 |
-| callbackObj | function，指定的回调函数对象。 |
+| repeatOffset | float, specifies the time interval (in seconds) between each execution after the first callback execution. You must remove the timer with the function[delTimer](#delTimer), otherwise it will continue to repeat. Values less than or equal to 0 will be ignored. |
+| callbackObj | function, the specified callback function object |
 
-返回:
+returns:
 
-- integer，该函数返回timer的内部id，这个id可用于[delTimer](#delTimer)移除定时器。
+- integer, the internal id of the timer. This id can be used to remove the timer from [delTimer](#delTimer).
 
 <a id="delTimer"></a>
 
 ### def delTimer(id):
 
-功能说明：
-函数delTimer用于移除一个注册的定时器，移除后的定时器不再执行。只执行1次的定时器在执行回调后自动移除，不必要使用delTimer移除。
-如果delTimer函数使用一个无效的id（例如已经移除），将会产生错误。
-到KBEngine.addTimer参考定时器的一个使用例子。
+Function description:
+The delTimer function is used to remove a registered timer. The removed timer is
+no longer executed. Single-shot timers are automatically removed after
+the callback is executed, and it is not necessary to use the delTimer
+function to remove it. If the delTimer function is passed an invalid id
+(for example, timer was removed), it will generate an error.
+A use case is shown in the KBEngine.[addTimer](#addTimer)example.
 
-参数：
+parameters:
 
-| id | integer，它指定要移除的定时器id。 |
+| id | integer, which specifies the timer id to remove. |
 | --- | --- |
 
 <a id="urlopen"></a>
 
 ### def urlopen(url, callback, postData, headers):
 
-功能说明：
-这个脚本函数在提供对外HTTP/HTTPS异步请求。
+Function description:
+This script function is providing an external HTTP/HTTPS asynchronous request.
 
-参数：
+parameters:
 
-| url | 有效的HTTP/HTTPS网址，字符串类型。 |
+| url | A valid HTTP/HTTPS URL. |
 | --- | --- |
-| callback | 可选参数，带有请求执行结果的回调对象（比如说是一个函数）。这个回调带有5个参数：HTTP请求返回码（如：200)，返回的内容，返回的HTTP协议头，是否成功，请求的网址。 声明样例： def onHttpCallback(httpcode, data, headers, success, url): print(httpcode, data, headers, success, url) 如同上面的例子所示:<br>httpcode:参数对应的就是“HTTP请求返回码”，这个结果集合参数是一个整形值。<br>data:参数则是“返回的内容”，它是一个字符串。<br>headers:参数是“服务器返回的HTTP协议头”，如：{"Content-Type": "application/x-www-form-urlencoded"}，它是一个字典。<br>success:则对应了“执行是否成功”，当请求执行有错误时，为False，可以通过httpcode进一步判断错误信息。<br>url:是“请求所用的网址。 |
-| postData | 可选参数，默认是GET方式请求服务器，如果需要POST方式请提供需要POST的内容，引擎将自动使用POST方式请求服务器，它是一个bytes。 |
-| headers | 可选参数，请求时使用的HTTP头，如：{"Content-Type": "application/x-www-form-urlencoded"}，它是一个字典。 |
+| callback | Optional parameter with a callback object (for example, a function) that requests execution results. This callback takes five parameters: the HTTP request return code (eg: 200), the returned content, the returned HTTP protocol header, whether it succeeded, and the requested URL. Example: def onHttpCallback(httpcode, data, headers, success, url): print(httpcode, data, headers, success, url) As the above example shows:&lt;br&gt;httpcode:The parameter corresponds to the "HTTP request return code", is an integer.&lt;br&gt;data:The parameter is “ returned content & rdquo;, it is a string.&lt;br&gt;headers:The parameter is the HTTP protocol header returned by the server, such as:{"Content-Type": "application/x-www-form-urlencoded"}, is an dict.&lt;br&gt;success:Whether the execution is successful or not, when the request execution has an error, it is False, and the error information can be further judged by httpcode.&lt;br&gt;url:Is the URL used by the request. |
+| postData | Optional parameter, the default is GET mode request server. If you need POST mode, please provide the content that needs POST. The engine will automatically request the server using POST, is an bytes. |
+| headers | Optional parameter, HTTP header used when requesting, such as：{"Content-Type": "application/x-www-form-urlencoded"}, is an dict. |
 
-## 回调函数文档
+## Callback functions documentation
 
 <a id="onLoggerAppReady"></a>
 
 ### def onLoggerAppReady():
 
-功能说明：
-当前进程已经准备好的时候回调此函数。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+This function is called back when the current process is ready.
+Note: This callback interface must be implemented in the portal module ( kbengine_defaults.xml ->entryScriptFile).
 
 <a id="onLoggerAppShutDown"></a>
 
 ### def onLoggerAppShutDown():
 
-功能说明：
-进程关闭会回调此函数。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+This function is called back when the process shuts down.
+Note: This callback interface must be implemented in the portal module ( kbengine_defaults.xml ->entryScriptFile).
 
 <a id="onLogWrote"></a>
 
 ### def onLogWrote(datas):
 
-功能说明：
-如果这个函数在脚本中有实现，logger进程获得了一条新日志，该回调函数被调用。
-数据库接口在kbengine_defaults.xml->dbmgr->databaseInterfaces定义。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+If this function is implemented in the script, it is invoked when the
+logger process obtains a new log.
+The database interface is defined inkbengine_defaults.xml->dbmgr->databaseInterfaces.
+Note: This callback interface must be implemented in the portal module ( kbengine_defaults.xml ->entryScriptFile).
 
-参数：
+parameters:
 
-| datas | bytes，日志数据。 |
+| datas | bytes, log data. |
 | --- | --- |
 
 <a id="onReadyForShutDown"></a>
 
 ### def onReadyForShutDown():
 
-功能说明：
-如果这个函数在脚本中有实现，当进程准备退出时，该回调函数被调用。
-可以通过该回调控制进程退出的时机。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+If this function is implemented in the script, it is called when the
+process is ready to exit.
+You can use this callback to control when the process exits.
+Note: This callback interface must be implemented in the portal module ( kbengine_defaults.xml ->entryScriptFile).
 
-返回：
+returns:
 
-- bool，如果返回True，则允许进入进程退出流程，返回其它值则进程会过一段时间后再次询问。
+- bool, if it returns True, it allows the process to exit. Returning other values will cause the process to ask again after a period of time.

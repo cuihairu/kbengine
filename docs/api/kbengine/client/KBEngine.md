@@ -1,12 +1,14 @@
-# KBEngine模块
+# KBEngine module
 
-[KBEngine](./KBEngine.md模块提供了逻辑脚本层访问实体的部分, 以及当前space的数据等等。
+ThisKBEnginemodule provides a part of the
+logic script layer access toentity,
+as well as current space data and so on.
 
-## 类
+## Class
 
 - Entity
 
-## 成员函数
+## Member function
 
 - def [login](#login)( username, password ):
 - def [createAccount](#createAccount)( username, password ):
@@ -18,167 +20,165 @@
 - def [findEntity](#findEntity)( entityID ):
 - def [getSpaceData](#getSpaceData)( key ):
 
-## 回调函数
+## Callback
 
-## 属性
+## Attributes
 
-| [component](#component) | 只读string |
+| [component](#component) | Read onlystring |
 | --- | --- |
 | [entities](#entities) | Entities[entity_uuid](#entity_uuid)uint64[entity_id](#entity_id)int32[spaceID](#spaceID)int32 |
 
-## 成员函数文档
+## Member functions documentation
 
 <a id="login"></a>
 
 ### def login(username, password):
 
-功能说明：
-登录账号到KBEngine服务端。
-注意：如果插件与UI层使用事件交互模式，在UI层不要直接调用，请触发一个"login"事件给插件，事件附带数据username和password。
+Function description:
+Login account to KBEngine server.
+Note: If the plug-in and the UI layer use event interaction mode, do
+not call directly from the UI layer. Please trigger a "login" event to the
+plug-in. The event is accompanied by the data username and password.
 
-参数：
+parameter
 
-| username | string，用户名。 |
+| username | string, username. |
 | --- | --- |
-| password | string，密码。 |
+| password | string, password. |
 
 <a id="createAccount"></a>
 
 ### def createAccount(username, password):
 
-功能说明：
-请求向KBEngine服务端创建一个登录账号。
-注意：如果插件与UI层使用事件交互模式，在UI层不要直接调用，请触发一个"createAccount"事件给插件，事件附带数据username和password。
+Function description
+Request to create a login account on the KBEngine server.
+Note: If the plug-in and the UI layer use the event interaction mode,
+do not call directly from the UI layer. Please trigger a "createAccount"
+event to the plug-in. The event is accompanied by the data username and
+password.
 
-参数：
+parameters:
 
-| username | string，用户名。 |
+| username | string, username. |
 | --- | --- |
-| password | string，密码。 |
+| password | string, password. |
 
 <a id="reloginBaseapp"></a>
 
 ### def reloginBaseapp():
 
-功能说明：
-请求重登录到KBEngine服务端(通常在掉线之后希望更及时的连接到服务端并继续控制服务端角色时使用)。
-注意：如果插件与UI层使用事件交互模式，在UI层不要直接调用，请触发一个"reloginBaseapp"事件给插件，事件附带数据为空。
+Function description
+Requests to re-login to the KBEngine server (usually used after a dropped
+connection in order to connect to the server more quickly and continue to
+control the server role).
+Note: If the plug-in and the UI layer use event interaction mode, do
+not call directly from the UI layer, please trigger a "reloginBaseapp"
+event to the plug-in, and the incidental data is empty.
 
 <a id="player"></a>
 
 ### def player():
 
-功能说明：
-获得本次客户端连接对应的Player实体。
-它本质上是按客户端运行时记录的 `entity_id` 从 `entities` 字典中取回实体，不表示该实体当前一定由本地客户端持有移动控制权。
+Function description
+Gets the entity that the current client controls.
 
-源码解析：
+return:
 
-- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
-
-返回：
-
-- Entity，返回当前连接对应的Player实体；如果该实体尚未创建或当前未连接到服务端则返回空。
+- Entity, return controlled entity, if it does not exist (e.g.: failed to connect to the server) returns null.
 
 <a id="resetPassword"></a>
 
 ### def resetPassword(username):
 
-功能说明：
-请求loginapp重置账号的密码, 服务端将会向该账号绑定的邮箱发送一封重置密码邮件(通常是忘记密码功能使用)。
+Function description
+Asks loginapp to reset the password of the account. The server will send
+a password reset email (usually the forgotten password function) to the
+email address to which the account is bound.
 
-参数：
+parameters:
 
-| username | string，用户名。 |
+| username | string, username. |
 | --- | --- |
 
 <a id="bindAccountEmail"></a>
 
 ### def bindAccountEmail(emailaddress):
 
-功能说明：
-请求baseapp绑定账号的email地址。
+Function description
+Requests Baseapp to bind the email address of the account.
 
-参数：
+parameters:
 
-| emailaddress | string，邮箱地址。 |
+| emailaddress | string, email address. |
 | --- | --- |
 
 <a id="newPassword"></a>
 
 ### def newPassword(oldpassword, newpassword):
 
-功能说明：
-请求设置账号的新密码。
+Function description
+Requests to set a new password for the account.
 
-参数：
+parameters:
 
-| oldpassword | string，旧密码。 |
+| oldpassword | string, old password |
 | --- | --- |
-| newpassword | string，新密码。 |
+| newpassword | string, new password |
 
 <a id="findEntity"></a>
 
 ### def findEntity(entityID):
 
-功能说明：
-通过实体ID在客户端运行时维护的实体表中查找实体实例。
-这个查找直接针对 `entities` 容器本身，不额外要求目标实体当前已经 `inWorld`；因此“能查到实体”和“实体已经进入客户端世界对象集合”是两件不同的事。
+Function description
+Finds an instance object of an entity by its ID.
 
-参数：
+parameters:
 
-| entityID | int32，实体ID。 |
+| entityID | int32, entity ID. |
 | --- | --- |
 
-源码解析：
+returns:
 
-- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table
-
-返回：
-
-- Entity，存在返回实体实例，不存在返回空。
+- EntityAn entity instance is returned. There can be no return null.
 
 <a id="getSpaceData"></a>
 
 ### def getSpaceData(key):
 
-功能说明：
-获取指定key的space数据。
-space数据由用户在服务端通过setSpaceData设置。
+Function description
+Gets the space data for the specified key.
+The space data is set by the user on the server throughsetSpaceData.
 
-参数：
+parameters:
 
-| key | string，一个字符串关键字。 |
+| key | string, a keyword |
 | --- | --- |
 
-返回：
+returns:
 
-- string，指定key的字符串数据。
+- string, specifies the value at the key
 
-## 回调函数文档
+## Callback function documentation
 
-## 属性文档
+## Attributes documentation
 
 <a id="component"></a>
 
 component
 
-说明：
-这是正运行在当前脚本环境的组件。（至今为止）可能值有'cellapp', 'baseapp', 'client', 'dbmgr', 'bots' 和 'editor'。
+Description:
+This is the component that is running in the current scripting environment.
+(So far) Possible values are 'cellapp', 'baseapp', 'client', 'dbmgr', 'bots'
+and 'editor'.
 
 <a id="entities"></a>
 
 entities
 
-说明：
-entities 是客户端运行时维护的实体实例表。
-它包含当前客户端仍然保留的实体对象，不等于“当前 AOI 可见实体列表”：例如当前连接对应的Player实体可能在收到 `onCreatedProxies()` 后就已经存在于表里，但要等进入世界后 `inWorld` 才会变为 `True`；清理当前空间时，客户端通常还会保留Player实体本身。
+Description:
+entities is a dictionary object that contains all the entities in the current process.
 
-源码解析：
-
-- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table
-
-类型：
+Types:
 
 - Entities
 
@@ -186,31 +186,23 @@ entities 是客户端运行时维护的实体实例表。
 
 entity_uuid
 
-说明：
-实体的uuid，改ID与实体本次登录绑定。当使用重登陆功能时服务端会与此ID进行比对，判断合法性。
+Description:
+The uuid of the entity. Change the ID and entity to bind to this login.
+When using the heavy login function, the server compares this ID and
+determines the validity.
 
 <a id="entity_id"></a>
 
 entity_id
 
-说明：
-当前连接对应的 Player 实体 ID。
-它是在服务端下发 `onCreatedProxies()` 时写入客户端运行时的连接级身份标记，`player()` 和 `Entity.isPlayer()` 都围绕它判断。
-它不等于“当前由本客户端持有移动控制权的实体”。
-
-源码解析：
-
-- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
+Description:
+The ID of the entity controlled by the current client.
 
 <a id="spaceID"></a>
 
 spaceID
 
-说明：
-当前客户端记录的玩家空间上下文 ID。
-它会在当前玩家收到 `onEntityEnterSpace()` 或初始化 spaceData 时更新，在离开当前空间或执行 `clearSpace(false)` 后回到 `0`。
-它描述的是“当前连接对应玩家现在处于哪个空间”，不等于 `KBEngine.entities` 中所有实体共享的过滤条件，也不等于任意一个实体对象自己的 `spaceID`。
-
-源码解析：
-
-- [网络与消息系统：客户端的 `onEnterWorld()` / `onLeaveWorld()` / `onEnterSpace()` / `onLeaveSpace()` 也不是同一层事件](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks
+Description:
+The ID of theSpacewhere the
+entity controlled by the current client is located (also can be understood
+as the corresponding scene, room, and copy).

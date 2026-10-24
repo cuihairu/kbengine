@@ -1,152 +1,166 @@
-# KBEngine模块
+# KBEngine module
 
-[KBEngine](./KBEngine.md模块提供了Python脚本控制dbmgr进程处理实体登陆查询与数据存取等部分。
+ThisKBEnginemodule provides Python scripts to
+control the dbmgr process to handle entity login queries and data access.
 
-## 成员函数
+## Member functions
 
 - def [addTimer](#addTimer)( initialOffset, repeatOffset=0, callbackObj=None ):
 - def [delTimer](#delTimer)( id ):
 - def [executeRawDatabaseCommand](#executeRawDatabaseCommand)( command, callback, threadID, dbInterfaceName ):
 - def [urlopen](#urlopen)( url, callback, postData, headers ):
 
-## 回调函数
+## Callbacks
 
 - def [onDBMgrReady](#onDBMgrReady)( ):
 - def [onDBMgrShutDown](#onDBMgrShutDown)( ):
 - def [onReadyForShutDown](#onReadyForShutDown)( ):
 - def [onSelectAccountDBInterface](#onSelectAccountDBInterface)( accountName ):
 
-## 成员函数文档
+## Member functions documentation
 
 <a id="addTimer"></a>
 
 ### def addTimer(initialOffset, repeatOffset=0, callbackObj=None):
 
-功能说明：
-注册一个定时器，定时器由回调函数callbackObj触发，回调函数将在"initialOffset"秒后被执行第1次，而后将每间隔"repeatOffset"秒执行1次。
-例子:
+Function description:
+Registers a timer. The timer triggers the callback function specified
+by callbackObj. The callback will be executed the first time after
+"initialOffset" seconds, and then executed once every "repeatOffset"
+seconds.
+Example:
 
 ```python
-# 这里是使用addTimer的一个例子
+# Here is an example of using addTimer
         import 
 KBEngine
 
  
-        # 增加一个定时器，5秒后执行第1次，而后每1秒执行1次，用户参数是9
+        # Add a timer, perform the first time after 5 seconds, and execute once every 1 second. The user parameter is 9
         KBEngine.addTimer( 5, 1, onTimer_Callbackfun )
  
-        # 增加一个定时器，1秒后执行，用户参数缺省是0
+        # Add a timer and execute it after 1 second. The default user parameter is 0.
         KBEngine.addTimer( 1, onTimer_Callbackfun )
  
     def onTimer_Callbackfun( id ):
         print "onTimer_Callbackfun called: id %i" % ( id )
-        # if 这是不断重复的定时器，当不再需要该定时器的时候，调用下面函数移除:
+        # If this is a repeated timer, it is no longer needed, call the following function to remove: 
         #     KBEngine.delTimer( id )
 ```
 
-参数：
+parameters:
 
-| initialOffset | float，指定定时器从注册到第一次回调的时间间隔（秒）。 |
+| initialOffset | float, specifies the time interval in seconds for the timer to register the first callback. |
 | --- | --- |
-| repeatOffset | float，指定第一次回调执行后每次执行的时间间隔（秒）。必须用函数[delTimer](#delTimer)移除定时器，否则它会一直重复下去。值小于等于0将被忽略。 |
-| callbackObj | function，指定的回调函数对象。 |
+| repeatOffset | float, specifies the time interval (in seconds) after each execution of the first callback execution. You must remove the timer with the function[delTimer](#delTimer), otherwise it will continue to repeat. Values less than or equal to 0 will be ignored. |
+| callbackObj | function, the specified callback function object. |
 
-返回:
+returns:
 
-- integer，该函数返回timer的内部id，这个id可用于[delTimer](#delTimer)移除定时器。
+- integer, this function returns the internal id of the timer. This id can be used to remove the timer using[delTimer](#delTimer).
 
 <a id="delTimer"></a>
 
 ### def delTimer(id):
 
-功能说明：
-函数delTimer用于移除一个注册的定时器，移除后的定时器不再执行。只执行1次的定时器在执行回调后自动移除，不必要使用delTimer移除。
-如果delTimer函数使用一个无效的id（例如已经移除），将会产生错误。
-到KBEngine.addTimer参考定时器的一个使用例子。
+Function description:
+The delTimer function is used to remove a registered timer. The removed
+timer is no longer executed. Single-shot timers are automatically removed
+after the callback is executed, and it is not necessary to use delTimer
+to remove it. If the delTimer function receives an invalid id (for
+example, it was removed), it will generate an error.
+A use case is in the KBEngine.[addTimer](#addTimer)example.
 
-参数：
+parameters:
 
-| id | integer，它指定要移除的定时器id。 |
+| id | integer, specifies the timer id to remove. |
 | --- | --- |
 
 <a id="executeRawDatabaseCommand"></a>
 
 ### def executeRawDatabaseCommand(command, callback, threadID, dbInterfaceName):
 
-功能说明：
-这个脚本函数在数据库上执行原始数据库命令，该命令将直接由相关数据库进行解析。
-请注意使用该函数修改实体数据可能不生效，因为如果实体已经检出，被修改过的实体数据将仍会被实体存档而导致覆盖。
-强烈不推荐这个函数用于读取或修改实体数据。
+Function description:
+This script function executes a database command on the database, which
+is directly parsed by the relevant database.
+Please note that using this function to modify entity data may not be
+effective because if the entity has been checked out, the modified data
+will still be archived by the entity and cause overwriting.
+This function is strongly not recommended for reading or modifying entity data.
 
-参数：
+parameters:
 
-| command | 这个数据库命令将会因为不同数据库配置方案而不同。对于方案为MySQL数据库它是一个SQL查询语句。 |
+| command | This database command will be different for different database configuration scenarios. For a MySQL database it is an SQL query. |
 | --- | --- |
-| callback | 可选参数，带有命令执行结果的回调对象（比如说是一个函数）。这个回调带有4个参数：结果集合，影响的行数，自増长值，错误信息。 声明样例： def sqlcallback(result, rows, insertid, error): print(result, rows, insertid, error) 如同上面的例子所示，result参数对应的就是“结果集合”，这个结果集合参数是一个行列表。 每一行是一个包含字段值的字符串列表。 命令执行没有返回结果集合（比如说是DELETE命令）， 或者 命令执行有错误时这个结果集合为None。 rows参数则是“影响的行数”，它是一个整数，表示命令执行受影响的行数。这个参数只和不返回结果结合的命令（如DELETE）相关。 如果有结果集合返回或者命令执行有错误时这个参数为None。<br>insertid对应的是“自増长值”，类似于实体的databaseID，当成功的向一张带有自増长类型字段的表中插入数据时，它返回该数据在插入时自増长字段所被赋于的值。 更多的信息可以参阅mysql的mysql_insert_id()方法。另外，此参数仅在数据库类型为mysql时有意义。 error则对应了“错误信息”，当命令执行有错误时，这个参数是一个描述错误的字符串。命令执行没有发生错误时这个参数为None。 |
-| threadID | int32，可选参数，指定一个线程来处理本条命令。用户可以通过这个参数控制某一类命令的执行先后顺序（dbmgr是多线程处理的），默认是不指定，如果threadID是实体的ID， 那么将加入到该实体的存档队列中由线程逐条写入。 |
-| dbInterfaceName | string，可选参数，指定由某个数据库接口来完成, 默认使用"default"接口。数据库接口由kbengine_defaults.xml->dbmgr->databaseInterfaces中定义。 |
+| callback | Optional parameter, callback object (for example, a function) called back with the command execution result. This callback has 4 parameters: result set, number of rows affected, auto value, error message. Example: def sqlcallback(result, rows, insertid, error): print(result, rows, insertid, error) As the above example shows, the result parameter corresponds to the "result set", and the result set parameter is a row List. Each line is a list of strings containing field values. If the command execution does not return a result set (for example, a DELETE command), or the command execution encounters an error, the result set is None. The rows parameter is the "number of rows affected", which is an integer indicating the number of rows affected by the command execution. This parameter is only relevant for commands that do not return results (such as DELETE). This parameter is None if there is a result set return or if there is an error in the command execution. The insertid is a long value, similar to an entity's databaseID. When successfully inserting data int a table with an auto long type field, it returns the data at the time of insertion. More information can be found in mysql's mysql_insert_id() method. In addition, this parameter is only meaningful when the database type is mysql. Error corresponds to the "error message", when the command execution encounters an error, this parameter is a string describing the error. This parameter is None when the command execution has not occurred. |
+| threadID | int32, optional parameter, specifies a thread to process this command. Users can use this parameter to control the execution order of certain commands (dbmgr is multi-threaded). The default is not specified. If threadId is the ID of an entity, it will be added to the entity's archive queue and written by the thread one by one. |
+| dbInterfaceName | string, optional parameter, specifies a database interface. By default it uses the "default" interface. Database interfaces are defined by kbengine_defaults.xml->dbmgr->databaseInterfaces. |
 
 <a id="urlopen"></a>
 
 ### def urlopen(url, callback, postData, headers):
 
-功能说明：
-这个脚本函数在提供对外HTTP/HTTPS异步请求。
+Function description:
+This script function is providing an external HTTP/HTTPS asynchronous request.
 
-参数：
+parameters:
 
-| url | 有效的HTTP/HTTPS网址，字符串类型。 |
+| url | A valid HTTP/HTTPS URL. |
 | --- | --- |
-| callback | 可选参数，带有请求执行结果的回调对象（比如说是一个函数）。这个回调带有5个参数：HTTP请求返回码（如：200)，返回的内容，返回的HTTP协议头，是否成功，请求的网址。 声明样例： def onHttpCallback(httpcode, data, headers, success, url): print(httpcode, data, headers, success, url) 如同上面的例子所示:<br>httpcode:参数对应的就是“HTTP请求返回码”，这个结果集合参数是一个整形值。<br>data:参数则是“返回的内容”，它是一个字符串。<br>headers:参数是“服务器返回的HTTP协议头”，如：{"Content-Type": "application/x-www-form-urlencoded"}，它是一个字典。<br>success:则对应了“执行是否成功”，当请求执行有错误时，为False，可以通过httpcode进一步判断错误信息。<br>url:是“请求所用的网址。 |
-| postData | 可选参数，默认是GET方式请求服务器，如果需要POST方式请提供需要POST的内容，引擎将自动使用POST方式请求服务器，它是一个bytes。 |
-| headers | 可选参数，请求时使用的HTTP头，如：{"Content-Type": "application/x-www-form-urlencoded"}，它是一个字典。 |
+| callback | Optional parameter with a callback object (for example, a function) that requests execution results. This callback takes five parameters: the HTTP request return code (eg: 200), the returned content, the returned HTTP protocol header, whether it succeeded, and the requested URL. Example: def onHttpCallback(httpcode, data, headers, success, url): print(httpcode, data, headers, success, url) As the above example shows:&lt;br&gt;httpcode:The parameter corresponds to the "HTTP request return code", is an integer.&lt;br&gt;data:The parameter is “ returned content & rdquo;, it is a string.&lt;br&gt;headers:The parameter is the HTTP protocol header returned by the server, such as:{"Content-Type": "application/x-www-form-urlencoded"}, is an dict.&lt;br&gt;success:Whether the execution is successful or not, when the request execution has an error, it is False, and the error information can be further judged by httpcode.&lt;br&gt;url:Is the URL used by the request. |
+| postData | Optional parameter, the default is GET mode request server. If you need POST mode, please provide the content that needs POST. The engine will automatically request the server using POST, is an bytes. |
+| headers | Optional parameter, HTTP header used when requesting, such as：{"Content-Type": "application/x-www-form-urlencoded"}, is an dict. |
 
-## 回调函数文档
+## Callback functions documentation
 
 <a id="onDBMgrReady"></a>
 
 ### def onDBMgrReady():
 
-功能说明：
-当前进程已经准备好的时候回调此函数。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+This function is called back when the current process is ready.
+Note: This callback interface must be implemented in the portal module ( kbengine_defaults.xml ->entryScriptFile).
 
 <a id="onDBMgrShutDown"></a>
 
 ### def onDBMgrShutDown():
 
-功能说明：
-进程关闭会回调此函数。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+This function is called when the process shuts down.
+Note: This callback interface must be implemented in the portal module ( kbengine_defaults.xml ->entryScriptFile).
 
 <a id="onReadyForShutDown"></a>
 
 ### def onReadyForShutDown():
 
-功能说明：
-如果这个函数在脚本中有实现，当进程准备退出时，该回调函数被调用。
-可以通过该回调控制进程退出的时机。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+If this function is implemented in a script, the callback function is called when the process is ready to exit.
+You can use this callback to control when the process exits.
+Note: This callback interface must be implemented in the portal module ( kbengine_defaults.xml ->entryScriptFile).
 
-返回：
+returns:
 
-- bool，如果返回True，则允许进入进程退出流程，返回其它值则进程会过一段时间后再次询问。
+- bool, if it returns True, it allows the process to exit. Returning other values will cause the process to ask again after a period of time.
 
 <a id="onSelectAccountDBInterface"></a>
 
 ### def onSelectAccountDBInterface(accountName):
 
-功能说明：
-这个回调实现返回某个账号对应的数据库接口，选定接口后dbmgr针对这个账号的相关操作都由对应的数据库接口完成。
-数据库接口在kbengine_defaults.xml->dbmgr->databaseInterfaces定义。
-利用该接口可以根据accountName来决定账号应该存储在哪个数据库。
-注意：该回调接口必须实现在入口模块(kbengine_defaults.xml->entryScriptFile)中。
+Function description:
+When implemented in a script, this callback returns the database interface
+corresponding to an account. After the interface is selected, the dbmgr
+operations related to this account are completed by the corresponding
+database interface.
+Database interfaces are defined inkbengine_defaults.xml->dbmgr->databaseInterfaces.
+Use this function to determine which database the account should be stored
+in based on accountName.
+Note: This callback interface must be implemented in the portal module ( kbengine_defaults.xml ->entryScriptFile).
 
-参数：
+parameters:
 
-| accountName | string，账号的名称。 |
+| accountName | string, the name of the account. |
 | --- | --- |
 
-返回：
+returns:
 
-- string，数据库接口名（数据库接口在kbengine_defaults.xml->dbmgr->databaseInterfaces定义）。
+- string, the database interface name (database interfaces are defined inkbengine_defaults.xml->dbmgr->databaseInterfaces).

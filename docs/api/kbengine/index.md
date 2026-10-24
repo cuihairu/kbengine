@@ -1,27 +1,27 @@
 # KBEngine API
 
-> 本目录来自 `docs/api/kbengine/kbengine_api(cn).chm` 的中文 API 帮助文档，是 KBEngine API 的规范入口。
+> This directory comes from the Chinese API help document `docs/api/kbengine/kbengine_api(cn).chm` and is the canonical entry point for the KBEngine API.
 
-## 核心概念
+## Core Concepts
 
-- [基本数据类型](/zh/api/kbengine/basetypes.md
-- [关键词释义](/zh/api/kbengine/keywords.md
+- [Basic data types](/api/kbengine/basetypes)
+- [Keywords](/api/kbengine/keywords)
 
-## 客户端
+## Client
 
-- [client](/zh/api/kbengine/client/
-- [bots](/zh/api/kbengine/bots/
+- [client](/api/kbengine/client/)
+- [bots](/api/kbengine/bots/)
 
-## 服务端组件
+## Server Components
 
-- [cellapp](/zh/api/kbengine/cellapp/
-- [baseapp](/zh/api/kbengine/baseapp/
-- [loginapp](/zh/api/kbengine/loginapp/
-- [dbmgr](/zh/api/kbengine/dbmgr/
-- [interfaces](/zh/api/kbengine/interfaces/
-- [logger](/zh/api/kbengine/logger/
+- [cellapp](/api/kbengine/cellapp/)
+- [baseapp](/api/kbengine/baseapp/)
+- [loginapp](/api/kbengine/loginapp/)
+- [dbmgr](/api/kbengine/dbmgr/)
+- [interfaces](/api/kbengine/interfaces/)
+- [logger](/api/kbengine/logger/)
 
-## 核对与源码解析
+## Audit and Source Analysis
 
-- [API 分类与核对清单](/zh/api/kbengine/audit-checklist.md
-- [源码解析专题](/zh/architecture/source-analysis/
+- [API classification and audit checklist](/api/kbengine/audit-checklist)
+- [Source-analysis topics](/architecture/source-analysis/)
