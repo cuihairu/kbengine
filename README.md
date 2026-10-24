@@ -17,13 +17,7 @@ KBEngine
 >
 > This fork does **NOT** provide stable releases or downloads.
 
-<a href="https://github.com/cuihairu/kbengine/releases"><img alt="Status" src="https://img.shields.io/badge/status-in%20development-orange"></a>
-<a href="https://github.com/cuihairu/kbengine/actions"><img alt="CI" src="https://github.com/cuihairu/kbengine/workflows/CI/badge.svg"></a>
-<a href="https://codecov.io/gh/cuihairu/kbengine"><img alt="Coverage" src="https://codecov.io/gh/cuihairu/kbengine/branch/chore/cmake-bootstrap/graph/badge.svg"></a>
-<a href="https://en.wikipedia.org/wiki/C%2B%2B#Standard_version"><img alt="C++17" src="https://img.shields.io/badge/C++-17-blue.svg"></a>
-<a href="https://www.python.org/"><img alt="Python 3.12" src="https://img.shields.io/badge/python-3.12-blue.svg"></a>
-
-
+<a href="https://github.com/cuihairu/kbengine/releases"><img alt="Status" src="https://img.shields.io/badge/status-in%20development-orange"></a> <a href="https://github.com/cuihairu/kbengine/actions"><img alt="CI" src="https://github.com/cuihairu/kbengine/workflows/CI/badge.svg"></a> <a href="https://codecov.io/gh/cuihairu/kbengine"><img alt="Coverage" src="https://codecov.io/gh/cuihairu/kbengine/branch/chore/cmake-bootstrap/graph/badge.svg"></a> <a href="https://en.wikipedia.org/wiki/C%2B%2B#Standard_version"><img alt="C++17" src="https://img.shields.io/badge/C++-17-blue.svg"></a> <a href="https://www.python.org/"><img alt="Python 3.12" src="https://img.shields.io/badge/python-3.12-blue.svg"></a>
 ## Homepage
 
 	https://kbengine.github.io/
