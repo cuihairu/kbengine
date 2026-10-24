@@ -100,7 +100,7 @@ import KBEngine
 
 参看：
 
-- [Proxy](./Proxy.md.)[onGiveClientToFailure](./Proxy.md#onGiveClientToFailure)
+- [Proxy](./Proxy.md)[onGiveClientToFailure](./Proxy.md#onGiveClientToFailure)
 
 参数：
 
@@ -116,7 +116,7 @@ import KBEngine
 
 参看：
 
-- [Proxy](./Proxy.md.)[onStreamComplete](./Proxy.md#onStreamComplete)
+- [Proxy](./Proxy.md)[onStreamComplete](./Proxy.md#onStreamComplete)
 
 参数：
 
@@ -138,7 +138,7 @@ import KBEngine
 当客户端再次绑定到实体的时候才可调用这个函数。16位的id完全取决于调用者。
 如果调用者没有指定这个ID则系统会分配一个未用过的id。可以在客户端根据这个id做资源判断。
 你可以在Proxy的派生类中定义回调函数（onStreamComplete），所有数据成功发送给客户端时或下载失败时会调用这个回调函数。
-参看：[Proxy](./Proxy.md.)[onStreamComplete](./Proxy.md#onStreamComplete)与客户端实体Entity.onStreamDataStarted和Entity.onStreamDataRecv还有Entity.onStreamDataCompleted。
+参看：[Proxy](./Proxy.md)[onStreamComplete](./Proxy.md#onStreamComplete)与客户端实体Entity.onStreamDataStarted和Entity.onStreamDataRecv还有Entity.onStreamDataCompleted。
 
 参数：
 

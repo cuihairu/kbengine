@@ -24,4 +24,4 @@
 
 ## Next steps
 
-Witness/AOI and timers should be filled in first, because they are the easiest to misread against the KBEngine [CellApp Entity](api/kbengine/cellapp/Entity.md.)
+Witness/AOI and timers should be filled in first, because they are the easiest to misread against the KBEngine [CellApp Entity](../kbengine/cellapp/Entity.md).

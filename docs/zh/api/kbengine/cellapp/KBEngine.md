@@ -234,7 +234,7 @@ space数据由用户通过[setSpaceData](#setSpaceData)设置。
 ### def deregisterReadFileDescriptor(fileDescriptor):
 
 功能说明：
-注销已经通过[KBEngine](./KBEngine.md.)[registerReadFileDescriptor](./KBEngine.md#registerReadFileDescriptor)注册的回调。
+注销已经通过[KBEngine](./KBEngine.md)[registerReadFileDescriptor](./KBEngine.md#registerReadFileDescriptor)注册的回调。
 例子:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
@@ -248,7 +248,7 @@ space数据由用户通过[setSpaceData](#setSpaceData)设置。
 ### def deregisterWriteFileDescriptor(fileDescriptor):
 
 功能说明：
-注销已经通过[KBEngine](./KBEngine.md.)[registerWriteFileDescriptor](./KBEngine.md#registerWriteFileDescriptor)注册的回调。
+注销已经通过[KBEngine](./KBEngine.md)[registerWriteFileDescriptor](./KBEngine.md#registerWriteFileDescriptor)注册的回调。
 例子:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
@@ -386,7 +386,7 @@ space数据由用户通过[setSpaceData](#setSpaceData)设置。
 ### def getAppFlags():
 
 功能说明：
-获取当前引擎APP的标记, 参考:[KBEngine](./KBEngine.md.)[setAppFlags](./KBEngine.md#setAppFlags)。
+获取当前引擎APP的标记, 参考:[KBEngine](./KBEngine.md)[setAppFlags](./KBEngine.md#setAppFlags)。
 
 返回：
 
@@ -882,7 +882,7 @@ KBEngine.cellAppData["hello"] = "there"
 print(KBEngine.cellAppData["hello"])
 ```
 
-参看：[KBEngine](./KBEngine.md.)[onCellAppData](./KBEngine.md#onCellAppData) 和 [KBEngine](./KBEngine.md.)[onCellAppDataDel](./KBEngine.md#onCellAppDataDel)。
+参看：[KBEngine](./KBEngine.md)[onCellAppData](./KBEngine.md#onCellAppData) 和 [KBEngine](./KBEngine.md)[onCellAppDataDel](./KBEngine.md#onCellAppDataDel)。
 
 注意：
 
@@ -960,7 +960,7 @@ KBEngine.globalData["hello"] = "there"
 print(KBEngine.globalData["hello"])
 ```
 
-参看：[KBEngine](./KBEngine.md.)[onGlobalData](./KBEngine.md#onGlobalData) 和 [KBEngine](./KBEngine.md.)[onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
+参看：[KBEngine](./KBEngine.md)[onGlobalData](./KBEngine.md#onGlobalData) 和 [KBEngine](./KBEngine.md)[onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
 
 注意：
 

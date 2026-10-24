@@ -151,7 +151,7 @@ Entity
 功能说明：
 函数delTimer用于移除一个注册的定时器，移除后的定时器不再执行。只执行1次的定时器在执行回调后自动移除，不必要使用delTimer移除。
 如果delTimer函数使用一个无效的id（例如已经移除），将会产生错误。
-到[Entity](./Entity.md.)[addTimer](./Entity.md#addTimer)参考定时器的一个使用例子。
+到[Entity](./Entity.md)[addTimer](./Entity.md#addTimer)参考定时器的一个使用例子。
 
 参数：
 
@@ -163,14 +163,14 @@ Entity
 ### def destroy(self, deleteFromDB, writeToDB):
 
 功能说明：
-这个函数销毁该实体的base部分。如果实体存在cell部分，那么用户必须先销毁cell部分，否则将会产生错误。要销毁实体的cell部分，调用[Entity](./Entity.md.)[destroyCellEntity](./Entity.md#destroyCellEntity)。
+这个函数销毁该实体的base部分。如果实体存在cell部分，那么用户必须先销毁cell部分，否则将会产生错误。要销毁实体的cell部分，调用[Entity](./Entity.md)[destroyCellEntity](./Entity.md#destroyCellEntity)。
 也许在onLoseCell回调里调用self.destroy更为恰当。这能保证实体的base部分被销毁。
 
 参数：
 
 | deleteFromDB | 如果是True，在数据库里与这个实体有关联的条目将会被删除，该参数默认为False。 |
 | --- | --- |
-| writeToDB | 如果是True，与这个实体相关联的存档属性将会写入数据库。只有在这个实体是从数据库读取的或者是使用过[Entity](./Entity.md.)[writeToDB](./Entity.md#writeToDB)写入数据库才会被执行。这个参数默认为True，但当deleteFromDB为True的时候它将被忽略。 |
+| writeToDB | 如果是True，与这个实体相关联的存档属性将会写入数据库。只有在这个实体是从数据库读取的或者是使用过[Entity](./Entity.md)[writeToDB](./Entity.md#writeToDB)写入数据库才会被执行。这个参数默认为True，但当deleteFromDB为True的时候它将被忽略。 |
 
 <a id="destroyCellEntity"></a>
 
@@ -291,7 +291,7 @@ destroyCellEntity请求销毁关联的cell实体。如果没有关联的cell实�
 ### def onPreArchive(self):
 
 功能说明：
-如果这个函数在脚本中有实现，这个函数在该实体自动写入数据库之前被调用。这个回调在[Entity](./Entity.md.)[onWriteToDB](./Entity.md#onWriteToDB)回调之前被调用。
+如果这个函数在脚本中有实现，这个函数在该实体自动写入数据库之前被调用。这个回调在[Entity](./Entity.md)[onWriteToDB](./Entity.md#onWriteToDB)回调之前被调用。
 如果该回调返回False，该归档操作中止。这个回调应该返回True使得操作继续。如果这个回调不存在，则归档操作继续进行。
 
 <a id="onRestore"></a>
@@ -309,13 +309,13 @@ destroyCellEntity请求销毁关联的cell实体。如果没有关联的cell实�
 
 功能说明：
 这个函数当一个与此实体关联的定时器触发的时候被调用。
-一个定时器可以使用[Entity](./Entity.md.)[addTimer](./Entity.md#addTimer)函数添加。
+一个定时器可以使用[Entity](./Entity.md)[addTimer](./Entity.md#addTimer)函数添加。
 
 参数：
 
 | timerHandle | 定时器的id。 |
 | --- | --- |
-| userData | 传进[Entity](./Entity.md.)[addTimer](./Entity.md#addTimer)的integer用户数据。 |
+| userData | 传进[Entity](./Entity.md)[addTimer](./Entity.md#addTimer)的integer用户数据。 |
 
 <a id="onWriteToDB"></a>
 

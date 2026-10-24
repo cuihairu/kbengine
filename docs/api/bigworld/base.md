@@ -20,4 +20,4 @@
 
 ## Next steps
 
-This page should later extract signatures, parameters, return values, and caveats from the `/*~ function Base.* */` and `/*~ attribute Base.* */` comments, and compare them with the KBEngine [BaseApp Entity](api/kbengine/baseapp/Entity.md.)
+This page should later extract signatures, parameters, return values, and caveats from the `/*~ function Base.* */` and `/*~ attribute Base.* */` comments, and compare them with the KBEngine [BaseApp Entity](../kbengine/baseapp/Entity.md).

@@ -163,7 +163,7 @@ MemoryStream对象存储的是二进制信息，提供这个类型是为了让�
 ### def createEntity():
 
 功能说明：
-[KBEngine](./KBEngine.md.)[createEntityLocally](./KBEngine.md#createEntityLocally)的别名.
+[KBEngine](./KBEngine.md)[createEntityLocally](./KBEngine.md#createEntityLocally)的别名.
 
 <a id="createEntityAnywhere"></a>
 
@@ -172,7 +172,7 @@ MemoryStream对象存储的是二进制信息，提供这个类型是为了让�
 功能说明：
 创建一个新的Entity实体，
 服务端可能选择任何的Baseapp来创建Entity实体。
-这个方法应作为[KBEngine](./KBEngine.md.)[createEntityLocally](./KBEngine.md#createEntityLocally)的首选，
+这个方法应作为[KBEngine](./KBEngine.md)[createEntityLocally](./KBEngine.md#createEntityLocally)的首选，
 这样服务端会灵活地选择一个合适的Baseapp来创建实体。
 函数参数需要提供创建的实体的类型，还有一个Python字典作为参数来初始化实体的值。
 这个Python字典不需要用户提供所有的属性，没有提供的属性默认为实体定义文件".def"提供的默认值。
@@ -208,7 +208,7 @@ createEntityAnywhere("Avatar", params, onCreateEntityCallback)
 
 功能说明：
 通过baseMB参数在一个指定的baseapp上创建一个新的Entity实体。
-应该将[KBEngine](./KBEngine.md.)[createEntityAnywhere](./KBEngine.md#createEntityLocally)方法作为首选。
+应该将[KBEngine](./KBEngine.md)[createEntityAnywhere](./KBEngine.md#createEntityLocally)方法作为首选。
 函数参数需要提供创建的实体的类型，还有一个Python字典作为参数来初始化实体的值。
 这个Python字典不需要用户提供所有的属性，没有提供的属性默认为实体定义文件".def"提供的默认值。
 例子：
@@ -306,7 +306,7 @@ createEntityRemotely("Avatar", baseEntityCall, params, onCreateEntityCallback)
 创建一个新的Entity实体。
 函数参数需要提供创建的实体的类型，还有一个Python字典作为参数来初始化实体的值。
 这个Python字典不需要用户提供所有的属性，没有提供的属性默认为实体定义文件".def"提供的默认值。
-[KBEngine](./KBEngine.md.)[createEntityAnywhere](./KBEngine.md#createEntityAnywhere)应该作为这个方法的首选，因为服务端可以灵活地
+[KBEngine](./KBEngine.md)[createEntityAnywhere](./KBEngine.md#createEntityAnywhere)应该作为这个方法的首选，因为服务端可以灵活地
 在合适的Baseapp上创建实体。
 例子：
 
@@ -379,7 +379,7 @@ ERROR cellapp [0x0000cd64] [2014-11-12 00:38:07,300] - PyGC::debugTracing(): Ent
 ### def deregisterReadFileDescriptor(fileDescriptor):
 
 功能说明：
-注销已经通过[KBEngine](./KBEngine.md.)[registerReadFileDescriptor](./KBEngine.md#registerReadFileDescriptor)注册的回调。
+注销已经通过[KBEngine](./KBEngine.md)[registerReadFileDescriptor](./KBEngine.md#registerReadFileDescriptor)注册的回调。
 例子:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
@@ -393,7 +393,7 @@ ERROR cellapp [0x0000cd64] [2014-11-12 00:38:07,300] - PyGC::debugTracing(): Ent
 ### def deregisterWriteFileDescriptor(fileDescriptor):
 
 功能说明：
-注销已经通过[KBEngine](./KBEngine.md.)[registerWriteFileDescriptor](./KBEngine.md#registerWriteFileDescriptor)注册的回调。
+注销已经通过[KBEngine](./KBEngine.md)[registerWriteFileDescriptor](./KBEngine.md#registerWriteFileDescriptor)注册的回调。
 例子:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
@@ -497,7 +497,7 @@ ERROR cellapp [0x0000cd64] [2014-11-12 00:38:07,300] - PyGC::debugTracing(): Ent
 ### def getAppFlags():
 
 功能说明：
-获取当前引擎APP的标记, 参考:[KBEngine](./KBEngine.md.)[setAppFlags](./KBEngine.md#setAppFlags)。
+获取当前引擎APP的标记, 参考:[KBEngine](./KBEngine.md)[setAppFlags](./KBEngine.md#setAppFlags)。
 
 返回：
 
@@ -1085,7 +1085,7 @@ KBEngine.baseAppData["hello"] = "there"
 print(KBEngine.baseAppData["hello"])
 ```
 
-参看：[KBEngine](./KBEngine.md.)[onBaseAppData](./KBEngine.md#onBaseAppData) 和 [KBEngine](./KBEngine.md.)[onBaseAppDataDel](./KBEngine.md#onBaseAppDataDel)。
+参看：[KBEngine](./KBEngine.md)[onBaseAppData](./KBEngine.md#onBaseAppData) 和 [KBEngine](./KBEngine.md)[onBaseAppDataDel](./KBEngine.md#onBaseAppDataDel)。
 
 注意：
 
@@ -1128,7 +1128,7 @@ KBEngine.globalData["hello"] = "there"
 print(KBEngine.globalData["hello"])
 ```
 
-参看：[KBEngine](./KBEngine.md.)[onGlobalData](./KBEngine.md#onGlobalData) 和 [KBEngine](./KBEngine.md.)[onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
+参看：[KBEngine](./KBEngine.md)[onGlobalData](./KBEngine.md#onGlobalData) 和 [KBEngine](./KBEngine.md)[onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
 
 注意：
 
