@@ -12,15 +12,15 @@ BigWorld API 的优先来源是：
 
 ## 模块入口
 
-- [BigWorld 模块](/zh/api/bigworld/bigworld-module.md
-- [Base 实体](/zh/api/bigworld/base.md
-- [Cell Entity](/zh/api/bigworld/entity.md
-- [BWPersonality 回调](/zh/api/bigworld/bwpersonality.md
+- [BigWorld 模块](/zh/api/bigworld/bigworld-module.md)
+- [Base 实体](/zh/api/bigworld/base.md)
+- [Cell Entity](/zh/api/bigworld/entity.md)
+- [BWPersonality 回调](/zh/api/bigworld/bwpersonality.md)
 
 ## 阅读方式
 
 BigWorld 和 KBEngine 有大量同源概念，例如 Base/Cell、Mailbox/EntityCall、timer、SpaceData、`reloadScript`。阅读 BigWorld API 时不要直接套用 KBEngine 的组件名和语义，应同时参考：
 
-- [BigWorld / KBEngine 对照](/zh/study/23-bigworld-and-kbengine-comparison.md
-- [热更新](/zh/study/21-hotupdate-fault-tolerance-and-ops.md
-- [脚本层源码分析](/zh/architecture/source-analysis/scripting.md
+- [BigWorld / KBEngine 对照](/zh/study/23-bigworld-and-kbengine-comparison.md)
+- [热更新](/zh/study/21-hotupdate-fault-tolerance-and-ops.md)
+- [脚本层源码分析](/zh/architecture/source-analysis/scripting.md)

@@ -20,4 +20,4 @@
 
 ## 后续处理
 
-本页后续应从 `/*~ function Base.* */` 和 `/*~ attribute Base.* */` 注释中抽取签名、参数、返回值和注意事项，并与 KBEngine 的 [BaseApp Entity](/zh/api/kbengine/baseapp/Entity.md 对照。
+本页后续应从 `/*~ function Base.* */` 和 `/*~ attribute Base.* */` 注释中抽取签名、参数、返回值和注意事项，并与 KBEngine 的 [BaseApp Entity](/zh/api/kbengine/baseapp/Entity.md) 对照。

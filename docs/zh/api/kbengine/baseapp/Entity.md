@@ -51,8 +51,8 @@ import KBEngine
 
 ## 详细描述
 
-Entity创建。一个[Entity](./Entity.md实体也可以通过Cellapp的函数KBEngine.createEntityOnBaseApp远程创建。
-一个[Entity](./Entity.md实体可以在一个活动的cells里面链接到一个实体，还可以被用来在一个合适的cell上创建一个关联的实体。
+Entity创建。一个[Entity](./Entity.md)实体也可以通过Cellapp的函数KBEngine.createEntityOnBaseApp远程创建。
+一个[Entity](./Entity.md)实体可以在一个活动的cells里面链接到一个实体，还可以被用来在一个合适的cell上创建一个关联的实体。
 这个类允许你创建和销毁在cell上的实体或者在base实体上注册一个定时器也或者访问此对象的联系信息，
 还可以访问一个CellEntityCall，通过它这个base实体可以与它的cell实体通信（这个被关联的cell实体可以移动到不同cell上，作为该cell实体移动的结果KBEngine会进行负载均衡）。
 
@@ -123,7 +123,7 @@ Entity
 
 源码解析：
 
-- [实体系统：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/zh/architecture/source-analysis/entity-system.html#base-entity-create-cell
+- [实体系统：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/zh/architecture/source-analysis/entity-system.html#base-entity-create-cell)
 
 参数：
 
@@ -151,7 +151,7 @@ Entity
 功能说明：
 函数delTimer用于移除一个注册的定时器，移除后的定时器不再执行。只执行1次的定时器在执行回调后自动移除，不必要使用delTimer移除。
 如果delTimer函数使用一个无效的id（例如已经移除），将会产生错误。
-到[Entity](./Entity.md.[addTimer](./Entity.md#addTimer参考定时器的一个使用例子。
+到[Entity](./Entity.md.)[addTimer](./Entity.md#addTimer)参考定时器的一个使用例子。
 
 参数：
 
@@ -163,14 +163,14 @@ Entity
 ### def destroy(self, deleteFromDB, writeToDB):
 
 功能说明：
-这个函数销毁该实体的base部分。如果实体存在cell部分，那么用户必须先销毁cell部分，否则将会产生错误。要销毁实体的cell部分，调用[Entity](./Entity.md.[destroyCellEntity](./Entity.md#destroyCellEntity。
+这个函数销毁该实体的base部分。如果实体存在cell部分，那么用户必须先销毁cell部分，否则将会产生错误。要销毁实体的cell部分，调用[Entity](./Entity.md.)[destroyCellEntity](./Entity.md#destroyCellEntity)。
 也许在onLoseCell回调里调用self.destroy更为恰当。这能保证实体的base部分被销毁。
 
 参数：
 
 | deleteFromDB | 如果是True，在数据库里与这个实体有关联的条目将会被删除，该参数默认为False。 |
 | --- | --- |
-| writeToDB | 如果是True，与这个实体相关联的存档属性将会写入数据库。只有在这个实体是从数据库读取的或者是使用过[Entity](./Entity.md.[writeToDB](./Entity.md#writeToDB写入数据库才会被执行。这个参数默认为True，但当deleteFromDB为True的时候它将被忽略。 |
+| writeToDB | 如果是True，与这个实体相关联的存档属性将会写入数据库。只有在这个实体是从数据库读取的或者是使用过[Entity](./Entity.md.)[writeToDB](./Entity.md#writeToDB)写入数据库才会被执行。这个参数默认为True，但当deleteFromDB为True的时候它将被忽略。 |
 
 <a id="destroyCellEntity"></a>
 
@@ -274,7 +274,7 @@ destroyCellEntity请求销毁关联的cell实体。如果没有关联的cell实�
 
 源码解析：
 
-- [实体系统：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/zh/architecture/source-analysis/entity-system.html#base-entity-create-cell
+- [实体系统：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/zh/architecture/source-analysis/entity-system.html#base-entity-create-cell)
 
 这个函数没有参数。
 
@@ -291,7 +291,7 @@ destroyCellEntity请求销毁关联的cell实体。如果没有关联的cell实�
 ### def onPreArchive(self):
 
 功能说明：
-如果这个函数在脚本中有实现，这个函数在该实体自动写入数据库之前被调用。这个回调在[Entity](./Entity.md.[onWriteToDB](./Entity.md#onWriteToDB回调之前被调用。
+如果这个函数在脚本中有实现，这个函数在该实体自动写入数据库之前被调用。这个回调在[Entity](./Entity.md.)[onWriteToDB](./Entity.md#onWriteToDB)回调之前被调用。
 如果该回调返回False，该归档操作中止。这个回调应该返回True使得操作继续。如果这个回调不存在，则归档操作继续进行。
 
 <a id="onRestore"></a>
@@ -299,7 +299,7 @@ destroyCellEntity请求销毁关联的cell实体。如果没有关联的cell实�
 ### def onRestore(self):
 
 功能说明：
-如果这个函数在脚本中有实现，这个函数在[Entity](./Entity.md应用程序崩溃后在其它[Entity](./Entity.md应用程序上
+如果这个函数在脚本中有实现，这个函数在[Entity](./Entity.md)应用程序崩溃后在其它[Entity](./Entity.md)应用程序上
 重新创建该实体时被调用。
 这个函数没有参数。
 
@@ -309,13 +309,13 @@ destroyCellEntity请求销毁关联的cell实体。如果没有关联的cell实�
 
 功能说明：
 这个函数当一个与此实体关联的定时器触发的时候被调用。
-一个定时器可以使用[Entity](./Entity.md.[addTimer](./Entity.md#addTimer函数添加。
+一个定时器可以使用[Entity](./Entity.md.)[addTimer](./Entity.md#addTimer)函数添加。
 
 参数：
 
 | timerHandle | 定时器的id。 |
 | --- | --- |
-| userData | 传进[Entity](./Entity.md.[addTimer](./Entity.md#addTimer的integer用户数据。 |
+| userData | 传进[Entity](./Entity.md.)[addTimer](./Entity.md#addTimer)的integer用户数据。 |
 
 <a id="onWriteToDB"></a>
 
@@ -327,7 +327,7 @@ destroyCellEntity请求销毁关联的cell实体。如果没有关联的cell实�
 
 参数：
 
-| cellData | 包含将要存进数据库的cell属性。[cellData](./Entity.md#cellData是一个字典。 |
+| cellData | 包含将要存进数据库的cell属性。[cellData](./Entity.md#cellData)是一个字典。 |
 | --- | --- |
 
 ## 属性文档
@@ -417,7 +417,7 @@ id是实体的对象id。这个id是一个整型，在base，cell和client相关
 isDestroyed
 
 说明：
-如果该[Entity](./Entity.md实体已经被销毁了，这个属性为True。
+如果该[Entity](./Entity.md)实体已经被销毁了，这个属性为True。
 
 类型：
 

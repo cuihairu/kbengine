@@ -12,15 +12,15 @@ The priority sources for the BigWorld API are:
 
 ## Module entries
 
-- [BigWorld module](bigworld-module.md
-- [Base entity](base.md
-- [Cell Entity](entity.md
-- [BWPersonality callbacks](bwpersonality.md
+- [BigWorld module](bigworld-module.md)
+- [Base entity](base.md)
+- [Cell Entity](entity.md)
+- [BWPersonality callbacks](bwpersonality.md)
 
 ## How to read it
 
 BigWorld and KBEngine share many concepts, such as Base/Cell, Mailbox/EntityCall, timers, SpaceData, and `reloadScript`. Do not carry KBEngine component names and semantics over directly while reading the BigWorld API; check the following at the same time:
 
-- [BigWorld / KBEngine comparison](study/23-bigworld-and-kbengine-comparison.md
-- [Hotfix](study/21-hotupdate-fault-tolerance-and-ops.md
-- [Scripting source analysis](architecture/source-analysis/scripting.md
+- [BigWorld / KBEngine comparison](study/23-bigworld-and-kbengine-comparison.md)
+- [Hotfix](study/21-hotupdate-fault-tolerance-and-ops.md)
+- [Scripting source analysis](architecture/source-analysis/scripting.md)

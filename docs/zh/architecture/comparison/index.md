@@ -6,9 +6,9 @@
 
 ## 页面范围
 
-1. [术语映射](/zh/architecture/comparison/terminology.md
-2. [架构对应关系](/zh/architecture/comparison/architecture.md
-3. [实现差异与取舍](/zh/architecture/comparison/implementation-differences.md
+1. [术语映射](/zh/architecture/comparison/terminology.md)
+2. [架构对应关系](/zh/architecture/comparison/architecture.md)
+3. [实现差异与取舍](/zh/architecture/comparison/implementation-differences.md)
 
 ## 编写原则
 

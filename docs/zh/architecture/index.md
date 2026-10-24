@@ -32,14 +32,14 @@ flowchart TD
 - `对照分析` 用来回答“哪些思想继承了 BigWorld，哪些地方变成了 KBEngine 自己的实现”。
 - `重设计方案` 是附录性质的工程草案，不作为源码分析主线。
 
-这里不是第二套学习主线。按顺序系统学习时，仍然应先进入 [/study/](/zh/study/；这里负责背景地图、专题入口和对照分析。
+这里不是第二套学习主线。按顺序系统学习时，仍然应先进入 [/study/](/zh/study/)；这里负责背景地图、专题入口和对照分析。
 
 ## 推荐阅读顺序
 
-1. [BigWorld 学习入口](/zh/architecture/bigworld/
-2. [源码专题总览](/zh/architecture/source-analysis/
-3. [BigWorld / KBEngine 对照](/zh/architecture/comparison/
-4. [KBEngine 2.0 重设计方案](/zh/architecture/redesign.md
+1. [BigWorld 学习入口](/zh/architecture/bigworld/)
+2. [源码专题总览](/zh/architecture/source-analysis/)
+3. [BigWorld / KBEngine 对照](/zh/architecture/comparison/)
+4. [KBEngine 2.0 重设计方案](/zh/architecture/redesign.md)
 
 ## 当前编写原则
 

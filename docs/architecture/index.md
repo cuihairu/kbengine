@@ -36,7 +36,7 @@ This is not a second learning track. For ordered systematic study, still enter [
 
 ## Recommended reading order
 
-4. [KBEngine 2.0 redesign proposal](redesign.md
+4. [KBEngine 2.0 redesign proposal](redesign.md)
 
 ## Current authoring rules
 

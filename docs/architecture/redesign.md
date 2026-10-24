@@ -2,7 +2,7 @@
 head:
   - - meta
     - http-equiv: refresh
-      content: 0; url=/kbengine/architecture/redesign/
+      content: 0; url=/kbengine/zh/architecture/redesign/
 ---
 
 Chinese-only section. 中文版

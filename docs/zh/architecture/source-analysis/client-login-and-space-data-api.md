@@ -606,10 +606,10 @@ SDK 模板侧也和服务端链保持一致：
 
 ## 与其他专题的关系
 
-- 代理会话、`createClientProxies()`、客户端接管边界，看 [Proxy 会话与流式传输 API](/zh/architecture/source-analysis/proxy-client-session-api.md
-- `baseapp` 侧重登录实现，看 [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md
-- `cellapp` 侧 `SpaceData` 生产端，看 [CellApp 空间运行时 API](/zh/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md
-- 客户端句柄表、世界/空间回调主线，看 [网络与消息系统](/zh/architecture/source-analysis/networking.md
+- 代理会话、`createClientProxies()`、客户端接管边界，看 [Proxy 会话与流式传输 API](/zh/architecture/source-analysis/proxy-client-session-api.md)
+- `baseapp` 侧重登录实现，看 [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md)
+- `cellapp` 侧 `SpaceData` 生产端，看 [CellApp 空间运行时 API](/zh/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md)
+- 客户端句柄表、世界/空间回调主线，看 [网络与消息系统](/zh/architecture/source-analysis/networking.md)
 
 这一页只负责把这批接口重新收束回一句话：
 

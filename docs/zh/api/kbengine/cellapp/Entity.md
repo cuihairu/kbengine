@@ -118,10 +118,10 @@ cellApp上新的Entity可以使用KBEngine.createEntity创建。一个实体还�
 
 可影响的运动包括：
 
-- Entity.[moveToEntity](./Entity.md#moveToEntity
-- Entity.[moveToPoint](./Entity.md#moveToPoint
-- Entity.[navigate](./Entity.md#navigate
-- Entity.[addYawRotator](./Entity.md#addYawRotator
+- Entity.[moveToEntity](./Entity.md#moveToEntity)
+- Entity.[moveToPoint](./Entity.md#moveToPoint)
+- Entity.[navigate](./Entity.md#navigate)
+- Entity.[addYawRotator](./Entity.md#addYawRotator)
 
 参数：
 
@@ -138,12 +138,12 @@ cellApp上新的Entity可以使用KBEngine.createEntity创建。一个实体还�
 ### def addYawRotator(self, targetYaw, velocity, userArg):
 
 功能说明：
-控制实体绕yaw旋转，旋转完成将会通过Entity.[onTurn](./Entity.md#onTurn通知。
-使用Entity.[cancelController](./Entity.md#cancelController带上控制器ID或者使用Entity.[cancelController("Movement")](./Entity.md#cancelController来删除它。
+控制实体绕yaw旋转，旋转完成将会通过Entity.[onTurn](./Entity.md#onTurn)通知。
+使用Entity.[cancelController](./Entity.md#cancelController)带上控制器ID或者使用Entity.[cancelController("Movement")](./Entity.md#cancelController)来删除它。
 
 参看：
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.[cancelController](./Entity.md#cancelController)
 
 参数：
 
@@ -166,12 +166,12 @@ cellApp上新的Entity可以使用KBEngine.createEntity创建。一个实体还�
 	def onLeaveTrap( self, entityLeaving, rangeXZ, rangeY, controllerID, userArg = 0 ):
 ```
 
-由于这个范围触发器是一个控制器，使用Entity.[cancelController](./Entity.md#cancelController带上控制器ID来删除它。
+由于这个范围触发器是一个控制器，使用Entity.[cancelController](./Entity.md#cancelController)带上控制器ID来删除它。
 需要注意的是回调有可能会立刻被触发，即使在addProximity()调用返回之前。
 
 参看：
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.[cancelController](./Entity.md#cancelController)
 
 参数：
 
@@ -195,7 +195,7 @@ cellApp上新的Entity可以使用KBEngine.createEntity创建。一个实体还�
 
 源码解析：
 
-- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers
+- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers)
 例子:
 
 ```python
@@ -253,7 +253,7 @@ Entity
 
 源码解析：
 
-- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers
+- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers)
 
 参数：
 
@@ -277,8 +277,8 @@ Entity
 ### def canNavigate(self):
 
 功能说明：
-通过这个方法判断当前实体是否可以使用导航（Entity.[navigate](./Entity.md#navigate）功能。它只能在一个real实体上被调用。
-通常当实体所在Space使用Entity.[addSpaceGeometryMapping](./Entity.md#addSpaceGeometryMapping加载过有效的导航用的碰撞数据（Navmesh或者2D的tile数据）并且实体在有效导航区域该功能可用。
+通过这个方法判断当前实体是否可以使用导航（Entity.[navigate](./Entity.md#navigate)）功能。它只能在一个real实体上被调用。
+通常当实体所在Space使用Entity.[addSpaceGeometryMapping](./Entity.md#addSpaceGeometryMapping)加载过有效的导航用的碰撞数据（Navmesh或者2D的tile数据）并且实体在有效导航区域该功能可用。
 
 返回：
 
@@ -319,7 +319,7 @@ debugView输出Entity的View的详细信息到cell的调试日志。
 
 源码解析：
 
-- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers
+- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers)
 
 参数：
 
@@ -358,8 +358,8 @@ debugView输出Entity的View的详细信息到cell的调试日志。
 ### def entitiesInRange(self, range, entityType=None, position=None):
 
 功能说明：
-在给定的距离内搜索[实体](./Entity.md。这是一个球形的搜索，3个轴的距离
-都要测量。这可以找到在这个[实体](./Entity.md的View范围之外的实体，但不能找到其他cell的实体。
+在给定的距离内搜索[实体](./Entity.md)。这是一个球形的搜索，3个轴的距离
+都要测量。这可以找到在这个[实体](./Entity.md)的View范围之外的实体，但不能找到其他cell的实体。
 例子：
 
 ```python
@@ -402,11 +402,11 @@ debugView输出Entity的View的详细信息到cell的调试日志。
 ### def moveToEntity(self, destEntityID, velocity, distance, userData, faceMovement, moveVertically, offsetPos):
 
 功能说明：
-直线移动[实体](./Entity.md到另一个Entity位置。
-任何[实体](./Entity.md，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
+直线移动[实体](./Entity.md)到另一个Entity位置。
+任何[实体](./Entity.md)，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
 调用后函数将返回一个可以用于取消这次移动的控制器ID。
-例如，Entity.[cancelController](./Entity.md#cancelController( movementID )。
-移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController( "Movement" )。当移动被取消之后回调通知方法将不被调用。
+例如，Entity.[cancelController](./Entity.md#cancelController)( movementID )。
+移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController)( "Movement" )。当移动被取消之后回调通知方法将不被调用。
 
 ```python
 	def onMove( self, controllerID, userData ):
@@ -416,7 +416,7 @@ debugView输出Entity的View的详细信息到cell的调试日志。
 
 参考:
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.[cancelController](./Entity.md#cancelController)
 
 参数：
 
@@ -439,12 +439,12 @@ debugView输出Entity的View的详细信息到cell的调试日志。
 
 功能说明：
 直线移动Entity到给定的坐标点，成功或失败会调用回调函数。
-任何[实体](./Entity.md，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
+任何[实体](./Entity.md)，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
 底层会先停止当前移动/转向控制链，再创建一个新的 `MoveController + MoveToPointHandler` 组合，由 CellApp 在后续 tick 中持续推进位置与朝向。
 返回一个可以用于取消这次移动的控制器ID。
 例如：
-Entity.[cancelController](./Entity.md#cancelController( movementID )。
-移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController( "Movement" )。当移动被取消之后通知方法将
+Entity.[cancelController](./Entity.md#cancelController)( movementID )。
+移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController)( "Movement" )。当移动被取消之后通知方法将
 不被调用。
 回调函数如下定义：
 
@@ -456,11 +456,11 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 参看：
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.[cancelController](./Entity.md#cancelController)
 
 源码解析：
 
-- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers
+- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers)
 
 参数：
 
@@ -482,7 +482,7 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 功能说明：
 这个函数返回这个Entity当前的View半径值。
-数据可以通过Entity.[setViewRadius](./Entity.md#setViewRadius( radius, hyst )设置。
+数据可以通过Entity.[setViewRadius](./Entity.md#setViewRadius)( radius, hyst )设置。
 
 返回：
 
@@ -494,7 +494,7 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 功能说明：
 这个函数返回这个Entity的View当前滞后区域值。
-数据可以通过Entity.[setViewRadius](./Entity.md#setViewRadius( radius, hyst )设置。
+数据可以通过Entity.[setViewRadius](./Entity.md#setViewRadius)( radius, hyst )设置。
 
 返回：
 
@@ -505,7 +505,7 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 ### def getRandomPoints(self, centerPos, maxRadius, maxPoints, layer):
 
 功能说明：
-这个函数用于获取以某个坐标点为中心一定区域内Entity.[navigate](./Entity.md#navigate可到达的随机坐标点。
+这个函数用于获取以某个坐标点为中心一定区域内Entity.[navigate](./Entity.md#navigate)可到达的随机坐标点。
 
 参数：
 
@@ -526,12 +526,12 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 功能说明：
 使用导航系统来使这个Entity向一个目标点移动，成功或失败会调用回调函数。
 KBEngine可以有数个预先生成好的导航网格，不同的网格大小（会导致不同的导航路径）。
-任何[实体](./Entity.md，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
+任何[实体](./Entity.md)，在任意时刻只能有一个移动控制器，重复调用任何移动函数将终止之前的移动控制器。
 它会先根据当前 `space` 的导航句柄计算路径点；如果路径为空，则直接返回 `0`，不会创建控制器。
 返回一个可以用于取消这次移动的控制器ID。
 例如：
-Entity.[cancelController](./Entity.md#cancelController( movementID )。
-移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController( "Movement" )。当移动被取消之后通知方法将
+Entity.[cancelController](./Entity.md#cancelController)( movementID )。
+移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController)( "Movement" )。当移动被取消之后通知方法将
 不被调用。
 回调函数如下定义：
 
@@ -543,11 +543,11 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 参看：
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.[cancelController](./Entity.md#cancelController)
 
 源码解析：
 
-- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers
+- [空间、AOI 与视野同步：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers)
 
 参数：
 
@@ -589,7 +589,7 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 注意：
 你可以通过设置kbengine.xml配置选项'cellapp/defaultViewRadius'来设置默认的View半径。
 View半径默认是不能大于500.0的。详情请看kbengine_defaults.xml配置选项'cellapp/entity_posdir_updates'。
-数据可以通过Entity.[getViewRadius](./Entity.md#getViewRadius( )与Entity.[getViewHystArea](./Entity.md#getViewHystArea( )获得。
+数据可以通过Entity.[getViewRadius](./Entity.md#getViewRadius)( )与Entity.[getViewHystArea](./Entity.md#getViewHystArea)( )获得。
 
 参数：
 
@@ -708,7 +708,7 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 
 ### def onEnterTrap(self, entity, rangeXZ, rangeY, controllerID, userArg):
 
-当注册了使用Entity.[addProximity](./Entity.md#addProximity注册了一个范围触发器，有其他实体进入触发器时，该回调函数被调用。
+当注册了使用Entity.[addProximity](./Entity.md#addProximity)注册了一个范围触发器，有其他实体进入触发器时，该回调函数被调用。
 
 参数：
 
@@ -717,7 +717,7 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 | rangeXZ | float，给定触发器xz轴区域的大小，必须大于等于0。 |
 | rangeY | float，给定触发器y轴高度，必须大于等于0。 需要注意的是，这个参数要生效必须开放kbengine_defaults.xml->cellapp->coordinate_system->rangemgr_y 开放y轴管理会带来一些消耗，因为一些游戏大量的实体都在同一y轴高度或者在差不多水平线高度，此时碰撞变得非常密集。 3D太空类游戏或者小房间类实体较少的游戏比较适合开放此选项。 |
 | controllerID | 这个触发器的控制器id。 |
-| userArg | 这个参数的值由用户调用[addProximity](./Entity.md#addProximity时给出，用户可以根据此参数对当前行为做一些判断。 |
+| userArg | 这个参数的值由用户调用[addProximity](./Entity.md#addProximity)时给出，用户可以根据此参数对当前行为做一些判断。 |
 
 <a id="onEnteredView"></a>
 
@@ -750,13 +750,13 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 | rangeXZ | float，给定触发器xz轴区域的大小，必须大于等于0。 |
 | rangeY | float，给定触发器y轴高度，必须大于等于0。 需要注意的是，这个参数要生效必须开放kbengine_defaults.xml->cellapp->coordinate_system->rangemgr_y 开放y轴管理会带来一些消耗，因为一些游戏大量的实体都在同一y轴高度或者在差不多水平线高度，此时碰撞变得非常密集。 3D太空类游戏或者小房间类实体较少的游戏比较适合开放此选项。 |
 | controllerID | 这个触发器的控制器ID。 |
-| userArg | 这个参数的值由用户调用[addProximity](./Entity.md#addProximity时给出，用户可以根据此参数对当前行为做一些判断。 |
+| userArg | 这个参数的值由用户调用[addProximity](./Entity.md#addProximity)时给出，用户可以根据此参数对当前行为做一些判断。 |
 
 <a id="onLoseControlledBy"></a>
 
 ### def onLoseControlledBy(self, id):
 
-如果这个函数在脚本中有实现，当Entity.[controlledBy](./Entity.md#controlledBy所关联的实体丢失时改回调方法被调用。
+如果这个函数在脚本中有实现，当Entity.[controlledBy](./Entity.md#controlledBy)所关联的实体丢失时改回调方法被调用。
 
 参数：
 
@@ -774,7 +774,7 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 
 ### def onMove(self, controllerID, userData):
 
-如果这个函数在脚本中有实现，相关的Entity.[moveToPoint](./Entity.md#moveToPoint与Entity.[moveToEntity](./Entity.md#moveToEntity还有Entity.[navigate](./Entity.md#navigate方法被调用并且成功后底层每帧移动都会回调此函数。
+如果这个函数在脚本中有实现，相关的Entity.[moveToPoint](./Entity.md#moveToPoint)与Entity.[moveToEntity](./Entity.md#moveToEntity)还有Entity.[navigate](./Entity.md#navigate)方法被调用并且成功后底层每帧移动都会回调此函数。
 
 参数：
 
@@ -786,7 +786,7 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 
 ### def onMoveOver(self, controllerID, userData):
 
-如果这个函数在脚本中有实现，相关的Entity.[moveToPoint](./Entity.md#moveToPoint与Entity.[moveToEntity](./Entity.md#moveToEntity还有Entity.[navigate](./Entity.md#navigate方法被调用后到达指定目标点时会回调此函数。
+如果这个函数在脚本中有实现，相关的Entity.[moveToPoint](./Entity.md#moveToPoint)与Entity.[moveToEntity](./Entity.md#moveToEntity)还有Entity.[navigate](./Entity.md#navigate)方法被调用后到达指定目标点时会回调此函数。
 
 参数：
 
@@ -798,7 +798,7 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 
 ### def onMoveFailure(self, controllerID, userData):
 
-如果这个函数在脚本中有实现，相关的Entity.[moveToPoint](./Entity.md#moveToPoint与Entity.[moveToEntity](./Entity.md#moveToEntity还有Entity.[navigate](./Entity.md#navigate方法被调用并且失败时会回调此函数。
+如果这个函数在脚本中有实现，相关的Entity.[moveToPoint](./Entity.md#moveToPoint)与Entity.[moveToEntity](./Entity.md#moveToEntity)还有Entity.[navigate](./Entity.md#navigate)方法被调用并且失败时会回调此函数。
 
 参数：
 
@@ -822,11 +822,11 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 
 ### def onTurn(self, controllerID, userData):
 
-如果这个函数在脚本中有实现，相关的Entity.[addYawRotator](./Entity.md#addYawRotator方法被调用后到达指定yaw时会回调此函数。
+如果这个函数在脚本中有实现，相关的Entity.[addYawRotator](./Entity.md#addYawRotator)方法被调用后到达指定yaw时会回调此函数。
 
 参数：
 
-| controllerID | Entity.[addYawRotator](./Entity.md#addYawRotator返回的控制器ID。 |
+| controllerID | Entity.[addYawRotator](./Entity.md#addYawRotator)返回的控制器ID。 |
 | --- | --- |
 | userData | 这个参数值由用户在请求移动相关接口时给出。 |
 
@@ -835,7 +835,7 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 ### def onTeleport(self):
 
 如果这个函数在脚本中有实现，在通过baseapp的Entity.teleport调用发生的实体传送中，实体(Real entity)被传送之前的时刻此方法会被调用。
-请注意，在cell上调用实体的teleport并不会回调此接口，如果你需要这个功能请在Entity.[teleport](./Entity.md#teleport之后调用此回调。
+请注意，在cell上调用实体的teleport并不会回调此接口，如果你需要这个功能请在Entity.[teleport](./Entity.md#teleport)之后调用此回调。
 
 <a id="onTimer"></a>
 
@@ -848,7 +848,7 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 
 源码解析：
 
-- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers
+- [脚本运行时与热更新：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers)
 
 参数：
 
@@ -860,17 +860,17 @@ cell实体的数据同时备份在base实体，确保遇到灾难恢复数据时
 
 ### def onTeleportFailure(self):
 
-如果这个函数在脚本中有实现，当用户调用Entity.[teleport](./Entity.md#teleport失败时该回调被调用。
+如果这个函数在脚本中有实现，当用户调用Entity.[teleport](./Entity.md#teleport)失败时该回调被调用。
 
 <a id="onTeleportSuccess"></a>
 
 ### def onTeleportSuccess(self, nearbyEntity):
 
-如果这个函数在脚本中有实现，当用户调用Entity.[teleport](./Entity.md#teleport成功时该回调被调用。
+如果这个函数在脚本中有实现，当用户调用Entity.[teleport](./Entity.md#teleport)成功时该回调被调用。
 
 参数：
 
-| nearbyEntity | 这个参数由用户调用Entity.[teleport](./Entity.md#teleport时给出。这是一个real实体。 |
+| nearbyEntity | 这个参数由用户调用Entity.[teleport](./Entity.md#teleport)时给出。这是一个real实体。 |
 | --- | --- |
 
 <a id="onUpdateBegin"></a>
@@ -917,7 +917,7 @@ avatar.allClients.attack(monsterID，skillID, damage)
 
 其他参考：
 
-- Entity.[clientEntity](./Entity.md#clientEntity Entity.[otherClients](./Entity.md#otherClients
+- Entity.[clientEntity](./Entity.md#clientEntity) Entity.[otherClients](./Entity.md#otherClients)
 
 <a id="base"></a>
 
@@ -927,7 +927,7 @@ base是用于联系Entity实体的entityCall。这个属性是只读的，且如
 
 其他参考：
 
-- Entity.[clientEntity](./Entity.md#clientEntity Entity.[allClients](./Entity.md#allClients Entity.[otherClients](./Entity.md#otherClients
+- Entity.[clientEntity](./Entity.md#clientEntity) Entity.[allClients](./Entity.md#allClients) Entity.[otherClients](./Entity.md#otherClients)
 
 类型：
 
@@ -951,7 +951,7 @@ client是用于联系客户端的entityCall。这个属性是只读的，且如�
 
 其他参考：
 
-- Entity.[clientEntity](./Entity.md#clientEntity Entity.[allClients](./Entity.md#allClients Entity.[otherClients](./Entity.md#otherClients
+- Entity.[clientEntity](./Entity.md#clientEntity) Entity.[allClients](./Entity.md#allClients) Entity.[otherClients](./Entity.md#otherClients)
 
 类型：
 
@@ -967,8 +967,8 @@ controlledBy
 
 其他参考：
 
-- Entity.[onLoseControlledBy](./Entity.md#onLoseControlledBy
-- [源码解析：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
+- Entity.[onLoseControlledBy](./Entity.md#onLoseControlledBy)
+- [源码解析：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control)
 
 类型：
 
@@ -1034,7 +1034,7 @@ isWitnessed
 
 如果当前实体进入了另一个绑定了Witness的实体的View范围（也可以理解为一个实体被观察者观察到了, 这个属性值为True，否则为False。
 参考：
-Entity.[onWitnessed](./Entity.md#onWitnessed
+Entity.[onWitnessed](./Entity.md#onWitnessed)
 
 类型：
 
@@ -1065,7 +1065,7 @@ avatar.otherClients.attack(monsterID，skillID, damage)
 
 其他参考：
 
-- Entity.[clientEntity](./Entity.md#clientEntity Entity.[otherClients](./Entity.md#otherClients
+- Entity.[clientEntity](./Entity.md#clientEntity) Entity.[otherClients](./Entity.md#otherClients)
 
 <a id="position"></a>
 
@@ -1110,7 +1110,7 @@ topSpeed
 
 其他参考：
 
-- Entity.[topSpeedY](./Entity.md#topSpeedY
+- Entity.[topSpeedY](./Entity.md#topSpeedY)
 
 类型：
 
@@ -1124,7 +1124,7 @@ topSpeedY
 
 其他参考：
 
-- Entity.[topSpeed](./Entity.md#topSpeed
+- Entity.[topSpeed](./Entity.md#topSpeed)
 
 类型：
 

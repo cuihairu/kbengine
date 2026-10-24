@@ -7,7 +7,7 @@
 > - `types.xml`、`ARRAY`、`FIXED_DICT` 是怎么真正进入实体系统的
 > - `ENTITYCALL` 到底是“实体对象引用”还是“远程 mailbox”
 >
-> 前面的 [实体系统](/zh/architecture/source-analysis/entity-system.md 和 [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md 已经把主线搭起来了；这一页继续把“类型系统”和“实体定义文件”这半边补成可落源码的专题。
+> 前面的 [实体系统](/zh/architecture/source-analysis/entity-system.md) 和 [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md) 已经把主线搭起来了；这一页继续把“类型系统”和“实体定义文件”这半边补成可落源码的专题。
 
 ## 先给结论
 
@@ -839,10 +839,10 @@ mailbox.teleport(spaceID, position)
 
 ## 与其他专题的关系
 
-- 想看实体怎样被真正实例化，接着看 [实体系统](/zh/architecture/source-analysis/entity-system.md
-- 想看脚本宿主、热更新和实体脚本类型怎样接起来，接着看 [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md
-- `vector3`、配置路径、环境变量这条线，继续看 [运行时配置与基础类型](/zh/architecture/source-analysis/runtime-config-and-types.md
-- 远程消息、RPC、`EntityCall` 最后怎么走到网络层，继续看 [网络与消息系统](/zh/architecture/source-analysis/networking.md
+- 想看实体怎样被真正实例化，接着看 [实体系统](/zh/architecture/source-analysis/entity-system.md)
+- 想看脚本宿主、热更新和实体脚本类型怎样接起来，接着看 [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md)
+- `vector3`、配置路径、环境变量这条线，继续看 [运行时配置与基础类型](/zh/architecture/source-analysis/runtime-config-and-types.md)
+- 远程消息、RPC、`EntityCall` 最后怎么走到网络层，继续看 [网络与消息系统](/zh/architecture/source-analysis/networking.md)
 
 这一页最后我只想把边界收成一句话：
 

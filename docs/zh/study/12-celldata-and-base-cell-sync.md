@@ -668,7 +668,7 @@ class Avatar(KBEngine.Entity):
 
 ## 12.8 与其他专题的关系
 
-- **实体创建**：[实体系统](/zh/architecture/source-analysis/entity-system.md
-- **持久化流程**：[数据库与持久化](/zh/architecture/source-analysis/persistence.md
-- **EntityCall 通信**：[RPC 与 EntityCall](/zh/study/11-rpc-entitycall-and-communication-patterns.md
-- **EntityDef 定义**：[EntityDef 实体定义](/zh/study/05-entitydef-and-entity-definition.md
+- **实体创建**：[实体系统](/zh/architecture/source-analysis/entity-system.md)
+- **持久化流程**：[数据库与持久化](/zh/architecture/source-analysis/persistence.md)
+- **EntityCall 通信**：[RPC 与 EntityCall](/zh/study/11-rpc-entitycall-and-communication-patterns.md)
+- **EntityDef 定义**：[EntityDef 实体定义](/zh/study/05-entitydef-and-entity-definition.md)

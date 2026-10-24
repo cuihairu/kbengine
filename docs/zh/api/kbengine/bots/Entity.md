@@ -54,11 +54,11 @@ import KBEngine
 
 功能说明：
 在 bots 客户端本地创建一个直线移动控制器，使该实体朝给定坐标点持续推进。
-任何[实体](./Entity.md在任意时刻只能有一个本地移动控制器，重复调用任何移动函数会终止之前的本地移动控制器。
+任何[实体](./Entity.md)在任意时刻只能有一个本地移动控制器，重复调用任何移动函数会终止之前的本地移动控制器。
 返回一个可用于取消这次本地移动的控制器ID。
 例如：
-Entity.[cancelController](./Entity.md#cancelController( movementID )。
-移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController( "Movement" )。当移动被取消之后通知方法将
+Entity.[cancelController](./Entity.md#cancelController)( movementID )。
+移动取消还可以调用Entity.[cancelController](./Entity.md#cancelController)( "Movement" )。当移动被取消之后通知方法将
 不被调用。
 回调函数如下定义：
 
@@ -70,11 +70,11 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 参看：
 
-- Entity.[cancelController](./Entity.md#cancelController
+- Entity.[cancelController](./Entity.md#cancelController)
 
 源码解析：
 
-- [网络与消息系统：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/zh/architecture/source-analysis/networking.html#client-entity-move-ground-sync
+- [网络与消息系统：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/zh/architecture/source-analysis/networking.html#client-entity-move-ground-sync)
 
 参数：
 
@@ -100,7 +100,7 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 源码解析：
 
-- [网络与消息系统：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/zh/architecture/source-analysis/networking.html#client-entity-move-ground-sync
+- [网络与消息系统：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/zh/architecture/source-analysis/networking.html#client-entity-move-ground-sync)
 
 参数：
 
@@ -117,7 +117,7 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 源码解析：
 
-- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
+- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control)
 
 返回：
 
@@ -186,7 +186,7 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 源码解析：
 
-- [网络与消息系统：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks
+- [网络与消息系统：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)
 
 <a id="onLeaveWorld"></a>
 
@@ -197,7 +197,7 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 源码解析：
 
-- [网络与消息系统：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks
+- [网络与消息系统：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)
 
 <a id="onEnterSpace"></a>
 
@@ -208,7 +208,7 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 源码解析：
 
-- [网络与消息系统：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks
+- [网络与消息系统：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)
 
 <a id="onLeaveSpace"></a>
 
@@ -219,7 +219,7 @@ Entity.[cancelController](./Entity.md#cancelController( movementID )。
 
 源码解析：
 
-- [网络与消息系统：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks
+- [网络与消息系统：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)
 
 ## 属性文档
 
@@ -233,11 +233,11 @@ base 是当前 bots 客户端实体持有的 `base entityCall`。它是否存在
 
 源码解析：
 
-- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table
+- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 其他参考：
 
-- Entity.[clientEntity](./Entity.md#clientEntity Entity.[allClients](./Entity.md#allClients Entity.[otherClients](./Entity.md#otherClients
+- Entity.[clientEntity](./Entity.md#clientEntity) Entity.[allClients](./Entity.md#allClients) Entity.[otherClients](./Entity.md#otherClients)
 
 类型：
 
@@ -253,7 +253,7 @@ cell 是当前 bots 客户端实体持有的 `cell entityCall`。它通常在实
 
 源码解析：
 
-- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table
+- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 类型：
 
@@ -293,7 +293,7 @@ clientapp
 
 源码解析：
 
-- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table
+- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 类型：
 
@@ -340,7 +340,7 @@ isOnGround
 
 源码解析：
 
-- [网络与消息系统：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/zh/architecture/source-analysis/networking.html#client-entity-move-ground-sync
+- [网络与消息系统：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/zh/architecture/source-analysis/networking.html#client-entity-move-ground-sync)
 
 类型：
 

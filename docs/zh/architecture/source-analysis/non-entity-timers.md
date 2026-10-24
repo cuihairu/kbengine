@@ -1,6 +1,6 @@
 # 非实体定时器：EventDispatcher 与全局节拍
 
-> 这一页是对"非实体周期任务怎么做"的继续深挖。主线学习先放在 [18. 钩子、回调、定时器与事件](/zh/study/18-hooks-callbacks-timers-and-events.md，这里专门把 KBEngine 的"不绑定实体"的 timer 机制拆出来，集中记录源码入口、注册方式、运行时边界和脚本层变通方案。
+> 这一页是对"非实体周期任务怎么做"的继续深挖。主线学习先放在 [18. 钩子、回调、定时器与事件](/zh/study/18-hooks-callbacks-timers-and-events.md)，这里专门把 KBEngine 的"不绑定实体"的 timer 机制拆出来，集中记录源码入口、注册方式、运行时边界和脚本层变通方案。
 
 ## 先收一版当前判断
 
@@ -47,10 +47,10 @@ flowchart TD
 
 | API 页面 | `addTimer` | `delTimer` | `onTimer` |
 | --- | --- | --- | --- |
-| BaseApp `Entity` | [addTimer](/zh/api/kbengine/baseapp/Entity.md#addTimer | [delTimer](/zh/api/kbengine/baseapp/Entity.md#delTimer | [onTimer](/zh/api/kbengine/baseapp/Entity.md#onTimer |
-| CellApp `Entity` | [addTimer](/zh/api/kbengine/cellapp/Entity.md#addTimer | [delTimer](/zh/api/kbengine/cellapp/Entity.md#delTimer | [onTimer](/zh/api/kbengine/cellapp/Entity.md#onTimer |
-| Client `Entity` | [addTimer](/zh/api/kbengine/client/Entity.md#addTimer | [delTimer](/zh/api/kbengine/client/Entity.md#delTimer | [onTimer](/zh/api/kbengine/client/Entity.md#onTimer |
-| Bots `Entity` | [addTimer](/zh/api/kbengine/bots/Entity.md#addTimer | [delTimer](/zh/api/kbengine/bots/Entity.md#delTimer | [onTimer](/zh/api/kbengine/bots/Entity.md#onTimer |
+| BaseApp `Entity` | [addTimer](/zh/api/kbengine/baseapp/Entity.md#addTimer) | [delTimer](/zh/api/kbengine/baseapp/Entity.md#delTimer) | [onTimer](/zh/api/kbengine/baseapp/Entity.md#onTimer) |
+| CellApp `Entity` | [addTimer](/zh/api/kbengine/cellapp/Entity.md#addTimer) | [delTimer](/zh/api/kbengine/cellapp/Entity.md#delTimer) | [onTimer](/zh/api/kbengine/cellapp/Entity.md#onTimer) |
+| Client `Entity` | [addTimer](/zh/api/kbengine/client/Entity.md#addTimer) | [delTimer](/zh/api/kbengine/client/Entity.md#delTimer) | [onTimer](/zh/api/kbengine/client/Entity.md#onTimer) |
+| Bots `Entity` | [addTimer](/zh/api/kbengine/bots/Entity.md#addTimer) | [delTimer](/zh/api/kbengine/bots/Entity.md#delTimer) | [onTimer](/zh/api/kbengine/bots/Entity.md#onTimer) |
 
 各组件 `KBEngine.md`（loginapp/baseapp/cellapp/dbmgr/...）里出现的 timer 描述，属于 C++ 组件运行时，不在脚本 Python 模块上暴露。
 
@@ -67,7 +67,7 @@ KBEngine 是多进程的，每个 App（BaseApp、CellApp、LoginApp、DBMgr、I
 - 进程级 timer：直接挂在 `EventDispatcher` 上，回调进 `TimerHandler`。
 - 实体级 timer：通过 `ScriptTimers` 间接挂在 `EventDispatcher` 上，回调转回 Python `onTimer`，并且 timer 表会被写入迁移流。
 
-[events.md](/zh/architecture/source-analysis/events.md 里强调过"事件循环 ≠ 脚本业务事件"，timer 也一样：`EventDispatcher` 是**网络/调度层**的，先于任何脚本逻辑存在。
+[events.md](/zh/architecture/source-analysis/events.md) 里强调过"事件循环 ≠ 脚本业务事件"，timer 也一样：`EventDispatcher` 是**网络/调度层**的，先于任何脚本逻辑存在。
 
 ## 源码层：关键类与文件
 
@@ -422,12 +422,12 @@ KBEngine 的 `EventDispatcher` 设计直接继承自 BigWorld 这一支（命名
 
 想完全掌握 KBEngine 的 timer 机制，建议按这个顺序：
 
-1. **主线**：[18. 钩子、回调、定时器与事件](/zh/study/18-hooks-callbacks-timers-and-events.md——先建立四类驱动机制的边界。
-2. **事件边界**：[事件系统、fireEvent 与事件总线](/zh/architecture/source-analysis/events.md——区分"网络事件循环"和"脚本业务事件"，timer 也遵循同样边界。
+1. **主线**：[18. 钩子、回调、定时器与事件](/zh/study/18-hooks-callbacks-timers-and-events.md)——先建立四类驱动机制的边界。
+2. **事件边界**：[事件系统、fireEvent 与事件总线](/zh/architecture/source-analysis/events.md)——区分"网络事件循环"和"脚本业务事件"，timer 也遵循同样边界。
 3. **本文**：非实体 timer 的源码落点。
-5. **进程模型**：[启动入口与引导流程](/zh/architecture/source-analysis/entry-and-bootstrap.md、[进程模型与组件协作](/zh/architecture/source-analysis/process-model.md——`EventDispatcher` 在哪里被构造、被谁驱动。
-6. **热更风险**：[21. 热更新、容错与运维](/zh/study/21-hotupdate-fault-tolerance-and-ops.md——App 级 timer / callback 表热更时必须手工重绑。
-7. **时间附录**：[服务器时间管理与世界时钟](/zh/study/appendix-server-time-management-and-world-clock.md——`gameUpdateHertz` 怎么决定 timer 节拍。
+5. **进程模型**：[启动入口与引导流程](/zh/architecture/source-analysis/entry-and-bootstrap.md)、[进程模型与组件协作](/zh/architecture/source-analysis/process-model.md)——`EventDispatcher` 在哪里被构造、被谁驱动。
+6. **热更风险**：[21. 热更新、容错与运维](/zh/study/21-hotupdate-fault-tolerance-and-ops.md)——App 级 timer / callback 表热更时必须手工重绑。
+7. **时间附录**：[服务器时间管理与世界时钟](/zh/study/appendix-server-time-management-and-world-clock.md)——`gameUpdateHertz` 怎么决定 timer 节拍。
 
 ### 关键源码位置速查
 

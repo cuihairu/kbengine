@@ -116,7 +116,7 @@ sequenceDiagram
 
 所以 Bots 更像“套了客户端网络壳的服务端工具进程”，而不是普通客户端。
 
-这点和前面 [组件型脚本 API](/zh/architecture/source-analysis/component-script-api.md 里看到的现象是能对上的：
+这点和前面 [组件型脚本 API](/zh/architecture/source-analysis/component-script-api.md) 里看到的现象是能对上的：
 
 - Bots 业务入口像工具组件
 - Bots 运行时底座又更像客户端宿主
@@ -505,10 +505,10 @@ self.direction.z += 0.1
 
 ## 与其他专题的关系
 
-- 通用资源路径 API、watcher、定时器、`urlopen` 这些宿主工具，看 [通用运行时工具 API](/zh/architecture/source-analysis/runtime-utility-api.md
-- `raycast`、导航、移动控制器这些大量吃 `Vector3` 的空间接口，看 [CellApp 空间运行时 API](/zh/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md
-- `position / direction` 后续进入实体同步与 AOI 的主线，看 [空间、AOI 与视野同步](/zh/architecture/source-analysis/space-aoi.md
-- `VECTOR3` 作为实体类型系统的一部分，放回总主线看，看 [实体系统](/zh/architecture/source-analysis/entity-system.md
+- 通用资源路径 API、watcher、定时器、`urlopen` 这些宿主工具，看 [通用运行时工具 API](/zh/architecture/source-analysis/runtime-utility-api.md)
+- `raycast`、导航、移动控制器这些大量吃 `Vector3` 的空间接口，看 [CellApp 空间运行时 API](/zh/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md)
+- `position / direction` 后续进入实体同步与 AOI 的主线，看 [空间、AOI 与视野同步](/zh/architecture/source-analysis/space-aoi.md)
+- `VECTOR3` 作为实体类型系统的一部分，放回总主线看，看 [实体系统](/zh/architecture/source-analysis/entity-system.md)
 
 这一页最后只想把边界收成一句话：
 

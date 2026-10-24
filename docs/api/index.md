@@ -4,7 +4,7 @@
 
 ## Engine APIs
 
-- English access note: `zh/api/kbengine/**` remains the Chinese authoritative source; the counterpart set now starts at [KBEngine API (English)](/en/api/kbengine/).
+- English access note: the KBEngine API reference is published in English at `/api/kbengine/**`; the Chinese API help CHM `docs/api/kbengine/kbengine_api(cn).chm` remains the authoritative source.
 
 ## Source boundary
 
@@ -16,4 +16,4 @@ New references must use `/api/kbengine/**` or `/api/bigworld/**`; the old root-l
 
 ## Verification and source analysis
 
-- [KBEngine API classification and audit checklist](kbengine/audit-checklist.md
+- [KBEngine API classification and audit checklist](kbengine/audit-checklist.md)

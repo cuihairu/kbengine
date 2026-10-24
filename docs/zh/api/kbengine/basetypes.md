@@ -47,7 +47,7 @@ KBEngine 的 `.def` 文件中，属性（`<Type>`）和方法参数（`<Arg>`）
 - **Persistent 标志控制**：只有标记 `<Persistent>true</Persistent>` 的属性才会写入数据库
 - **DATABASE_LENGTH**：字符串类型可用 `<DatabaseLength>255</DatabaseLength>` 控制 VARCHAR 长度
 
-详见：[类型系统与实体定义文件](/zh/architecture/source-analysis/entitydef-type-system.md
+详见：[类型系统与实体定义文件](/zh/architecture/source-analysis/entitydef-type-system.md)
 
 ## 类型总览
 
@@ -285,7 +285,7 @@ if self.targetEntity:
 </DynamicData>
 ```
 
-详见：[类型系统详解](/zh/architecture/source-analysis/entitydef-type-system.md
+详见：[类型系统详解](/zh/architecture/source-analysis/entitydef-type-system.md)
 
 ## ⚠️ .def 文件修改的版本兼容性
 

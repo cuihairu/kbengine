@@ -1,6 +1,6 @@
 # vcpkg Migration Status
 
-> 该主题已收敛到 [工程指南 / vcpkg 迁移状态](/zh/guide/engineering/vcpkg-migration.md。
+> 该主题已收敛到 [工程指南 / vcpkg 迁移状态](/zh/guide/engineering/vcpkg-migration.md)。
 
 ## 当前定位
 
@@ -9,4 +9,4 @@
 
 ## 请改用
 
-- [vcpkg 迁移状态](/zh/guide/engineering/vcpkg-migration.md
+- [vcpkg 迁移状态](/zh/guide/engineering/vcpkg-migration.md)

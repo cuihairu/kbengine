@@ -75,4 +75,4 @@
 
 ## 兼容页面
 
-- [/vcpkg-migration-status.md](/zh/vcpkg-migration-status.md
+- [/vcpkg-migration-status.md](/zh/vcpkg-migration-status.md)

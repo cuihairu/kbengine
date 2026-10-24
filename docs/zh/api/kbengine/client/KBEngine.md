@@ -1,6 +1,6 @@
 # KBEngine模块
 
-[KBEngine](./KBEngine.md模块提供了逻辑脚本层访问实体的部分, 以及当前space的数据等等。
+[KBEngine](./KBEngine.md)模块提供了逻辑脚本层访问实体的部分, 以及当前space的数据等等。
 
 ## 类
 
@@ -74,7 +74,7 @@
 
 源码解析：
 
-- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
+- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control)
 
 返回：
 
@@ -132,7 +132,7 @@
 
 源码解析：
 
-- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table
+- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 返回：
 
@@ -176,7 +176,7 @@ entities 是客户端运行时维护的实体实例表。
 
 源码解析：
 
-- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table
+- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 类型：
 
@@ -200,7 +200,7 @@ entity_id
 
 源码解析：
 
-- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
+- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control)
 
 <a id="spaceID"></a>
 
@@ -213,4 +213,4 @@ spaceID
 
 源码解析：
 
-- [网络与消息系统：客户端的 `onEnterWorld()` / `onLeaveWorld()` / `onEnterSpace()` / `onLeaveSpace()` 也不是同一层事件](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks
+- [网络与消息系统：客户端的 `onEnterWorld()` / `onLeaveWorld()` / `onEnterSpace()` / `onLeaveSpace()` 也不是同一层事件](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)

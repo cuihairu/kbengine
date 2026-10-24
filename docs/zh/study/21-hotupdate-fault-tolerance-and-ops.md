@@ -4,9 +4,9 @@
 
 ## 相关 API 回查
 
-- BaseApp 管理接口：[KBEngine(baseapp)](/)](/zh/api/kbengine/baseapp/Proxy.md
-- Login / DB / Interfaces / Logger：[KBEngine(loginapp)](/)](/)](/)](/zh/api/kbengine/logger/KBEngine.md
-- Bots 压测接口：[KBEngine(bots)](/)](/zh/api/kbengine/bots/PyClientApp.md
+- BaseApp 管理接口：[KBEngine(baseapp)](/zh/api/kbengine/baseapp/KBEngine.md)、[Proxy(baseapp)](/zh/api/kbengine/baseapp/Proxy.md)
+- Login / DB / Interfaces / Logger：[KBEngine(loginapp)](/zh/api/kbengine/loginapp/KBEngine.md)、[KBEngine(dbmgr)](/zh/api/kbengine/dbmgr/KBEngine.md)、[KBEngine(interfaces)](/zh/api/kbengine/interfaces/KBEngine.md)、[KBEngine(logger)](/zh/api/kbengine/logger/KBEngine.md)
+- Bots 压测接口：[KBEngine(bots)](/zh/api/kbengine/bots/KBEngine.md)、[PyClientApp(bots)](/zh/api/kbengine/bots/PyClientApp.md)
 
 ## 21.1 热更新：不停服修改 Python 行为的主要入口
 
@@ -606,7 +606,7 @@ class ScriptTimerHandler : public TimerHandler
 
 ### 21.1.9 线上排查方法
 
-Telnet Python 模式、直接运行诊断脚本、`gc`、`dis`、`__code__`、`__globals__` 等工具的完整说明见 [Ch20 的 Telnet 调试控制台](20-observability-monitoring-profiling-and-debugging.md#205-telnet-调试控制台)。本节只保留热更新现场最常用的判断脚本。
+Telnet Python 模式、直接运行诊断脚本、`gc`、`dis`、`__code__`、`__globals__` 等工具的完整说明见 [Ch20 的 Telnet 调试控制台](20-observability-monitoring-profiling-and-debugging.md#205-telnet-)调试控制台)。本节只保留热更新现场最常用的判断脚本。
 
 如果怀疑热更新后旧代码仍在跑，先不要重启。重启会清掉现场。应在出问题进程的 telnet/Python 控制台里比较对象 identity：
 

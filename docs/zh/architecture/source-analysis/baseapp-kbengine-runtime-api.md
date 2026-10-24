@@ -853,10 +853,10 @@ Baseapp::getSingleton().createEntityAnywhereFromDBID(...)
 
 ## 与其他专题的关系
 
-- Base 实体自己的生命周期收束，看 [Base 实体生命周期](/zh/architecture/source-analysis/base-entity-lifecycle.md
-- 实体主线与 Base/Cell 交接，看 [实体系统](/zh/architecture/source-analysis/entity-system.md
-- 持久化主线与 Dbmgr 归档，看 [持久化与数据库](/zh/architecture/source-analysis/persistence.md
-- 脚本宿主、热更新、定时器背景，看 [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md
+- Base 实体自己的生命周期收束，看 [Base 实体生命周期](/zh/architecture/source-analysis/base-entity-lifecycle.md)
+- 实体主线与 Base/Cell 交接，看 [实体系统](/zh/architecture/source-analysis/entity-system.md)
+- 持久化主线与 Dbmgr 归档，看 [持久化与数据库](/zh/architecture/source-analysis/persistence.md)
+- 脚本宿主、热更新、定时器背景，看 [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md)
 
 这一页只负责把这些分散机制重新收束回一句话：
 

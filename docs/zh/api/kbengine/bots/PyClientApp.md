@@ -53,7 +53,7 @@ space数据由用户在服务端通过setSpaceData设置。
 
 源码解析：
 
-- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
+- [网络与消息系统：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control)
 
 返回：
 
@@ -85,7 +85,7 @@ entities 是当前这个 bots 客户端运行时维护的实体实例表。
 
 源码解析：
 
-- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table
+- [网络与消息系统：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table)
 
 类型：
 

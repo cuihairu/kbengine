@@ -1,6 +1,6 @@
 # KBEngine模块
 
-[KBEngine](./KBEngine.md模块提供了Python脚本访问实体的部分，特别是它提供了定时器的注册与移除，
+[KBEngine](./KBEngine.md)模块提供了Python脚本访问实体的部分，特别是它提供了定时器的注册与移除，
 以及实体的创建。
 
 ## 类
@@ -234,7 +234,7 @@ space数据由用户通过[setSpaceData](#setSpaceData)设置。
 ### def deregisterReadFileDescriptor(fileDescriptor):
 
 功能说明：
-注销已经通过[KBEngine](./KBEngine.md.[registerReadFileDescriptor](./KBEngine.md#registerReadFileDescriptor注册的回调。
+注销已经通过[KBEngine](./KBEngine.md.)[registerReadFileDescriptor](./KBEngine.md#registerReadFileDescriptor)注册的回调。
 例子:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
@@ -248,7 +248,7 @@ space数据由用户通过[setSpaceData](#setSpaceData)设置。
 ### def deregisterWriteFileDescriptor(fileDescriptor):
 
 功能说明：
-注销已经通过[KBEngine](./KBEngine.md.[registerWriteFileDescriptor](./KBEngine.md#registerWriteFileDescriptor注册的回调。
+注销已经通过[KBEngine](./KBEngine.md.)[registerWriteFileDescriptor](./KBEngine.md#registerWriteFileDescriptor)注册的回调。
 例子:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
@@ -386,7 +386,7 @@ space数据由用户通过[setSpaceData](#setSpaceData)设置。
 ### def getAppFlags():
 
 功能说明：
-获取当前引擎APP的标记, 参考:[KBEngine](./KBEngine.md.[setAppFlags](./KBEngine.md#setAppFlags。
+获取当前引擎APP的标记, 参考:[KBEngine](./KBEngine.md.)[setAppFlags](./KBEngine.md#setAppFlags)。
 
 返回：
 
@@ -657,7 +657,7 @@ space数据可以通过[getSpaceData](#getSpaceData)获取。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -680,7 +680,7 @@ space数据可以通过[getSpaceData](#getSpaceData)获取。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -702,7 +702,7 @@ space数据可以通过[getSpaceData](#getSpaceData)获取。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -725,7 +725,7 @@ space数据可以通过[getSpaceData](#getSpaceData)获取。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -862,13 +862,13 @@ cellAppData
 说明：
 `CellApp` 进程级共享字典，只在所有 `CellApp` 之间同步。
 脚本执行 `KBEngine.cellAppData[key] = value` 或 `del KBEngine.cellAppData[key]` 时，请求会先发往 `dbmgr` 持有的权威副本，再广播给其他 `CellApp`。
-写入方本地值会在本次脚本赋值/删除流程中直接更新，不会再收到一次自己的回环广播；其他 `CellApp` 收到广播后，才会触发 [onCellAppData](./KBEngine.md#onCellAppData 或 [onCellAppDataDel](./KBEngine.md#onCellAppDataDel。
+写入方本地值会在本次脚本赋值/删除流程中直接更新，不会再收到一次自己的回环广播；其他 `CellApp` 收到广播后，才会触发 [onCellAppData](./KBEngine.md#onCellAppData) 或 [onCellAppDataDel](./KBEngine.md#onCellAppDataDel)。
 新启动的 `CellApp` 在登录 `dbmgr` 时，还会收到当前全量快照，不只是后续增量。
 键和值都必须能在目标组件上完成 `pickle/unpickle`。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 例子：
 
@@ -882,7 +882,7 @@ KBEngine.cellAppData["hello"] = "there"
 print(KBEngine.cellAppData["hello"])
 ```
 
-参看：[KBEngine](./KBEngine.md.[onCellAppData](./KBEngine.md#onCellAppData 和 [KBEngine](./KBEngine.md.[onCellAppDataDel](./KBEngine.md#onCellAppDataDel。
+参看：[KBEngine](./KBEngine.md.)[onCellAppData](./KBEngine.md#onCellAppData) 和 [KBEngine](./KBEngine.md.)[onCellAppDataDel](./KBEngine.md#onCellAppDataDel)。
 
 注意：
 
@@ -940,13 +940,13 @@ globalData
 `BaseApp` 与 `CellApp` 共享的进程级字典。
 脚本执行 `KBEngine.globalData[key] = value` 或 `del KBEngine.globalData[key]` 时，请求会先进入 `dbmgr` 持有的权威副本，再由 `dbmgr` 广播给所有其他 `BaseApp` 和 `CellApp`。
 这里的权威方是 `dbmgr`，不是 `CellAppMgr`。
-写入方本地不会收到一遍自己的同步回调；其他组件在完成反序列化和本地落地后，才会触发 [onGlobalData](./KBEngine.md#onGlobalData 或 [onGlobalDataDel](./KBEngine.md#onGlobalDataDel。
+写入方本地不会收到一遍自己的同步回调；其他组件在完成反序列化和本地落地后，才会触发 [onGlobalData](./KBEngine.md#onGlobalData) 或 [onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
 新启动的 `BaseApp` 或 `CellApp` 也会在登录 `dbmgr` 后收到当前全量快照。
 键和值都必须能在目标组件上完成 `pickle/unpickle`。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 例子：
 
@@ -960,7 +960,7 @@ KBEngine.globalData["hello"] = "there"
 print(KBEngine.globalData["hello"])
 ```
 
-参看：[KBEngine](./KBEngine.md.[onGlobalData](./KBEngine.md#onGlobalData 和 [KBEngine](./KBEngine.md.[onGlobalDataDel](./KBEngine.md#onGlobalDataDel。
+参看：[KBEngine](./KBEngine.md.)[onGlobalData](./KBEngine.md#onGlobalData) 和 [KBEngine](./KBEngine.md.)[onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
 
 注意：
 

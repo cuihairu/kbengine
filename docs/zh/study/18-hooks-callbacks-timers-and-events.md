@@ -4,9 +4,9 @@
 
 ## 相关 API 回查
 
-- BaseApp 脚本接口：[KBEngine(baseapp)](/)](/)](/zh/api/kbengine/baseapp/Proxy.md
-- CellApp 脚本接口：[KBEngine(cellapp)](/)](/zh/api/kbengine/cellapp/Entity.md
-- 关键词补充：[关键词释义](/zh/api/kbengine/keywords.md
+- BaseApp 脚本接口：[KBEngine(baseapp)](/zh/api/kbengine/baseapp/KBEngine.md)、[Entity(baseapp)](/zh/api/kbengine/baseapp/Entity.md)、[Proxy(baseapp)](/zh/api/kbengine/baseapp/Proxy.md)
+- CellApp 脚本接口：[KBEngine(cellapp)](/zh/api/kbengine/cellapp/KBEngine.md)、[Entity(cellapp)](/zh/api/kbengine/cellapp/Entity.md)
+- 关键词补充：[关键词释义](/zh/api/kbengine/keywords.md)
 
 ## 18.1 本章核心问题
 
@@ -20,7 +20,7 @@
 ## 18.1.1 本章与源码学习专题的分工
 
 - 本章负责主线学习：先把四类机制分开，看清它们各自解决什么问题。
-- 事件系统的源码细节、BigWorld 对照和使用场景，放在 [源码学习：事件系统、fireEvent 与事件总线](/zh/architecture/source-analysis/events.md。
+- 事件系统的源码细节、BigWorld 对照和使用场景，放在 [源码学习：事件系统、fireEvent 与事件总线](/zh/architecture/source-analysis/events.md)。
 - 其他专题页如果后续继续拆分，也遵循同一规则：主线章节保留学习顺序和摘要，详细调用链集中到专题页。
 
 ## 18.2 四大类严格区分
@@ -475,14 +475,14 @@ BigWorld TwoWay + PyDeferred:
 
 **本质相同**：都是 ID→回调映射。BigWorld 多了 errback 链和组合能力（Ch11）。
 
-如果你关心的不是“`CallbackMgr` 在底层怎么工作”，而是“在纯单向消息流里，业务层应该怎么优雅地拿结果、避免回调地狱”，请继续看 [Ch11.11 单向消息流下，如何优雅地“拿结果”](./11-rpc-entitycall-and-communication-patterns.md#1111-单向消息流下如何优雅地拿结果：
+如果你关心的不是“`CallbackMgr` 在底层怎么工作”，而是“在纯单向消息流里，业务层应该怎么优雅地拿结果、避免回调地狱”，请继续看 [Ch11.11 单向消息流下，如何优雅地“拿结果”](./11-rpc-entitycall-and-communication-patterns.md#1111-)单向消息流下如何优雅地拿结果：
 
 - 那一节讨论的是工程化解法与建模方式
 - 这里这一节讨论的是 `CallbackMgr` 这个具体机制本身
 
 ## 18.6 事件注册/恢复：运行时的事件响应关系
 
-> 本节只保留主线说明。`fireEvent/registerEvent/deregisterEvent` 的架构边界、源码细节、BigWorld 对照和使用场景，见 [源码解析：事件系统、fireEvent 与事件总线](/zh/architecture/source-analysis/events.md。
+> 本节只保留主线说明。`fireEvent/registerEvent/deregisterEvent` 的架构边界、源码细节、BigWorld 对照和使用场景，见 [源码解析：事件系统、fireEvent 与事件总线](/zh/architecture/source-analysis/events.md)。
 
 ### 问题
 
@@ -735,7 +735,7 @@ BigWorld ScriptEvents（全局级）：
 
 这层机制不在本章主线，因为脚本无法直接调用它。如果你想做"非实体周期任务"（全服广播、定时清理全局缓存、定时拉外部接口），或者想理解 BaseApp 的 game tick、组件心跳、ghost 同步节拍是怎么落地的，跳到专题页：
 
-→ [非实体定时器：EventDispatcher 与全局节拍](/zh/architecture/source-analysis/non-entity-timers.md
+→ [非实体定时器：EventDispatcher 与全局节拍](/zh/architecture/source-analysis/non-entity-timers.md)
 
 专题页给出了：
 

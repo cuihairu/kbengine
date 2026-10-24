@@ -1,6 +1,6 @@
 # KBEngine模块
 
-[KBEngine](./KBEngine.md模块提供了Python脚本控制loginapp进程处理实体登陆注册等部分。
+[KBEngine](./KBEngine.md)模块提供了Python脚本控制loginapp进程处理实体登陆注册等部分。
 
 ## 成员函数
 

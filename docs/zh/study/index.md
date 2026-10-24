@@ -6,35 +6,35 @@ hero:
   actions:
     - theme: brand
       text: 开始阅读
-      link: /study/01-introduction-and-method.html
+      link: /zh/study/01-introduction-and-method.html
     - theme: alt
       text: 详细目录
-      link: /study/table-of-contents.html
+      link: /zh/study/table-of-contents.html
 features:
   - title: "\u2776 问题驱动"
     details: 从"为什么传统单进程不行"出发，理解 Login/Base/Cell/DB 分工是如何被 MMO 需求一步步推出来的。
-    link: /study/02-bigworld-problems-model-concepts.html
+    link: /zh/study/02-bigworld-problems-model-concepts.html
   - title: "\u2777 基础设施先行"
     details: 并发模型、I/O 多路复用、分布式 ID 与注册中心——理解系统跑在什么样的基础设施之上。
-    link: /study/07-concurrency-threads-and-memory.html
+    link: /zh/study/07-concurrency-threads-and-memory.html
   - title: "\u2778 核心通信机制"
     details: 序列化 → RPC → 属性同步 → 持久化，逐层构建实体间的通信与数据流。
-    link: /study/10-serialization-bundle-and-messages.html
+    link: /zh/study/10-serialization-bundle-and-messages.html
   - title: "\u2779 空间与 AOI"
     details: 十字链表、RangeTrigger、Hysteresis 防抖、BSP 树动态拓扑——面试高频的 AOI 算法详解。
-    link: /study/14-space-aoi-and-vision-system.html
+    link: /zh/study/14-space-aoi-and-vision-system.html
   - title: "\u277A 实战走读"
     details: 五条函数级链路（登录、EntityCall、属性同步、写库、视野建立），可直接拿 IDE 跟进。
-    link: /study/24-practical-source-walkthroughs.html
+    link: /zh/study/24-practical-source-walkthroughs.html
   - title: "\u277B 双引擎对照"
     details: BigWorld vs KBEngine 十维度对比——"完整方案 vs 最小可行方案"的设计取舍。
-    link: /study/23-bigworld-and-kbengine-comparison.html
+    link: /zh/study/23-bigworld-and-kbengine-comparison.html
 footer: 24 章 · 9 个 Part · 7 个附录 · 覆盖从基础设施到运维实战的完整技术栈
 ---
 
 > 这是本站唯一的学习主线。第一次阅读只走这里，按章节顺序建立完整心智模型；专题深挖和接口回查都放在主线之后。
 
-> 配套入口：按 Part 浏览用 [详细目录](./table-of-contents.md，回看源码细节用 [/architecture/source-analysis/](/zh/architecture/source-analysis/，接口回查用 [/api/](/zh/api/。
+> 配套入口：按 Part 浏览用 [详细目录](./table-of-contents.md)，回看源码细节用 [/architecture/source-analysis/](/zh/architecture/source-analysis/)，接口回查用 [/api/](/zh/api/)。
 
 ## 系统架构总览
 
@@ -172,4 +172,4 @@ graph TD
 
 - 不替代 API 文档做接口字典。
 - 不在每章里重复展开 `source-analysis/**` 已经细写过的调用链。
-- 不承担原始资料核对说明；这部分统一放到 [/resources/](/zh/resources/。
+- 不承担原始资料核对说明；这部分统一放到 [/resources/](/zh/resources/)。

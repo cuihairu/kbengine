@@ -2,7 +2,7 @@
 head:
   - - meta
     - http-equiv: refresh
-      content: 0; url=/kbengine/architecture/source-analysis/non-entity-timers/
+      content: 0; url=/kbengine/zh/architecture/source-analysis/non-entity-timers/
 ---
 
 Chinese-only section. 中文版

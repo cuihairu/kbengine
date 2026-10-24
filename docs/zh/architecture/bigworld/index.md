@@ -2,7 +2,7 @@
 
 > 这一组文档用于建立理解 KBEngine 所需的 BigWorld 架构背景。
 
-> 它不是 KBEngine 主线正文，而是背景区。真正按顺序阅读时，先走 [/study/](/zh/study/；需要补设计来源时，再回到这里。
+> 它不是 KBEngine 主线正文，而是背景区。真正按顺序阅读时，先走 [/study/](/zh/study/)；需要补设计来源时，再回到这里。
 
 ## 这一组回答什么问题
 
@@ -13,9 +13,9 @@
 
 ## 页面范围
 
-- [核心概念](/zh/architecture/bigworld/concepts.md
-- [进程模型](/zh/architecture/bigworld/process-model.md
-- [实体与空间](/zh/architecture/bigworld/entity-space.md
+- [核心概念](/zh/architecture/bigworld/concepts.md)
+- [进程模型](/zh/architecture/bigworld/process-model.md)
+- [实体与空间](/zh/architecture/bigworld/entity-space.md)
 
 ## 编写原则
 

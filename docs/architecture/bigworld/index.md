@@ -13,9 +13,9 @@
 
 ## Page scope
 
-- [Core concepts](concepts.md
-- [Process model](process-model.md
-- [Entities and spaces](entity-space.md
+- [Core concepts](concepts.md)
+- [Process model](process-model.md)
+- [Entities and spaces](entity-space.md)
 
 ## Authoring rules
 

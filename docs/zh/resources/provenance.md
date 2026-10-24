@@ -43,7 +43,7 @@
 - BigWorld API 不是 CHM/PDF 逐页迁移结果，应按源码注释和绑定点逐项核对。
 - `architecture` 目录不是脚本从 CHM/PDF 提取的结果，必须按源码或原始资料另行核对。
 - `study` 目录是围绕源码的结构化讲解主线，不是 CHM/PDF 的逐页重建结果。
-- 最新逐页核对结果见 [verification-status.md](/zh/resources/verification-status.md。
+- 最新逐页核对结果见 [verification-status.md](/zh/resources/verification-status.md)。
 
 ## 后续处理原则
 

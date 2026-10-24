@@ -352,7 +352,7 @@ int Cellapp::raycast(SPACE_ID spaceID, int layer, const Position3D& start, const
 
 - **CellApp 这个脚本宿主复用了整个服务端通用工具面**
 
-这组前面在 [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md 已经详细拆过，这里不重复展开原理，只强调一点：
+这组前面在 [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md) 已经详细拆过，这里不重复展开原理，只强调一点：
 
 - 同样的工具 API，放到 CellApp 上时，语义是“作用于当前 CellApp 进程”
 
@@ -547,10 +547,10 @@ SCRIPT_OBJECT_CALL_ARGS1(getEntryScript().get(), "onGlobalDataDel", "O", pyKey, 
 
 ## 与其他专题的关系
 
-- Cell 实体自身的移动、AOI、Witness，看 [空间与 AOI](/zh/architecture/source-analysis/space-aoi.md
-- Cell 实体定时器与热更新背景，看 [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md
-- 全局字典同步链，看 [网络与消息系统](/zh/architecture/source-analysis/networking.md#global-data-dicts-sync
-- 通用脚本宿主工具，看 [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md
+- Cell 实体自身的移动、AOI、Witness，看 [空间与 AOI](/zh/architecture/source-analysis/space-aoi.md)
+- Cell 实体定时器与热更新背景，看 [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md)
+- 全局字典同步链，看 [网络与消息系统](/zh/architecture/source-analysis/networking.md#global-data-dicts-sync)
+- 通用脚本宿主工具，看 [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md)
 
 这一页只负责把这些动作收束回一句话：
 

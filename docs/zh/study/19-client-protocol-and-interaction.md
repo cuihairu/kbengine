@@ -4,9 +4,9 @@
 
 ## 相关 API 回查
 
-- 客户端接口：[KBEngine(client)](/)](/zh/api/kbengine/client/Entity.md
-- 机器人客户端接口：[KBEngine(bots)](/)](/)](/zh/api/kbengine/bots/PyClientApp.md
-- 数据类型补充：[基本数据类型](/zh/api/kbengine/basetypes.md
+- 客户端接口：[KBEngine(client)](/zh/api/kbengine/client/KBEngine.md)、[Entity(client)](/zh/api/kbengine/client/Entity.md)
+- 机器人客户端接口：[KBEngine(bots)](/zh/api/kbengine/bots/KBEngine.md)、[Entity(bots)](/zh/api/kbengine/bots/Entity.md)、[PyClientApp(bots)](/zh/api/kbengine/bots/PyClientApp.md)
+- 数据类型补充：[基本数据类型](/zh/api/kbengine/basetypes.md)
 
 ## 19.1 本章核心问题
 

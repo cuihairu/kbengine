@@ -1,6 +1,6 @@
 # KBEngine模块
 
-[KBEngine](./KBEngine.md模块提供了Python脚本控制对特定类型的日志进行分析和转储等能力。
+[KBEngine](./KBEngine.md)模块提供了Python脚本控制对特定类型的日志进行分析和转储等能力。
 
 ## 成员函数
 

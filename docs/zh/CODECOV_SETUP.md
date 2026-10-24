@@ -1,6 +1,6 @@
 # Codecov 设置指南
 
-> 该主题已收敛到 [工程指南 / 覆盖率与 Codecov](/zh/guide/engineering/coverage.md。
+> 该主题已收敛到 [工程指南 / 覆盖率与 Codecov](/zh/guide/engineering/coverage.md)。
 
 ## 当前定位
 
@@ -9,4 +9,4 @@
 
 ## 请改用
 
-- [覆盖率与 Codecov](/zh/guide/engineering/coverage.md
+- [覆盖率与 Codecov](/zh/guide/engineering/coverage.md)

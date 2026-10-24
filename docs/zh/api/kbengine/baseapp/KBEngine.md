@@ -1,6 +1,6 @@
 # KBEngine模块
 
-[KBEngine](./KBEngine.md模块提供了Python脚本访问实体的部分，特别是它提供了定时器的注册与移除，
+[KBEngine](./KBEngine.md)模块提供了Python脚本访问实体的部分，特别是它提供了定时器的注册与移除，
 以及实体的创建。
 
 ## 类
@@ -163,7 +163,7 @@ MemoryStream对象存储的是二进制信息，提供这个类型是为了让�
 ### def createEntity():
 
 功能说明：
-[KBEngine](./KBEngine.md.[createEntityLocally](./KBEngine.md#createEntityLocally的别名.
+[KBEngine](./KBEngine.md.)[createEntityLocally](./KBEngine.md#createEntityLocally)的别名.
 
 <a id="createEntityAnywhere"></a>
 
@@ -172,7 +172,7 @@ MemoryStream对象存储的是二进制信息，提供这个类型是为了让�
 功能说明：
 创建一个新的Entity实体，
 服务端可能选择任何的Baseapp来创建Entity实体。
-这个方法应作为[KBEngine](./KBEngine.md.[createEntityLocally](./KBEngine.md#createEntityLocally的首选，
+这个方法应作为[KBEngine](./KBEngine.md.)[createEntityLocally](./KBEngine.md#createEntityLocally)的首选，
 这样服务端会灵活地选择一个合适的Baseapp来创建实体。
 函数参数需要提供创建的实体的类型，还有一个Python字典作为参数来初始化实体的值。
 这个Python字典不需要用户提供所有的属性，没有提供的属性默认为实体定义文件".def"提供的默认值。
@@ -208,7 +208,7 @@ createEntityAnywhere("Avatar", params, onCreateEntityCallback)
 
 功能说明：
 通过baseMB参数在一个指定的baseapp上创建一个新的Entity实体。
-应该将[KBEngine](./KBEngine.md.[createEntityAnywhere](./KBEngine.md#createEntityLocally方法作为首选。
+应该将[KBEngine](./KBEngine.md.)[createEntityAnywhere](./KBEngine.md#createEntityLocally)方法作为首选。
 函数参数需要提供创建的实体的类型，还有一个Python字典作为参数来初始化实体的值。
 这个Python字典不需要用户提供所有的属性，没有提供的属性默认为实体定义文件".def"提供的默认值。
 例子：
@@ -306,7 +306,7 @@ createEntityRemotely("Avatar", baseEntityCall, params, onCreateEntityCallback)
 创建一个新的Entity实体。
 函数参数需要提供创建的实体的类型，还有一个Python字典作为参数来初始化实体的值。
 这个Python字典不需要用户提供所有的属性，没有提供的属性默认为实体定义文件".def"提供的默认值。
-[KBEngine](./KBEngine.md.[createEntityAnywhere](./KBEngine.md#createEntityAnywhere应该作为这个方法的首选，因为服务端可以灵活地
+[KBEngine](./KBEngine.md.)[createEntityAnywhere](./KBEngine.md#createEntityAnywhere)应该作为这个方法的首选，因为服务端可以灵活地
 在合适的Baseapp上创建实体。
 例子：
 
@@ -364,7 +364,7 @@ ERROR cellapp [0x0000cd64] [2014-11-12 00:38:07,300] - PyGC::debugTracing(): Ent
 
 功能说明：
 从数据库删除指定的实体（包括属性所产生的子表数据），如果实体没有从数据库检出则删除成功，
-如果实体已经从数据库检出那么[KBEngine](./KBEngine.md服务系统将会删除失败，并且从回调中返回Entity实体的entityCall。
+如果实体已经从数据库检出那么[KBEngine](./KBEngine.md)服务系统将会删除失败，并且从回调中返回Entity实体的entityCall。
 
 参数：
 
@@ -379,7 +379,7 @@ ERROR cellapp [0x0000cd64] [2014-11-12 00:38:07,300] - PyGC::debugTracing(): Ent
 ### def deregisterReadFileDescriptor(fileDescriptor):
 
 功能说明：
-注销已经通过[KBEngine](./KBEngine.md.[registerReadFileDescriptor](./KBEngine.md#registerReadFileDescriptor注册的回调。
+注销已经通过[KBEngine](./KBEngine.md.)[registerReadFileDescriptor](./KBEngine.md#registerReadFileDescriptor)注册的回调。
 例子:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
@@ -393,7 +393,7 @@ ERROR cellapp [0x0000cd64] [2014-11-12 00:38:07,300] - PyGC::debugTracing(): Ent
 ### def deregisterWriteFileDescriptor(fileDescriptor):
 
 功能说明：
-注销已经通过[KBEngine](./KBEngine.md.[registerWriteFileDescriptor](./KBEngine.md#registerWriteFileDescriptor注册的回调。
+注销已经通过[KBEngine](./KBEngine.md.)[registerWriteFileDescriptor](./KBEngine.md#registerWriteFileDescriptor)注册的回调。
 例子:
 [http://www.kbengine.org/assets/other/py/Poller.py](http://www.kbengine.org/assets/other/py/Poller.py)
 
@@ -497,7 +497,7 @@ ERROR cellapp [0x0000cd64] [2014-11-12 00:38:07,300] - PyGC::debugTracing(): Ent
 ### def getAppFlags():
 
 功能说明：
-获取当前引擎APP的标记, 参考:[KBEngine](./KBEngine.md.[setAppFlags](./KBEngine.md#setAppFlags。
+获取当前引擎APP的标记, 参考:[KBEngine](./KBEngine.md.)[setAppFlags](./KBEngine.md#setAppFlags)。
 
 返回：
 
@@ -529,7 +529,7 @@ True
 
 功能说明：
 返回服务端是否正在关闭中。
-在[onBaseAppShutDown(state=0)](./KBEngine.md#onBaseAppShutDown回调函数被调用后，这个函数返回True。
+在[onBaseAppShutDown(state=0)](./KBEngine.md#onBaseAppShutDown)回调函数被调用后，这个函数返回True。
 
 返回：
 
@@ -568,7 +568,7 @@ True
 
 功能说明：
 查询一个实体是否从数据库检出，
-如果实体已经从数据库检出那么[KBEngine](./KBEngine.md服务系统将从回调中返回Entity实体的entityCall。
+如果实体已经从数据库检出那么[KBEngine](./KBEngine.md)服务系统将从回调中返回Entity实体的entityCall。
 
 参数：
 
@@ -803,7 +803,7 @@ Baseapp关闭过程会回调此函数。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -826,7 +826,7 @@ Baseapp关闭过程会回调此函数。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -848,7 +848,7 @@ Baseapp关闭过程会回调此函数。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -871,7 +871,7 @@ Baseapp关闭过程会回调此函数。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 参数：
 
@@ -1065,13 +1065,13 @@ baseAppData
 说明：
 `BaseApp` 进程级共享字典，只在所有 `BaseApp` 之间同步。
 脚本执行 `KBEngine.baseAppData[key] = value` 或 `del KBEngine.baseAppData[key]` 时，请求会先发往 `dbmgr` 持有的权威副本，再广播给其他 `BaseApp`。
-写入方本地值会在本次脚本赋值/删除流程中直接更新，不会再收到一次自己的回环广播；其他 `BaseApp` 收到广播后，才会触发 [onBaseAppData](./KBEngine.md#onBaseAppData 或 [onBaseAppDataDel](./KBEngine.md#onBaseAppDataDel。
+写入方本地值会在本次脚本赋值/删除流程中直接更新，不会再收到一次自己的回环广播；其他 `BaseApp` 收到广播后，才会触发 [onBaseAppData](./KBEngine.md#onBaseAppData) 或 [onBaseAppDataDel](./KBEngine.md#onBaseAppDataDel)。
 新启动的 `BaseApp` 在登录 `dbmgr` 时，还会收到当前全量快照，不只是后续增量。
 键和值都必须能在目标组件上完成 `pickle/unpickle`。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 例子：
 
@@ -1085,7 +1085,7 @@ KBEngine.baseAppData["hello"] = "there"
 print(KBEngine.baseAppData["hello"])
 ```
 
-参看：[KBEngine](./KBEngine.md.[onBaseAppData](./KBEngine.md#onBaseAppData 和 [KBEngine](./KBEngine.md.[onBaseAppDataDel](./KBEngine.md#onBaseAppDataDel。
+参看：[KBEngine](./KBEngine.md.)[onBaseAppData](./KBEngine.md#onBaseAppData) 和 [KBEngine](./KBEngine.md.)[onBaseAppDataDel](./KBEngine.md#onBaseAppDataDel)。
 
 注意：
 
@@ -1108,13 +1108,13 @@ globalData
 说明：
 `BaseApp` 与 `CellApp` 共享的进程级字典。
 脚本执行 `KBEngine.globalData[key] = value` 或 `del KBEngine.globalData[key]` 时，请求会先进入 `dbmgr` 持有的权威副本，再由 `dbmgr` 广播给所有其他 `BaseApp` 和 `CellApp`。
-写入方本地不会收到一遍自己的同步回调；其他组件在完成反序列化和本地落地后，才会触发 [onGlobalData](./KBEngine.md#onGlobalData 或 [onGlobalDataDel](./KBEngine.md#onGlobalDataDel。
+写入方本地不会收到一遍自己的同步回调；其他组件在完成反序列化和本地落地后，才会触发 [onGlobalData](./KBEngine.md#onGlobalData) 或 [onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
 新启动的 `BaseApp` 或 `CellApp` 也会在登录 `dbmgr` 后收到当前全量快照。
 键和值都必须能在目标组件上完成 `pickle/unpickle`。
 
 源码解析：
 
-- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [网络与消息系统：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 例子：
 
@@ -1128,7 +1128,7 @@ KBEngine.globalData["hello"] = "there"
 print(KBEngine.globalData["hello"])
 ```
 
-参看：[KBEngine](./KBEngine.md.[onGlobalData](./KBEngine.md#onGlobalData 和 [KBEngine](./KBEngine.md.[onGlobalDataDel](./KBEngine.md#onGlobalDataDel。
+参看：[KBEngine](./KBEngine.md.)[onGlobalData](./KBEngine.md#onGlobalData) 和 [KBEngine](./KBEngine.md.)[onGlobalDataDel](./KBEngine.md#onGlobalDataDel)。
 
 注意：
 

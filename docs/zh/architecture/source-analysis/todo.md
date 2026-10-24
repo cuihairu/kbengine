@@ -211,7 +211,7 @@
 
 收尾说明：
 
-- `addTimer / delTimer / urlopen / genUUID64 / watcher / FD` 这类跨组件通用宿主能力，已统一收束到 [通用运行时工具 API](/zh/architecture/source-analysis/runtime-utility-api.md。
+- `addTimer / delTimer / urlopen / genUUID64 / watcher / FD` 这类跨组件通用宿主能力，已统一收束到 [通用运行时工具 API](/zh/architecture/source-analysis/runtime-utility-api.md)。
 
 ## Batch 7：通用工具与配置专题
 
@@ -261,7 +261,7 @@
 
 收尾说明：
 
-- `vector3` 继续放在 [运行时配置与基础类型](/zh/architecture/source-analysis/runtime-config-and-types.md 里，不重复展开。
+- `vector3` 继续放在 [运行时配置与基础类型](/zh/architecture/source-analysis/runtime-config-and-types.md) 里，不重复展开。
 - 关键词与基础类型这一块在覆盖矩阵里已从“部分覆盖”收口为“已深入解析”。
 
 ## 新增缺口记录

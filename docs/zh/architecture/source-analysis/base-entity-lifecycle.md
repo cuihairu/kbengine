@@ -435,7 +435,7 @@ void Entity::onTimer(ScriptID timerID, int useraAgs)
 - `addTimer(initialOffset, repeatOffset, userArg)`
 - 最终脚本层收到 `onTimer(timerID, userArg)`
 
-这里和前面 [通用运行时工具 API](/zh/architecture/source-analysis/runtime-utility-api.md 里讲过的 `KBEngine.addTimer()` 要明确区分：
+这里和前面 [通用运行时工具 API](/zh/architecture/source-analysis/runtime-utility-api.md) 里讲过的 `KBEngine.addTimer()` 要明确区分：
 
 - `KBEngine.addTimer()`
   - 来自 `PythonApp`
@@ -494,9 +494,9 @@ flowchart TD
 
 ## 与其他专题的关系
 
-- `createCellEntity / onGetCell` 的创建主线，放在 [实体系统](/zh/architecture/source-analysis/entity-system.md#base-entity-create-cell
-- 持久化线程与 Dbmgr 侧，放在 [持久化与数据库](/zh/architecture/source-analysis/persistence.md
-- Space / Cell 侧的 AOI、Witness、Teleport，放在 [空间与 AOI](/zh/architecture/source-analysis/space-aoi.md
+- `createCellEntity / onGetCell` 的创建主线，放在 [实体系统](/zh/architecture/source-analysis/entity-system.md#base-entity-create-cell)
+- 持久化线程与 Dbmgr 侧，放在 [持久化与数据库](/zh/architecture/source-analysis/persistence.md)
+- Space / Cell 侧的 AOI、Witness、Teleport，放在 [空间与 AOI](/zh/architecture/source-analysis/space-aoi.md)
 
 这一页的职责不是重复它们，而是把这些分散在别处的链路重新收束回：
 

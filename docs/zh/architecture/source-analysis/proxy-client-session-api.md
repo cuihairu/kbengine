@@ -393,7 +393,7 @@ CALL_ENTITY_AND_COMPONENTS_METHOD(this, ..., "onClientGetCell", ...);
 
 ## 第八层：`giveClientTo()` 转移的是整条客户端所有权链
 
-这一块在 [空间与 AOI](/zh/architecture/source-analysis/space-aoi.md#proxy-give-client-to 已经展开过，这里只把它放回 `Proxy` 会话主线里理解。
+这一块在 [空间与 AOI](/zh/architecture/source-analysis/space-aoi.md#proxy-give-client-to) 已经展开过，这里只把它放回 `Proxy` 会话主线里理解。
 
 `Proxy::giveClientTo(...)` 会做这些事情：
 
@@ -592,9 +592,9 @@ if(proxy)
 
 ## 与其他专题的关系
 
-- `giveClientTo()` 迁移的 AOI / Witness 链，看 [空间与 AOI](/zh/architecture/source-analysis/space-aoi.md#proxy-give-client-to
-- Base 实体与 Cell 生命周期边界，看 [Base 实体生命周期](/zh/architecture/source-analysis/base-entity-lifecycle.md
-- BaseApp 作为脚本宿主的运行时 API，看 [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md
+- `giveClientTo()` 迁移的 AOI / Witness 链，看 [空间与 AOI](/zh/architecture/source-analysis/space-aoi.md#proxy-give-client-to)
+- Base 实体与 Cell 生命周期边界，看 [Base 实体生命周期](/zh/architecture/source-analysis/base-entity-lifecycle.md)
+- BaseApp 作为脚本宿主的运行时 API，看 [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md)
 
 这一页只负责把这些动作收束回一句话：
 

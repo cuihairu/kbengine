@@ -13,10 +13,10 @@
 
 | 分类 | 页面范围 | 当前重点 | 状态 |
 | --- | --- | --- | --- |
-| 核心概念层 | [api/kbengine](/zh/api/kbengine/、[basetypes](/zh/api/kbengine/basetypes.md、[keywords](/zh/api/kbengine/keywords.md | 基础类型、关键词、EntityCall/属性描述术语统一 | 未开始 |
-| 客户端运行时层 | [client/KBEngine](/zh/api/kbengine/client/KBEngine.md、[client/Entity](/zh/api/kbengine/client/Entity.md、[bots/KBEngine](/zh/api/kbengine/bots/KBEngine.md、[bots/Entity](/zh/api/kbengine/bots/Entity.md、[bots/PyClientApp](/zh/api/kbengine/bots/PyClientApp.md | `player`、`isPlayer`、`isControlled`、可见性回调、客户端移动与 ownerOnly 边界 | 进行中 |
-| 服务端实体层 | [baseapp/Entity](/zh/api/kbengine/baseapp/Entity.md、[baseapp/Proxy](/zh/api/kbengine/baseapp/Proxy.md、[cellapp/Entity](/zh/api/kbengine/cellapp/Entity.md | Base/Cell 实体职责、`controlledBy`、控制器、AOI、持久化、客户端绑定 | 进行中 |
-| 服务端全局入口层 | [baseapp/KBEngine](/zh/api/kbengine/baseapp/KBEngine.md、[cellapp/KBEngine](/zh/api/kbengine/cellapp/KBEngine.md、[loginapp/KBEngine](/zh/api/kbengine/loginapp/KBEngine.md、[dbmgr/KBEngine](/zh/api/kbengine/dbmgr/KBEngine.md、[interfaces/KBEngine](/zh/api/kbengine/interfaces/KBEngine.md、[logger/KBEngine](/zh/api/kbengine/logger/KBEngine.md | 全局函数、全局数据字典、进程级回调、组件边界 | 进行中 |
+| 核心概念层 | [api/kbengine](/zh/api/kbengine/)、[basetypes](/zh/api/kbengine/basetypes.md)、[keywords](/zh/api/kbengine/keywords.md) | 基础类型、关键词、EntityCall/属性描述术语统一 | 未开始 |
+| 客户端运行时层 | [client/KBEngine](/zh/api/kbengine/client/KBEngine.md)、[client/Entity](/zh/api/kbengine/client/Entity.md)、[bots/KBEngine](/zh/api/kbengine/bots/KBEngine.md)、[bots/Entity](/zh/api/kbengine/bots/Entity.md)、[bots/PyClientApp](/zh/api/kbengine/bots/PyClientApp.md) | `player`、`isPlayer`、`isControlled`、可见性回调、客户端移动与 ownerOnly 边界 | 进行中 |
+| 服务端实体层 | [baseapp/Entity](/zh/api/kbengine/baseapp/Entity.md)、[baseapp/Proxy](/zh/api/kbengine/baseapp/Proxy.md)、[cellapp/Entity](/zh/api/kbengine/cellapp/Entity.md) | Base/Cell 实体职责、`controlledBy`、控制器、AOI、持久化、客户端绑定 | 进行中 |
+| 服务端全局入口层 | [baseapp/KBEngine](/zh/api/kbengine/baseapp/KBEngine.md)、[cellapp/KBEngine](/zh/api/kbengine/cellapp/KBEngine.md)、[loginapp/KBEngine](/zh/api/kbengine/loginapp/KBEngine.md)、[dbmgr/KBEngine](/zh/api/kbengine/dbmgr/KBEngine.md)、[interfaces/KBEngine](/zh/api/kbengine/interfaces/KBEngine.md)、[logger/KBEngine](/zh/api/kbengine/logger/KBEngine.md) | 全局函数、全局数据字典、进程级回调、组件边界 | 进行中 |
 | 交叉专题层 | 跨多个 API 页的同名概念 | 玩家身份/控制权、生命周期、计时器、全局数据、属性同步、空间与控制器 | 进行中 |
 
 ## 推荐核对顺序
@@ -39,9 +39,9 @@
 
 页面：
 
-- [API 总览](/zh/api/
-- [基本数据类型](/zh/api/kbengine/basetypes.md
-- [关键词释义](/zh/api/kbengine/keywords.md
+- [API 总览](/zh/api/)
+- [基本数据类型](/zh/api/kbengine/basetypes.md)
+- [关键词释义](/zh/api/kbengine/keywords.md)
 
 重点核对：
 
@@ -51,18 +51,18 @@
 
 建议关联源码解析：
 
-- [Entity 与实体系统](/zh/architecture/source-analysis/entity-system.html
-- [脚本系统与 Python 桥接](/zh/architecture/source-analysis/scripting.html
+- [Entity 与实体系统](/zh/architecture/source-analysis/entity-system.html)
+- [脚本系统与 Python 桥接](/zh/architecture/source-analysis/scripting.html)
 
 ### 2. 客户端运行时层
 
 页面：
 
-- [client/KBEngine](/zh/api/kbengine/client/KBEngine.md
-- [client/Entity](/zh/api/kbengine/client/Entity.md
-- [bots/KBEngine](/zh/api/kbengine/bots/KBEngine.md
-- [bots/Entity](/zh/api/kbengine/bots/Entity.md
-- [bots/PyClientApp](/zh/api/kbengine/bots/PyClientApp.md
+- [client/KBEngine](/zh/api/kbengine/client/KBEngine.md)
+- [client/Entity](/zh/api/kbengine/client/Entity.md)
+- [bots/KBEngine](/zh/api/kbengine/bots/KBEngine.md)
+- [bots/Entity](/zh/api/kbengine/bots/Entity.md)
+- [bots/PyClientApp](/zh/api/kbengine/bots/PyClientApp.md)
 
 重点核对：
 
@@ -74,42 +74,42 @@
 
 建议关联源码解析：
 
-- [网络与消息系统](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
-- [空间、AOI 与视野系统](/zh/architecture/source-analysis/space-aoi.html
+- [网络与消息系统](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control)
+- [空间、AOI 与视野系统](/zh/architecture/source-analysis/space-aoi.html)
 
 当前已完成：
 
-- [client/KBEngine.player](/zh/api/kbengine/client/KBEngine.md#player
-- [client/KBEngine.findEntity](/zh/api/kbengine/client/KBEngine.md#findEntity
-- [client/KBEngine.entities](/zh/api/kbengine/client/KBEngine.md#entities
-- [client/KBEngine.entity_id](/zh/api/kbengine/client/KBEngine.md#entity_id
-- [client/KBEngine.spaceID](/zh/api/kbengine/client/KBEngine.md#spaceID
-- [client/Entity.baseCall](/zh/api/kbengine/client/Entity.md#baseCall
-- [client/Entity.cellCall](/zh/api/kbengine/client/Entity.md#cellCall
-- [client/Entity.isPlayer](/zh/api/kbengine/client/Entity.md#isPlayer
-- [client/Entity.onEnterWorld](/zh/api/kbengine/client/Entity.md#onEnterWorld
-- [client/Entity.onLeaveWorld](/zh/api/kbengine/client/Entity.md#onLeaveWorld
-- [client/Entity.onEnterSpace](/zh/api/kbengine/client/Entity.md#onEnterSpace
-- [client/Entity.onLeaveSpace](/zh/api/kbengine/client/Entity.md#onLeaveSpace
-- [client/Entity.base](/zh/api/kbengine/client/Entity.md#base
-- [client/Entity.cell](/zh/api/kbengine/client/Entity.md#cell
-- [client/Entity.clientapp](/zh/api/kbengine/client/Entity.md#clientapp
-- [client/Entity.isOnGround](/zh/api/kbengine/client/Entity.md#isOnGround
-- [client/Entity.inWorld](/zh/api/kbengine/client/Entity.md#inWorld
-- [bots/PyClientApp.player](/zh/api/kbengine/bots/PyClientApp.md#player
-- [bots/PyClientApp.id](/zh/api/kbengine/bots/PyClientApp.md#id
-- [bots/PyClientApp.entities](/zh/api/kbengine/bots/PyClientApp.md#entities
-- [bots/Entity.isPlayer](/zh/api/kbengine/bots/Entity.md#isPlayer
-- [bots/Entity.onEnterWorld](/zh/api/kbengine/bots/Entity.md#onEnterWorld
-- [bots/Entity.onLeaveWorld](/zh/api/kbengine/bots/Entity.md#onLeaveWorld
-- [bots/Entity.onEnterSpace](/zh/api/kbengine/bots/Entity.md#onEnterSpace
-- [bots/Entity.onLeaveSpace](/zh/api/kbengine/bots/Entity.md#onLeaveSpace
-- [bots/Entity.base](/zh/api/kbengine/bots/Entity.md#base
-- [bots/Entity.cell](/zh/api/kbengine/bots/Entity.md#cell
-- [bots/Entity.clientapp](/zh/api/kbengine/bots/Entity.md#clientapp
-- [bots/Entity.moveToPoint](/zh/api/kbengine/bots/Entity.md#moveToPoint
-- [bots/Entity.cancelController](/zh/api/kbengine/bots/Entity.md#cancelController
-- [bots/Entity.isOnGround](/zh/api/kbengine/bots/Entity.md#isOnGround
+- [client/KBEngine.player](/zh/api/kbengine/client/KBEngine.md#player)
+- [client/KBEngine.findEntity](/zh/api/kbengine/client/KBEngine.md#findEntity)
+- [client/KBEngine.entities](/zh/api/kbengine/client/KBEngine.md#entities)
+- [client/KBEngine.entity_id](/zh/api/kbengine/client/KBEngine.md#entity_id)
+- [client/KBEngine.spaceID](/zh/api/kbengine/client/KBEngine.md#spaceID)
+- [client/Entity.baseCall](/zh/api/kbengine/client/Entity.md#baseCall)
+- [client/Entity.cellCall](/zh/api/kbengine/client/Entity.md#cellCall)
+- [client/Entity.isPlayer](/zh/api/kbengine/client/Entity.md#isPlayer)
+- [client/Entity.onEnterWorld](/zh/api/kbengine/client/Entity.md#onEnterWorld)
+- [client/Entity.onLeaveWorld](/zh/api/kbengine/client/Entity.md#onLeaveWorld)
+- [client/Entity.onEnterSpace](/zh/api/kbengine/client/Entity.md#onEnterSpace)
+- [client/Entity.onLeaveSpace](/zh/api/kbengine/client/Entity.md#onLeaveSpace)
+- [client/Entity.base](/zh/api/kbengine/client/Entity.md#base)
+- [client/Entity.cell](/zh/api/kbengine/client/Entity.md#cell)
+- [client/Entity.clientapp](/zh/api/kbengine/client/Entity.md#clientapp)
+- [client/Entity.isOnGround](/zh/api/kbengine/client/Entity.md#isOnGround)
+- [client/Entity.inWorld](/zh/api/kbengine/client/Entity.md#inWorld)
+- [bots/PyClientApp.player](/zh/api/kbengine/bots/PyClientApp.md#player)
+- [bots/PyClientApp.id](/zh/api/kbengine/bots/PyClientApp.md#id)
+- [bots/PyClientApp.entities](/zh/api/kbengine/bots/PyClientApp.md#entities)
+- [bots/Entity.isPlayer](/zh/api/kbengine/bots/Entity.md#isPlayer)
+- [bots/Entity.onEnterWorld](/zh/api/kbengine/bots/Entity.md#onEnterWorld)
+- [bots/Entity.onLeaveWorld](/zh/api/kbengine/bots/Entity.md#onLeaveWorld)
+- [bots/Entity.onEnterSpace](/zh/api/kbengine/bots/Entity.md#onEnterSpace)
+- [bots/Entity.onLeaveSpace](/zh/api/kbengine/bots/Entity.md#onLeaveSpace)
+- [bots/Entity.base](/zh/api/kbengine/bots/Entity.md#base)
+- [bots/Entity.cell](/zh/api/kbengine/bots/Entity.md#cell)
+- [bots/Entity.clientapp](/zh/api/kbengine/bots/Entity.md#clientapp)
+- [bots/Entity.moveToPoint](/zh/api/kbengine/bots/Entity.md#moveToPoint)
+- [bots/Entity.cancelController](/zh/api/kbengine/bots/Entity.md#cancelController)
+- [bots/Entity.isOnGround](/zh/api/kbengine/bots/Entity.md#isOnGround)
 
 下一批待核对：
 
@@ -120,9 +120,9 @@
 
 页面：
 
-- [baseapp/Entity](/zh/api/kbengine/baseapp/Entity.md
-- [baseapp/Proxy](/zh/api/kbengine/baseapp/Proxy.md
-- [cellapp/Entity](/zh/api/kbengine/cellapp/Entity.md
+- [baseapp/Entity](/zh/api/kbengine/baseapp/Entity.md)
+- [baseapp/Proxy](/zh/api/kbengine/baseapp/Proxy.md)
+- [cellapp/Entity](/zh/api/kbengine/cellapp/Entity.md)
 
 重点核对：
 
@@ -133,21 +133,21 @@
 
 建议关联源码解析：
 
-- [Entity 与实体系统](/zh/architecture/source-analysis/entity-system.html
-- [空间、AOI 与视野系统](/zh/architecture/source-analysis/space-aoi.html
-- [持久化](/zh/architecture/source-analysis/persistence.html
+- [Entity 与实体系统](/zh/architecture/source-analysis/entity-system.html)
+- [空间、AOI 与视野系统](/zh/architecture/source-analysis/space-aoi.html)
+- [持久化](/zh/architecture/source-analysis/persistence.html)
 
 当前已完成：
 
-- [cellapp/Entity.controlledBy](/zh/api/kbengine/cellapp/Entity.md#controlledBy
-- [baseapp/Entity.createCellEntity](/zh/api/kbengine/baseapp/Entity.md#createCellEntity
-- [baseapp/Entity.onGetCell](/zh/api/kbengine/baseapp/Entity.md#onGetCell
-- [baseapp/Proxy.giveClientTo](/zh/api/kbengine/baseapp/Proxy.md#giveClientTo
-- [cellapp/Entity.addTimer](/zh/api/kbengine/cellapp/Entity.md#addTimer
-- [cellapp/Entity.delTimer](/zh/api/kbengine/cellapp/Entity.md#delTimer
-- [cellapp/Entity.moveToPoint](/zh/api/kbengine/cellapp/Entity.md#moveToPoint
-- [cellapp/Entity.navigate](/zh/api/kbengine/cellapp/Entity.md#navigate
-- [cellapp/Entity.cancelController](/zh/api/kbengine/cellapp/Entity.md#cancelController
+- [cellapp/Entity.controlledBy](/zh/api/kbengine/cellapp/Entity.md#controlledBy)
+- [baseapp/Entity.createCellEntity](/zh/api/kbengine/baseapp/Entity.md#createCellEntity)
+- [baseapp/Entity.onGetCell](/zh/api/kbengine/baseapp/Entity.md#onGetCell)
+- [baseapp/Proxy.giveClientTo](/zh/api/kbengine/baseapp/Proxy.md#giveClientTo)
+- [cellapp/Entity.addTimer](/zh/api/kbengine/cellapp/Entity.md#addTimer)
+- [cellapp/Entity.delTimer](/zh/api/kbengine/cellapp/Entity.md#delTimer)
+- [cellapp/Entity.moveToPoint](/zh/api/kbengine/cellapp/Entity.md#moveToPoint)
+- [cellapp/Entity.navigate](/zh/api/kbengine/cellapp/Entity.md#navigate)
+- [cellapp/Entity.cancelController](/zh/api/kbengine/cellapp/Entity.md#cancelController)
 
 优先核对：
 
@@ -160,12 +160,12 @@
 
 页面：
 
-- [baseapp/KBEngine](/zh/api/kbengine/baseapp/KBEngine.md
-- [cellapp/KBEngine](/zh/api/kbengine/cellapp/KBEngine.md
-- [loginapp/KBEngine](/zh/api/kbengine/loginapp/KBEngine.md
-- [dbmgr/KBEngine](/zh/api/kbengine/dbmgr/KBEngine.md
-- [interfaces/KBEngine](/zh/api/kbengine/interfaces/KBEngine.md
-- [logger/KBEngine](/zh/api/kbengine/logger/KBEngine.md
+- [baseapp/KBEngine](/zh/api/kbengine/baseapp/KBEngine.md)
+- [cellapp/KBEngine](/zh/api/kbengine/cellapp/KBEngine.md)
+- [loginapp/KBEngine](/zh/api/kbengine/loginapp/KBEngine.md)
+- [dbmgr/KBEngine](/zh/api/kbengine/dbmgr/KBEngine.md)
+- [interfaces/KBEngine](/zh/api/kbengine/interfaces/KBEngine.md)
+- [logger/KBEngine](/zh/api/kbengine/logger/KBEngine.md)
 
 重点核对：
 
@@ -175,23 +175,23 @@
 
 建议关联源码解析：
 
-- [网络与消息系统](/zh/architecture/source-analysis/networking.html
-- [持久化](/zh/architecture/source-analysis/persistence.html
+- [网络与消息系统](/zh/architecture/source-analysis/networking.html)
+- [持久化](/zh/architecture/source-analysis/persistence.html)
 
 当前已完成：
 
-- [baseapp/KBEngine.baseAppData](/zh/api/kbengine/baseapp/KBEngine.md#baseAppData
-- [baseapp/KBEngine.globalData](/zh/api/kbengine/baseapp/KBEngine.md#globalData
-- [baseapp/KBEngine.onBaseAppData](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppData
-- [baseapp/KBEngine.onBaseAppDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppDataDel
-- [baseapp/KBEngine.onGlobalData](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalData
-- [baseapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalDataDel
-- [cellapp/KBEngine.cellAppData](/zh/api/kbengine/cellapp/KBEngine.md#cellAppData
-- [cellapp/KBEngine.globalData](/zh/api/kbengine/cellapp/KBEngine.md#globalData
-- [cellapp/KBEngine.onCellAppData](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppData
-- [cellapp/KBEngine.onCellAppDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppDataDel
-- [cellapp/KBEngine.onGlobalData](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalData
-- [cellapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalDataDel
+- [baseapp/KBEngine.baseAppData](/zh/api/kbengine/baseapp/KBEngine.md#baseAppData)
+- [baseapp/KBEngine.globalData](/zh/api/kbengine/baseapp/KBEngine.md#globalData)
+- [baseapp/KBEngine.onBaseAppData](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppData)
+- [baseapp/KBEngine.onBaseAppDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppDataDel)
+- [baseapp/KBEngine.onGlobalData](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalData)
+- [baseapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalDataDel)
+- [cellapp/KBEngine.cellAppData](/zh/api/kbengine/cellapp/KBEngine.md#cellAppData)
+- [cellapp/KBEngine.globalData](/zh/api/kbengine/cellapp/KBEngine.md#globalData)
+- [cellapp/KBEngine.onCellAppData](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppData)
+- [cellapp/KBEngine.onCellAppDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppDataDel)
+- [cellapp/KBEngine.onGlobalData](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalData)
+- [cellapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalDataDel)
 
 优先核对：
 
@@ -215,62 +215,62 @@
 
 已打通的专题入口：
 
-- [client/KBEngine.player](/zh/api/kbengine/client/KBEngine.md#player
-- [client/KBEngine.findEntity](/zh/api/kbengine/client/KBEngine.md#findEntity
-- [client/Entity.baseCall](/zh/api/kbengine/client/Entity.md#baseCall
-- [client/Entity.cellCall](/zh/api/kbengine/client/Entity.md#cellCall
-- [client/Entity.isPlayer](/zh/api/kbengine/client/Entity.md#isPlayer
-- [client/Entity.onEnterWorld](/zh/api/kbengine/client/Entity.md#onEnterWorld
-- [client/Entity.onEnterSpace](/zh/api/kbengine/client/Entity.md#onEnterSpace
-- [client/Entity.base](/zh/api/kbengine/client/Entity.md#base
-- [client/Entity.cell](/zh/api/kbengine/client/Entity.md#cell
-- [client/Entity.clientapp](/zh/api/kbengine/client/Entity.md#clientapp
-- [client/Entity.isOnGround](/zh/api/kbengine/client/Entity.md#isOnGround
-- [client/Entity.inWorld](/zh/api/kbengine/client/Entity.md#inWorld
-- [bots/PyClientApp.player](/zh/api/kbengine/bots/PyClientApp.md#player
-- [bots/PyClientApp.entities](/zh/api/kbengine/bots/PyClientApp.md#entities
-- [bots/Entity.isPlayer](/zh/api/kbengine/bots/Entity.md#isPlayer
-- [bots/Entity.onEnterWorld](/zh/api/kbengine/bots/Entity.md#onEnterWorld
-- [bots/Entity.onEnterSpace](/zh/api/kbengine/bots/Entity.md#onEnterSpace
-- [bots/Entity.base](/zh/api/kbengine/bots/Entity.md#base
-- [bots/Entity.cell](/zh/api/kbengine/bots/Entity.md#cell
-- [bots/Entity.clientapp](/zh/api/kbengine/bots/Entity.md#clientapp
-- [bots/Entity.moveToPoint](/zh/api/kbengine/bots/Entity.md#moveToPoint
-- [bots/Entity.cancelController](/zh/api/kbengine/bots/Entity.md#cancelController
-- [bots/Entity.isOnGround](/zh/api/kbengine/bots/Entity.md#isOnGround
-- [client/KBEngine.entity_id](/zh/api/kbengine/client/KBEngine.md#entity_id
-- [client/KBEngine.spaceID](/zh/api/kbengine/client/KBEngine.md#spaceID
-- [baseapp/Entity.createCellEntity](/zh/api/kbengine/baseapp/Entity.md#createCellEntity
-- [baseapp/Entity.onGetCell](/zh/api/kbengine/baseapp/Entity.md#onGetCell
-- [cellapp/Entity.controlledBy](/zh/api/kbengine/cellapp/Entity.md#controlledBy
-- [cellapp/Entity.addTimer](/zh/api/kbengine/cellapp/Entity.md#addTimer
-- [cellapp/Entity.delTimer](/zh/api/kbengine/cellapp/Entity.md#delTimer
-- [cellapp/Entity.moveToPoint](/zh/api/kbengine/cellapp/Entity.md#moveToPoint
-- [cellapp/Entity.navigate](/zh/api/kbengine/cellapp/Entity.md#navigate
-- [cellapp/Entity.cancelController](/zh/api/kbengine/cellapp/Entity.md#cancelController
-- [baseapp/KBEngine.baseAppData](/zh/api/kbengine/baseapp/KBEngine.md#baseAppData
-- [baseapp/KBEngine.globalData](/zh/api/kbengine/baseapp/KBEngine.md#globalData
-- [baseapp/KBEngine.onBaseAppData](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppData
-- [baseapp/KBEngine.onBaseAppDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppDataDel
-- [baseapp/KBEngine.onGlobalData](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalData
-- [baseapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalDataDel
-- [cellapp/KBEngine.cellAppData](/zh/api/kbengine/cellapp/KBEngine.md#cellAppData
-- [cellapp/KBEngine.globalData](/zh/api/kbengine/cellapp/KBEngine.md#globalData
-- [cellapp/KBEngine.onCellAppData](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppData
-- [cellapp/KBEngine.onCellAppDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppDataDel
-- [cellapp/KBEngine.onGlobalData](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalData
-- [cellapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalDataDel
-- [源码解析：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/zh/architecture/source-analysis/entity-system.html#base-entity-create-cell
-- [源码解析：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control
-- [源码解析：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks
-- [源码解析：`baseCall()` 与 `cellCall()` 的真实限制条件](/zh/architecture/source-analysis/networking.html#client-entity-remote-calls
-- [源码解析：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/zh/architecture/source-analysis/networking.html#client-entity-move-ground-sync
-- [源码解析：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table
-- [baseapp/Proxy.giveClientTo](/zh/api/kbengine/baseapp/Proxy.md#giveClientTo
-- [源码解析：`Proxy.giveClientTo()` 转移的是客户端绑定与 Witness 链路](/zh/architecture/source-analysis/space-aoi.html#proxy-give-client-to
-- [源码解析：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers
-- [源码解析：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers
-- [源码解析：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync
+- [client/KBEngine.player](/zh/api/kbengine/client/KBEngine.md#player)
+- [client/KBEngine.findEntity](/zh/api/kbengine/client/KBEngine.md#findEntity)
+- [client/Entity.baseCall](/zh/api/kbengine/client/Entity.md#baseCall)
+- [client/Entity.cellCall](/zh/api/kbengine/client/Entity.md#cellCall)
+- [client/Entity.isPlayer](/zh/api/kbengine/client/Entity.md#isPlayer)
+- [client/Entity.onEnterWorld](/zh/api/kbengine/client/Entity.md#onEnterWorld)
+- [client/Entity.onEnterSpace](/zh/api/kbengine/client/Entity.md#onEnterSpace)
+- [client/Entity.base](/zh/api/kbengine/client/Entity.md#base)
+- [client/Entity.cell](/zh/api/kbengine/client/Entity.md#cell)
+- [client/Entity.clientapp](/zh/api/kbengine/client/Entity.md#clientapp)
+- [client/Entity.isOnGround](/zh/api/kbengine/client/Entity.md#isOnGround)
+- [client/Entity.inWorld](/zh/api/kbengine/client/Entity.md#inWorld)
+- [bots/PyClientApp.player](/zh/api/kbengine/bots/PyClientApp.md#player)
+- [bots/PyClientApp.entities](/zh/api/kbengine/bots/PyClientApp.md#entities)
+- [bots/Entity.isPlayer](/zh/api/kbengine/bots/Entity.md#isPlayer)
+- [bots/Entity.onEnterWorld](/zh/api/kbengine/bots/Entity.md#onEnterWorld)
+- [bots/Entity.onEnterSpace](/zh/api/kbengine/bots/Entity.md#onEnterSpace)
+- [bots/Entity.base](/zh/api/kbengine/bots/Entity.md#base)
+- [bots/Entity.cell](/zh/api/kbengine/bots/Entity.md#cell)
+- [bots/Entity.clientapp](/zh/api/kbengine/bots/Entity.md#clientapp)
+- [bots/Entity.moveToPoint](/zh/api/kbengine/bots/Entity.md#moveToPoint)
+- [bots/Entity.cancelController](/zh/api/kbengine/bots/Entity.md#cancelController)
+- [bots/Entity.isOnGround](/zh/api/kbengine/bots/Entity.md#isOnGround)
+- [client/KBEngine.entity_id](/zh/api/kbengine/client/KBEngine.md#entity_id)
+- [client/KBEngine.spaceID](/zh/api/kbengine/client/KBEngine.md#spaceID)
+- [baseapp/Entity.createCellEntity](/zh/api/kbengine/baseapp/Entity.md#createCellEntity)
+- [baseapp/Entity.onGetCell](/zh/api/kbengine/baseapp/Entity.md#onGetCell)
+- [cellapp/Entity.controlledBy](/zh/api/kbengine/cellapp/Entity.md#controlledBy)
+- [cellapp/Entity.addTimer](/zh/api/kbengine/cellapp/Entity.md#addTimer)
+- [cellapp/Entity.delTimer](/zh/api/kbengine/cellapp/Entity.md#delTimer)
+- [cellapp/Entity.moveToPoint](/zh/api/kbengine/cellapp/Entity.md#moveToPoint)
+- [cellapp/Entity.navigate](/zh/api/kbengine/cellapp/Entity.md#navigate)
+- [cellapp/Entity.cancelController](/zh/api/kbengine/cellapp/Entity.md#cancelController)
+- [baseapp/KBEngine.baseAppData](/zh/api/kbengine/baseapp/KBEngine.md#baseAppData)
+- [baseapp/KBEngine.globalData](/zh/api/kbengine/baseapp/KBEngine.md#globalData)
+- [baseapp/KBEngine.onBaseAppData](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppData)
+- [baseapp/KBEngine.onBaseAppDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onBaseAppDataDel)
+- [baseapp/KBEngine.onGlobalData](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalData)
+- [baseapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/baseapp/KBEngine.md#onGlobalDataDel)
+- [cellapp/KBEngine.cellAppData](/zh/api/kbengine/cellapp/KBEngine.md#cellAppData)
+- [cellapp/KBEngine.globalData](/zh/api/kbengine/cellapp/KBEngine.md#globalData)
+- [cellapp/KBEngine.onCellAppData](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppData)
+- [cellapp/KBEngine.onCellAppDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onCellAppDataDel)
+- [cellapp/KBEngine.onGlobalData](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalData)
+- [cellapp/KBEngine.onGlobalDataDel](/zh/api/kbengine/cellapp/KBEngine.md#onGlobalDataDel)
+- [源码解析：`Entity.createCellEntity()` 不是本地建对象，而是一次 Base -> Cell 交接](/zh/architecture/source-analysis/entity-system.html#base-entity-create-cell)
+- [源码解析：`isPlayer()`、`player()` 和 `controlledBy()` 的关系](/zh/architecture/source-analysis/networking.html#client-entity-isplayer-control)
+- [源码解析：客户端实体进入/离开世界与空间回调](/zh/architecture/source-analysis/networking.html#client-entity-world-space-callbacks)
+- [源码解析：`baseCall()` 与 `cellCall()` 的真实限制条件](/zh/architecture/source-analysis/networking.html#client-entity-remote-calls)
+- [源码解析：客户端 `moveToPoint()`、`cancelController()` 与 `isOnGround` 同步](/zh/architecture/source-analysis/networking.html#client-entity-move-ground-sync)
+- [源码解析：客户端的句柄表与实体容器语义](/zh/architecture/source-analysis/networking.html#client-entity-handles-table)
+- [baseapp/Proxy.giveClientTo](/zh/api/kbengine/baseapp/Proxy.md#giveClientTo)
+- [源码解析：`Proxy.giveClientTo()` 转移的是客户端绑定与 Witness 链路](/zh/architecture/source-analysis/space-aoi.html#proxy-give-client-to)
+- [源码解析：Cell 实体的 `addTimer()` / `delTimer()` 实际上操作的是 `ScriptID -> TimerHandle` 映射](/zh/architecture/source-analysis/scripting.html#cell-entity-script-timers)
+- [源码解析：Cell 实体的 `moveToPoint()` / `navigate()` / `cancelController()` 共享同一套控制器链](/zh/architecture/source-analysis/space-aoi.html#cell-entity-move-controllers)
+- [源码解析：`baseAppData` / `globalData` / `cellAppData` 的同步链与回调分发](/zh/architecture/source-analysis/networking.html#global-data-dicts-sync)
 
 ## 当前执行策略
 

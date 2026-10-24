@@ -1,6 +1,6 @@
 # KBEngine模块
 
-[KBEngine](./KBEngine.md模块主要处理KBEngine服务端与第三方平台的接入接出工作。
+[KBEngine](./KBEngine.md)模块主要处理KBEngine服务端与第三方平台的接入接出工作。
 
 ## 成员函数
 

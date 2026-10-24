@@ -180,4 +180,4 @@ const config = defineConfig({
 
 - [VitePress 官方文档](https://vitepress.dev/)
 - [markdown-it-wikilinks 插件](https://www.npmjs.com/package/@binyamin/markdown-it-wikilinks)
-- [文档优化方案](/zh/architecture/source-analysis/doc-optimization-plan
+- [文档优化方案](/zh/architecture/source-analysis/doc-optimization-plan)

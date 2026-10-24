@@ -1,6 +1,6 @@
 # Python 3.12 Upgrade Notes
 
-> 该主题已收敛到 [工程指南 / Python 3.12 升级](/zh/guide/engineering/python-3.12-upgrade.md。
+> 该主题已收敛到 [工程指南 / Python 3.12 升级](/zh/guide/engineering/python-3.12-upgrade.md)。
 
 ## 当前定位
 
@@ -9,4 +9,4 @@
 
 ## 请改用
 
-- [Python 3.12 升级](/zh/guide/engineering/python-3.12-upgrade.md
+- [Python 3.12 升级](/zh/guide/engineering/python-3.12-upgrade.md)

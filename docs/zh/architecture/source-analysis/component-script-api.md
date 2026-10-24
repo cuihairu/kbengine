@@ -572,10 +572,10 @@ flowchart TD
 
 ## 与其他专题的关系
 
-- 登录、重登录、客户端 SpaceData，看 [客户端登录、重登录与 SpaceData API](/zh/architecture/source-analysis/client-login-and-space-data-api.md
-- BaseApp 发起充值、DB 原始命令、运行时工具，看 [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md
-- 持久化主线与 DB 任务背景，看 [持久化与数据库](/zh/architecture/source-analysis/persistence.md
-- 脚本宿主、热更新、定时器机制，看 [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md
+- 登录、重登录、客户端 SpaceData，看 [客户端登录、重登录与 SpaceData API](/zh/architecture/source-analysis/client-login-and-space-data-api.md)
+- BaseApp 发起充值、DB 原始命令、运行时工具，看 [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md)
+- 持久化主线与 DB 任务背景，看 [持久化与数据库](/zh/architecture/source-analysis/persistence.md)
+- 脚本宿主、热更新、定时器机制，看 [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md)
 
 这一页只负责把这批组件型 API 收束成一句话：
 

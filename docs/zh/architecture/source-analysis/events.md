@@ -1,6 +1,6 @@
 # 事件系统：`fireEvent`、实体事件与客户端事件总线
 
-> 这一页是对 `fireEvent/registerEvent/deregisterEvent` 的继续深挖。主线学习先放在 [18. 钩子、回调、定时器与事件](/zh/study/18-hooks-callbacks-timers-and-events.md，这里单独把事件系统拆出来，集中记录源码入口、运行时边界、BigWorld 对照和使用场景。
+> 这一页是对 `fireEvent/registerEvent/deregisterEvent` 的继续深挖。主线学习先放在 [18. 钩子、回调、定时器与事件](/zh/study/18-hooks-callbacks-timers-and-events.md)，这里单独把事件系统拆出来，集中记录源码入口、运行时边界、BigWorld 对照和使用场景。
 
 ## 先收一版当前判断
 
@@ -43,10 +43,10 @@ flowchart LR
 
 | API 页面 | `fireEvent` | `registerEvent` | `deregisterEvent` |
 | --- | --- | --- | --- |
-| BaseApp `Entity` | [fireEvent](/zh/api/kbengine/baseapp/Entity.md#fireEvent | [registerEvent](/zh/api/kbengine/baseapp/Entity.md#registerEvent | [deregisterEvent](/zh/api/kbengine/baseapp/Entity.md#deregisterEvent |
-| CellApp `Entity` | [fireEvent](/zh/api/kbengine/cellapp/Entity.md#fireEvent | [registerEvent](/zh/api/kbengine/cellapp/Entity.md#registerEvent | [deregisterEvent](/zh/api/kbengine/cellapp/Entity.md#deregisterEvent |
-| Client `Entity` | [fireEvent](/zh/api/kbengine/client/Entity.md#fireEvent | [registerEvent](/zh/api/kbengine/client/Entity.md#registerEvent | [deregisterEvent](/zh/api/kbengine/client/Entity.md#deregisterEvent |
-| Bots `Entity` | [fireEvent](/zh/api/kbengine/bots/Entity.md#fireEvent | [registerEvent](/zh/api/kbengine/bots/Entity.md#registerEvent | [deregisterEvent](/zh/api/kbengine/bots/Entity.md#deregisterEvent |
+| BaseApp `Entity` | [fireEvent](/zh/api/kbengine/baseapp/Entity.md#fireEvent) | [registerEvent](/zh/api/kbengine/baseapp/Entity.md#registerEvent) | [deregisterEvent](/zh/api/kbengine/baseapp/Entity.md#deregisterEvent) |
+| CellApp `Entity` | [fireEvent](/zh/api/kbengine/cellapp/Entity.md#fireEvent) | [registerEvent](/zh/api/kbengine/cellapp/Entity.md#registerEvent) | [deregisterEvent](/zh/api/kbengine/cellapp/Entity.md#deregisterEvent) |
+| Client `Entity` | [fireEvent](/zh/api/kbengine/client/Entity.md#fireEvent) | [registerEvent](/zh/api/kbengine/client/Entity.md#registerEvent) | [deregisterEvent](/zh/api/kbengine/client/Entity.md#deregisterEvent) |
+| Bots `Entity` | [fireEvent](/zh/api/kbengine/bots/Entity.md#fireEvent) | [registerEvent](/zh/api/kbengine/bots/Entity.md#registerEvent) | [deregisterEvent](/zh/api/kbengine/bots/Entity.md#deregisterEvent) |
 
 API 层给出的公共语义是：
 

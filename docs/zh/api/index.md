@@ -1,12 +1,12 @@
 # API 总览
 
-> 这里是工具书入口，不是学习主线。需要系统理解时回到 [/study/](/zh/study/；需要看具体实现时回到 [/architecture/source-analysis/](/zh/architecture/source-analysis/。
+> 这里是工具书入口，不是学习主线。需要系统理解时回到 [/study/](/zh/study/)；需要看具体实现时回到 [/architecture/source-analysis/](/zh/architecture/source-analysis/)。
 
 ## 引擎 API
 
-- [KBEngine API](/zh/api/kbengine/
+- [KBEngine API](/zh/api/kbengine/)
 - 英文版说明：`api/kbengine/**` 仍保留中文权威页；英文对应页后续以 `*.en.md` 新增，并通过本页目录级索引进入。
-- [BigWorld API](/zh/api/bigworld/
+- [BigWorld API](/zh/api/bigworld/)
 
 ## 来源边界
 
@@ -18,5 +18,5 @@
 
 ## 核对与源码解析
 
-- [KBEngine API 分类与核对清单](/zh/api/kbengine/audit-checklist.md
-- [源码解析专题](/zh/architecture/source-analysis/
+- [KBEngine API 分类与核对清单](/zh/api/kbengine/audit-checklist.md)
+- [源码解析专题](/zh/architecture/source-analysis/)

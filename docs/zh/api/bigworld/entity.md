@@ -24,4 +24,4 @@
 
 ## 后续处理
 
-本页后续应先补 Witness/AOI 与 timer，因为它们最容易和 KBEngine 的 [CellApp Entity](/zh/api/kbengine/cellapp/Entity.md 发生误读。
+本页后续应先补 Witness/AOI 与 timer，因为它们最容易和 KBEngine 的 [CellApp Entity](/zh/api/kbengine/cellapp/Entity.md) 发生误读。

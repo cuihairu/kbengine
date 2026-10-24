@@ -52,4 +52,4 @@
 
 ## 兼容页面
 
-- [/python-3.12-upgrade-notes.md](/zh/python-3.12-upgrade-notes.md
+- [/python-3.12-upgrade-notes.md](/zh/python-3.12-upgrade-notes.md)

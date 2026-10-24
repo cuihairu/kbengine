@@ -4,7 +4,7 @@
 
 ### EntityCall:
 
-脚本层与实体远程交互的常规手段(其他参考：[allClients](./cellapp/Entity.md#allClients、[otherClients](./cellapp/Entity.md#otherClients、[clientEntity](./cellapp/Entity.md#clientEntity)。
+脚本层与实体远程交互的常规手段(其他参考：[allClients](./cellapp/Entity.md#allClients)、[otherClients](./cellapp/Entity.md#otherClients)、[clientEntity](./cellapp/Entity.md#clientEntity)。
 EntityCall对象在C++底层实现非常简单，它只包含了实体的ID、目的地的地址、实体类型、EntityCall类型。当用户请求一次远程交互时，底层首先能够通过实体类型找到实体定义的描述，
 通过实体定义的描述对用户输入的数据进行检查，如果检查合法那么底层将数据打包并发往目的地，目的地进程根据协议进行解包最终调用到脚本层。
 注意: EntityCall只能调用其对应def文件中声明过的方法，不能访问实体的属性以及其他任何信息。
@@ -123,20 +123,20 @@ View与空间相关，每个View都能够设定独立的大小范围。
 ### cell
 
 cell在文档中存在二个不同的意思。
-通常如果描述的是[Entity.cell](./baseapp/Entity.md#cell属性， 此时实际是在描述实体的[CellEntityCall](#EntityCall)。
+通常如果描述的是[Entity.cell](./baseapp/Entity.md#cell)属性， 此时实际是在描述实体的[CellEntityCall](#EntityCall)。
 如果是在cellapp上有关cell的描述通常是在描述一个[空间](#cn_Space)的一部分，一个空间在[cellapp](./cellapp/)进行负载平衡时有可能被分割成N份，每一份称之为一个cell，每个cell由不同进程维护。
 
 <a id="base"></a>
 
 ### base
 
-通常是指[baseapp](./baseapp/)上的Base实体或者是一个指向Base实体的[BaseEntityCall](#EntityCall), 例如：[Entity.base](./cellapp/Entity.md#base。
+通常是指[baseapp](./baseapp/)上的Base实体或者是一个指向Base实体的[BaseEntityCall](#EntityCall), 例如：[Entity.base](./cellapp/Entity.md#base)。
 
 <a id="client"></a>
 
 ### client
 
-通常是指客户端或者是一个指向客户端实体的[EntityCall](#EntityCall), 例如：[Entity.client](./baseapp/Entity.md#client。
+通常是指客户端或者是一个指向客户端实体的[EntityCall](#EntityCall), 例如：[Entity.client](./baseapp/Entity.md#client)。
 
 <a id="cellapp"></a>
 

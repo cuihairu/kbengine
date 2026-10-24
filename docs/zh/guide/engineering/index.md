@@ -4,10 +4,10 @@
 
 ## 当前主题
 
-- [覆盖率与 Codecov](/zh/guide/engineering/coverage.md
-- [Python 3.12 升级](/zh/guide/engineering/python-3.12-upgrade.md
-- [vcpkg 迁移状态](/zh/guide/engineering/vcpkg-migration.md
-- [网络层 I/O 调研](/zh/guide/engineering/network-io-research.md
+- [覆盖率与 Codecov](/zh/guide/engineering/coverage.md)
+- [Python 3.12 升级](/zh/guide/engineering/python-3.12-upgrade.md)
+- [vcpkg 迁移状态](/zh/guide/engineering/vcpkg-migration.md)
+- [网络层 I/O 调研](/zh/guide/engineering/network-io-research.md)
 
 ## 这一组文档负责什么
 
@@ -19,4 +19,4 @@
 
 - 不承担 KBEngine 架构学习入口。
 - 不承担 API 参考。
-- 不承担原始资料来源与核对说明；这部分统一放到 [/resources/](/zh/resources/。
+- 不承担原始资料来源与核对说明；这部分统一放到 [/resources/](/zh/resources/)。

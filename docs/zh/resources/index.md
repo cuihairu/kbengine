@@ -4,9 +4,9 @@
 
 ## 你在这里能看到什么
 
-- [文档来源边界与核对状态](/zh/resources/provenance.md
-- [文档核对结果](/zh/resources/verification-status.md
-- [文档结构设计](/zh/resources/doc-structure.md
+- [文档来源边界与核对状态](/zh/resources/provenance.md)
+- [文档核对结果](/zh/resources/verification-status.md)
+- [文档结构设计](/zh/resources/doc-structure.md)
 
 ## 原始资料范围
 

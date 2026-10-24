@@ -2,7 +2,7 @@
 
 > 这里不是第二套正文，而是“带着问题继续下钻”的专题区。
 >
-> 进入顺序应该是：先读 [/study/](/zh/study/ 建立主线，再到这里追具体机制的源码落点。如果连系统地图都还不稳定，先回 [架构总览](/zh/architecture/。
+> 进入顺序应该是：先读 [/study/](/zh/study/) 建立主线，再到这里追具体机制的源码落点。如果连系统地图都还不稳定，先回 [架构总览](/zh/architecture/)。
 
 ## 从问题进入专题
 
@@ -35,29 +35,29 @@ flowchart TD
 
 ## 专题入口
 
-1. [启动入口与引导流程](/zh/architecture/source-analysis/entry-and-bootstrap.md
-2. [进程模型与组件协作](/zh/architecture/source-analysis/process-model.md
-3. [实体系统](/zh/architecture/source-analysis/entity-system.md
-4. [类型系统与实体定义文件](/zh/architecture/source-analysis/entitydef-type-system.md
-5. [空间、AOI 与视野同步](/zh/architecture/source-analysis/space-aoi.md
-6. [网络与消息系统](/zh/architecture/source-analysis/networking.md
-7. [持久化与数据库](/zh/architecture/source-analysis/persistence.md
-8. [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md
-9. [事件系统：fireEvent 与事件总线](/zh/architecture/source-analysis/events.md
-10. [非实体定时器：EventDispatcher 与全局节拍](/zh/architecture/source-analysis/non-entity-timers.md
-11. [Base 实体生命周期](/zh/architecture/source-analysis/base-entity-lifecycle.md
-12. [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md
-13. [Proxy 会话与流式传输 API](/zh/architecture/source-analysis/proxy-client-session-api.md
-14. [CellApp 空间运行时 API](/zh/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md
-15. [客户端登录、重登录与 SpaceData API](/zh/architecture/source-analysis/client-login-and-space-data-api.md
-16. [组件型脚本 API](/zh/architecture/source-analysis/component-script-api.md
-17. [通用运行时工具 API](/zh/architecture/source-analysis/runtime-utility-api.md
-18. [运行时配置与基础类型](/zh/architecture/source-analysis/runtime-config-and-types.md
-19. [API 到源码解析覆盖矩阵](/zh/architecture/source-analysis/api-coverage.md
+1. [启动入口与引导流程](/zh/architecture/source-analysis/entry-and-bootstrap.md)
+2. [进程模型与组件协作](/zh/architecture/source-analysis/process-model.md)
+3. [实体系统](/zh/architecture/source-analysis/entity-system.md)
+4. [类型系统与实体定义文件](/zh/architecture/source-analysis/entitydef-type-system.md)
+5. [空间、AOI 与视野同步](/zh/architecture/source-analysis/space-aoi.md)
+6. [网络与消息系统](/zh/architecture/source-analysis/networking.md)
+7. [持久化与数据库](/zh/architecture/source-analysis/persistence.md)
+8. [脚本运行时与热更新](/zh/architecture/source-analysis/scripting.md)
+9. [事件系统：fireEvent 与事件总线](/zh/architecture/source-analysis/events.md)
+10. [非实体定时器：EventDispatcher 与全局节拍](/zh/architecture/source-analysis/non-entity-timers.md)
+11. [Base 实体生命周期](/zh/architecture/source-analysis/base-entity-lifecycle.md)
+12. [BaseApp 运行时 API](/zh/architecture/source-analysis/baseapp-kbengine-runtime-api.md)
+13. [Proxy 会话与流式传输 API](/zh/architecture/source-analysis/proxy-client-session-api.md)
+14. [CellApp 空间运行时 API](/zh/architecture/source-analysis/cellapp-kbengine-space-runtime-api.md)
+15. [客户端登录、重登录与 SpaceData API](/zh/architecture/source-analysis/client-login-and-space-data-api.md)
+16. [组件型脚本 API](/zh/architecture/source-analysis/component-script-api.md)
+17. [通用运行时工具 API](/zh/architecture/source-analysis/runtime-utility-api.md)
+18. [运行时配置与基础类型](/zh/architecture/source-analysis/runtime-config-and-types.md)
+19. [API 到源码解析覆盖矩阵](/zh/architecture/source-analysis/api-coverage.md)
 
 ## 执行看板
 
-- [文档重构 TODO](/zh/architecture/source-analysis/todo.md：当前执行看板，后续推进以这张表为准，用来固定批次、状态和下一步，避免源码解析范围继续漂移。
+- [文档重构 TODO](/zh/architecture/source-analysis/todo.md)：当前执行看板，后续推进以这张表为准，用来固定批次、状态和下一步，避免源码解析范围继续漂移。
 
 ## 内容归属
 
@@ -69,7 +69,7 @@ flowchart TD
 
 ## API 覆盖追踪
 
-[API 到源码解析覆盖矩阵](/zh/architecture/source-analysis/api-coverage.md 用来维护 `docs/api/kbengine/**` 和源码学习专题之间的对应关系。KBEngine API 页保持和 CHM 一致，覆盖矩阵只记录解析状态、源码落点和后续缺口。
+[API 到源码解析覆盖矩阵](/zh/architecture/source-analysis/api-coverage.md) 用来维护 `docs/api/kbengine/**` 和源码学习专题之间的对应关系。KBEngine API 页保持和 CHM 一致，覆盖矩阵只记录解析状态、源码落点和后续缺口。
 
 ## 阅读原则
 
