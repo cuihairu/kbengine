@@ -35,3 +35,11 @@ features:
 footer: Docs are built from material already in this repository; continuously updated
 ---
 
+## Process architecture
+
+The KBEngine MMOG engine runs as a set of cooperative processes that scale horizontally through dynamic load balancing. The player path runs `Client → LoginApp → BaseApp → CellApp → DBMgr`: LoginApp handles access and authentication, BaseApp holds long-lived player logic and the client session, CellApp performs real-time space simulation, and DBMgr centralizes persistence to MySQL / Redis. Peripheral processes (Machine, BaseAppMgr, CellAppMgr, Logger, Interfaces, Bots) provide service registration, scheduling, log aggregation, external integration, and load testing. Components and data flow are derived from `kbe/src/server`.
+
+![KBEngine multi-process architecture: player path Client → LoginApp → BaseApp → CellApp → DBMgr, with registry, schedulers, logger, interfaces and load-test bots](/images/architecture-en.svg)
+
+[Open full SVG](/images/architecture-en.svg) · [Architecture overview](/architecture/) · [System map](/architecture/)
+

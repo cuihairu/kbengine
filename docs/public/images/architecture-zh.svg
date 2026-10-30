@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1420" viewBox="0 0 1280 1420" role="img" aria-labelledby="title desc" xml:lang="zh-CN">
+<title id="title">KBEngine · 进程架构</title>
+<desc id="desc">MMOG 分布式游戏服务端引擎的多进程架构。玩家主线 Client → LoginApp → BaseApp → CellApp → DBMgr。LoginApp 负责接入与认证，BaseApp 承载玩家长期逻辑与客户端会话，CellApp 负责实时空间模拟（Space/AOI/Witness、real/ghost），DBMgr 统一持久化到 MySQL / Redis。外围有 Machine 服务注册中心、BaseAppMgr / CellAppMgr 调度器、Logger 日志汇聚、Interfaces 外部接口网关、Bots 压测客户端。虚线为控制/调度/注册，实线为业务数据，紫色为持久化。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="context-stroke"/></marker></defs>
+<style>text{font-family:Arial,'Noto Sans CJK SC','Microsoft YaHei',sans-serif;fill:#172b4d}.title{font-size:30px;font-weight:700}.name{font-size:22px;font-weight:700}.body{font-size:16px;fill:#435570}.small{font-size:14px;fill:#52647b}.subname{font-size:18px;font-weight:700}.label{font-size:14px;fill:#435570;paint-order:stroke;stroke:#f8fafc;stroke-width:5px;stroke-linejoin:round}.caption{font-size:14px;fill:#435570}.edge{fill:none;stroke-linejoin:round}.control{stroke-dasharray:7 5}</style>
+<rect width="1280" height="1420" rx="20" fill="#f8fafc"/>
+<text x="40" y="48" class="title" text-anchor="start">KBEngine · 进程架构</text>
+<text x="40" y="80" class="body" text-anchor="start">MMOG 分布式游戏服务端引擎 · 多进程动态负载均衡 · 玩家主线 Client→LoginApp→BaseApp→CellApp→DBMgr</text>
+
+<!-- ===== 业务数据流（主列，实线） ===== -->
+<path d="M340 220 V300" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="client-login" data-from="client" data-to="loginapp" d="M340 220 V300" class="edge" style="stroke:#475569;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M340 420 V500" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="login-base" data-from="loginapp" data-to="baseapp" d="M340 420 V500" class="edge" style="stroke:#475569;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M340 700 V780" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="base-cell" data-from="baseapp" data-to="cellapp" d="M340 700 V780" class="edge" style="stroke:#475569;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M340 980 V1050" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="cell-db" data-from="cellapp" data-to="dbmgr" d="M340 980 V1050" class="edge" style="stroke:#475569;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M340 1180 V1240" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="db-store" data-from="dbmgr" data-to="storage" d="M340 1180 V1240" class="edge" style="stroke:#7c3aed;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+
+<!-- ===== 持久化 / 认证（左列，实线） ===== -->
+<path d="M60 620 H22 V1120 H60" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="base-db" data-from="baseapp" data-to="dbmgr" d="M60 620 H22 V1120 H60" class="edge" style="stroke:#7c3aed;stroke-width:2" marker-end="url(#arrow)"/>
+<path d="M60 360 H42 V1100 H60" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="login-db-auth" data-from="loginapp" data-to="dbmgr" d="M60 360 H42 V1100 H60" class="edge" style="stroke:#475569;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+
+<!-- ===== 控制 / 调度 / 注册（右列，虚线） ===== -->
+<path d="M720 170 H644 V340 H620" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="bots-login" data-from="bots" data-to="loginapp" d="M720 170 H644 V340 H620" class="edge control" style="stroke:#475569;stroke-width:2" marker-end="url(#arrow)"/>
+<path d="M720 350 H652 V370 H620" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="machine-login" data-from="machine" data-to="loginapp" d="M720 350 H652 V370 H620" class="edge control" style="stroke:#64748b;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M720 365 H660 V600 H620" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="machine-base" data-from="machine" data-to="baseapp" d="M720 365 H660 V600 H620" class="edge control" style="stroke:#64748b;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M720 380 H668 V880 H620" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="machine-cell" data-from="machine" data-to="cellapp" d="M720 380 H668 V880 H620" class="edge control" style="stroke:#64748b;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M720 395 H676 V1115 H620" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="machine-db" data-from="machine" data-to="dbmgr" d="M720 395 H676 V1115 H620" class="edge control" style="stroke:#64748b;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M720 545 H692 V600 H620" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="baseappmgr-base" data-from="baseappmgr" data-to="baseapp" d="M720 545 H692 V600 H620" class="edge control" style="stroke:#64748b;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M720 675 H700 V880 H620" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="cellappmgr-cell" data-from="cellappmgr" data-to="cellapp" d="M720 675 H700 V880 H620" class="edge control" style="stroke:#64748b;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M720 805 H684 V740 H620" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="logger-log" data-from="logger" data-to="baseapp" d="M720 805 H684 V740 H620" class="edge control" style="stroke:#64748b;stroke-width:2" marker-end="url(#arrow)"/>
+<path d="M620 660 H688 V935 H720" fill="none" stroke="#f8fafc" stroke-width="9"/>
+<path id="base-interfaces" data-from="baseapp" data-to="interfaces" d="M620 660 H688 V935 H720" class="edge control" style="stroke:#64748b;stroke-width:2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+
+<!-- ===== 主列盒子 ===== -->
+<g id="client" data-node="client"><rect x="60" y="120" width="560" height="100" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+<text x="80" y="154" class="name" text-anchor="start">Client 客户端</text>
+<text x="80" y="180" class="body" text-anchor="start">Unity / UE4 / OGRE / Cocos2d-js / HTML5 / Godot 插件</text>
+<text x="80" y="204" class="small" text-anchor="start">TCP / UDP / KCP · 登录与游戏会话</text>
+</g>
+<g id="loginapp" data-node="loginapp"><rect x="60" y="300" width="560" height="120" rx="14" fill="#eef2ff" stroke="#a5b4fc" stroke-width="1.5"/>
+<text x="80" y="334" class="name" text-anchor="start">LoginApp · 接入层</text>
+<text x="80" y="360" class="body" text-anchor="start">第一跳接入 · 账号认证 · 分发到最空闲 BaseApp</text>
+<text x="80" y="386" class="small" text-anchor="start">login() / reqCreateAccount() / onAccountLogin()</text>
+</g>
+<g id="baseapp" data-node="baseapp"><rect x="60" y="500" width="560" height="200" rx="14" fill="#eef8f5" stroke="#86c9b3" stroke-width="1.5"/>
+<text x="80" y="534" class="name" text-anchor="start">BaseApp · 逻辑层</text>
+<text x="80" y="560" class="body" text-anchor="start">玩家长期逻辑 · 客户端会话绑定 · Backup / Archive</text>
+<rect x="90" y="590" width="240" height="90" rx="10" fill="#fff" stroke="#86c9b3"/>
+<text x="110" y="622" class="subname" text-anchor="start">Proxy</text>
+<text x="110" y="650" class="small" text-anchor="start">客户端会话锚点</text>
+<rect x="350" y="590" width="240" height="90" rx="10" fill="#fff" stroke="#86c9b3"/>
+<text x="370" y="622" class="subname" text-anchor="start">Base Entity</text>
+<text x="370" y="650" class="small" text-anchor="start">长期逻辑 · writeToDB</text>
+</g>
+<g id="cellapp" data-node="cellapp"><rect x="60" y="780" width="560" height="200" rx="14" fill="#edf5ff" stroke="#93b9e3" stroke-width="1.5"/>
+<text x="80" y="814" class="name" text-anchor="start">CellApp · 空间层</text>
+<text x="80" y="840" class="body" text-anchor="start">实时空间模拟 · 游戏主 tick · real / ghost</text>
+<rect x="90" y="870" width="160" height="90" rx="10" fill="#fff" stroke="#93b9e3"/>
+<text x="110" y="902" class="subname" text-anchor="start">Cell Entity</text>
+<text x="110" y="930" class="small" text-anchor="start">实时空间主体</text>
+<rect x="270" y="870" width="170" height="90" rx="10" fill="#fff" stroke="#93b9e3"/>
+<text x="290" y="902" class="subname" text-anchor="start">Space / AOI / Witness</text>
+<text x="290" y="930" class="small" text-anchor="start">AOI 同步到客户端</text>
+<rect x="460" y="870" width="140" height="90" rx="10" fill="#fff" stroke="#93b9e3"/>
+<text x="480" y="902" class="subname" text-anchor="start">Ghost</text>
+<text x="480" y="930" class="small" text-anchor="start">空间跨进程代理</text>
+</g>
+<g id="dbmgr" data-node="dbmgr"><rect x="60" y="1050" width="560" height="130" rx="14" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+<text x="80" y="1084" class="name" text-anchor="start">DBMgr · 持久化层</text>
+<text x="80" y="1110" class="body" text-anchor="start">账号/实体查询 · writeToDB / removeEntity · 实体 ID 分配</text>
+<text x="80" y="1136" class="small" text-anchor="start">在线/离线边界（EntityLog）· DBTask 线程池 · 全局唯一写入口</text>
+</g>
+<g id="storage" data-node="storage"><rect x="60" y="1240" width="560" height="80" rx="14" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="80" y="1274" class="name" text-anchor="start">MySQL + Redis 存储</text>
+<text x="80" y="1300" class="small" text-anchor="start">db_mysql 权威持久化 · db_redis 高速数据 · 连接池</text>
+</g>
+
+<!-- ===== 右列盒子 ===== -->
+<g id="bots" data-node="bots"><rect x="720" y="120" width="520" height="100" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+<text x="740" y="154" class="name" text-anchor="start">Bots · 压测客户端</text>
+<text x="740" y="180" class="body" text-anchor="start">脚本化压测机器人 · 走完整客户端登录链路</text>
+<text x="740" y="204" class="small" text-anchor="start">ClientApp 基类 · 非服务端组件</text>
+</g>
+<g id="machine" data-node="machine"><rect x="720" y="300" width="520" height="130" rx="14" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+<text x="740" y="334" class="name" text-anchor="start">Machine · 服务注册中心</text>
+<text x="740" y="360" class="body" text-anchor="start">UDP 广播发现 · 组件注册 / 查询</text>
+<text x="740" y="386" class="small" text-anchor="start">进程启停监管 · watcher</text>
+</g>
+<g id="baseappmgr" data-node="baseappmgr"><rect x="720" y="500" width="520" height="90" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="740" y="534" class="name" text-anchor="start">BaseAppMgr</text>
+<text x="740" y="560" class="small" text-anchor="start">findFreeBaseapp() · 最空闲 BaseApp 调度</text>
+</g>
+<g id="cellappmgr" data-node="cellappmgr"><rect x="720" y="630" width="520" height="90" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="740" y="664" class="name" text-anchor="start">CellAppMgr</text>
+<text x="740" y="690" class="small" text-anchor="start">findFreeCellapp() · 最空闲 CellApp 调度</text>
+</g>
+<g id="logger" data-node="logger"><rect x="720" y="760" width="520" height="90" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="740" y="794" class="name" text-anchor="start">Logger</text>
+<text x="740" y="820" class="small" text-anchor="start">集中日志收集（PythonApp）</text>
+</g>
+<g id="interfaces" data-node="interfaces"><rect x="720" y="890" width="520" height="90" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="740" y="924" class="name" text-anchor="start">Interfaces</text>
+<text x="740" y="950" class="small" text-anchor="start">外部接口网关 · billing / 认证等外围对接</text>
+</g>
+<g id="ops" data-node="ops"><rect x="720" y="1020" width="520" height="80" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="740" y="1052" class="name" text-anchor="start">guiconsole · kbcmd</text>
+<text x="740" y="1078" class="small" text-anchor="start">GUI 管理 / 命令行运维工具</text>
+</g>
+
+<!-- ===== 主列边标签 ===== -->
+<text x="352" y="266" class="label" text-anchor="start">TCP / KCP</text>
+<text x="352" y="466" class="label" text-anchor="start">会话落地 · 经 BaseAppMgr 分配</text>
+<text x="352" y="746" class="label" text-anchor="start">EntityCall · 属性同步</text>
+<text x="352" y="1020" class="label" text-anchor="start">Cell 状态持久化</text>
+<text x="352" y="1216" class="label" text-anchor="start" style="fill:#7c3aed">SQL / Redis 读写</text>
+<text transform="translate(16 870) rotate(-90)" class="label" text-anchor="middle" style="fill:#7c3aed">Base → DBMgr 持久化</text>
+<text transform="translate(36 730) rotate(-90)" class="label" text-anchor="middle">LoginApp → DBMgr 账号认证</text>
+
+<!-- ===== 右列说明（控制边标签） ===== -->
+<text x="736" y="236" class="caption" text-anchor="start">压测客户端登录链路</text>
+<text x="736" y="452" class="caption" text-anchor="start">组件注册 / 发现 · UDP 广播</text>
+<text x="736" y="606" class="caption" text-anchor="start">↓ 分配最空闲 BaseApp</text>
+<text x="736" y="736" class="caption" text-anchor="start">↓ 分配最空闲 CellApp</text>
+<text x="736" y="866" class="caption" text-anchor="start">← 收集所有组件日志</text>
+<text x="736" y="996" class="caption" text-anchor="start">→ 对接计费 / 认证等外围</text>
+
+<!-- ===== 图例 ===== -->
+<path d="M60 1352 H120" class="edge" style="stroke:#475569;stroke-width:2"/>
+<text x="130" y="1358" class="small" text-anchor="start">实线 · 业务数据流</text>
+<path d="M400 1352 H460" class="edge control" style="stroke:#64748b;stroke-width:2"/>
+<text x="470" y="1358" class="small" text-anchor="start">虚线 · 控制 / 调度 / 注册</text>
+<path d="M820 1352 H880" class="edge" style="stroke:#7c3aed;stroke-width:2"/>
+<text x="890" y="1358" class="small" text-anchor="start">紫色 · 持久化</text>
+<text x="40" y="1392" class="small" text-anchor="start">无圆点的交叉不表示连通 · 组件与数据流依据 kbe/src/server 源码 · 玩家主线 Client → LoginApp → BaseApp → CellApp → DBMgr</text>
+</svg>
