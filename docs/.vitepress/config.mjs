@@ -34,7 +34,7 @@ const config = defineConfig({
       })
     }
   },
-  // 死链零容忍：build 即断（官方 locales 结构，root=中文 /en=英文）
+  // 死链零容忍：build 即断（官方 locales 结构，root=英文 /zh=中文）
   ignoreDeadLinks: false,
   vite: {
     build: {
@@ -61,26 +61,6 @@ const config = defineConfig({
           return env.frontmatter?.search === false
             ? ''
             : rendered.replace(HTML_PRE_BLOCK_RE, '\n')
-        },
-        locales: {
-          '/': {
-            translations: {
-              button: {
-                buttonText: '搜索文档',
-                buttonAriaLabel: '搜索文档'
-              },
-              modal: {
-                noResultsText: '没有结果',
-                resetButtonTitle: '重置',
-                backButtonTitle: '关闭',
-                footer: {
-                  selectText: '选择',
-                  navigateText: '导航',
-                  closeText: '关闭'
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -322,31 +302,49 @@ const config = defineConfig({
 
 
 // —— 官方国际化（vitepress locales，唯一方案；内容内不放语言头行）——
-// 结构铁律（kbengine 例外）：root=中文，en=英文，路由 /en/...
-const prefixEn = (link) =>
-  typeof link === 'string' && link.startsWith('/') && !link.startsWith('/en/')
-    ? (link === '/' ? '/en/' : '/en' + link)
+// 结构铁律（kbengine 例外）：root=英文，zh=中文，路由 /zh/...
+// b9e91b4「flip layout english root chinese zh」后文件布局为英文在根、中文在 docs/zh/，
+// locales 必须与文件布局一致：否则根页挂 zh-CN 元数据、zh 站点导航链到英文页、/en/ 空转 404。
+const prefixZh = (link) =>
+  typeof link === 'string' && link.startsWith('/') && !link.startsWith('/zh/')
+    ? (link === '/' ? '/zh/' : '/zh' + link)
     : link
 const prefixItems = (items) =>
   (items || []).map((item) => ({
     ...item,
-    link: prefixEn(item.link),
+    link: prefixZh(item.link),
     ...(item.items ? { items: prefixItems(item.items) } : {})
   }))
 const rootTheme = config.themeConfig || {}
+const zhSearchTranslations = {
+  button: {
+    buttonText: '搜索文档',
+    buttonAriaLabel: '搜索文档'
+  },
+  modal: {
+    noResultsText: '没有结果',
+    resetButtonTitle: '重置',
+    backButtonTitle: '关闭',
+    footer: {
+      selectText: '选择',
+      navigateText: '导航',
+      closeText: '关闭'
+    }
+  }
+}
 config.locales = {
   root: {
-    label: '简体中文',
-    lang: 'zh-CN',
-    title: 'KBEngine 文档',
-    description: '基于 CHM 与 PDF 重建的 KBEngine 中文文档站点',
-    themeConfig: rootTheme
-  },
-  en: {
     label: 'English',
     lang: 'en-US',
     title: 'KBEngine Docs',
     description: 'KBEngine documentation rebuilt from in-repository sources',
+    themeConfig: rootTheme
+  },
+  zh: {
+    label: '简体中文',
+    lang: 'zh-CN',
+    title: 'KBEngine 中文文档',
+    description: '基于 CHM 与 PDF 重建的 KBEngine 中文文档站点',
     themeConfig: {
       ...rootTheme,
       nav: prefixItems(rootTheme.nav),
@@ -361,23 +359,8 @@ config.locales = {
         options: {
           ...rootTheme.search?.options,
           locales: {
-            '/en/': {
-              translations: {
-                button: {
-                  buttonText: 'Search docs',
-                  buttonAriaLabel: 'Search docs'
-                },
-                modal: {
-                  noResultsText: 'No results',
-                  resetButtonTitle: 'Reset',
-                  backButtonTitle: 'Close',
-                  footer: {
-                    selectText: 'to select',
-                    navigateText: 'to navigate',
-                    closeText: 'to close'
-                  }
-                }
-              }
+            '/zh/': {
+              translations: zhSearchTranslations
             }
           }
         }

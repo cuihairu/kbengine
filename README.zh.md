@@ -1,6 +1,6 @@
 # KBEngine
 
-<p align="center">[![Status](https://img.shields.io/badge/status-in%20development-orange)](https://github.com/cuihairu/kbengine/releases) <a href="https://cuihairu.github.io/kbengine/zh//"><img src="https://img.shields.io/badge/%E6%96%87%E6%A1%A3-blue" alt="docs"></a>
+<p align="center">[![Status](https://img.shields.io/badge/status-in%20development-orange)](https://github.com/cuihairu/kbengine/releases) <a href="https://cuihairu.github.io/kbengine/zh/"><img src="https://img.shields.io/badge/%E6%96%87%E6%A1%A3-blue" alt="docs"></a>
 </p>
 
 > [English](README.md) | **中文**

@@ -1,8 +1,7 @@
 KBEngine
 ========
 
-<p align="center"><a href="README.md">English</a> | <a href="README.zh.md">中文</a> <a href="https://cuihairu.github.io/kbengine//"><img src="https://img.shields.io/badge/docs-blue" alt="docs"></a>
-</p>
+<p align="center"><a href="README.md">English</a> | <a href="README.zh.md">中文</a></p>
 
 > **⚠️ Development Fork Notice**
 >
@@ -18,7 +17,7 @@ KBEngine
 >
 > This fork does **NOT** provide stable releases or downloads.
 
-<a href="https://github.com/cuihairu/kbengine/releases"><img alt="Status" src="https://img.shields.io/badge/status-in%20development-orange"></a> <a href="https://github.com/cuihairu/kbengine/actions"><img alt="CI" src="https://github.com/cuihairu/kbengine/workflows/CI/badge.svg"></a> <a href="https://codecov.io/gh/cuihairu/kbengine"><img alt="Coverage" src="https://codecov.io/gh/cuihairu/kbengine/branch/chore/cmake-bootstrap/graph/badge.svg"></a> <a href="https://en.wikipedia.org/wiki/C%2B%2B#Standard_version"><img alt="C++17" src="https://img.shields.io/badge/C++-17-blue.svg"></a> <a href="https://www.python.org/"><img alt="Python 3.12" src="https://img.shields.io/badge/python-3.12-blue.svg"></a>
+<p align="center"><a href="https://github.com/cuihairu/kbengine/releases"><img alt="Status" src="https://img.shields.io/badge/status-in%20development-orange"></a> <a href="https://github.com/cuihairu/kbengine/actions"><img alt="CI" src="https://github.com/cuihairu/kbengine/workflows/CI/badge.svg"></a> <a href="https://codecov.io/gh/cuihairu/kbengine"><img alt="Coverage" src="https://codecov.io/gh/cuihairu/kbengine/branch/chore/cmake-bootstrap/graph/badge.svg"></a> <a href="https://en.wikipedia.org/wiki/C%2B%2B#Standard_version"><img alt="C++17" src="https://img.shields.io/badge/C++-17-blue.svg"></a> <a href="https://www.python.org/"><img alt="Python 3" src="https://img.shields.io/badge/python-3-blue.svg"></a> <a href="https://cuihairu.github.io/kbengine/"><img alt="docs" src="https://img.shields.io/badge/docs-blue"></a></p>
 ## Homepage
 
 	https://kbengine.github.io/
@@ -59,22 +58,6 @@ KBEngine
 	http://v.youku.com/v_show/id_XMjgyMjM0MTYwNA==.html?spm=a2h3j.8428770.3416059.1
 
 
-## What is KBEngine?
-
-	An MMOG server engine. 
-	Just use Python scripting to be able to complete any game logic simply and efficiently (supports hotfixing).
-	Various KBEngine plugins can be quickly combined with (Unity3D, OGRE, Cocos2d-x, HTML5, etc.) technology to 
-	form a complete game client.
-
-	The engine is written in C++, and saves developers from having to re-implement common server-side 
-	technology, allowing them to concentrate on game logic development, to quickly create a variety of games.
-
-	(Because it is often asked what the upper limit of the load is that KBEngine can handle, the underlying 
-	architecture has been designed as a multi-process distributed dynamic load balancing solution. In theory, 
-	by continuously expanding the hardware, the upper limit of the load can also be continuously increased. 
-	The upper limit of the capacity of a single machine depends on the complexity of the game logic itself.)
-
-
 ## Create a new game asset library
 
 	Execute:
@@ -90,15 +73,10 @@ KBEngine
 		When configured with the vcpkg toolchain, KBEngine will prefer vcpkg-provided fmt, zlib, OpenSSL, libmariadb, hiredis and GTest.
 		If vcpkg is not active, the current vendored/fallback path remains available.
 		The manifest is pinned with a vcpkg builtin baseline for reproducible dependency resolution.
-		The current manifest resolves to:
-			fmt 12.1.0
-			OpenSSL 3.6.1
-			curl 8.18.0
-			zlib 1.3.1
-			GTest 1.17.0
-			hiredis 1.3.0
-			libmariadb 3.4.7
-		libmariadb 3.4.7 is the MariaDB Connector/C client library used by KBEngine.
+		Versions are resolved from that baseline (`vcpkg.json` `builtin-baseline`), not from in-repo overrides;
+		`vcpkg.json` declares the ports (apr, apr-util, curl, fmt, gtest, hiredis, libmariadb, openssl,
+		python3, tinyxml2, utfcpp, zlib) without pinning exact versions.
+		libmariadb is the MariaDB Connector/C client library used by KBEngine.
 		It is suitable for MariaDB and MySQL deployments, including MySQL 8 authentication flows introduced after older 3.0.x connector releases.
 
 		Example:
@@ -127,7 +105,7 @@ KBEngine uses CMake 3.21+ for cross-platform building. The build system supports
 
 **Dependencies:**
 - All dependencies are managed by **vcpkg** when using vcpkg mode
-- This includes Python 3.12, which is embedded into KBEngine (requires Python headers for compilation)
+- This includes Python 3, which is embedded into KBEngine (requires Python headers for compilation)
 - Two libraries use vendored source code: **tmxparser** (map parser) and **g3dlite** (3D math library)
 
 ---
@@ -316,24 +294,26 @@ ctest --preset vcpkg --parallel 4
 
 The project uses **vcpkg manifest mode** for dependency management.
 
-**Required dependencies (provided by vcpkg):**
-- fmt 12.1.0 - Text formatting
-- OpenSSL 3.6.1 - Cryptography & SSL/TLS
-- curl 8.18.0 - HTTP client
-- zlib 1.3.1 - Compression
-- GTest 1.17.0 - Testing framework
-- hiredis 1.3.0 - Redis client
-- libmariadb 3.4.7 - MySQL/MariaDB connector
-- Python 3.12 - Embedded scripting (KBEngine embeds Python interpreter)
+**Required dependencies (declared in `vcpkg.json`):**
+- fmt - Text formatting
+- openssl - Cryptography & SSL/TLS
+- curl - HTTP client
+- zlib - Compression
+- gtest - Testing framework
+- hiredis - Redis client
+- libmariadb - MySQL/MariaDB connector
+- python3 - Embedded scripting (KBEngine embeds a Python interpreter)
 - tinyxml2 - XML parsing
-- utf8cpp - UTF-8 string handling
-- log4cxx - Logging
-- apr/apr-util - Apache Portable Runtime
-- jemalloc - Memory allocator
+- utfcpp - UTF-8 string handling
+- apr / apr-util - Apache Portable Runtime
+
+**Optional dependencies (off by default, not in the manifest):**
+- log4cxx - Logging, opt-in via `-DKBE_USE_LOG4CXX=ON` (`cmake/KBEngineOptions.cmake`)
+- jemalloc - Memory allocator, opt-in via `-DKBE_USE_JEMALLOC=ON` (`cmake/KBEngineOptions.cmake`)
 
 **Vendored libraries (not in vcpkg):**
-- **tmxparser** - Map tile format parser
-- **g3dlite** - 3D math and geometry library
+- **tmxparser** - Map tile format parser (`kbe/src/lib/dependencies/tmxparser/`)
+- **g3dlite** - 3D math and geometry library (`kbe/src/lib/dependencies/g3dlite/`)
 
 **Note:** In vcpkg mode, all dependencies must come from vcpkg. The build will fail if any required vcpkg dependency is not found.
 
@@ -404,7 +384,7 @@ clang --version
 
 ```bash
 # If CMake cannot find Python3, ensure vcpkg is properly configured
-# Python 3.12 is provided by vcpkg, no system installation needed
+# Python 3 is provided by vcpkg, no system installation needed
 cmake --preset vcpkg -DVCPKG_ROOT=/path/to/vcpkg
 ```
 
