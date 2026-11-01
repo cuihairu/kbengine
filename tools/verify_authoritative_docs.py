@@ -76,7 +76,14 @@ def extract_chm_html(chm_path: Path, output_root: Path) -> None:
         if result != 0 or unit is None:
             continue
         _, data = book.RetrieveObject(unit)
-        target = output_root / path.lstrip("/")
+        # CHM 成员名来自归档内容（archive-controlled），lstrip("/") 只去前导斜杠，
+        # 不净化 `..`/绝对路径；若成员名含穿越片段则跳过，防止写出 output_root 之外。
+        # 先归一 `\` 为 `/`：PurePosixPath 视反斜杠为字面字符，不归一则在 Windows 的
+        # Path.joinpath 下 `..\..` 仍可穿越。
+        safe_path = PurePosixPath(path.lstrip("/").replace("\\", "/"))
+        if safe_path.is_absolute() or ".." in safe_path.parts:
+            continue
+        target = output_root.joinpath(*safe_path.parts)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
 
