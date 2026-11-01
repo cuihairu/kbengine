@@ -1,7 +1,7 @@
 KBEngine
 ========
 
-<p align="center"><a href="https://cuihairu.github.io/kbengine/"><img src="https://img.shields.io/badge/docs-docs-blue" alt="docs"></a></p>
+<p align="center"><a href="https://cuihairu.github.io/kbengine//"><img src="https://img.shields.io/badge/docs-docs-blue" alt="docs"></a> <a href="https://cuihairu.github.io/kbengine/"><img src="https://img.shields.io/badge/docs-docs-blue" alt="docs"></a></p>
 
 > **⚠️ Development Fork Notice**
 >
