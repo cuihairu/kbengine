@@ -194,7 +194,7 @@ wchar_t* char2wchar(const char* cs, size_t* outlen)
 	wchar_t* ccattr = (wchar_t*)malloc(len);
 	memset(ccattr, 0, len);
 
-	size_t slen = mbstowcs(ccattr, cs, len);
+	size_t slen = mbstowcs(ccattr, cs, strlen(cs) + 1);
 
 	if (outlen)
 	{
