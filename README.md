@@ -3,6 +3,8 @@ KBEngine
 
 <p align="center"><a href="README.md">English</a> | <a href="README.zh.md">中文</a></p>
 
+<p align="center"><a href="https://github.com/cuihairu/kbengine/releases"><img alt="Status" src="https://img.shields.io/badge/status-in%20development-orange"></a> <a href="https://github.com/cuihairu/kbengine/actions"><img alt="CI" src="https://github.com/cuihairu/kbengine/workflows/CI/badge.svg"></a> <a href="https://codecov.io/gh/cuihairu/kbengine"><img alt="Coverage" src="https://codecov.io/gh/cuihairu/kbengine/branch/chore/cmake-bootstrap/graph/badge.svg"></a> <a href="https://en.wikipedia.org/wiki/C%2B%2B#Standard_version"><img alt="C++17" src="https://img.shields.io/badge/C++-17-blue.svg"></a> <a href="https://www.python.org/"><img alt="Python 3" src="https://img.shields.io/badge/python-3-blue.svg"></a> <a href="https://cuihairu.github.io/kbengine/"><img alt="docs" src="https://img.shields.io/badge/docs-blue"></a></p>
+
 > **⚠️ Development Fork Notice**
 >
 > This is a **development fork** for contributing improvements to the upstream KBEngine project.
@@ -17,7 +19,7 @@ KBEngine
 >
 > This fork does **NOT** provide stable releases or downloads.
 
-<p align="center"><a href="https://github.com/cuihairu/kbengine/releases"><img alt="Status" src="https://img.shields.io/badge/status-in%20development-orange"></a> <a href="https://github.com/cuihairu/kbengine/actions"><img alt="CI" src="https://github.com/cuihairu/kbengine/workflows/CI/badge.svg"></a> <a href="https://codecov.io/gh/cuihairu/kbengine"><img alt="Coverage" src="https://codecov.io/gh/cuihairu/kbengine/branch/chore/cmake-bootstrap/graph/badge.svg"></a> <a href="https://en.wikipedia.org/wiki/C%2B%2B#Standard_version"><img alt="C++17" src="https://img.shields.io/badge/C++-17-blue.svg"></a> <a href="https://www.python.org/"><img alt="Python 3" src="https://img.shields.io/badge/python-3-blue.svg"></a> <a href="https://cuihairu.github.io/kbengine/"><img alt="docs" src="https://img.shields.io/badge/docs-blue"></a></p>
+
 ## Homepage
 
 	https://kbengine.github.io/
