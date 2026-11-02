@@ -330,6 +330,12 @@ bool DBTaskWriteEntity::db_thread_process()
 	(*pDatas_) >> sid_ >> callbackID_ >> shouldAutoLoad_;
 
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskWriteEntity::db_thread_process: script module not found (sid={})!\n", sid_));
+		return false;
+	}
+
 	bool writeEntityLog = (entityDBID_ == 0);
 
 	uint32 ip = 0;
@@ -378,6 +384,12 @@ bool DBTaskWriteEntity::db_thread_process()
 thread::TPTask::TPTaskState DBTaskWriteEntity::presentMainThread()
 {
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskWriteEntity::presentMainThread: script module not found (sid={})!\n", sid_));
+		return thread::TPTask::TPTASK_STATE_COMPLETED;
+	}
+
 	DEBUG_MSG(fmt::format("Dbmgr::writeEntity: {0}({1}).\n", pModule->getName(), entityDBID_));
 
 	// 返回写entity的结果， 成功或者失败
@@ -424,7 +436,14 @@ bool DBTaskRemoveEntity::db_thread_process()
 	KBE_ASSERT(pELTable);
 	pELTable->eraseEntityLog(pdbi_, entityDBID_, sid_);
 
-	entityTables.removeEntity(pdbi_, entityDBID_, EntityDef::findScriptModule(sid_));
+	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskRemoveEntity::db_thread_process: script module not found (sid={})!\n", sid_));
+		return false;
+	}
+
+	entityTables.removeEntity(pdbi_, entityDBID_, pModule);
 	return false;
 }
 
@@ -432,6 +451,12 @@ bool DBTaskRemoveEntity::db_thread_process()
 thread::TPTask::TPTaskState DBTaskRemoveEntity::presentMainThread()
 {
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskRemoveEntity::presentMainThread: script module not found (sid={})!\n", sid_));
+		return thread::TPTask::TPTASK_STATE_COMPLETED;
+	}
+
 	DEBUG_MSG(fmt::format("Dbmgr::removeEntity: {}({}).\n", pModule->getName(), entityDBID_));
 	return EntityDBTask::presentMainThread();
 }
@@ -468,6 +493,11 @@ bool DBTaskDeleteEntityByDBID::db_thread_process()
 	KBEEntityLogTable::EntityLog entitylog;
 
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskDeleteEntityByDBID::db_thread_process: script module not found (sid={})!\n", sid_));
+		return false;
+	}
 
 	haslog = pELTable->queryEntity(pdbi_, entityDBID_, entitylog, pModule->getUType());
 
@@ -490,6 +520,11 @@ bool DBTaskDeleteEntityByDBID::db_thread_process()
 thread::TPTask::TPTaskState DBTaskDeleteEntityByDBID::presentMainThread()
 {
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskDeleteEntityByDBID::presentMainThread: script module not found (sid={})!\n", sid_));
+		return thread::TPTask::TPTASK_STATE_COMPLETED;
+	}
 
 	DEBUG_MSG(fmt::format("Dbmgr::DBTaskDeleteEntityByDBID: {}({}), entityInAppID({}).\n",
 		pModule->getName(), entityDBID_, entityInAppID_));
@@ -529,6 +564,12 @@ DBTaskEntityAutoLoad::~DBTaskEntityAutoLoad()
 bool DBTaskEntityAutoLoad::db_thread_process()
 {
 	ScriptDefModule* pModule = EntityDef::findScriptModule(entityType_);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskEntityAutoLoad::db_thread_process: script module not found (entityType={})!\n", entityType_));
+		return false;
+	}
+
 	EntityTables::findByInterfaceName(pdbi_->name()).queryAutoLoadEntities(this->pdbi_, pModule, start_, end_, outs_);
 	return false;
 }
@@ -538,6 +579,11 @@ thread::TPTask::TPTaskState DBTaskEntityAutoLoad::presentMainThread()
 {
 	int size = (int)outs_.size();
 	ScriptDefModule* pModule = EntityDef::findScriptModule(entityType_);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskEntityAutoLoad::presentMainThread: script module not found (entityType={})!\n", entityType_));
+		return thread::TPTask::TPTASK_STATE_COMPLETED;
+	}
 
 	if(size > 0)
 	{
@@ -597,6 +643,11 @@ bool DBTaskLookUpEntityByDBID::db_thread_process()
 	KBEEntityLogTable::EntityLog entitylog;
 
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskLookUpEntityByDBID::db_thread_process: script module not found (sid={})!\n", sid_));
+		return false;
+	}
 
 	// 如果有在线纪录
 	if(pELTable->queryEntity(pdbi_, entityDBID_, entitylog, pModule->getUType()))
@@ -626,6 +677,11 @@ bool DBTaskLookUpEntityByDBID::db_thread_process()
 thread::TPTask::TPTaskState DBTaskLookUpEntityByDBID::presentMainThread()
 {
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskLookUpEntityByDBID::presentMainThread: script module not found (sid={})!\n", sid_));
+		return thread::TPTask::TPTASK_STATE_COMPLETED;
+	}
 
 	DEBUG_MSG(fmt::format("Dbmgr::DBTaskLookUpEntityByDBID: {}({}), entityInAppID({}).\n",
 		pModule->getName(), entityDBID_, entityInAppID_));
@@ -1365,6 +1421,12 @@ bool DBTaskQueryAccount::db_thread_process()
 	}
 
 	ScriptDefModule* pModule = EntityDef::findScriptModule(DBUtil::accountScriptName());
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskQueryAccount::db_thread_process: script module not found!\n"));
+		return false;
+	}
+
 	success_ = entityTables.queryEntity(pdbi_, info.dbid, s_, pModule);
 
 	if(!success_ && pdbi_->getlasterror() > 0)
@@ -1760,6 +1822,12 @@ bool DBTaskQueryEntity::db_thread_process()
 {
 	EntityTables& entityTables = EntityTables::findByInterfaceName(pdbi_->name());
 	ScriptDefModule* pModule = EntityDef::findScriptModule(entityType_.c_str());
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("DBTaskQueryEntity::db_thread_process: script module not found (entityType={})!\n", entityType_));
+		return false;
+	}
+
 	success_ = entityTables.queryEntity(pdbi_, dbid_, s_, pModule);
 
 	if(success_)

@@ -295,6 +295,12 @@ EntityTable* EntityTables::findKBETable(std::string name)
 //-------------------------------------------------------------------------------------
 DBID EntityTables::writeEntity(DBInterface* pdbi, DBID dbid, int8 shouldAutoLoad, MemoryStream* s, ScriptDefModule* pModule)
 {
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("EntityTables::writeEntity: pModule is NULL!\n"));
+		return 0;
+	}
+
 	EntityTable* pTable = this->findTable(pModule->getName());
 	KBE_ASSERT(pTable != NULL);
 
@@ -304,6 +310,12 @@ DBID EntityTables::writeEntity(DBInterface* pdbi, DBID dbid, int8 shouldAutoLoad
 //-------------------------------------------------------------------------------------
 bool EntityTables::removeEntity(DBInterface* pdbi, DBID dbid, ScriptDefModule* pModule)
 {
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("EntityTables::removeEntity: pModule is NULL!\n"));
+		return false;
+	}
+
 	EntityTable* pTable = this->findTable(pModule->getName());
 	KBE_ASSERT(pTable != NULL);
 
@@ -313,6 +325,12 @@ bool EntityTables::removeEntity(DBInterface* pdbi, DBID dbid, ScriptDefModule* p
 //-------------------------------------------------------------------------------------
 bool EntityTables::queryEntity(DBInterface* pdbi, DBID dbid, MemoryStream* s, ScriptDefModule* pModule)
 {
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("EntityTables::queryEntity: pModule is NULL!\n"));
+		return false;
+	}
+
 	EntityTable* pTable = this->findTable(pModule->getName());
 	KBE_ASSERT(pTable != NULL);
 

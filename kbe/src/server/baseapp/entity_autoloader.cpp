@@ -75,6 +75,13 @@ void EntityAutoLoader::onEntityAutoLoadCBFromDBMgr(Network::Channel* pChannel, M
 	ENTITY_SCRIPT_UID entityType;
 	s >> entityType;
 
+	ScriptDefModule* pModule = EntityDef::findScriptModule(entityType);
+	if(pModule == NULL)
+	{
+		ERROR_MSG(fmt::format("EntityAutoLoader::onEntityAutoLoadCBFromDBMgr: script module not found (entityType={})!\n", entityType));
+		return;
+	}
+
 	for(int i=0; i<size; ++i)
 	{
 		DBID dbid;
@@ -85,7 +92,7 @@ void EntityAutoLoader::onEntityAutoLoadCBFromDBMgr(Network::Channel* pChannel, M
 			PyObject* pyResult = PyObject_CallMethod(Baseapp::getSingleton().getEntryScript().get(),
 												const_cast<char*>("onAutoLoadEntityCreate"),
 												const_cast<char*>("sK"),
-												EntityDef::findScriptModule(entityType)->getName(),
+												pModule->getName(),
 												dbid);
 
 			if(pyResult != NULL)
@@ -102,7 +109,7 @@ void EntityAutoLoader::onEntityAutoLoadCBFromDBMgr(Network::Channel* pChannel, M
 		}
 		else
 		{
-			Baseapp::getSingleton().createEntityAnywhereFromDBID(EntityDef::findScriptModule(entityType)->getName(), dbid, NULL,
+			Baseapp::getSingleton().createEntityAnywhereFromDBID(pModule->getName(), dbid, NULL,
 				g_kbeSrvConfig.dbInterfaceIndex2dbInterfaceName(dbInterfaceIndex));
 		}
 	}
