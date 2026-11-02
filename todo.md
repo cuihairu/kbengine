@@ -22,6 +22,7 @@
 - [ ] 代码深审 P3：`verify_authoritative_docs.py:78` CHM 页面数据未判 None
 - [ ] 代码深审 P3：`verify_authoritative_docs.py:153` 生成页缺对应文件未捕获 `FileNotFoundError`
 - [ ] 代码深审 P3：`verify_authoritative_docs.py:188` 有失配仍 `return 0`，CI 靠 stdout 判定
+- [ ] 代码深审 P3：`queryAccount` 失败路径 `ACCOUNT_INFOS.flags` 未初始化即被读（`kbe/src/lib/db_mysql/kbe_table_mysql.cpp:645-646,690-691`、`dbtasks.cpp:687,708`）
 - [ ] 代码深审 P3：视角 aliasID 超 255 实体过期/截断（`kbe/src/server/cellapp/witness.cpp:721-733`）
 - [ ] 代码深审 P3：`SpaceMemory::removeEntity` 仅 KBE_ASSERT 越界（`kbe/src/server/cellapp/spacememory.cpp:394-400`）
 - [ ] 代码深审 P3：`createFromStream` 未知 scriptUType 解引用 NULL（`kbe/src/server/cellapp/entity.cpp:4082-4084`）
