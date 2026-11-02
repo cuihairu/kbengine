@@ -74,6 +74,29 @@
 - 根因：**并非代码 bug**——前一个 `machine` 实例已正常绑定 external 端口 20099 并存活，第二个实例绑定失败属正常端口冲突。
 - 结论：machine 单实例即可；起服前先 `pkill -f kbe/bin/server` 清理残留。
 
+### 坑 6：char2wchar 把字节数当宽字符数传给 mbstowcs（FORTIFY 检测溢出）
+
+- 现象：`logger`/`interfaces` 启动立即 `*** buffer overflow detected ***`（glibc FORTIFY）并 abort。
+- 根因：`kbe/src/lib/common/strutil_core.cpp` 的 `char2wchar()`：
+  ```cpp
+  int len = (int)((strlen(cs) + 1) * sizeof(wchar_t));  // 字节数
+  wchar_t* ccattr = (wchar_t*)malloc(len);              // 缓冲区 len 字节
+  size_t slen = mbstowcs(ccattr, cs, len);              // BUG: 第三参是"最大宽字符数"，却传字节数
+  ```
+  `mbstowcs` 第三参数语义是"最多写多少个宽字符"。传 `len`（字节数）意味着最多写 `len` 个宽字符 = `len*4` 字节，超出缓冲区 4 倍 → 溢出。
+- 注意：`strutil.cpp` 同名函数**不参与编译**（`kbe_common_strutil` 目标只编 `strutil_core.cpp`），改错文件无效。
+- 解决：`strutil_core.cpp` 改为 `mbstowcs(ccattr, cs, strlen(cs) + 1)`（缓冲区恰好容纳 `strlen+1` 个宽字符）。已提交 `4f81d38`。
+
+### 坑 7：嵌入式 Python 3.7 找不到 encodings（stdlib 未进入模块搜索路径）
+
+- 现象：坑 6 修复后 `logger` 又 abort：`Fatal Python error: initfsencoding: Unable to get the locale encoding / ModuleNotFoundError: No module named 'encodings'`。
+- 根因（两层）：
+  1. 引擎 `Script::install()`（`lib/pyscript/script.cpp`）在 Python 3.7 分支设 `Py_IgnoreEnvironmentFlag=1` 并调用 `Py_SetPath(pyPaths)`——**Python 的模块搜索路径被完全替换为引擎脚本目录**，`sys.path` 里没有任何含 stdlib 的目录，`import encodings` 必然失败。
+  2. `SCRIPT_PATH` 宏（`lib/pyscript/script.h`）把 `kbe/res/scripts/common`（及 `lib-dynload`/`DLLs`/`Lib` 等子目录）替换真实 res 路径后并入 `pyPaths`。即**KBEngine 期望 `kbe/res/scripts/common/` 本身就是 stdlib 根目录**（Windows 式捆绑 Python 布局：顶层 .py + `encodings/` + `lib-dynload/` 直接在该目录下）。系统发行版 Python（deadsnakes python3.7，stdlib 在 `/usr/lib/python3.7`）不符合该布局。
+- 解决（运行期部署物，不涉及源码）：
+  `kbe/res/scripts/common/` 下对 `/usr/lib/python3.7` 的每个顶层条目建立软链（`encodings`、`os.py`、`codecs.py`、`lib-dynload`、`Lib` 等）。该目录的 `.gitignore` 本就忽略除自身外的所有内容，故软链不入库。
+- 验证：`PYTHONHOME=<kbe/res/scripts/common> python3.7 -c "import encodings"` 成功；`logger` 修复后正常启动。
+
 ### 构建结果
 
 - 编译器：gcc/g++ 15.2 直接通过，**无需切换 g++-12**。
@@ -82,3 +105,28 @@
   `cmake -S . -B build/presets/linux -G Ninja -DCMAKE_BUILD_TYPE=Release -DPython3_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.7m.so -DPython3_INCLUDE_DIR=/usr/include/python3.7m -DKBE_ENABLE_TESTING=OFF`
 - 产物（`kbe/bin/server/`）：`machine` `baseappmgr` `baseapp` `cellappmgr` `cellapp` `dbmgr` `loginapp` `logger` `interfaces` 共 9 个，全部构建成功。
 - 链接验证：`dbmgr` 依赖 `libpython3.7m.so.1.0` + `libmysqlclient.so.24`；baseapp/cellapp/loginapp/logger 依赖 `libpython3.7m.so.1.0`。
+
+## 阶段 2：起服测试
+
+### 启动方式
+
+- 工作目录：`/home/cui/workspaces/kbengine-build/assets`（`python_assets` 拷贝，`res/server/kbengine.xml` 已配置 DB：`192.168.5.5:3306` root / `kbengine_root_pw_2026`，`databaseName=kbengine`，encrypt=false；各组件 `internalInterface=192.168.5.188`）。
+- 环境：`KBE_RES_PATH=kbe/res/:assets:assets/res:assets/scripts/`、`KBE_BIN_PATH=kbe/bin/server/`、`KBE_ROOT=kbengine-build`。
+- 顺序：`machine → logger → interfaces → dbmgr → baseappmgr → cellappmgr → baseapp → cellapp → loginapp`（均后台 `nohup`，日志 `/tmp/kbelogs/*.log`）。
+
+### 结果
+
+- **9 个进程全部存活**（pid 见下），连续观察稳定无退出：
+  `machine 2755810`、`logger 2844876`、`interfaces 2848458`、`dbmgr 2850246`、`baseappmgr 2853859`、`cellappmgr 2853860`、`baseapp 2855761`、`cellapp 2858322`、`loginapp 2860375`。
+- **MySQL 表已创建**（192.168.5.5:3306 库 `kbengine`）：`kbe_accountinfos`、`kbe_email_verification`、`kbe_entitylog`、`kbe_serverlog`、`tbl_Account`。
+- **日志管线打通**：`kbe_serverlog` 已有心跳行（`heartbeatTime=1793610046, serverGroupID=1000`），证明 dbmgr→logger→MySQL 写入正常。
+- 本地日志文件无 ERROR/CRITICAL 内容（仅调试用 strace 文件含预期 abort 记录）。
+
+### 阻塞点（全部已解决）
+
+| 阻塞 | 根因 | 解决 |
+|---|---|---|
+| machine SIGSEGV | SignalHandlers 单例未实例化（已提交 `ada6418`） | `new SignalHandlers()` in `installSignals()` |
+| logger/interfaces buffer overflow | char2wchar 传字节数给 mbstowcs（已提交 `4f81d38`） | `mbstowcs(ccattr, cs, strlen(cs)+1)` |
+| logger "No module named encodings" | Py_SetPath 限定搜索路径，stdlib 不在其中（坑 7） | stdlib 软链入 `kbe/res/scripts/common/` |
+| 起服前端口冲突 | 旧 machine 实例仍占 20099 | 先 `pkill -f kbe/bin/server` 清理 |
