@@ -1,14 +1,43 @@
 # todo — kbengine
 
-## 已完成
-
-- [x] 双语收口：README.md 中文正文移出、英文版补对应内容、首屏顶部居中语言切换器；新建 README.zh.md 收中文原文（2026-10-16；README.zh.md 入库）
-- [x] 文档双语收口 `docs/` 根级：根目录 7 篇全部配对，两向语言切换器已加（2026-10-16；`CODECOV_SETUP.md` 等 7 篇配对）
-- [x] 中英双版媒体文件互索引：`docs/resources/index.md`、`docs/resources/provenance.md` 登记 4 个原始资料文件，`docs/guide/index.md`、`docs/api/index.md` 补目录内索引（2026-10-16 R1016F；4 个二进制登记，用仓库路径内联代码免死链）
-- [x] 文档双语收口 `docs/` 子目录：入口层、`api/bigworld/**`、`api/kbengine/**`（26 对）完成（2026-10-22；commit `3b08b08`、`daaf492`；`docs:build` 通过，`test:docs` 4/4，权威核对 24/24）
-- [x] 文档双语收口 `docs/` 子目录：`architecture/**`、`study/**`、`guide/**`、`resources/**`、`book-legacy/**`、`tutorial/**` 完成（b9e91b4 布局翻转后英文根 + `docs/zh/` 镜像，131 篇对 131 篇、0 缺失，2026-11-01 复核）
-- [x] `api/kbengine/**` 双语化核对口径：24 页拆 13 个 CHM 直通页与 11 个增强页，新增 `tools/tests/test_verify_authoritative_docs.py` 三类回归（2026-10-16 R1016PATROL；中文权威页首行不改，英文走 `.en.md` 与目录级索引）
-
 ## 待办
 
-（空）
+- [ ] 代码深审 P0：客户端 `PY_*` 方法参数经非受限 `pickle.loads` 反序列化可远程代码执行（`kbe/src/lib/pyscript/pickler.cpp:26,152`、`kbe/src/lib/entitydef/datatype.cpp:1240,1296,1352,1408`；需引擎构建环境实现受限反序列化）
+- [ ] 代码深审 P1：传送回滚解引用 NULL 控制器列表（`kbe/src/server/cellapp/entity.cpp:3989-3993,4112-4113,4147-4148`、`cellapp.cpp:2087`）
+- [ ] 代码深审 P1：网络消息长度 `0xFFFF`+扩展字段可致 4GB 分配、`bad_alloc` 未捕获崩溃（`kbe/src/lib/network/packet_reader.cpp:141,148-151,226`、`channel.cpp:1186`）
+- [ ] 代码深审 P2：安装脚本硬编码默认 MySQL 口令（`kbe/tools/server/install/installer.py:817,976` `mysql_kbe_password = "pwd123456"`）
+- [ ] 代码深审 P2：fallback 构建缺系统 `tinyxml2`，README「Fallback uses vendored deps」不准确（`cmake/KBEngineDependencies.cmake:52` 无条件 `find_package(... REQUIRED)`，无 vendored 回退）
+- [ ] 代码深审 P2：`__py_createEntityAnywhereFromDBID` 对未知 dbInterface 名解引用 NULL（`kbe/src/server/baseapp/baseapp.cpp:1475-1476`、`serverconfig.inl:112-124`）
+- [ ] 代码深审 P2：`Entity::writeToDB` 对未知 dbInterface 名解引用 NULL（`kbe/src/server/baseapp/entity.cpp:1157-1158`）
+- [ ] 代码深审 P2：`KBEEntityLogTableMysql::queryEntity` SQL 失败仍返回 true、读未初始化 EntityLog（`kbe/src/lib/db_mysql/kbe_table_mysql.cpp:220-222`、`dbtasks.cpp:602-616,1658-1667`）
+- [ ] 代码深审 P2：`Archiver::tick` 有符号 32 位乘法溢出致 OOB 索引（`kbe/src/server/baseapp/archiver.cpp:38-43`）
+- [ ] 代码深审 P2：`findRandomPointAroundCircle` 无 ground 多边形时解引用 NULL poly/未初始化读（`kbe/src/lib/navigation/navigation_mesh_handle.cpp:197,231,246,249,267`）
+- [ ] 代码深审 P2：负 navmesh layer 未拒绝、`GetLayer` `.at()` 抛异常（`kbe/src/lib/navigation/navigation_tile_handle.cpp:59,409`、`entity.cpp:2663,2690,2758`）
+- [ ] 代码深审 P2：`setPosition_XYZ_float` 丢弃 Y 且用 Y 覆写 X（`kbe/src/server/cellapp/entity.cpp:1864-1866`、`cellapp_interface.h:187-191`）
+- [ ] 代码深审 P2：navmesh 加载失败静默报成功（`kbe/src/server/cellapp/loadnavmesh_threadtasks.cpp:22-32`、`spacememory.cpp:299-328`）
+- [ ] 代码深审 P2：`MoveController::createFromStream` 未知 subtype 解引用 NULL（`kbe/src/lib/server/move_controller.cpp:51-58,60`）
+- [ ] 代码深审 P2：blowfish 解密失败被忽略、信任攻击者帧（`kbe/src/lib/network/encryption_filter.cpp:225-229`、`blowfish.cpp:148-155`）
+- [ ] 代码深审 P3：冒烟测试硬编码口令（`tests/smoke/test_server_sendmail.cpp:58` `info.password = "secret"`）
+- [ ] 代码深审 P3：`rebuild_docs.py` CHM 解包超时异常路径泄漏临时目录（`tools/rebuild_docs.py:490-505`）
+- [ ] 代码深审 P3：`verify_authoritative_docs.py:78` CHM 页面数据未判 None
+- [ ] 代码深审 P3：`verify_authoritative_docs.py:153` 生成页缺对应文件未捕获 `FileNotFoundError`
+- [ ] 代码深审 P3：`verify_authoritative_docs.py:188` 有失配仍 `return 0`，CI 靠 stdout 判定
+- [ ] 代码深审 P3：视角 aliasID 超 255 实体过期/截断（`kbe/src/server/cellapp/witness.cpp:721-733`）
+- [ ] 代码深审 P3：`SpaceMemory::removeEntity` 仅 KBE_ASSERT 越界（`kbe/src/server/cellapp/spacememory.cpp:394-400`）
+- [ ] 代码深审 P3：`createFromStream` 未知 scriptUType 解引用 NULL（`kbe/src/server/cellapp/entity.cpp:4082-4084`）
+- [ ] 代码深审 P3：传送到达消息未知 entityType 解引用 NULL（`kbe/src/server/cellapp/cellapp.cpp:1939`）
+- [ ] 代码深审 P3：`ProximityController` 析构解引用 NULL trap（`kbe/src/lib/server/proximity_controller.cpp:34-38`）
+- [ ] 代码深审 P3：ID 池耗尽返回复用 ID（`kbe/src/lib/server/idallocate.h:257-279`）
+- [ ] 代码深审 P3：`RangeTrigger::install` 部分失败结果被忽略（`kbe/src/lib/server/range_trigger.cpp:73-93`）
+- [ ] 代码深审 P3：`Channel::destroy` 未回池 EndPoint、每信道周期泄漏（`kbe/src/lib/network/channel.cpp:533-543,293-305`）
+- [ ] 代码深审 P3：`mergeFragmentMessage` 拷贝缺 `+ rpos()` 偏移（`kbe/src/lib/network/packet_reader.cpp:291`）
+- [ ] 代码深审 P3：dispatch 仅捕 `MemoryStreamException`、异常泄漏接收报文（`kbe/src/lib/network/channel.cpp:1182-1199,1201`）
+
+## 已完成
+
+- [x] 文档双语收口 README 双语 + 中文版独立页（2026-10-16；README.zh.md 入库）
+- [x] 文档双语收口 docs/ 根级 7 篇配对（2026-10-16；7 篇互链）
+- [x] 中英双版媒体文件互索引 + 4 个原始资料登记（2026-10-16 R1016F；仓库路径内联免死链）
+- [x] 文档双语收口 docs/ 子目录 api（2026-10-22；commit `3b08b08`、`daaf492`；docs:build 过、test:docs 4/4、权威核对 24/24）
+- [x] 文档双语收口 docs/ 子目录 architecture/study/guide/resources/book-legacy/tutorial（b9e91b4 布局翻转；131 对 131、0 缺失、2026-11-01 复核）
+- [x] api/kbengine 双语化核对口径：24 页 = 13 直通 + 11 增强（2026-10-16 R1016PATROL；新增 `test_verify_authoritative_docs.py` 三类回归）
