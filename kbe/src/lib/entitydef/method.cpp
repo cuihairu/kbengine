@@ -200,8 +200,12 @@ PyObject* MethodDescription::createFromStream(MemoryStream* mstream)
 
 		if(pyitem == NULL)
 		{
-			WARNING_MSG(fmt::format("MethodDescription::createFromStream: {} arg[{}][{}] is NULL.\n", 
+			WARNING_MSG(fmt::format("MethodDescription::createFromStream: {} arg[{}][{}] is NULL.\n",
 				this->getName(), index, argTypes_[index]->getName()));
+
+			// 失败的参数置为 None，避免把 NULL 存入 tuple 导致后续 PyObject_CallObject/checkArgs 解引用崩溃
+			pyitem = Py_None;
+			Py_INCREF(Py_None);
 		}
 
 		PyTuple_SET_ITEM(pyArgsTuple, index + offset, pyitem);
