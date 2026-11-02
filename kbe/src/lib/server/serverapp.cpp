@@ -120,9 +120,10 @@ bool ServerApp::loadConfig()
 	return true;
 }
 
-//-------------------------------------------------------------------------------------		
+//-------------------------------------------------------------------------------------
 bool ServerApp::installSignals()
 {
+	new SignalHandlers();
 	g_kbeSignalHandlers.attachApp(this);
 	g_kbeSignalHandlers.ignoreSignal(SIGPIPE);
 	g_kbeSignalHandlers.addSignal(SIGINT, this);

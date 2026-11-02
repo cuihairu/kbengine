@@ -62,6 +62,18 @@
 - 根因：hiredis 1.x 把 `hi_malloc` 等分配函数拆到 `alloc.c`、dict 到 `dict.c`、异步 API 到 `async.c`；KBEngine CMake 原只列 `hiredis.c/net.c/read.c/sds.c`。
 - 解决：`cmake/KBEngineDependencies.cmake` 的 `kbe_dependency_hiredis` 追加 `dict.c`、`alloc.c`、`async.c`（本仓库已修改提交）。
 
+### 坑 4：SignalHandlers 单例从未实例化 → machine 启动段错误
+
+- 现象：`machine` 启动立即 SIGSEGV，gdb 回溯在 `SignalHandlers::attachApp`，寄存器 `rdi=0`（`this` 为 NULL）。
+- 根因：`g_kbeSignalHandlers = SignalHandlers::getSingleton()`，但 `SignalHandlers` 单例指针只在构造函数里赋值，全仓库无任何 `SignalHandlers` 对象被构造（上游 KBEngine 亦然）；仓库现代化后该实例化缺失，`getSingleton()` 返回空引用。
+- 解决：`kbe/src/lib/server/serverapp.cpp` 的 `ServerApp::installSignals()` 首用前补 `new SignalHandlers();`（与仓库其它单例 `new Resmgr()`/`new DebugHelper()` 惯例一致）。此修复覆盖所有组件。
+
+### 坑 5：NetworkInterface 断言"no available port"
+
+- 现象：修好坑 4 后再起 machine，`NetworkInterface` 构造 `myassert` 中止。
+- 根因：**并非代码 bug**——前一个 `machine` 实例已正常绑定 external 端口 20099 并存活，第二个实例绑定失败属正常端口冲突。
+- 结论：machine 单实例即可；起服前先 `pkill -f kbe/bin/server` 清理残留。
+
 ### 构建结果
 
 - 编译器：gcc/g++ 15.2 直接通过，**无需切换 g++-12**。
