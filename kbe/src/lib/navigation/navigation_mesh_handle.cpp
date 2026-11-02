@@ -524,11 +524,18 @@ dtNavMesh* tryReadNavmesh(uint8* data, size_t readsize, const std::string& res, 
 		NavMeshTileHeader tileHeader;
 		size = sizeof(NavMeshTileHeader);
 
+		if(pos + size > (int)readsize)
+		{
+			success = false;
+			status = DT_FAILURE + DT_INVALID_PARAM;
+			break;
+		}
+
 		memcpy(&tileHeader, &data[pos], size);
 		pos += size;
 
 		size = tileHeader.dataSize;
-		if (!tileHeader.tileRef || !tileHeader.dataSize)
+		if (!tileHeader.tileRef || size <= 0 || size > (int)readsize - pos)
 		{
 			success = false;
 			status = DT_FAILURE + DT_INVALID_PARAM;
