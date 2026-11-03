@@ -2,19 +2,19 @@
 
 ## 待办
 
-- [ ] 代码深审 P0：客户端 `PY_*` 方法参数经非受限 `pickle.loads` 反序列化可远程代码执行（`kbe/src/lib/pyscript/pickler.cpp:26,152`、`kbe/src/lib/entitydef/datatype.cpp:1240,1296,1352,1408`；需引擎构建环境实现受限反序列化）
+- [x] 代码深审 P0：客户端 `PY_*` 方法参数经非受限 `pickle.loads` 反序列化可远程代码执行（`kbe/src/lib/pyscript/pickler.cpp:26,152`、`kbe/src/lib/entitydef/datatype.cpp:1240,1296,1352,1408`；需引擎构建环境实现受限反序列化）（2026-11-04 已修：受限 Unpickler 白名单 `_upf` 回调+安全内建类型；`kbe_smoke_tests` 177/177 全绿；commit `167d085`、`kbe/src/lib/pyscript/pickler.cpp:26`）
 - [x] 代码深审 P1：传送回滚解引用 NULL 控制器列表（`kbe/src/server/cellapp/entity.cpp:3989-3993,4112-4113,4147-4148`、`cellapp.cpp:2087`）（2026-11-04 复核属实；已修：`createMovementHandlerFromStream` 顶部惰性重建 `pControllers_`，与 `createControllersFromStream` 既有守卫一致，保证传送回滚序列先移动处理器后控制器列表的解流顺序安全；`kbe_cellapp` 编译链接过；`kbe_smoke_tests` 173/173、`kbe_entitydef_xml_tests` 30/30 全绿；本 commit、`kbe/src/server/cellapp/entity.cpp:4289-4293`）
-- [ ] 代码深审 P1：网络消息长度 `0xFFFF`+扩展字段可致 4GB 分配、`bad_alloc` 未捕获崩溃（`kbe/src/lib/network/packet_reader.cpp:141,148-151,226`、`channel.cpp:1186`）
-- [ ] 代码深审 P2：安装脚本硬编码默认 MySQL 口令（`kbe/tools/server/install/installer.py:817,976` `mysql_kbe_password = "pwd123456"`）
-- [ ] 代码深审 P2：fallback 构建缺系统 `tinyxml2`，README「Fallback uses vendored deps」不准确（`cmake/KBEngineDependencies.cmake:52` 无条件 `find_package(... REQUIRED)`，无 vendored 回退）
-- [ ] 代码深审 P2：`__py_createEntityAnywhereFromDBID` 对未知 dbInterface 名解引用 NULL（`kbe/src/server/baseapp/baseapp.cpp:1475-1476`、`serverconfig.inl:112-124`）
-- [ ] 代码深审 P2：`Entity::writeToDB` 对未知 dbInterface 名解引用 NULL（`kbe/src/server/baseapp/entity.cpp:1157-1158`）
-- [ ] 代码深审 P2：`KBEEntityLogTableMysql::queryEntity` SQL 失败仍返回 true、读未初始化 EntityLog（`kbe/src/lib/db_mysql/kbe_table_mysql.cpp:220-222`、`dbtasks.cpp:602-616,1658-1667`）
-- [ ] 代码深审 P2：`Archiver::tick` 有符号 32 位乘法溢出致 OOB 索引（`kbe/src/server/baseapp/archiver.cpp:38-43`）
-- [ ] 代码深审 P2：`findRandomPointAroundCircle` 无 ground 多边形时解引用 NULL poly/未初始化读（`kbe/src/lib/navigation/navigation_mesh_handle.cpp:197,231,246,249,267`）
-- [ ] 代码深审 P2：负 navmesh layer 未拒绝、`GetLayer` `.at()` 抛异常（`kbe/src/lib/navigation/navigation_tile_handle.cpp:59,409`、`entity.cpp:2663,2690,2758`）
-- [ ] 代码深审 P2：`setPosition_XYZ_float` 丢弃 Y 且用 Y 覆写 X（`kbe/src/server/cellapp/entity.cpp:1864-1866`、`cellapp_interface.h:187-191`）
-- [ ] 代码深审 P2：navmesh 加载失败静默报成功（`kbe/src/server/cellapp/loadnavmesh_threadtasks.cpp:22-32`、`spacememory.cpp:299-328`）
+- [x] 代码深审 P1：网络消息长度 `0xFFFF`+扩展字段可致 4GB 分配、`bad_alloc` 未捕获崩溃（`kbe/src/lib/network/packet_reader.cpp:141,148-151,226`、`channel.cpp:1186`）（2026-11-04 已修：扩展长度超 MAX_SIZE 拒绝+`bad_alloc` 捕获；`kbe_smoke_tests` 177/177 全绿；commit `40ab95f`、`kbe/src/lib/network/packet_reader.cpp:148`）
+- [x] 代码深审 P2：安装脚本硬编码默认 MySQL 口令（`kbe/tools/server/install/installer.py:817,976` `mysql_kbe_password = "pwd123456"`）（2026-11-04 已修：空口令拒绝+重新提示；AST 扫描无残留默认口令；commit `9c7a7fd`、`kbe/tools/server/install/installer.py:817`）
+- [x] 代码深审 P2：fallback 构建缺系统 `tinyxml2`，README「Fallback uses vendored deps」不准确（`cmake/KBEngineDependencies.cmake:52` 无条件 `find_package(... REQUIRED)`，无 vendored 回退）（2026-11-04 已修：vendored tinyxml2 v10 入库+fallback 强制使用；`kbe_smoke_tests` 177/177 全绿；commit `85072cc`、`cmake/KBEngineDependencies.cmake:52`）
+- [x] 代码深审 P2：`__py_createEntityAnywhereFromDBID` 对未知 dbInterface 名解引用 NULL（`kbe/src/server/baseapp/baseapp.cpp:1475-1476`、`serverconfig.inl:112-124`）（2026-11-04 已修：baseapp 6 处 dbInterface NULL 守卫；`kbe_baseapp` 编译链接过；commit `9b0b6f6`、`kbe/src/server/baseapp/baseapp.cpp:1136`）
+- [x] 代码深审 P2：`Entity::writeToDB` 对未知 dbInterface 名解引用 NULL（`kbe/src/server/baseapp/entity.cpp:1157-1158`）（2026-11-04 已修：writeToDB dbInterface NULL 守卫；`kbe_baseapp` 编译链接过；commit `99ba906`、`kbe/src/server/baseapp/entity.cpp:1157`）
+- [x] 代码深审 P2：`KBEEntityLogTableMysql::queryEntity` SQL 失败仍返回 true、读未初始化 EntityLog（`kbe/src/lib/db_mysql/kbe_table_mysql.cpp:220-222`、`dbtasks.cpp:602-616,1658-1667`）（2026-11-04 已修：查询前初始化 entitylog+SQL 失败返回 false；`kbe_dbmgr` 编译链接过；commit `f30c19a`、`kbe/src/lib/db_mysql/kbe_table_mysql.cpp:220`）
+- [x] 代码深审 P2：`Archiver::tick` 有符号 32 位乘法溢出致 OOB 索引（`kbe/src/server/baseapp/archiver.cpp:38-43`）（2026-11-04 已修：索引改为 size_t 避免有符号溢出；`kbe_baseapp` 编译链接过；commit `2e0e7ae`、`kbe/src/server/baseapp/archiver.cpp:38`）
+- [x] 代码深审 P2：`findRandomPointAroundCircle` 无 ground 多边形时解引用 NULL poly/未初始化读（`kbe/src/lib/navigation/navigation_mesh_handle.cpp:197,231,246,249,267`）（2026-11-04 已修：NULL tile/poly 守卫提前返回；`kbe_navigation` 编译链接过；commit `83ec425`、`kbe/src/lib/navigation/navigation_mesh_handle.cpp:197`）
+- [x] 代码深审 P2：负 navmesh layer 未拒绝、`GetLayer` `.at()` 抛异常（`kbe/src/lib/navigation/navigation_tile_handle.cpp:59,409`、`entity.cpp:2663,2690,2758`）（2026-11-04 已修：负 layer 三个入口返回 NAV_ERROR；`kbe_navigation` 编译链接过；commit `c6f8283`、`kbe/src/lib/navigation/navigation_tile_handle.cpp:59`）
+- [x] 代码深审 P2：`setPosition_XYZ_float` 丢弃 Y 且用 Y 覆写 X（`kbe/src/server/cellapp/entity.cpp:1864-1866`、`cellapp_interface.h:187-191`）（2026-11-04 已修：pos.x=x/pos.y=y/pos.z=z；`kbe_cellapp` 编译链接过；commit `c2a0c8c`、`kbe/src/server/cellapp/entity.cpp:1864`）
+- [x] 代码深审 P2：navmesh 加载失败静默报成功（`kbe/src/server/cellapp/loadnavmesh_threadtasks.cpp:22-32`、`spacememory.cpp:299-328`）（2026-11-04 已修：navmeshLayer 为空时 create 返回 NULL；`kbe_navigation` 编译过+`kbe_smoke_tests` 177/177 全绿；commit `f080123`、`kbe/src/lib/navigation/navigation_mesh_handle.cpp:464`）
 - [ ] 代码深审 P2：`MoveController::createFromStream` 未知 subtype 解引用 NULL（`kbe/src/lib/server/move_controller.cpp:51-58,60`）
 - [ ] 代码深审 P2：blowfish 解密失败被忽略、信任攻击者帧（`kbe/src/lib/network/encryption_filter.cpp:225-229`、`blowfish.cpp:148-155`）
 - [ ] 代码深审 P3：冒烟测试硬编码口令（`tests/smoke/test_server_sendmail.cpp:58` `info.password = "secret"`）
