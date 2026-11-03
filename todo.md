@@ -42,3 +42,17 @@
 - [x] 文档双语收口 docs/ 子目录 api（2026-10-22；commit `3b08b08`、`daaf492`；docs:build 过、test:docs 4/4、权威核对 24/24）
 - [x] 文档双语收口 docs/ 子目录 architecture/study/guide/resources/book-legacy/tutorial（b9e91b4 布局翻转；131 对 131、0 缺失、2026-11-01 复核）
 - [x] api/kbengine 双语化核对口径：24 页 = 13 直通 + 11 增强（2026-10-16 R1016PATROL；新增 `test_verify_authoritative_docs.py` 三类回归）
+
+## 区间审核：a3c481d731d1..HEAD（2026-11-02，只审不改）
+
+覆盖：5 提交（`20b9794` dbmgr NULL 模块守卫、`4f09902` navmesh 边界、`0700925` method Py_None、`db77814`/`3f6d733` 文档）× 7 文件，全部代码文件已逐行核对 + 框架语义回溯（TPTask 线程循环/`presentMainThread` 状态机、`CallbackMgr` 超时回收、baseapp `isArchiveing_` 复位点、`EntityAutoLoader::querying_` 状态机）。
+
+- [x] 审核发现：`presentMainThread` 的 NULL 模块守卫提前 `return COMPLETED` 而未向请求方发送失败回调，依赖侧永久卡死——`DBTaskEntityAutoLoad::presentMainThread`（`dbtasks.cpp:582-586`）丢 `onEntityAutoLoadCBFromDBMgr` → baseapp `EntityAutoLoader::querying_` 永真（`entity_autoloader.cpp:73,122`）→ 自动加载停摆、baseapp 启动挂起（`setAutoLoadState(1)` 永不执行）；`DBTaskWriteEntity::presentMainThread`（`dbtasks.cpp:387-391`）丢 `onWriteToDBCallback` → baseapp `isArchiveing_` 永不复位（`entity.cpp:1194,1240`），首写实体（dbid<=0、cell 存活）永久无法再写库；`DBTaskDeleteEntityByDBID`/`DBTaskLookUpEntityByDBID::presentMainThread`（`dbtasks.cpp:523-527,680-684`）丢回调 → baseapp 脚本回调永不触发（`CallbackMgr::tick` 仅超时回收 PyObject，不调用脚本）。建议：守卫应构造 `success_=false` 的失败回调而非静默 COMPLETED（`dbtasks.cpp` 4 处）（2026-11-03 复核属实；已修：4 处 NULL 守卫改为发送 `success_=false` 失败回调，`kbe/src/server/dbmgr/dbtasks.cpp:387-401`（WriteEntity）、`:534-548`（DeleteEntityByDBID）、`:604-618`（EntityAutoLoad）、`:713-727`（LookUpEntityByDBID）；`kbe_dbmgr` 编译过；`kbe_smoke_tests` 173/173、`kbe_entitydef_xml_tests` 30/30 全绿；commit `e9d548d`、`kbe/src/server/dbmgr/dbtasks.cpp:390-401,537-548,607-618,716-727`）
+- [x] 审核发现：`DBTaskRemoveEntity::db_thread_process` 的 NULL 守卫位于 `eraseEntityLog` 之后（`dbtasks.cpp:437-447`），未知模块路径先擦除 entitylog 再失败返回，留下「日志已删、实体行未删」的不一致——守卫应前置到 `eraseEntityLog` 之前（2026-11-03 复核属实；已修：NULL 守卫前置到 `eraseEntityLog` 之前，`kbe/src/server/dbmgr/dbtasks.cpp:445-451`；`kbe_dbmgr` 编译过；`kbe_smoke_tests` 173/173、`kbe_entitydef_xml_tests` 30/30 全绿；commit `e9d548d`、`kbe/src/server/dbmgr/dbtasks.cpp:447-451`）
+- [x] 审核发现：测试缺口——本区间 4 个代码修复均无回归测试：navmesh 恶意瓦片解码（size=0/负/越界）无用例（`tests/smoke/` 无 navigation 测试）；`MethodDescription::createFromStream` NULL 参数→Py_None 无用例；dbmgr/baseapp `findScriptModule` NULL 守卫路径无用例（仅 `test_entitydef_xml_loading.cpp` 存在）（2026-11-03 复核属实；已补回归：navmesh 恶意瓦片 3 用例 `tests/smoke/test_navigation_navmesh_decode.cpp`（RejectsZero/Negative/OverrunSizeTile）、MethodDescription NULL→Py_None 1 用例 `tests/smoke/test_entitydef_xml_loading.cpp`（MethodDescriptionCreateFromStreamTurnsNullArgIntoNone）；dbmgr `findScriptModule` NULL 守卫为集成级（需 `Dbmgr` 完整运行时，`dbtasks.cpp` 依赖 `Dbmgr::getSingleton().networkInterface()`/`DBInterface`），无法单测，以 `kbe_dbmgr` 编译+修复代码为证；`kbe_smoke_tests` 173/173、`kbe_entitydef_xml_tests` 30/30 全绿；commit `f2d62bc`、`tests/smoke/test_navigation_navmesh_decode.cpp:83-103`、`tests/smoke/test_entitydef_xml_loading.cpp:1749-1774`）
+
+## 区间审核：3f6d7336..HEAD（2026-11-03，只审不改）
+
+覆盖：1 提交（`c2a3b8f` Update README.md）× 1 文件（`README.md`，+3/-1）。改动为纯文档排版：将徽章 `<p align="center">` 行（内容逐字节一致）从 Development Fork Notice 下方移至语言链接下方，并补一行空行；无链接新增/失效、无 Markdown 结构破坏、无代码文件涉及。
+
+- [x] 审核发现：本轮 diff 未见问题（3f6d7336..HEAD）（2026-11-03 复核属实：`git diff 3f6d7336 HEAD` 仅 `README.md` +3/-1 纯文档排版，徽章 `<p align="center">` 行内容逐字节一致地从 Development Fork Notice 下方移至语言链接下方并补一空行，无链接新增/失效、无 Markdown 结构破坏、无代码文件涉及）
