@@ -38,11 +38,14 @@ public:
 
 private:
 	static PyObject* picklerMethod_;						// cPicket.dumps方法指针
-	static PyObject* unPicklerMethod_;						// cPicket.loads方法指针
+	static PyObject* unPicklerMethod_;						// cPickle.Unpickler类指针
+	static PyObject* restrictedUnpicklerClass_;			// 受限反序列化Unpickler子类
 
 	static PyObject* pyPickleFuncTableModule_;				// unpickle函数表模块对象 所有自定义类的unpickle函数都需要在此注册
 
 	static bool	isInit;										// 是否已经被初始化
+
+	static PyObject* createRestrictedUnpicklerClass(void);
 } ;
 
 }

@@ -46,6 +46,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_math.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_resmgr.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_navigation_navmesh_decode.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_pyscript_pickler.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_event_dispatcher.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_endpoint.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_fixed_messages.cpp"
@@ -185,6 +186,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::network_bundle
     KBEngine::network_channel
     KBEngine::network_interface
+    KBEngine::pyscript
     KBEngine::network_bundle_broadcast
     KBEngine::navigation
     KBEngine::helper_profile_handler
