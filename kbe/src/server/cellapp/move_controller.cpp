@@ -55,7 +55,11 @@ void MoveController::createFromStream(KBEngine::MemoryStream& s)
 	else if(utype == MoveToPointHandler::MOVE_TYPE_POINT)
 		pMoveToPointHandler_ = new MoveToPointHandler();
 	else
-		KBE_ASSERT(false);
+	{
+		ERROR_MSG(fmt::format("MoveController::createFromStream: invalid move type({})!\n",
+			(int)utype));
+		return;
+	}
 
 	pMoveToPointHandler_->createFromStream(s);
 }

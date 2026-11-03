@@ -24,11 +24,12 @@ public:
 	virtual void createFromStream(KBEngine::MemoryStream& s);
 
 	float velocity() const {
-		return pMoveToPointHandler_->velocity();
+		return pMoveToPointHandler_ ? pMoveToPointHandler_->velocity() : 0.f;
 	}
 
 	void velocity(float v) {
-		pMoveToPointHandler_->velocity(v);
+		if (pMoveToPointHandler_)
+			pMoveToPointHandler_->velocity(v);
 	}
 
 protected:
