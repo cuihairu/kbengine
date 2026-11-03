@@ -140,6 +140,9 @@ else()
     "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/net.c"
     "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/read.c"
     "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/sds.c"
+    "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/alloc.c"
+    "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/async.c"
+    "${KBE_SOURCE_DIR}/lib/dependencies/hiredis/sockcompat.c"
   )
 
   target_include_directories(kbe_dependency_hiredis
