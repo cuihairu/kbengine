@@ -35,14 +35,14 @@ void Archiver::tick()
 	// baseEntity的数量 * idx / tick周期 = 每次在vector中移动的一个区段
 	// 这个区段在每个gametick进行处理, 刚好平滑的在periodInTicks中处理完任务
 	// 如果archiveIndex_ >= periodInTicks则重新产生一次随机序列
-	int size = (int)arEntityIDs_.size();
-	int startIndex = size * archiveIndex_ / periodInTicks;
+	size_t size = arEntityIDs_.size();
+	size_t startIndex = size * (size_t)archiveIndex_ / (size_t)periodInTicks;
 
 	++archiveIndex_;
 
-	int endIndex   = size * archiveIndex_ / periodInTicks;
+	size_t endIndex = size * (size_t)archiveIndex_ / (size_t)periodInTicks;
 
-	for (int i = startIndex; i < endIndex; ++i)
+	for (size_t i = startIndex; i < endIndex; ++i)
 	{
 		Entity* pEntity = Baseapp::getSingleton().findEntity(arEntityIDs_[i]);
 
