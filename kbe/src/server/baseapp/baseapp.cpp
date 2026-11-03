@@ -1134,6 +1134,13 @@ PyObject* Baseapp::__py_createEntityFromDBID(PyObject* self, PyObject* args)
 		dbInterfaceName = PyUnicode_AsUTF8AndSize(pyDBInterfaceName, NULL);
 
 		DBInterfaceInfo* pDBInterfaceInfo = g_kbeSrvConfig.dbInterface(dbInterfaceName);
+		if (pDBInterfaceInfo == NULL)
+		{
+			PyErr_Format(PyExc_TypeError, "KBEngine::createEntityFromDBID: not found dbInterface(%s)!",
+				dbInterfaceName.c_str());
+			PyErr_PrintEx(0);
+			return NULL;
+		}
 		if (pDBInterfaceInfo->isPure)
 		{
 			ERROR_MSG(fmt::format("KBEngine::createEntityFromDBID: dbInterface({}) is a pure database does not support Entity! "
@@ -1473,6 +1480,13 @@ PyObject* Baseapp::__py_createEntityAnywhereFromDBID(PyObject* self, PyObject* a
 		dbInterfaceName = PyUnicode_AsUTF8AndSize(pyDBInterfaceName, NULL);
 
 		DBInterfaceInfo* pDBInterfaceInfo = g_kbeSrvConfig.dbInterface(dbInterfaceName);
+		if (pDBInterfaceInfo == NULL)
+		{
+			PyErr_Format(PyExc_TypeError, "Baseapp::createEntityAnywhereFromDBID: not found dbInterface(%s)!",
+				dbInterfaceName.c_str());
+			PyErr_PrintEx(0);
+			return NULL;
+		}
 		if (pDBInterfaceInfo->isPure)
 		{
 			ERROR_MSG(fmt::format("Baseapp::createEntityAnywhereFromDBID: dbInterface({}) is a pure database does not support Entity! "
@@ -1986,6 +2000,13 @@ PyObject* Baseapp::__py_createEntityRemotelyFromDBID(PyObject* self, PyObject* a
 		dbInterfaceName = PyUnicode_AsUTF8AndSize(pyDBInterfaceName, NULL);
 
 		DBInterfaceInfo* pDBInterfaceInfo = g_kbeSrvConfig.dbInterface(dbInterfaceName);
+		if (pDBInterfaceInfo == NULL)
+		{
+			PyErr_Format(PyExc_TypeError, "Baseapp::createEntityRemotelyFromDBID: not found dbInterface(%s)!",
+				dbInterfaceName.c_str());
+			PyErr_PrintEx(0);
+			return NULL;
+		}
 		if (pDBInterfaceInfo->isPure)
 		{
 			ERROR_MSG(fmt::format("Baseapp::createEntityRemotelyFromDBID: dbInterface({}) is a pure database does not support Entity! "
