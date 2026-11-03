@@ -814,7 +814,8 @@ def modifyKBEConfig():
 		mysql_kbe_name = "kbe"
 
 	if len(mysql_kbe_password) == 0:
-		mysql_kbe_password = "pwd123456"
+		ERROR_MSG("mysql-kbe-password is empty, please set it before installation.")
+		return False
 		
 	if len(mysql_kbe_db_name) == 0:
 		mysql_kbe_db_name = "kbe"
@@ -971,9 +972,10 @@ def createDatabase():
 			if len(mysql_kbe_name) == 0:
 				mysql_kbe_name = "kbe"
                         
-			mysql_kbe_password = getInput("- password(Do not enter the default is \'kbe\')): ")
-			if len(mysql_kbe_password) == 0:
-				mysql_kbe_password = "pwd123456"
+			while len(mysql_kbe_password) == 0:
+				mysql_kbe_password = getInput("- password(Do not enter the default is \'kbe\')): ")
+				if len(mysql_kbe_password) == 0:
+					ERROR_MSG("mysql-kbe-password must not be empty, please enter again.")
 
 			INFO_MSG('Create kbe-account: name=%s, password=%s successfully!' % (mysql_kbe_name, mysql_kbe_password))
             
