@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <cstdlib>
+
 #include "server/sendmail_threadtasks.h"
 #include "server/serverconfig.h"
 
@@ -55,7 +57,8 @@ TEST(SendmailRequestTest, BuildsRequestForPlainSmtp)
   info.smtp_server = "smtp.example.com";
   info.smtp_port = 25;
   info.username = "sender@example.com";
-  info.password = "secret";
+  const char* envPassword = std::getenv("KBE_TEST_SMTP_PASSWORD");
+  info.password = envPassword ? envPassword : "test-password";
   info.smtp_auth = 1;
 
   TestSendMailTask task(
@@ -76,7 +79,7 @@ TEST(SendmailRequestTest, BuildsRequestForPlainSmtp)
   EXPECT_EQ(request.subjectLine, "Activate");
   EXPECT_EQ(request.mailFrom, "<sender@example.com>");
   EXPECT_EQ(request.username, "sender@example.com");
-  EXPECT_EQ(request.password, "secret");
+  EXPECT_EQ(request.password, info.password);
   EXPECT_EQ(request.loginOptions, "AUTH=LOGIN");
   EXPECT_FALSE(request.useSsl);
   EXPECT_EQ(request.messageHtml,
