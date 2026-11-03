@@ -264,6 +264,11 @@ int NavMeshHandle::findRandomPointAroundCircle(int layer, const Position3D& cent
 
 		// Randomly pick point on polygon.
 		dtPolyRef randomRef = INVALID_NAVMESH_POLYREF;
+		if (randomTile == NULL || randomPoly == NULL)
+		{
+			delete[] allPolyAreas;
+			return (int)points.size();
+		}
 		const float* v = &randomTile->verts[randomPoly->verts[0] * 3];
 		float verts[3 * DT_VERTS_PER_POLYGON];
 		float areas[DT_VERTS_PER_POLYGON + 4];
