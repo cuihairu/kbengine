@@ -217,17 +217,17 @@ bool KBEEntityLogTableMysql::queryEntity(DBInterface * pdbi, DBID dbid, EntityLo
 	sqlstr += tbuf;
 	sqlstr += " LIMIT 1";
 
-	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
-	{
-		return true;
-	}
-	
 	entitylog.dbid = dbid;
 	entitylog.componentID = 0;
 	entitylog.serverGroupID = 0;
 	entitylog.entityID = 0;
 	entitylog.ip[0] = '\0';
 	entitylog.port = 0;
+
+	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
+	{
+		return false;
+	}
 
 	MYSQL_RES * pResult = mysql_store_result(static_cast<DBInterfaceMysql*>(pdbi)->mysql());
 	if(pResult)
