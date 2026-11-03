@@ -387,6 +387,17 @@ thread::TPTask::TPTaskState DBTaskWriteEntity::presentMainThread()
 	if(pModule == NULL)
 	{
 		ERROR_MSG(fmt::format("DBTaskWriteEntity::presentMainThread: script module not found (sid={})!\n", sid_));
+		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
+		(*pBundle).newMessage(BaseappInterface::onWriteToDBCallback);
+		BaseappInterface::onWriteToDBCallbackArgs5::staticAddToBundle((*pBundle),
+			eid_, entityDBID_, pdbi_->dbIndex(), callbackID_, false);
+
+		if(!this->send(pBundle))
+		{
+			ERROR_MSG(fmt::format("DBTaskWriteEntity::presentMainThread: channel({0}) not found.\n", addr_.c_str()));
+			Network::Bundle::reclaimPoolObject(pBundle);
+		}
+
 		return thread::TPTask::TPTASK_STATE_COMPLETED;
 	}
 
@@ -431,17 +442,17 @@ bool DBTaskRemoveEntity::db_thread_process()
 	(*pDatas_) >> sid_;
 
 	EntityTables& entityTables = EntityTables::findByInterfaceName(pdbi_->name());
-	KBEEntityLogTable* pELTable = static_cast<KBEEntityLogTable*>(entityTables.findKBETable(KBE_TABLE_PERFIX "_entitylog"));
-
-	KBE_ASSERT(pELTable);
-	pELTable->eraseEntityLog(pdbi_, entityDBID_, sid_);
-
 	ScriptDefModule* pModule = EntityDef::findScriptModule(sid_);
 	if(pModule == NULL)
 	{
 		ERROR_MSG(fmt::format("DBTaskRemoveEntity::db_thread_process: script module not found (sid={})!\n", sid_));
 		return false;
 	}
+
+	KBEEntityLogTable* pELTable = static_cast<KBEEntityLogTable*>(entityTables.findKBETable(KBE_TABLE_PERFIX "_entitylog"));
+
+	KBE_ASSERT(pELTable);
+	pELTable->eraseEntityLog(pdbi_, entityDBID_, sid_);
 
 	entityTables.removeEntity(pdbi_, entityDBID_, pModule);
 	return false;
@@ -523,6 +534,17 @@ thread::TPTask::TPTaskState DBTaskDeleteEntityByDBID::presentMainThread()
 	if(pModule == NULL)
 	{
 		ERROR_MSG(fmt::format("DBTaskDeleteEntityByDBID::presentMainThread: script module not found (sid={})!\n", sid_));
+		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
+		(*pBundle).newMessage(BaseappInterface::deleteEntityByDBIDCB);
+
+		(*pBundle) << false << entityID_ << entityInAppID_ << callbackID_ << sid_ << entityDBID_;
+
+		if(!this->send(pBundle))
+		{
+			ERROR_MSG(fmt::format("DBTaskDeleteEntityByDBID::presentMainThread: channel({}) not found.\n", addr_.c_str()));
+			Network::Bundle::reclaimPoolObject(pBundle);
+		}
+
 		return thread::TPTask::TPTASK_STATE_COMPLETED;
 	}
 
@@ -582,6 +604,17 @@ thread::TPTask::TPTaskState DBTaskEntityAutoLoad::presentMainThread()
 	if(pModule == NULL)
 	{
 		ERROR_MSG(fmt::format("DBTaskEntityAutoLoad::presentMainThread: script module not found (entityType={})!\n", entityType_));
+		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
+		(*pBundle).newMessage(BaseappInterface::onEntityAutoLoadCBFromDBMgr);
+
+		(*pBundle) << pdbi_->dbIndex() << 0 << entityType_;
+
+		if(!this->send(pBundle))
+		{
+			ERROR_MSG(fmt::format("DBTaskEntityAutoLoad::presentMainThread: channel({}) not found.\n", addr_.c_str()));
+			Network::Bundle::reclaimPoolObject(pBundle);
+		}
+
 		return thread::TPTask::TPTASK_STATE_COMPLETED;
 	}
 
@@ -680,6 +713,17 @@ thread::TPTask::TPTaskState DBTaskLookUpEntityByDBID::presentMainThread()
 	if(pModule == NULL)
 	{
 		ERROR_MSG(fmt::format("DBTaskLookUpEntityByDBID::presentMainThread: script module not found (sid={})!\n", sid_));
+		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
+		(*pBundle).newMessage(BaseappInterface::lookUpEntityByDBIDCB);
+
+		(*pBundle) << false << entityID_ << entityInAppID_ << callbackID_ << sid_ << entityDBID_;
+
+		if(!this->send(pBundle))
+		{
+			ERROR_MSG(fmt::format("DBTaskLookUpEntityByDBID::presentMainThread: channel({}) not found.\n", addr_.c_str()));
+			Network::Bundle::reclaimPoolObject(pBundle);
+		}
+
 		return thread::TPTask::TPTASK_STATE_COMPLETED;
 	}
 
