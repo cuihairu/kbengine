@@ -459,6 +459,14 @@ NavigationHandle* NavMeshHandle::create(std::string resPath, const std::map< int
 		}		
 	}
 	
+	// If no layer was actually loaded (all _create calls failed), return NULL so
+	// callers do not treat an empty navmesh as a successful load.
+	if (pNavMeshHandle->navmeshLayer.empty())
+	{
+		delete pNavMeshHandle;
+		return NULL;
+	}
+
 	return pNavMeshHandle;
 }
 
