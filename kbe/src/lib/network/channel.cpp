@@ -26,6 +26,8 @@
 #include "helper/debug_helper.h"
 #include "common/ssl.h"
 
+#include <new>
+
 namespace KBEngine { 
 namespace Network
 {
@@ -1196,6 +1198,20 @@ void Channel::processPackets(KBEngine::Network::MessageHandlers* pMsgHandlers, P
 		pPacketReader_->currMsgID(0);
 		pPacketReader_->currMsgLen(0);
 		condemn("Channel::processPackets: packet invalid!");
+	}
+	catch(const std::bad_alloc &)
+	{
+		Network::MessageHandler* pMsgHandler = pMsgHandlers->find(pPacketReader_->currMsgID());
+		ERROR_MSG(fmt::format("Channel::processPackets({}): allocation failure while processing packet. currMsg=({}, id={}, len={}), currMsgLen={}\n",
+			this->c_str()
+			, (pMsgHandler == NULL ? "unknown" : pMsgHandler->name)
+			, pPacketReader_->currMsgID()
+			, (pMsgHandler == NULL ? -1 : pMsgHandler->msgLen)
+			, pPacketReader_->currMsgLen()));
+
+		pPacketReader_->currMsgID(0);
+		pPacketReader_->currMsgLen(0);
+		condemn("Channel::processPackets: allocation failure!");
 	}
 
 	RECLAIM_PACKET(pPacket->isTCPPacket(), pPacket);

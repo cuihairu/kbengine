@@ -142,6 +142,24 @@ void PacketReader::processMessages(KBEngine::Network::MessageHandlers* pMsgHandl
 
 					NetworkStats::getSingleton().trackMessage(NetworkStats::RECV, *pMsgHandler,
 						currMsgLen_ + NETWORK_MESSAGE_ID_SIZE + NETWORK_MESSAGE_LENGTH1_SIZE);
+
+					// Reject decoded lengths that exceed the maximum supported
+					// message size. The extended length field is a 32-bit value
+					// (up to 4 GB) and, without this bound, a malicious peer could
+					// drive a multi-GB allocation in writeFragmentMessage() and
+					// crash the server with an uncaught std::bad_alloc.
+					if (currMsgLen_ > MemoryStream::MAX_SIZE)
+					{
+						WARNING_MSG(fmt::format(
+							"PacketReader::processMessages({0}): msglen exceeds the hard limit! msgID={1}, msglen={2}, maxlen={3}, from {4}.\n",
+							pMsgHandler->name.c_str(), currMsgID_, currMsgLen_,
+							(size_t)MemoryStream::MAX_SIZE, pChannel_->c_str()));
+
+						currMsgID_ = 0;
+						currMsgLen_ = 0;
+						pChannel_->condemn("PacketReader::processMessages: msglen exceeds the hard limit!");
+						break;
+					}
 				}
 			}
 
