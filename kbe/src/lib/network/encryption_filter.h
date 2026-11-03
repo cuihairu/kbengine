@@ -20,7 +20,7 @@ public:
 	virtual ~EncryptionFilter() {}
 
 	virtual void encrypt(Packet * pInPacket, Packet * pOutPacket) = 0;
-	virtual void decrypt(Packet * pInPacket, Packet * pOutPacket) = 0;
+	virtual bool decrypt(Packet * pInPacket, Packet * pOutPacket) = 0;
 };
 
 
@@ -38,7 +38,7 @@ public:
 	virtual Reason recv(Channel * pChannel, PacketReceiver & receiver, Packet * pPacket);
 
 	void encrypt(Packet * pInPacket, Packet * pOutPacket);
-	void decrypt(Packet * pInPacket, Packet * pOutPacket);
+	bool decrypt(Packet * pInPacket, Packet * pOutPacket);
 private:
 	Packet * pPacket_;
 	Network::PacketLength packetLen_;

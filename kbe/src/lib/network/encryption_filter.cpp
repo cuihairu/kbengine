@@ -222,7 +222,20 @@ Reason BlowfishFilter::recv(Channel * pChannel, PacketReceiver & receiver, Packe
 				DebugHelper::getSingleton().changeLogger(COMPONENT_NAME_EX(g_componentType));
 		}
 		
-		decrypt(pPacket, pPacket);
+		if (!decrypt(pPacket, pPacket))
+		{
+			ERROR_MSG(fmt::format("BlowfishFilter::recv({}): decrypt failed, "
+				"invalid encrypted packet. encryptedLen={}, padSize={}\n",
+				pChannel->c_str(), packetLen_, (int)padSize_));
+
+			if(pPacket_)
+			{
+				RECLAIM_PACKET(pPacket_->isTCPPacket(), pPacket);
+				pPacket_ = NULL;
+			}
+
+			return REASON_CORRUPTED_PACKET;
+		}
 
 		// 上面的流程能保证wpos之后不会有多余的包
 		// 如果有多余的包数据会放在pPacket_
@@ -296,7 +309,7 @@ void BlowfishFilter::encrypt(Packet * pInPacket, Packet * pOutPacket)
 }
 
 //-------------------------------------------------------------------------------------
-void BlowfishFilter::decrypt(Packet * pInPacket, Packet * pOutPacket)
+bool BlowfishFilter::decrypt(Packet * pInPacket, Packet * pOutPacket)
 {
 	if(pInPacket != pOutPacket)
 	{
@@ -306,16 +319,24 @@ void BlowfishFilter::decrypt(Packet * pInPacket, Packet * pOutPacket)
 			pOutPacket->data() + pOutPacket->rpos(),  
 			(int)(pInPacket->wpos() - pInPacket->rpos()));
 
+		if(size < 0)
+			return false;
+
 		pOutPacket->wpos((int)(size + pOutPacket->wpos()));
 	}
 	else
 	{
-		KBEBlowfish::decrypt(pInPacket->data() + pInPacket->rpos(), pInPacket->data(),  
+		int size = KBEBlowfish::decrypt(pInPacket->data() + pInPacket->rpos(), pInPacket->data(),  
 			(int)(pInPacket->wpos() - pInPacket->rpos()));
+
+		if(size < 0)
+			return false;
 
 		pInPacket->wpos((int)(pInPacket->wpos() - pInPacket->rpos()));
 		pInPacket->rpos(0);
 	}
+
+	return true;
 }
 
 //-------------------------------------------------------------------------------------
