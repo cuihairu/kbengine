@@ -488,12 +488,16 @@ def extract_chm_to_temp(chm_file: Path) -> Path:
         raise FileNotFoundError("未找到 hh.exe，当前环境无法直接解包 CHM")
 
     temp_root = Path(tempfile.mkdtemp(prefix="kbengine_chm_"))
-    result = subprocess.run(
-        [hh_exe, "-decompile", str(temp_root), str(chm_file)],
-        capture_output=True,
-        text=True,
-        timeout=120,
-    )
+    try:
+        result = subprocess.run(
+            [hh_exe, "-decompile", str(temp_root), str(chm_file)],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        shutil.rmtree(temp_root, ignore_errors=True)
+        raise RuntimeError(f"hh.exe 解包超时: {chm_file}")
 
     if result.returncode != 0:
         shutil.rmtree(temp_root, ignore_errors=True)
