@@ -91,7 +91,7 @@ KBEngine
 KBEngine uses CMake 3.21+ for cross-platform building. The build system supports two modes:
 
 1. **vcpkg mode** (Recommended): Uses vcpkg for dependency management
-2. **Fallback mode**: Uses available system packages where present, otherwise vendored dependencies
+2. **Fallback mode**: Uses vendored dependencies
 
 ### Prerequisites
 
@@ -105,9 +105,9 @@ KBEngine uses CMake 3.21+ for cross-platform building. The build system supports
 - **macOS**: Xcode 13+ or Clang 10+
 
 **Dependencies:**
-- All dependencies are managed by **vcpkg** when using vcpkg mode; fallback mode prefers system packages where available and otherwise uses vendored sources
+- All dependencies are managed by **vcpkg** when using vcpkg mode; fallback mode uses vendored sources (system packages are used for optional extras only)
 - This includes Python 3, which is embedded into KBEngine (requires Python headers for compilation)
-- Two libraries use vendored source code: **tmxparser** (map parser) and **g3dlite** (3D math library)
+- Libraries with vendored source code include **tinyxml2** (XML parsing), **tmxparser** (map parser), and **g3dlite** (3D math library)
 
 ---
 
