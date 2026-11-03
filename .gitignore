@@ -100,6 +100,10 @@ downloads/
 eggs/
 .eggs/
 lib/
+!kbe/src/lib/
+!kbe/src/lib/dependencies/
+!kbe/src/lib/dependencies/tinyxml2/
+!kbe/src/lib/dependencies/tinyxml2/*
 lib64/
 parts/
 sdist/

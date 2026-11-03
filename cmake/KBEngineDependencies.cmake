@@ -49,16 +49,32 @@ else()
   message(STATUS "KBEngine: using vendored fmt sources")
 endif()
 
-find_package(tinyxml2 CONFIG REQUIRED)
+find_package(tinyxml2 CONFIG QUIET)
 
-add_library(kbe_dependency_tinyxml INTERFACE)
-add_library(KBEngine::tinyxml ALIAS kbe_dependency_tinyxml)
-add_library(KBEngine::tinyxml2 ALIAS kbe_dependency_tinyxml)
-
-target_link_libraries(kbe_dependency_tinyxml
-  INTERFACE
-    tinyxml2::tinyxml2
-)
+if(TARGET tinyxml2::tinyxml2)
+  add_library(kbe_dependency_tinyxml INTERFACE)
+  add_library(KBEngine::tinyxml ALIAS kbe_dependency_tinyxml)
+  add_library(KBEngine::tinyxml2 ALIAS kbe_dependency_tinyxml)
+  target_link_libraries(kbe_dependency_tinyxml
+    INTERFACE
+      tinyxml2::tinyxml2
+  )
+  message(STATUS "KBEngine: using package-provided tinyxml2 target")
+elseif(KBE_USING_VCPKG)
+  message(FATAL_ERROR "KBEngine: vcpkg mode requires a package-provided tinyxml2 target.")
+else()
+  add_library(kbe_dependency_tinyxml STATIC
+    "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml2/tinyxml2.cpp"
+  )
+  add_library(KBEngine::tinyxml ALIAS kbe_dependency_tinyxml)
+  add_library(KBEngine::tinyxml2 ALIAS kbe_dependency_tinyxml)
+  target_compile_features(kbe_dependency_tinyxml PUBLIC cxx_std_17)
+  target_include_directories(kbe_dependency_tinyxml
+    PUBLIC
+      "${KBE_SOURCE_DIR}/lib/dependencies/tinyxml2"
+  )
+  message(STATUS "KBEngine: using vendored tinyxml2 sources")
+endif()
 
 if(KBE_USE_LOG4CXX)
   set(KBE_LOG4CXX_IMPORTED_TARGET "")
