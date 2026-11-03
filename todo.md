@@ -15,7 +15,7 @@
 - [x] 代码深审 P2：负 navmesh layer 未拒绝、`GetLayer` `.at()` 抛异常（`kbe/src/lib/navigation/navigation_tile_handle.cpp:59,409`、`entity.cpp:2663,2690,2758`）（2026-11-04 已修：负 layer 三个入口返回 NAV_ERROR；`kbe_navigation` 编译链接过；commit `c6f8283`、`kbe/src/lib/navigation/navigation_tile_handle.cpp:59`）
 - [x] 代码深审 P2：`setPosition_XYZ_float` 丢弃 Y 且用 Y 覆写 X（`kbe/src/server/cellapp/entity.cpp:1864-1866`、`cellapp_interface.h:187-191`）（2026-11-04 已修：pos.x=x/pos.y=y/pos.z=z；`kbe_cellapp` 编译链接过；commit `c2a0c8c`、`kbe/src/server/cellapp/entity.cpp:1864`）
 - [x] 代码深审 P2：navmesh 加载失败静默报成功（`kbe/src/server/cellapp/loadnavmesh_threadtasks.cpp:22-32`、`spacememory.cpp:299-328`）（2026-11-04 已修：navmeshLayer 为空时 create 返回 NULL；`kbe_navigation` 编译过+`kbe_smoke_tests` 177/177 全绿；commit `f080123`、`kbe/src/lib/navigation/navigation_mesh_handle.cpp:464`）
-- [ ] 代码深审 P2：`MoveController::createFromStream` 未知 subtype 解引用 NULL（`kbe/src/lib/server/move_controller.cpp:51-58,60`）
+- [x] 代码深审 P2：`MoveController::createFromStream` 未知 subtype 解引用 NULL（`kbe/src/lib/server/move_controller.cpp:51-58,60`）（2026-11-04 已修：未知 subtype 记错误并返回，`velocity()`/`velocity(v)` 判空；`kbe_cellapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `68f6a26`、`kbe/src/server/cellapp/move_controller.cpp:58`）
 - [ ] 代码深审 P2：blowfish 解密失败被忽略、信任攻击者帧（`kbe/src/lib/network/encryption_filter.cpp:225-229`、`blowfish.cpp:148-155`）
 - [ ] 代码深审 P3：冒烟测试硬编码口令（`tests/smoke/test_server_sendmail.cpp:58` `info.password = "secret"`）
 - [ ] 代码深审 P3：`rebuild_docs.py` CHM 解包超时异常路径泄漏临时目录（`tools/rebuild_docs.py:490-505`）
