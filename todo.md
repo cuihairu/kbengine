@@ -3,7 +3,7 @@
 ## 待办
 
 - [ ] 代码深审 P0：客户端 `PY_*` 方法参数经非受限 `pickle.loads` 反序列化可远程代码执行（`kbe/src/lib/pyscript/pickler.cpp:26,152`、`kbe/src/lib/entitydef/datatype.cpp:1240,1296,1352,1408`；需引擎构建环境实现受限反序列化）
-- [ ] 代码深审 P1：传送回滚解引用 NULL 控制器列表（`kbe/src/server/cellapp/entity.cpp:3989-3993,4112-4113,4147-4148`、`cellapp.cpp:2087`）
+- [x] 代码深审 P1：传送回滚解引用 NULL 控制器列表（`kbe/src/server/cellapp/entity.cpp:3989-3993,4112-4113,4147-4148`、`cellapp.cpp:2087`）（2026-11-04 复核属实；已修：`createMovementHandlerFromStream` 顶部惰性重建 `pControllers_`，与 `createControllersFromStream` 既有守卫一致，保证传送回滚序列先移动处理器后控制器列表的解流顺序安全；`kbe_cellapp` 编译链接过；`kbe_smoke_tests` 173/173、`kbe_entitydef_xml_tests` 30/30 全绿；本 commit、`kbe/src/server/cellapp/entity.cpp:4289-4293`）
 - [ ] 代码深审 P1：网络消息长度 `0xFFFF`+扩展字段可致 4GB 分配、`bad_alloc` 未捕获崩溃（`kbe/src/lib/network/packet_reader.cpp:141,148-151,226`、`channel.cpp:1186`）
 - [ ] 代码深审 P2：安装脚本硬编码默认 MySQL 口令（`kbe/tools/server/install/installer.py:817,976` `mysql_kbe_password = "pwd123456"`）
 - [ ] 代码深审 P2：fallback 构建缺系统 `tinyxml2`，README「Fallback uses vendored deps」不准确（`cmake/KBEngineDependencies.cmake:52` 无条件 `find_package(... REQUIRED)`，无 vendored 回退）

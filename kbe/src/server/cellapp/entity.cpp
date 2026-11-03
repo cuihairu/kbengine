@@ -4288,6 +4288,11 @@ void Entity::addMovementHandlerToStream(KBEngine::MemoryStream& s)
 //-------------------------------------------------------------------------------------
 void Entity::createMovementHandlerFromStream(KBEngine::MemoryStream& s)
 {
+	if(pControllers_ == NULL)
+	{
+		pControllers_ = new Controllers(id());
+	}
+
 	bool hasMoveHandler;
 	s >> hasMoveHandler;
 
