@@ -1734,4 +1734,38 @@ TEST_F(EntityDefXmlLoadingTest, LoadAllEntityScriptModulesRejectsInvalidSubclass
   Py_DECREF(entity_base);
 }
 
+// 回归测试：0700925（method.cpp 用 Py_None 替换失败的参数解析）
+// 当某个参数类型 createFromStream 返回 NULL 时，MethodDescription::createFromStream
+// 必须用 Py_None 占位而非把 NULL 存入 tuple（避免后续解引用崩溃）。
+class NullReturningType : public KBEngine::DataType
+{
+public:
+  NullReturningType() : KBEngine::DataType(0) {}
+
+  bool isSameType(PyObject*) override { return false; }
+  void addToStream(KBEngine::MemoryStream*, PyObject*) override {}
+  PyObject* createFromStream(KBEngine::MemoryStream*) override { return nullptr; }
+  PyObject* parseDefaultStr(std::string) override { return nullptr; }
+  const char* getName() const override { return "NULL_RETURNING"; }
+};
+
+TEST_F(EntityDefXmlLoadingTest, MethodDescriptionCreateFromStreamTurnsNullArgIntoNone)
+{
+  ensure_python_runtime();
+
+  KBEngine::MethodDescription method(
+      700, KBEngine::BASEAPP_TYPE, "NullArg", KBEngine::MethodDescription::NO_EXPOSED);
+
+  auto* null_type = new NullReturningType();
+  ASSERT_TRUE(method.pushArgType(null_type));
+
+  KBEngine::MemoryStream stream;
+
+  PyObject* pyArgs = method.createFromStream(&stream);
+  ASSERT_NE(pyArgs, nullptr);
+  ASSERT_EQ(PyTuple_Size(pyArgs), 1);
+  EXPECT_EQ(PyTuple_GetItem(pyArgs, 0), Py_None);
+  Py_DECREF(pyArgs);
+}
+
 }  // namespace

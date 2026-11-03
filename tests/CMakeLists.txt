@@ -45,6 +45,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_event_poller.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_math.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_resmgr.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_navigation_navmesh_decode.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_event_dispatcher.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_endpoint.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_fixed_messages.cpp"
@@ -126,6 +127,7 @@ target_link_libraries(kbe_smoke_tests
     GTest::gtest_main
     KBEngine::build_config
     KBEngine::third_party
+    KBEngine::server_runtime
     KBEngine::xml
     KBEngine::dependency_tmxparser
     KBEngine::common_core
@@ -184,6 +186,7 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::network_channel
     KBEngine::network_interface
     KBEngine::network_bundle_broadcast
+    KBEngine::navigation
     KBEngine::helper_profile_handler
     KBEngine::helper_watch_pools
     KBEngine::server_components
