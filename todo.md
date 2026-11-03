@@ -18,7 +18,7 @@
 - [x] 代码深审 P2：`MoveController::createFromStream` 未知 subtype 解引用 NULL（`kbe/src/lib/server/move_controller.cpp:51-58,60`）（2026-11-04 已修：未知 subtype 记错误并返回，`velocity()`/`velocity(v)` 判空；`kbe_cellapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `68f6a26`、`kbe/src/server/cellapp/move_controller.cpp:58`）
 - [x] 代码深审 P2：blowfish 解密失败被忽略、信任攻击者帧（`kbe/src/lib/network/encryption_filter.cpp:225-229`、`blowfish.cpp:148-155`）（2026-11-04 已修：`decrypt` 返回 bool，失败记错并返回 `REASON_CORRUPTED_PACKET`；`kbe_loginapp`/`kbe_baseapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `2a4f321`、`kbe/src/lib/network/encryption_filter.cpp:225`）
 - [x] 代码深审 P3：冒烟测试硬编码口令（`tests/smoke/test_server_sendmail.cpp:58` `info.password = "secret"`）（2026-11-04 已修：口令改从 `KBE_TEST_SMTP_PASSWORD` 环境变量读取，缺省为测试专用非敏感值；`kbe_smoke_tests` 177/177 全绿；commit `5db37ab`、`tests/smoke/test_server_sendmail.cpp:61`）
-- [ ] 代码深审 P3：`rebuild_docs.py` CHM 解包超时异常路径泄漏临时目录（`tools/rebuild_docs.py:490-505`）
+- [x] 代码深审 P3：`rebuild_docs.py` CHM 解包超时异常路径泄漏临时目录（`tools/rebuild_docs.py:490-505`）（2026-11-04 已修：`subprocess.TimeoutExpired` 捕获后清理临时目录并抛 `RuntimeError`；`py_compile`/AST 校验通过+`kbe_smoke_tests` 177/177 全绿；commit `1e6196e`、`tools/rebuild_docs.py:497`）
 - [ ] 代码深审 P3：`verify_authoritative_docs.py:78` CHM 页面数据未判 None
 - [ ] 代码深审 P3：`verify_authoritative_docs.py:153` 生成页缺对应文件未捕获 `FileNotFoundError`
 - [ ] 代码深审 P3：`verify_authoritative_docs.py:188` 有失配仍 `return 0`，CI 靠 stdout 判定
