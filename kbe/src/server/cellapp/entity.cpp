@@ -1862,7 +1862,7 @@ void Entity::setPosition_XYZ_float(Network::Channel* pChannel, float x, float y,
 		return;
 
 	pos.x = x;
-	pos.x = y;
+	pos.y = y;
 	pos.z = z;
 	onPositionChanged();
 }
