@@ -1155,6 +1155,12 @@ void Entity::writeToDB(void* data, void* extra1, void* extra2)
 		if (strlen(static_cast<char*>(extra2)) > 0)
 		{
 			DBInterfaceInfo* pDBInterfaceInfo = g_kbeSrvConfig.dbInterface(static_cast<char*>(extra2));
+			if (pDBInterfaceInfo == NULL)
+			{
+				ERROR_MSG(fmt::format("Entity::writeToDB: not found dbInterface({})!\n",
+					static_cast<char*>(extra2)));
+				return;
+			}
 			if (pDBInterfaceInfo->isPure)
 			{
 				ERROR_MSG(fmt::format("Entity::writeToDB: dbInterface({}) is a pure database does not support Entity! "

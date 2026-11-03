@@ -1219,6 +1219,12 @@ void Baseapp::createEntityFromDBID(const char* entityType, DBID dbid, PyObject* 
 	}
 
 	DBInterfaceInfo* pDBInterfaceInfo = g_kbeSrvConfig.dbInterface(dbInterfaceName);
+	if (pDBInterfaceInfo == NULL)
+	{
+		ERROR_MSG(fmt::format("Baseapp::createEntityFromDBID: not found dbInterface({})!\n",
+			dbInterfaceName));
+		return;
+	}
 	if (pDBInterfaceInfo->isPure)
 	{
 		ERROR_MSG(fmt::format("Baseapp::createEntityFromDBID: dbInterface({}) is a pure database does not support Entity! "
@@ -1565,6 +1571,12 @@ void Baseapp::createEntityAnywhereFromDBID(const char* entityType, DBID dbid, Py
 	}
 
 	DBInterfaceInfo* pDBInterfaceInfo = g_kbeSrvConfig.dbInterface(dbInterfaceName);
+	if (pDBInterfaceInfo == NULL)
+	{
+		ERROR_MSG(fmt::format("Baseapp::createEntityAnywhereFromDBID: not found dbInterface({})!\n",
+			dbInterfaceName));
+		return;
+	}
 	if (pDBInterfaceInfo->isPure)
 	{
 		ERROR_MSG(fmt::format("Baseapp::createEntityAnywhereFromDBID: dbInterface({}) is a pure database does not support Entity! "
@@ -2102,6 +2114,12 @@ void Baseapp::createEntityRemotelyFromDBID(const char* entityType, DBID dbid, CO
 	}
 
 	DBInterfaceInfo* pDBInterfaceInfo = g_kbeSrvConfig.dbInterface(dbInterfaceName);
+	if (pDBInterfaceInfo == NULL)
+	{
+		ERROR_MSG(fmt::format("Baseapp::createEntityRemotelyFromDBID: not found dbInterface({})!\n",
+			dbInterfaceName));
+		return;
+	}
 	if (pDBInterfaceInfo->isPure)
 	{
 		ERROR_MSG(fmt::format("Baseapp::createEntityRemotelyFromDBID: dbInterface({}) is a pure database does not support Entity! "
