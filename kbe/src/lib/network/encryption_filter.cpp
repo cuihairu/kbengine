@@ -228,9 +228,14 @@ Reason BlowfishFilter::recv(Channel * pChannel, PacketReceiver & receiver, Packe
 				"invalid encrypted packet. encryptedLen={}, padSize={}\n",
 				pChannel->c_str(), packetLen_, (int)padSize_));
 
+			// 无论在独立包还是残留分片场景，解密失败都必须回收在途包；
+			// 若 pPacket_ 持有此前被剪裁出的残留加密字节，也一并回收，避免池对象泄漏。
+			RECLAIM_PACKET(pPacket->isTCPPacket(), pPacket);
+			pPacket = NULL;
+
 			if(pPacket_)
 			{
-				RECLAIM_PACKET(pPacket_->isTCPPacket(), pPacket);
+				RECLAIM_PACKET(pPacket_->isTCPPacket(), pPacket_);
 				pPacket_ = NULL;
 			}
 
