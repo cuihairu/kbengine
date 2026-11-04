@@ -25,7 +25,7 @@
 - [x] 代码深审 P3：`queryAccount` 失败路径 `ACCOUNT_INFOS.flags` 未初始化即被读（`kbe/src/lib/db_mysql/kbe_table_mysql.cpp:645-646,690-691`、`dbtasks.cpp:687,708`）（2026-11-04 已修：`queryAccount`/`queryAccountAllInfos` 查询前置零 `dbid/flags/deadline`；`kbe_dbmgr` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `9c6af68`、`kbe/src/lib/db_mysql/kbe_table_mysql.cpp:645`）
 - [x] 代码深审 P3：视角 aliasID 超 255 实体过期/截断（`kbe/src/server/cellapp/witness.cpp:721-733`）（2026-11-04 已修：`updateEntitiesAliasID` 只为 NORMAL 实体分配紧凑 aliasID，移除 255 上限 break；`kbe_cellapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `25c9040`、`kbe/src/server/cellapp/witness.cpp:725`）
 - [x] 代码深审 P3：`SpaceMemory::removeEntity` 仅 KBE_ASSERT 越界（`kbe/src/server/cellapp/spacememory.cpp:394-400`）（2026-11-04 已修：越界/索引不匹配改为记错并返回，避免生产 abort；`kbe_cellapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `7be0f4f`、`kbe/src/server/cellapp/spacememory.cpp:394`）
-- [ ] 代码深审 P3：`createFromStream` 未知 scriptUType 解引用 NULL（`kbe/src/server/cellapp/entity.cpp:4082-4084`）
+- [x] 代码深审 P3：`createFromStream` 未知 scriptUType 解引用 NULL（`kbe/src/server/cellapp/entity.cpp:4082-4084`）（2026-11-04 已修：未知 scriptUType 记错并 `onDestroy(true)` 返回；`kbe_cellapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `8ef3a47`、`kbe/src/server/cellapp/entity.cpp:4083`）
 - [ ] 代码深审 P3：传送到达消息未知 entityType 解引用 NULL（`kbe/src/server/cellapp/cellapp.cpp:1939`）
 - [ ] 代码深审 P3：`ProximityController` 析构解引用 NULL trap（`kbe/src/lib/server/proximity_controller.cpp:34-38`）
 - [ ] 代码深审 P3：ID 池耗尽返回复用 ID（`kbe/src/lib/server/idallocate.h:257-279`）
