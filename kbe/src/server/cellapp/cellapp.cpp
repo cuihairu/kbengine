@@ -1936,7 +1936,26 @@ void Cellapp::reqTeleportToCellApp(Network::Channel* pChannel, MemoryStream& s)
 	}
 
 	// 创建entity
-	Entity* e = createEntity(EntityDef::findScriptModule(entityType)->getName(), NULL, false, teleportEntityID, false);
+	ScriptDefModule* pModule = EntityDef::findScriptModule(entityType);
+	if (pModule == NULL)
+	{
+		s.rpos((int)rpos);
+
+		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
+		(*pBundle).newMessage(CellappInterface::reqTeleportToCellAppCB);
+		(*pBundle) << ghostCell << g_componentID << entityBaseappID;
+		(*pBundle) << teleportEntityID;
+		(*pBundle) << success;
+		(*pBundle).append(&s);
+		pChannel->send(pBundle);
+
+		ERROR_MSG(fmt::format("Cellapp::reqTeleportToCellApp: unknown entityType({}) for reqTeleportEntity({})!\n",
+			entityType, teleportEntityID));
+		s.done();
+		return;
+	}
+
+	Entity* e = createEntity(pModule->getName(), NULL, false, teleportEntityID, false);
 	if (e == NULL)
 	{
 		s.rpos((int)rpos);

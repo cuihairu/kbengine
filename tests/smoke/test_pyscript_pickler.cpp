@@ -12,6 +12,9 @@ namespace {
 // A benign engine callback that mirrors the shape of registered `_upf` functions.
 PyObject* test_upf_callback(PyObject* /*self*/, PyObject* args)
 {
+  // `args` is a borrowed reference owned by the call machinery; returning it
+  // as the result transfers ownership, so take our own reference first.
+  Py_INCREF(args);
   return args;
 }
 
