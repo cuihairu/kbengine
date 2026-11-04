@@ -5303,7 +5303,8 @@ void Baseapp::deleteEntityByDBIDCB(Network::Channel* pChannel, KBEngine::MemoryS
 	if(sm == NULL)
 	{
 		ERROR_MSG(fmt::format("Baseapp::deleteEntityByDBIDCB: entityUType({}) not found!\n", sid));
-		return;
+		// 模块缺失时同样触发已注册回调（以 false 结束），避免悬置回调。
+		sm = NULL;
 	}
 
 	if(callbackID > 0)
@@ -5318,7 +5319,7 @@ void Baseapp::deleteEntityByDBIDCB(Network::Channel* pChannel, KBEngine::MemoryS
 				pyval = Py_True;
 				Py_INCREF(pyval);
 			}
-			else if(entityID > 0 && entityInAppID > 0)
+			else if(sm != NULL && entityID > 0 && entityInAppID > 0)
 			{
 				Entity* e = static_cast<Entity*>(this->findEntity(entityID));
 				if(e != NULL)
@@ -5480,7 +5481,8 @@ void Baseapp::lookUpEntityByDBIDCB(Network::Channel* pChannel, KBEngine::MemoryS
 	if(sm == NULL)
 	{
 		ERROR_MSG(fmt::format("Baseapp::lookUpEntityByDBIDCB: entityUType({}) not found!\n", sid));
-		return;
+		// 模块缺失时同样触发已注册回调（以 false 结束），避免悬置回调。
+		sm = NULL;
 	}
 
 	if(callbackID > 0)
@@ -5491,7 +5493,7 @@ void Baseapp::lookUpEntityByDBIDCB(Network::Channel* pChannel, KBEngine::MemoryS
 		{
 			PyObject* pyval = NULL;
 
-			if(entityID > 0 && entityInAppID > 0)
+			if(sm != NULL && entityID > 0 && entityInAppID > 0)
 			{
 				Entity* e = static_cast<Entity*>(this->findEntity(entityID));
 				if(e != NULL)
