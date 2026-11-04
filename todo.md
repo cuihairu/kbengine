@@ -31,8 +31,8 @@
 - [x] 代码深审 P3：ID 池耗尽返回复用 ID（`kbe/src/lib/server/idallocate.h:257-279`）（2026-11-04 已修：耗尽时记错并返回 0，不推进区间/复用旧 ID；`kbe_baseapp`/`kbe_cellapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `05f045f`、`kbe/src/lib/server/idallocate.h:257`）
 - [ ] 代码深审 P3：`RangeTrigger::install` 部分失败结果被忽略（`kbe/src/lib/server/range_trigger.cpp:73-93`）
 - [ ] 代码深审 P3：`Channel::destroy` 未回池 EndPoint、每信道周期泄漏（`kbe/src/lib/network/channel.cpp:533-543,293-305`）
-- [ ] 代码深审 P3：`mergeFragmentMessage` 拷贝缺 `+ rpos()` 偏移（`kbe/src/lib/network/packet_reader.cpp:291`）
-- [ ] 代码深审 P3：dispatch 仅捕 `MemoryStreamException`、异常泄漏接收报文（`kbe/src/lib/network/channel.cpp:1182-1199,1201`）
+- [x] 代码深审 P3：`mergeFragmentMessage` 拷贝缺 `+ rpos()` 偏移（`kbe/src/lib/network/packet_reader.cpp:291`）（2026-11-04 复核属实；已修：`else` 分支 `memcpy` 源改为 `pPacket->data() + pPacket->rpos()`；`kbe_smoke_tests` 179/179 全绿+`kbe_cellapp`/`kbe_baseapp`/`kbe_dbmgr` 编译链接过；commit `c60029e`、`kbe/src/lib/network/packet_reader.cpp:304`）
+- [x] 代码深审 P3：dispatch 仅捕 `MemoryStreamException`、异常泄漏接收报文（`kbe/src/lib/network/channel.cpp:1182-1199,1201`）（2026-11-04 复核属实；已修：`processPackets` 增补 `catch(MemoryStreamWriteOverflow)` 与 `catch(std::exception)`，确保接收报文仍被回收；`kbe_smoke_tests` 179/179 全绿+`kbe_cellapp`/`kbe_baseapp`/`kbe_dbmgr` 编译链接过；commit `c60029e`、`kbe/src/lib/network/channel.cpp:1216`）
 
 ## 已完成
 
