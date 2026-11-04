@@ -391,8 +391,12 @@ void SpaceMemory::removeEntity(Entity* pEntity)
 	// 先获取到所在位置
 	SPACE_ENTITIES::size_type idx = pEntity->spaceEntityIdx();
 
-	KBE_ASSERT(idx < entities_.size());
-	KBE_ASSERT(entities_[ idx ] == pEntity);
+	if (idx >= entities_.size() || entities_[idx].get() != pEntity)
+	{
+		ERROR_MSG(fmt::format("SpaceMemory::removeEntity({}): invalid spaceEntityIdx({}) for space({}), entities.size={}\n",
+			pEntity->id(), (int)idx, this->id(), entities_.size()));
+		return;
+	}
 
 	// 如果有2个或以上的entity则将最后一个entity移至删除的这个entity所在位置
 	Entity* pBack = entities_.back().get();
