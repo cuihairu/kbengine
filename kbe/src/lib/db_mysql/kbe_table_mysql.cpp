@@ -641,11 +641,14 @@ bool KBEAccountTableMysql::queryAccount(DBInterface * pdbi, const std::string& n
 	sqlstr += "\" LIMIT 1";
 	SAFE_RELEASE_ARRAY(tbuf);
 
+	info.dbid = 0;
+	info.flags = 0;
+	info.deadline = 0;
+
 	// 如果查询失败则返回存在， 避免可能产生的错误
 	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
 		return true;
 
-	info.dbid = 0;
 	MYSQL_RES * pResult = mysql_store_result(static_cast<DBInterfaceMysql*>(pdbi)->mysql());
 	if(pResult)
 	{
@@ -686,11 +689,14 @@ bool KBEAccountTableMysql::queryAccountAllInfos(DBInterface * pdbi, const std::s
 	sqlstr += "\" LIMIT 1";
 	SAFE_RELEASE_ARRAY(tbuf);
 
+	info.dbid = 0;
+	info.flags = 0;
+	info.deadline = 0;
+
 	// 如果查询失败则返回存在， 避免可能产生的错误
 	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
 		return true;
 
-	info.dbid = 0;
 	MYSQL_RES * pResult = mysql_store_result(static_cast<DBInterfaceMysql*>(pdbi)->mysql());
 	if(pResult)
 	{
