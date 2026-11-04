@@ -254,7 +254,12 @@ public:
 	*/
 	T alloc(void)
 	{
-		KBE_ASSERT(size() > 0 && "IDClient:: alloc:no usable of the id.\n");
+		if (size() <= 0)
+		{
+			ERROR_MSG(fmt::format("IDClient::alloc: no usable id left (range {}-{}, cached={})!\n",
+				last_id_range_begin_, last_id_range_end_, id_list_.size()));
+			return 0;
+		}
 
 		T id = last_id_range_begin_++;
 
