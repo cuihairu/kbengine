@@ -19,9 +19,9 @@
 - [x] 代码深审 P2：blowfish 解密失败被忽略、信任攻击者帧（`kbe/src/lib/network/encryption_filter.cpp:225-229`、`blowfish.cpp:148-155`）（2026-11-04 已修：`decrypt` 返回 bool，失败记错并返回 `REASON_CORRUPTED_PACKET`；`kbe_loginapp`/`kbe_baseapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `2a4f321`、`kbe/src/lib/network/encryption_filter.cpp:225`）
 - [x] 代码深审 P3：冒烟测试硬编码口令（`tests/smoke/test_server_sendmail.cpp:58` `info.password = "secret"`）（2026-11-04 已修：口令改从 `KBE_TEST_SMTP_PASSWORD` 环境变量读取，缺省为测试专用非敏感值；`kbe_smoke_tests` 177/177 全绿；commit `5db37ab`、`tests/smoke/test_server_sendmail.cpp:61`）
 - [x] 代码深审 P3：`rebuild_docs.py` CHM 解包超时异常路径泄漏临时目录（`tools/rebuild_docs.py:490-505`）（2026-11-04 已修：`subprocess.TimeoutExpired` 捕获后清理临时目录并抛 `RuntimeError`；`py_compile`/AST 校验通过+`kbe_smoke_tests` 177/177 全绿；commit `1e6196e`、`tools/rebuild_docs.py:497`）
-- [ ] 代码深审 P3：`verify_authoritative_docs.py:78` CHM 页面数据未判 None
-- [ ] 代码深审 P3：`verify_authoritative_docs.py:153` 生成页缺对应文件未捕获 `FileNotFoundError`
-- [ ] 代码深审 P3：`verify_authoritative_docs.py:188` 有失配仍 `return 0`，CI 靠 stdout 判定
+- [x] 代码深审 P3：`verify_authoritative_docs.py:78` CHM 页面数据未判 None（2026-11-04 已修：`RetrieveObject` 返回 `None` 时跳过；`py_compile`/AST 校验通过+`kbe_smoke_tests` 177/177 全绿；commit `b95dfbd`、`tools/verify_authoritative_docs.py:78`）
+- [x] 代码深审 P3：`verify_authoritative_docs.py:153` 生成页缺对应文件未捕获 `FileNotFoundError`（2026-11-04 已修：当前/生成页缺失均记 mismatch 不中断；commit `b95dfbd`、`tools/verify_authoritative_docs.py:155`）
+- [x] 代码深审 P3：`verify_authoritative_docs.py:188` 有失配仍 `return 0`，CI 靠 stdout 判定（2026-11-04 已修：失配或 WebConsole 不匹配时 `return 1`；commit `b95dfbd`、`tools/verify_authoritative_docs.py:190`）
 - [ ] 代码深审 P3：`queryAccount` 失败路径 `ACCOUNT_INFOS.flags` 未初始化即被读（`kbe/src/lib/db_mysql/kbe_table_mysql.cpp:645-646,690-691`、`dbtasks.cpp:687,708`）
 - [ ] 代码深审 P3：视角 aliasID 超 255 实体过期/截断（`kbe/src/server/cellapp/witness.cpp:721-733`）
 - [ ] 代码深审 P3：`SpaceMemory::removeEntity` 仅 KBE_ASSERT 越界（`kbe/src/server/cellapp/spacememory.cpp:394-400`）
