@@ -4081,7 +4081,13 @@ void Entity::createFromStream(KBEngine::MemoryStream& s)
 
 	this->pScriptModule_ = EntityDef::findScriptModule(scriptUType);
 
-	KBE_ASSERT(this->pScriptModule_);
+	if (this->pScriptModule_ == NULL)
+	{
+		ERROR_MSG(fmt::format("Entity::createFromStream({}): unknown scriptUType({})! entity={}\n",
+			id_, scriptUType, id_));
+		this->onDestroy(true);
+		return;
+	}
 
 	// 设置entity的baseEntityCall
 	if(baseEntityCallComponentID > 0)
