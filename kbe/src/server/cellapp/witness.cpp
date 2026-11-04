@@ -725,10 +725,10 @@ void Witness::updateEntitiesAliasID()
 	for(; iter != viewEntities_.end(); ++iter)
 	{
 		EntityRef* pEntityRef = (*iter);
-		pEntityRef->aliasID(n++);
-
-		if(n >= 255)
-			break;
+		// 只为已进入客户端（NORMAL）的实体分配紧凑 aliasID，与 clientViewSize_
+		// 保持一致；未同步到客户端的实体仍按完整 entityID 发送，避免超 255 截断。
+		if ((pEntityRef->flags() & ENTITYREF_FLAG_NORMAL) > 0)
+			pEntityRef->aliasID(n++);
 	}
 }
 
