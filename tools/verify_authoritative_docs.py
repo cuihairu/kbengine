@@ -75,7 +75,9 @@ def extract_chm_html(chm_path: Path, output_root: Path) -> None:
         result, unit = book.ResolveObject(path.encode())
         if result != 0 or unit is None:
             continue
-        _, data = book.RetrieveObject(unit)
+        size, data = book.RetrieveObject(unit)
+        if data is None:
+            continue
         # CHM 成员名来自归档内容（archive-controlled），lstrip("/") 只去前导斜杠，
         # 不净化 `..`/绝对路径；若成员名含穿越片段则跳过，防止写出 output_root 之外。
         # 先归一 `\` 为 `/`：PurePosixPath 视反斜杠为字面字符，不归一则在 Windows 的
@@ -152,8 +154,17 @@ def verify_api(mod, temp_root: Path) -> tuple[int, int, int, list[str]]:
     mismatches: list[str] = []
     for path in generated_files:
         rel = path.relative_to(md_root)
-        current = (DOCS_ROOT / "api" / "kbengine" / rel).read_text(encoding="utf-8")
-        generated = path.read_text(encoding="utf-8")
+        current_path = DOCS_ROOT / "api" / "kbengine" / rel
+        try:
+            current = current_path.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            mismatches.append(f"{rel} (missing current page)")
+            continue
+        try:
+            generated = path.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            mismatches.append(f"{rel} (missing generated page)")
+            continue
         if not verify_api_page(current, generated, rel):
             mismatches.append(str(rel))
 
@@ -187,6 +198,9 @@ def main() -> int:
         print(f"- {rel}")
 
     print(f"WebConsole exact match: {webconsole_match}")
+    if api_mismatches or not webconsole_match:
+        print("VERIFY FAILED: authoritative docs differ from generated content")
+        return 1
     return 0
 
 
