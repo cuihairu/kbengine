@@ -173,4 +173,44 @@ TEST_F(PicklerTest, BlocksArbitraryGlobal)
   Py_DECREF(data);
 }
 
+
+TEST_F(PicklerTest, AllowsOrderedDictPayload)
+{
+  // A payload containing collections.OrderedDict must round-trip through the
+  // restricted unpickler (legitimate engine data, e.g. PYTHON properties).
+  PyObject* collections_module = PyImport_ImportModule("collections");
+  ASSERT_NE(collections_module, nullptr);
+  PyObject* ordered_dict = PyObject_GetAttrString(collections_module, "OrderedDict");
+  Py_DECREF(collections_module);
+  ASSERT_NE(ordered_dict, nullptr);
+
+  PyObject* value = PyObject_CallFunction(ordered_dict, nullptr);
+  Py_DECREF(ordered_dict);
+  ASSERT_NE(value, nullptr);
+
+  PyObject* data = pickled_bytes(value);
+  ASSERT_NE(data, nullptr);
+  PyObject* result = KBEngine::script::Pickler::unpickle(bytes_to_string(data));
+  EXPECT_NE(result, nullptr);
+  if (result)
+  {
+    int eq = PyObject_RichCompareBool(result, value, Py_EQ);
+    EXPECT_EQ(eq, 1);
+    Py_DECREF(result);
+  }
+  Py_DECREF(value);
+  Py_DECREF(data);
+}
+
+TEST_F(PicklerTest, BlocksUpfDunderEscape)
+{
+  // A payload referencing a dunder attribute on _upf (e.g. __loader__) must be
+  // rejected, not returned as a module internal object.  We inject a raw pickle
+  // stream using the GLOBAL opcode (protocol 0) to force find_class('_upf',
+  // '__loader__').
+  const char raw[] = "c_upf\n__loader__\n.\n";
+  PyObject* result = KBEngine::script::Pickler::unpickle(std::string(raw, sizeof(raw) - 1));
+  EXPECT_EQ(result, nullptr);
+  PyErr_Clear();
+}
 }  // namespace
