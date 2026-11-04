@@ -39,7 +39,7 @@ bool KBEEntityLogTableRedis::logEntity(DBInterface * pdbi, const char* ip, uint3
 }
 
 //-------------------------------------------------------------------------------------
-bool KBEEntityLogTableRedis::queryEntity(DBInterface * pdbi, DBID dbid, EntityLog& entitylog, ENTITY_SCRIPT_UID entityType)
+KBEEntityLogTable::QueryResult KBEEntityLogTableRedis::queryEntity(DBInterface * pdbi, DBID dbid, EntityLog& entitylog, ENTITY_SCRIPT_UID entityType)
 {
 	/*
 	kbe_entitylog:dbid:entityType = hashes(entityID, ip, port, componentID, serverGroupID)
@@ -73,7 +73,7 @@ bool KBEEntityLogTableRedis::queryEntity(DBInterface * pdbi, DBID dbid, EntityLo
 		freeReplyObject(pRedisReply); 
 	}
 
-	return entitylog.componentID > 0;
+	return entitylog.componentID > 0 ? QUERY_FOUND : QUERY_NOT_FOUND;
 }
 
 //-------------------------------------------------------------------------------------

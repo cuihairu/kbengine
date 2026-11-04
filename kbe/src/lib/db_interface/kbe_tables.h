@@ -44,6 +44,13 @@ protected:
 class KBEEntityLogTable : public KBETable
 {
 public:
+	enum QueryResult
+	{
+		QUERY_ERROR,
+		QUERY_NOT_FOUND,
+		QUERY_FOUND
+	};
+
 	struct EntityLog
 	{
 		DBID dbid;
@@ -69,7 +76,7 @@ public:
 	virtual bool logEntity(DBInterface * pdbi, const char* ip, uint32 port, DBID dbid,
 						COMPONENT_ID componentID, ENTITY_ID entityID, ENTITY_SCRIPT_UID entityType) = 0;
 
-	virtual bool queryEntity(DBInterface * pdbi, DBID dbid, EntityLog& entitylog, ENTITY_SCRIPT_UID entityType) = 0;
+	virtual QueryResult queryEntity(DBInterface * pdbi, DBID dbid, EntityLog& entitylog, ENTITY_SCRIPT_UID entityType) = 0;
 
 	virtual bool eraseEntityLog(DBInterface * pdbi, DBID dbid, ENTITY_SCRIPT_UID entityType) = 0;
 	virtual bool eraseBaseappEntityLog(DBInterface * pdbi, COMPONENT_ID componentID) = 0;

@@ -510,15 +510,23 @@ bool DBTaskDeleteEntityByDBID::db_thread_process()
 		return false;
 	}
 
-	haslog = pELTable->queryEntity(pdbi_, entityDBID_, entitylog, pModule->getUType());
+	KBEEntityLogTable::QueryResult queryResult = pELTable->queryEntity(pdbi_, entityDBID_, entitylog, pModule->getUType());
+
+	// 查询失败按"存在"处理（fail-closed）：不得把瞬时错误误判为无在线记录
+	// 而删除仍在线的实体行；同时保持 ID 为 0，避免 KBE_ASSERT 在查询失败时
+	// 因未初始化字段而误触发崩溃。
+	haslog = (queryResult == KBEEntityLogTable::QUERY_ERROR) || (queryResult == KBEEntityLogTable::QUERY_FOUND);
 
 	// 如果有在线纪录
 	if(haslog)
 	{
 		success_ = false;
-		entityInAppID_ = entitylog.componentID;
-		entityID_ = entitylog.entityID;
-		KBE_ASSERT(entityID_ > 0 && entityInAppID_ > 0);
+		if(queryResult == KBEEntityLogTable::QUERY_FOUND)
+		{
+			entityInAppID_ = entitylog.componentID;
+			entityID_ = entitylog.entityID;
+			KBE_ASSERT(entityID_ > 0 && entityInAppID_ > 0);
+		}
 		return false;
 	}
 
@@ -683,7 +691,8 @@ bool DBTaskLookUpEntityByDBID::db_thread_process()
 	}
 
 	// 如果有在线纪录
-	if(pELTable->queryEntity(pdbi_, entityDBID_, entitylog, pModule->getUType()))
+	KBEEntityLogTable::QueryResult queryResult = pELTable->queryEntity(pdbi_, entityDBID_, entitylog, pModule->getUType());
+	if(queryResult == KBEEntityLogTable::QUERY_FOUND)
 	{
 		if(entitylog.serverGroupID != (COMPONENT_ID)getUserUID())
 		{
@@ -698,6 +707,15 @@ bool DBTaskLookUpEntityByDBID::db_thread_process()
 		entityInAppID_ = entitylog.componentID;
 		entityID_ = entitylog.entityID;
 		KBE_ASSERT(entityID_ > 0 && entityInAppID_ > 0);
+		return false;
+	}
+	else if(queryResult == KBEEntityLogTable::QUERY_ERROR)
+	{
+		// 查询失败按"存在"处理（fail-closed），不误判为无记录，
+		// 同时保持 ID 为 0 以避免断言失败。
+		success_ = false;
+		entityInAppID_ = 0;
+		entityID_ = 0;
 		return false;
 	}
 
@@ -1762,7 +1780,15 @@ bool DBTaskAccountLogin::db_thread_process()
 
 	retcode_ = SERVER_ERR_ACCOUNT_IS_ONLINE;
 	KBEEntityLogTable::EntityLog entitylog;
-	bool success = !pELTable->queryEntity(pdbi_, info.dbid, entitylog, pModule->getUType());
+	KBEEntityLogTable::QueryResult queryResult = pELTable->queryEntity(pdbi_, info.dbid, entitylog, pModule->getUType());
+	bool success = (queryResult == KBEEntityLogTable::QUERY_NOT_FOUND);
+
+	if(queryResult == KBEEntityLogTable::QUERY_ERROR)
+	{
+		// 查询失败：fail-closed，不允许登录放行；保留默认错误码。
+		retcode_ = SERVER_ERR_DB;
+		return false;
+	}
 
 	// 如果有在线纪录
 	if(!success)
@@ -1902,10 +1928,11 @@ bool DBTaskQueryEntity::db_thread_process()
 		if(!success_)
 		{
 			KBEEntityLogTable::EntityLog entitylog;
+			KBEEntityLogTable::QueryResult queryResult;
 
 			try
 			{
-				pELTable->queryEntity(pdbi_, dbid_, entitylog, pModule->getUType());
+				queryResult = pELTable->queryEntity(pdbi_, dbid_, entitylog, pModule->getUType());
 			}
 			catch (std::exception & e)
 			{
@@ -1922,6 +1949,13 @@ bool DBTaskQueryEntity::db_thread_process()
 			}
 
 			wasActive_ = true;
+
+			if(queryResult == KBEEntityLogTable::QUERY_ERROR)
+			{
+				success_ = false;
+				wasActive_ = false;
+				return false;
+			}
 
 			if(entitylog.serverGroupID != (uint64)getUserUID())
 			{

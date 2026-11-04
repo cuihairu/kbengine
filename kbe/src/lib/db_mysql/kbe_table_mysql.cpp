@@ -204,7 +204,7 @@ bool KBEEntityLogTableMysql::logEntity(DBInterface * pdbi, const char* ip, uint3
 }
 
 //-------------------------------------------------------------------------------------
-bool KBEEntityLogTableMysql::queryEntity(DBInterface * pdbi, DBID dbid, EntityLog& entitylog, ENTITY_SCRIPT_UID entityType)
+KBEEntityLogTable::QueryResult KBEEntityLogTableMysql::queryEntity(DBInterface * pdbi, DBID dbid, EntityLog& entitylog, ENTITY_SCRIPT_UID entityType)
 {
 	std::string sqlstr = "select entityID, ip, port, componentID, serverGroupID from " KBE_TABLE_PERFIX "_entitylog where entityDBID=";
 
@@ -226,10 +226,7 @@ bool KBEEntityLogTableMysql::queryEntity(DBInterface * pdbi, DBID dbid, EntityLo
 
 	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
 	{
-		// 查询失败按"存在"处理（fail-closed），避免调用方（如
-		// DBTaskDeleteEntityByDBID::db_thread_process）将瞬时查询错误误判为
-		// "无在线记录"而删除仍在线的实体行。
-		return true;
+		return QUERY_ERROR;
 	}
 
 	MYSQL_RES * pResult = mysql_store_result(static_cast<DBInterfaceMysql*>(pdbi)->mysql());
@@ -248,7 +245,7 @@ bool KBEEntityLogTableMysql::queryEntity(DBInterface * pdbi, DBID dbid, EntityLo
 		mysql_free_result(pResult);
 	}
 
-	return entitylog.componentID > 0;
+	return entitylog.componentID > 0 ? QUERY_FOUND : QUERY_NOT_FOUND;
 }
 
 //-------------------------------------------------------------------------------------
@@ -267,10 +264,7 @@ bool KBEEntityLogTableMysql::eraseEntityLog(DBInterface * pdbi, DBID dbid, ENTIT
 
 	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
 	{
-		// 查询失败按"存在"处理（fail-closed），避免调用方（如
-		// DBTaskDeleteEntityByDBID::db_thread_process）将瞬时查询错误误判为
-		// "无在线记录"而删除仍在线的实体行。
-		return true;
+		return false;
 	}
 
 	return true;
@@ -504,10 +498,7 @@ bool KBEServerLogTableMysql::clearServers(DBInterface * pdbi, const std::vector<
 
 	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
 	{
-		// 查询失败按"存在"处理（fail-closed），避免调用方（如
-		// DBTaskDeleteEntityByDBID::db_thread_process）将瞬时查询错误误判为
-		// "无在线记录"而删除仍在线的实体行。
-		return true;
+		return false;
 	}
 
 	return true;

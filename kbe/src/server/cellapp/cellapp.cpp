@@ -1981,14 +1981,35 @@ void Cellapp::reqTeleportToCellApp(Network::Channel* pChannel, MemoryStream& s)
 		ERROR_MSG(fmt::format("Cellapp::reqTeleportToCellApp: deserialization of reqTeleportEntity({}) failed, abort teleport!\n",
 			teleportEntityID));
 
+		// 与其他失败分支一致：回附请求流，确保源端 success==false 恢复路径
+		// 能继续解出 nearbyMBRefID/lastSpaceID/entityType/pos/dir/cid。
+		s.rpos((int)rpos);
+
 		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
 		(*pBundle).newMessage(CellappInterface::reqTeleportToCellAppCB);
 		(*pBundle) << ghostCell << g_componentID << entityBaseappID;
 		(*pBundle) << teleportEntityID;
 		(*pBundle) << false;
+		(*pBundle).append(&s);
 		pChannel->send(pBundle);
 
+		// createEntity 已把实体加入 pEntities_；失败后必须移除，
+		// 避免永久驻留的幽灵实体。仅当映射确实持有 e 时按映射语义销毁，
+		// 否则（与既有 id 冲突）直接销毁本实体，绝不误毁旧实体。
+		bool inMap = (pEntities()->find(teleportEntityID) == e);
+		bool wasDestroyed = e->isDestroyed();
+		if(inMap)
+			destroyEntity(teleportEntityID, false);
+		else
+			e->destroy(false);
+
+		// 平衡上方 Py_INCREF(e)，并释放残余引用。无论实体是否入 map，
+		// 销毁路径会递减对象基础引用；若 createFromStream 已触发
+		// onDestroy(true)，destroy() 因幂等跳过、不再递减，需额外递减一次。
 		Py_DECREF(e);
+		if(wasDestroyed)
+			Py_DECREF(e);
+
 		s.done();
 		return;
 	}

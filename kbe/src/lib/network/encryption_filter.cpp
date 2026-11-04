@@ -230,6 +230,10 @@ Reason BlowfishFilter::recv(Channel * pChannel, PacketReceiver & receiver, Packe
 
 			// 无论在独立包还是残留分片场景，解密失败都必须回收在途包；
 			// 若 pPacket_ 持有此前被剪裁出的残留加密字节，也一并回收，避免池对象泄漏。
+			// 残留分片场景下两者指向同一对象，必须先摘除别名再回收。
+			if(pPacket_ == pPacket)
+				pPacket_ = NULL;
+
 			RECLAIM_PACKET(pPacket->isTCPPacket(), pPacket);
 			pPacket = NULL;
 
