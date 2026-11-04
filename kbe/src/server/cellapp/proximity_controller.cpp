@@ -33,8 +33,12 @@ y_(0.f)
 //-------------------------------------------------------------------------------------
 ProximityController::~ProximityController()
 {
-	pTrapTrigger_->uninstall();
-	delete pTrapTrigger_;
+	if (pTrapTrigger_ != NULL)
+	{
+		pTrapTrigger_->uninstall();
+		delete pTrapTrigger_;
+		pTrapTrigger_ = NULL;
+	}
 }
 
 //-------------------------------------------------------------------------------------
