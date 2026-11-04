@@ -1254,7 +1254,27 @@ void Baseapp::createEntityFromDBID(const char* entityType, DBID dbid, PyObject* 
 	pBundle->newMessage(DbmgrInterface::queryEntity);
 
 	ENTITY_ID entityID = idClient_.alloc();
-	KBE_ASSERT(entityID > 0);
+	if (entityID <= 0)
+	{
+		ERROR_MSG("Baseapp::createEntityFromDBID: no entity id available!\n");
+		Network::Bundle::reclaimPoolObject(pBundle);
+		if (pyCallback != NULL)
+		{
+			PyObjectPtr pyfunc = pyCallbackMgr_.take(callbackID);
+			if (pyfunc != NULL)
+			{
+				PyObject* pyval = Py_False;
+				Py_INCREF(pyval);
+				PyObject* pyResult = PyObject_CallFunction(pyfunc.get(), const_cast<char*>("O"), pyval);
+				if (pyResult != NULL)
+					Py_DECREF(pyResult);
+				else
+					SCRIPT_ERROR_CHECK();
+				Py_DECREF(pyval);
+			}
+		}
+		return;
+	}
 
 	DbmgrInterface::queryEntityArgs7::staticAddToBundle((*pBundle),
 		dbInterfaceIndex, g_componentID, 0, dbid, entityType, callbackID, entityID);
@@ -1653,7 +1673,27 @@ void Baseapp::onGetCreateEntityAnywhereFromDBIDBestBaseappID(Network::Channel* p
 	pBundle->newMessage(DbmgrInterface::queryEntity);
 
 	ENTITY_ID entityID = idClient_.alloc();
-	KBE_ASSERT(entityID > 0);
+	if (entityID <= 0)
+	{
+		ERROR_MSG("Baseapp::createEntityAnywhereFromDBID: no entity id available!\n");
+		Network::Bundle::reclaimPoolObject(pBundle);
+		if (callbackID > 0)
+		{
+			PyObjectPtr pyfunc = pyCallbackMgr_.take(callbackID);
+			if (pyfunc != NULL)
+			{
+				PyObject* pyval = Py_False;
+				Py_INCREF(pyval);
+				PyObject* pyResult = PyObject_CallFunction(pyfunc.get(), const_cast<char*>("O"), pyval);
+				if (pyResult != NULL)
+					Py_DECREF(pyResult);
+				else
+					SCRIPT_ERROR_CHECK();
+				Py_DECREF(pyval);
+			}
+		}
+		return;
+	}
 
 	DbmgrInterface::queryEntityArgs7::staticAddToBundle((*pBundle),
 		dbInterfaceIndex, targetComponentID, 1, dbid, entityType, callbackID, entityID);
@@ -2149,7 +2189,27 @@ void Baseapp::createEntityRemotelyFromDBID(const char* entityType, DBID dbid, CO
 	pBundle->newMessage(DbmgrInterface::queryEntity);
 
 	ENTITY_ID entityID = idClient_.alloc();
-	KBE_ASSERT(entityID > 0);
+	if (entityID <= 0)
+	{
+		ERROR_MSG("Baseapp::createEntityRemotelyFromDBID: no entity id available!\n");
+		Network::Bundle::reclaimPoolObject(pBundle);
+		if (pyCallback != NULL)
+		{
+			PyObjectPtr pyfunc = pyCallbackMgr_.take(callbackID);
+			if (pyfunc != NULL)
+			{
+				PyObject* pyval = Py_False;
+				Py_INCREF(pyval);
+				PyObject* pyResult = PyObject_CallFunction(pyfunc.get(), const_cast<char*>("O"), pyval);
+				if (pyResult != NULL)
+					Py_DECREF(pyResult);
+				else
+					SCRIPT_ERROR_CHECK();
+				Py_DECREF(pyval);
+			}
+		}
+		return;
+	}
 
 	DbmgrInterface::queryEntityArgs7::staticAddToBundle((*pBundle),
 		dbInterfaceIndex, createToComponentID, 2, dbid, entityType, callbackID, entityID);
@@ -3973,7 +4033,14 @@ void Baseapp::loginBaseapp(Network::Channel* pChannel,
 		(*pBundle).newMessage(DbmgrInterface::queryAccount);
 
 		ENTITY_ID entityID = idClient_.alloc();
-		KBE_ASSERT(entityID > 0);
+		if (entityID <= 0)
+		{
+			ERROR_MSG("Baseapp::loginBaseapp: no entity id available!\n");
+			Network::Bundle::reclaimPoolObject(pBundle);
+			loginBaseappFailed(pChannel, accountName, SERVER_ERR_SRV_NO_READY);
+			pendingLoginMgr_.removeNextTick(accountName);
+			return;
+		}
 
 		DbmgrInterface::queryAccountArgs8::staticAddToBundle((*pBundle), accountName, password, ptinfos->needCheckPassword, g_componentID,
 			entityID, ptinfos->entityDBID, pChannel->addr().ip, pChannel->addr().port);
