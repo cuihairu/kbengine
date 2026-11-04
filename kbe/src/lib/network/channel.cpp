@@ -1213,6 +1213,34 @@ void Channel::processPackets(KBEngine::Network::MessageHandlers* pMsgHandlers, P
 		pPacketReader_->currMsgLen(0);
 		condemn("Channel::processPackets: allocation failure!");
 	}
+	catch(const MemoryStreamWriteOverflow &)
+	{
+		Network::MessageHandler* pMsgHandler = pMsgHandlers->find(pPacketReader_->currMsgID());
+		ERROR_MSG(fmt::format("Channel::processPackets({}): stream write overflow while processing packet. currMsg=({}, id={}, len={}), currMsgLen={}\n",
+			this->c_str()
+			, (pMsgHandler == NULL ? "unknown" : pMsgHandler->name) 
+			, pPacketReader_->currMsgID() 
+			, (pMsgHandler == NULL ? -1 : pMsgHandler->msgLen) 
+			, pPacketReader_->currMsgLen()));
+
+		pPacketReader_->currMsgID(0);
+		pPacketReader_->currMsgLen(0);
+		condemn("Channel::processPackets: stream write overflow!");
+	}
+	catch(const std::exception & e)
+	{
+		Network::MessageHandler* pMsgHandler = pMsgHandlers->find(pPacketReader_->currMsgID());
+		ERROR_MSG(fmt::format("Channel::processPackets({}): exception while processing packet: {}. currMsg=({}, id={}, len={}), currMsgLen={}\n",
+			this->c_str(), e.what()
+			, (pMsgHandler == NULL ? "unknown" : pMsgHandler->name) 
+			, pPacketReader_->currMsgID() 
+			, (pMsgHandler == NULL ? -1 : pMsgHandler->msgLen) 
+			, pPacketReader_->currMsgLen()));
+
+		pPacketReader_->currMsgID(0);
+		pPacketReader_->currMsgLen(0);
+		condemn("Channel::processPackets: exception during packet processing!");
+	}
 
 	RECLAIM_PACKET(pPacket->isTCPPacket(), pPacket);
 }

@@ -306,7 +306,8 @@ void PacketReader::mergeFragmentMessage(Packet* pPacket)
 	}
 	else
 	{
-		memcpy(pFragmentDatas_ + pFragmentDatasWpos_, pPacket->data(), opsize);
+		// 拷贝时须从当前读位置开始，否则会把已消费的头部字节一并拷入。
+		memcpy(pFragmentDatas_ + pFragmentDatasWpos_, pPacket->data() + pPacket->rpos(), opsize);
 		pFragmentDatasRemain_ -= opsize;
 		pFragmentDatasWpos_ += opsize;
 		pPacket->rpos(pPacket->rpos() + opsize);
