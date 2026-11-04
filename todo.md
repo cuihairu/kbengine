@@ -27,7 +27,7 @@
 - [x] 代码深审 P3：`SpaceMemory::removeEntity` 仅 KBE_ASSERT 越界（`kbe/src/server/cellapp/spacememory.cpp:394-400`）（2026-11-04 已修：越界/索引不匹配改为记错并返回，避免生产 abort；`kbe_cellapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `7be0f4f`、`kbe/src/server/cellapp/spacememory.cpp:394`）
 - [x] 代码深审 P3：`createFromStream` 未知 scriptUType 解引用 NULL（`kbe/src/server/cellapp/entity.cpp:4082-4084`）（2026-11-04 已修：未知 scriptUType 记错并 `onDestroy(true)` 返回；`kbe_cellapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `8ef3a47`、`kbe/src/server/cellapp/entity.cpp:4083`）
 - [x] 代码深审 P3：传送到达消息未知 entityType 解引用 NULL（`kbe/src/server/cellapp/cellapp.cpp:1939`）（2026-11-04 已修：未知 entityType 记错并发送失败回执；附带修正 Pickler 测试回调引用计数修复间歇段错误；`kbe_cellapp` 编译链接过+`kbe_smoke_tests` 177/177 重复运行全绿、`kbe_entitydef_xml_tests` 30/30 全绿；commit `4d78700`、`kbe/src/server/cellapp/cellapp.cpp:1939`）
-- [ ] 代码深审 P3：`ProximityController` 析构解引用 NULL trap（`kbe/src/lib/server/proximity_controller.cpp:34-38`）
+- [x] 代码深审 P3：`ProximityController` 析构解引用 NULL trap（`kbe/src/lib/server/proximity_controller.cpp:34-38`）（2026-11-04 已修：析构前判 `pTrapTrigger_` 非空并置 NULL；`kbe_cellapp` 编译链接过+`kbe_smoke_tests` 177/177、`kbe_entitydef_xml_tests` 30/30 全绿；commit `f5652ea`、`kbe/src/server/cellapp/proximity_controller.cpp:34`）
 - [ ] 代码深审 P3：ID 池耗尽返回复用 ID（`kbe/src/lib/server/idallocate.h:257-279`）
 - [ ] 代码深审 P3：`RangeTrigger::install` 部分失败结果被忽略（`kbe/src/lib/server/range_trigger.cpp:73-93`）
 - [ ] 代码深审 P3：`Channel::destroy` 未回池 EndPoint、每信道周期泄漏（`kbe/src/lib/network/channel.cpp:533-543,293-305`）
