@@ -19,6 +19,10 @@ public:
 	void pMoveToPointHandler(MoveToPointHandler* pMoveToPointHandler)
 		{ pMoveToPointHandler_ = pMoveToPointHandler; }
 
+	MoveToPointHandler* pMoveToPointHandler() const { return pMoveToPointHandler_; }
+
+	bool invalidType() const { return invalidType_; }
+
 	virtual void destroy();
 	virtual void addToStream(KBEngine::MemoryStream& s);
 	virtual void createFromStream(KBEngine::MemoryStream& s);
@@ -34,6 +38,7 @@ public:
 
 protected:
 	MoveToPointHandler* pMoveToPointHandler_;
+	bool invalidType_ = false;
 };
 
 }

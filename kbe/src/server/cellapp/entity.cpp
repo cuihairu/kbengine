@@ -4019,7 +4019,12 @@ void Entity::changeToReal(COMPONENT_ID ghostCell, KBEngine::MemoryStream& s)
 	DEBUG_MSG(fmt::format("{}::changeToReal(): {}, ghostCell={}, spaceID={}, position=({},{},{}).\n",
 		scriptName(), id(), ghostCell_, spaceID_, position().x, position().y, position().z));
 
-	createFromStream(s);
+	if (!createFromStream(s))
+	{
+		// 反序列化失败（如非法 move type），中止转 real。
+		ERROR_MSG(fmt::format("{}::changeToReal(): {} deserialization failed!\n",
+			scriptName(), id()));
+	}
 }
 
 //-------------------------------------------------------------------------------------
@@ -4055,7 +4060,7 @@ void Entity::addToStream(KBEngine::MemoryStream& s)
 }
 
 //-------------------------------------------------------------------------------------
-void Entity::createFromStream(KBEngine::MemoryStream& s)
+bool Entity::createFromStream(KBEngine::MemoryStream& s)
 {
 	ENTITY_SCRIPT_UID scriptUType;
 	COMPONENT_ID baseEntityCallComponentID;
@@ -4086,7 +4091,7 @@ void Entity::createFromStream(KBEngine::MemoryStream& s)
 		ERROR_MSG(fmt::format("Entity::createFromStream({}): unknown scriptUType({})! entity={}\n",
 			id_, scriptUType, id_));
 		this->onDestroy(true);
-		return;
+		return false;
 	}
 
 	// 设置entity的baseEntityCall
@@ -4115,13 +4120,18 @@ void Entity::createFromStream(KBEngine::MemoryStream& s)
 
 	removeFlags(ENTITY_FLAGS_INITING);
 
-	createMovementHandlerFromStream(s);
+	if (!createMovementHandlerFromStream(s))
+	{
+		// 非法 move type：中止该实体的反序列化，由调用方处理（不重新加入场景）。
+		return false;
+	}
 	createControllersFromStream(s);
 	createWitnessFromStream(s);
 	createTimersFromStream(s);
 	createEventsFromStream(s);
 
 	pyCallbackMgr_.createFromStream(s);
+	return true;
 }
 
 //-------------------------------------------------------------------------------------
@@ -4292,7 +4302,7 @@ void Entity::addMovementHandlerToStream(KBEngine::MemoryStream& s)
 }
 
 //-------------------------------------------------------------------------------------
-void Entity::createMovementHandlerFromStream(KBEngine::MemoryStream& s)
+bool Entity::createMovementHandlerFromStream(KBEngine::MemoryStream& s)
 {
 	if(pControllers_ == NULL)
 	{
@@ -4306,8 +4316,15 @@ void Entity::createMovementHandlerFromStream(KBEngine::MemoryStream& s)
 	{
 		stopMove();
 
-		pMoveController_ = KBEShared_ptr<Controller>(new MoveController(this));
-		pMoveController_->createFromStream(s);
+		KBEShared_ptr<MoveController> pMove(new MoveController(this));
+		pMove->createFromStream(s);
+		if (pMove->invalidType())
+		{
+			// 非法 move type：未消费流，中止后续反序列化，避免读取错位。
+			ERROR_MSG(fmt::format("Entity::createMovementHandlerFromStream({}): invalid move type, abort deserialization!\n", id()));
+			return false;
+		}
+		pMoveController_ = pMove;
 		pControllers_->add(pMoveController_);
 	}
 
@@ -4323,6 +4340,8 @@ void Entity::createMovementHandlerFromStream(KBEngine::MemoryStream& s)
 		pTurnController_->createFromStream(s);
 		pControllers_->add(pTurnController_);
 	}
+
+	return true;
 }
 
 //-------------------------------------------------------------------------------------

@@ -1974,7 +1974,24 @@ void Cellapp::reqTeleportToCellApp(Network::Channel* pChannel, MemoryStream& s)
 	}
 
 	Py_INCREF(e);
-	e->createFromStream(s);
+	if (!e->createFromStream(s) || e->isDestroyed())
+	{
+		// 反序列化失败或实体已销毁（如未知 scriptUType 触发 onDestroy）：
+		// 不得重新加入场景，也不得向源 cellapp 回报成功。
+		ERROR_MSG(fmt::format("Cellapp::reqTeleportToCellApp: deserialization of reqTeleportEntity({}) failed, abort teleport!\n",
+			teleportEntityID));
+
+		Network::Bundle* pBundle = Network::Bundle::createPoolObject(OBJECTPOOL_POINT);
+		(*pBundle).newMessage(CellappInterface::reqTeleportToCellAppCB);
+		(*pBundle) << ghostCell << g_componentID << entityBaseappID;
+		(*pBundle) << teleportEntityID;
+		(*pBundle) << false;
+		pChannel->send(pBundle);
+
+		Py_DECREF(e);
+		s.done();
+		return;
+	}
 
 	// 有可能序列化过来的ghost内容包含移动控制器，之所以序列化过来是为了
 	// 在传送失败时可以用于恢复现场, 那么传送成功了我们应该停止以前的移动行为

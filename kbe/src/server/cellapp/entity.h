@@ -546,7 +546,7 @@ public:
 	void changeToReal(COMPONENT_ID ghostCell, KBEngine::MemoryStream& s);
 
 	void addToStream(KBEngine::MemoryStream& s);
-	void createFromStream(KBEngine::MemoryStream& s);
+	bool createFromStream(KBEngine::MemoryStream& s);
 
 	void addTimersToStream(KBEngine::MemoryStream& s);
 	void createTimersFromStream(KBEngine::MemoryStream& s);
@@ -558,7 +558,7 @@ public:
 	void createWitnessFromStream(KBEngine::MemoryStream& s);
 
 	void addMovementHandlerToStream(KBEngine::MemoryStream& s);
-	void createMovementHandlerFromStream(KBEngine::MemoryStream& s);
+	bool createMovementHandlerFromStream(KBEngine::MemoryStream& s);
 
 	void addEventsToStream(KBEngine::MemoryStream& s);
 	void createEventsFromStream(KBEngine::MemoryStream& s);

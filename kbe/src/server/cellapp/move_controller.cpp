@@ -33,6 +33,14 @@ void MoveController::addToStream(KBEngine::MemoryStream& s)
 {
 	Controller::addToStream(s);
 
+	if (pMoveToPointHandler_ == NULL)
+	{
+		// 非法 move type 已由 createFromStream 拒绝（该实体不会被序列化回传），
+		// 此处防御性返回，避免解引用空指针。
+		ERROR_MSG("MoveController::addToStream: no move handler, skip serialization!\n");
+		return;
+	}
+
 	uint8 utype = pMoveToPointHandler_->type();
 	s << utype;
 
@@ -58,6 +66,9 @@ void MoveController::createFromStream(KBEngine::MemoryStream& s)
 	{
 		ERROR_MSG(fmt::format("MoveController::createFromStream: invalid move type({})!\n",
 			(int)utype));
+		// 非法类型：不初始化 handler 并置标记，Entity::createMovementHandlerFromStream
+		// 将中止该实体的反序列化，避免后续流读取错位。
+		invalidType_ = true;
 		return;
 	}
 
