@@ -226,7 +226,10 @@ bool KBEEntityLogTableMysql::queryEntity(DBInterface * pdbi, DBID dbid, EntityLo
 
 	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
 	{
-		return false;
+		// 查询失败按"存在"处理（fail-closed），避免调用方（如
+		// DBTaskDeleteEntityByDBID::db_thread_process）将瞬时查询错误误判为
+		// "无在线记录"而删除仍在线的实体行。
+		return true;
 	}
 
 	MYSQL_RES * pResult = mysql_store_result(static_cast<DBInterfaceMysql*>(pdbi)->mysql());
@@ -264,7 +267,10 @@ bool KBEEntityLogTableMysql::eraseEntityLog(DBInterface * pdbi, DBID dbid, ENTIT
 
 	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
 	{
-		return false;
+		// 查询失败按"存在"处理（fail-closed），避免调用方（如
+		// DBTaskDeleteEntityByDBID::db_thread_process）将瞬时查询错误误判为
+		// "无在线记录"而删除仍在线的实体行。
+		return true;
 	}
 
 	return true;
@@ -498,7 +504,10 @@ bool KBEServerLogTableMysql::clearServers(DBInterface * pdbi, const std::vector<
 
 	if(!pdbi->query(sqlstr.c_str(), sqlstr.size(), false))
 	{
-		return false;
+		// 查询失败按"存在"处理（fail-closed），避免调用方（如
+		// DBTaskDeleteEntityByDBID::db_thread_process）将瞬时查询错误误判为
+		// "无在线记录"而删除仍在线的实体行。
+		return true;
 	}
 
 	return true;
