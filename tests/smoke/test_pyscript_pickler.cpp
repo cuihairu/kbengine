@@ -151,9 +151,19 @@ protected:
         "        if os.path.isdir(ld):\n"
         "            sys.stderr.write('KBE_DIAG_LD_OK: %r struct=%r\\n' % (\n"
         "                ld, [x for x in os.listdir(ld) if 'struct' in x][:10]))\n"
+        "            sys.stderr.write('KBE_DIAG_LD_FULL: %r\\n' % os.listdir(ld)[:80])\n"
         "        elif os.path.isdir(p):\n"
         "            sys.stderr.write('KBE_DIAG_DIR_OK: %r struct=%r\\n' % (\n"
-        "                p, [x for x in os.listdir(p) if 'struct' in x][:10]))\n");
+        "                p, [x for x in os.listdir(p) if 'struct' in x][:10]))\n"
+        "    try:\n"
+        "        import subprocess\n"
+        "        r = subprocess.run(['/usr/bin/python3', '-c',\n"
+        "            'import struct;print(struct.__file__)'],\n"
+        "            capture_output=True, text=True)\n"
+        "        sys.stderr.write('KBE_DIAG_SYS_STRUCT: %r err=%r\\n' % (\n"
+        "            r.stdout.strip(), r.stderr.strip()[:200]))\n"
+        "    except Exception as e:\n"
+        "        sys.stderr.write('KBE_DIAG_SUBPROC_ERR: %r\\n' % e)\n");
 
     ASSERT_TRUE(KBEngine::script::Pickler::initialize());
   }
