@@ -19,13 +19,11 @@
 	#include <unistd.h>
 #endif
 
-// Define KBEngine global variables for testing
-namespace KBEngine
-{
-	COMPONENT_TYPE g_componentType = UNKNOWN_COMPONENT_TYPE;
-	COMPONENT_ID g_componentID = 0;
-	GAME_TIME g_kbetime = 0;
-}
+// KBEngine global variables (g_componentType / g_componentID / g_kbetime) are
+// provided by the linked server_runtime library (serverapp.cpp); the tests only
+// declare them via common/common.h and must not redefine them here, otherwise
+// the smoke-test link collides with serverapp.cpp.o on platforms that pull that
+// archive member (e.g. macOS ld64) with duplicate-symbol errors.
 
 /**
  * OpenSSL 3.x Compatibility Test Suite

@@ -201,6 +201,17 @@ target_link_libraries(kbe_smoke_tests
     KBEngine::server_forward_messagebuffer
 )
 
+# Embedded-Python smoke tests: Debian/Ubuntu ships the CPython extension modules
+# (_struct, _pickle, ...) in <stdlib>/lib-dynload, which a bare Py_Initialize()
+# from the build tree leaves off sys.path.  Pass the directory to the test so it
+# can make stdlib modules like pickle importable before the Pickler initialises.
+if(Python3_STDLIB)
+  get_filename_component(KBE_TEST_PY_LIB_DYNLOAD "${Python3_STDLIB}/lib-dynload" ABSOLUTE)
+  target_compile_definitions(kbe_smoke_tests PRIVATE
+    KBE_TEST_PY_LIB_DYNLOAD="${KBE_TEST_PY_LIB_DYNLOAD}"
+  )
+endif()
+
 gtest_discover_tests(kbe_smoke_tests)
 
 target_link_libraries(kbe_entitydef_xml_tests

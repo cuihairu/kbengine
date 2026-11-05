@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <Python.h>
+#include "pyscript/python_wrapper.h"
 
 #include "cellapp/teleport_release.h"
 

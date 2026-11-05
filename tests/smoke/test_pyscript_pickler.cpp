@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <Python.h>
+#include "pyscript/python_wrapper.h"
 
 #include <string>
 
@@ -84,6 +84,23 @@ protected:
     {
       Py_Initialize();
     }
+
+    // Debian/Ubuntu splits the CPython extension modules (_struct, _pickle, ...)
+    // into <stdlib>/lib-dynload, which a bare Py_Initialize() from the build tree
+    // leaves off sys.path.  Without it, importing stdlib modules such as pickle
+    // fails with "No module named '_struct'", so make sure the directory is
+    // searchable before the Pickler initialises.
+#ifdef KBE_TEST_PY_LIB_DYNLOAD
+    PyObject* sysPath = PySys_GetObject("path");
+    PyObject* dynload = PyUnicode_FromString(KBE_TEST_PY_LIB_DYNLOAD);
+    if (sysPath != NULL && dynload != NULL &&
+        PySequence_Contains(sysPath, dynload) == 0)
+    {
+      PyList_Insert(sysPath, 0, dynload);
+    }
+    Py_XDECREF(dynload);
+#endif
+
     ASSERT_TRUE(KBEngine::script::Pickler::initialize());
   }
 

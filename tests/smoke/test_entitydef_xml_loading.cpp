@@ -6,7 +6,7 @@
 #include <fstream>
 #include <string>
 
-#include <Python.h>
+#include "pyscript/python_wrapper.h"
 
 #include "entitydef/common.h"
 #include "entitydef/datatypes.h"
