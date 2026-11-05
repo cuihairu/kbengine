@@ -304,6 +304,17 @@ if(TARGET Python3::Python)
         endif()
       endif()
     endif()
+
+    # vcpkg ships a static libpython; stdlib extension modules loaded at runtime
+    # (lib-dynload *.so) resolve the Python API symbols from the executable
+    # itself, so the executable must export its symbol table.
+    if(NOT WIN32)
+      set_property(TARGET Python3::Python PROPERTY INTERFACE_LINK_OPTIONS "-rdynamic")
+
+      if(TARGET Python3::Module)
+        set_property(TARGET Python3::Module PROPERTY INTERFACE_LINK_OPTIONS "-rdynamic")
+      endif()
+    endif()
   endif()
 endif()
 
