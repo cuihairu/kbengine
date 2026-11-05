@@ -11,13 +11,13 @@
   "devDependencies": {
     "@binyamin/markdown-it-wikilinks": "^2.0.0",
     "@braintree/sanitize-url": "^7.1.2",
-    "cytoscape": "^3.33.2",
+    "cytoscape": "^3.34.4",
     "cytoscape-cose-bilkent": "^4.1.0",
-    "dayjs": "^1.11.20",
-    "mermaid": "^10.9.0",
-    "sass-embedded": "^1.98.0",
-    "vitepress": "^1.6.0",
-    "vitepress-plugin-mermaid": "^2.0.16"
+    "dayjs": "^1.11.23",
+    "mermaid": "^10.9.8",
+    "sass-embedded": "^1.107.1",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17"
   },
   "keywords": [
     "kbengine",

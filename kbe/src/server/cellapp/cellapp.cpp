@@ -2142,8 +2142,28 @@ void Cellapp::reqTeleportToCellAppCB(Network::Channel* pChannel, MemoryStream& s
 
 	Py_INCREF(entity);
 	entity->changeToReal(0, s);
-	entity->onTeleportFailure();
-	Py_DECREF(entity);
+
+	if(entity->isDestroyed())
+	{
+		// createFromStream 遇到未知 scriptUType 已标记销毁并执行 onDestroy。
+		// 此处必须移除并释放实体：否则已销毁实体滞留 pEntities_，且 destroy()
+		// 因幂等跳过 Py_DECREF，导致 createObject 基础引用永久泄漏。
+		bool inMap = (pEntities()->find(teleportEntityID) == entity);
+		if(inMap)
+			destroyEntity(teleportEntityID, false);
+		else
+			entity->destroy(false);
+
+		// destroyEntity/destroy 已释放映射引用；destroy() 幂等跳过基础引用，
+		// 需两次递减：一次平衡上方 Py_INCREF，一次释放 createObject 基础引用。
+		Py_DECREF(entity);
+		Py_DECREF(entity);
+	}
+	else
+	{
+		entity->onTeleportFailure();
+		Py_DECREF(entity);
+	}
 
 	s.done();
 }

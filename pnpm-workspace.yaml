@@ -1,0 +1,5 @@
+
+
+overrides:
+  vite@<6.4.4: 6.4.4
+  markdown-it@<14.3.3: 14.3.3
