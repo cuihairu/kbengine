@@ -47,6 +47,7 @@ add_executable(kbe_smoke_tests
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_resmgr.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_navigation_navmesh_decode.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_pyscript_pickler.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_cellapp_teleport_release.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_event_dispatcher.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_endpoint.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/smoke/test_network_fixed_messages.cpp"

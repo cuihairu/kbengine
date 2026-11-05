@@ -30,6 +30,7 @@
 #include "../../server/cellapp/cellapp_interface.h"
 #include "../../server/dbmgr/dbmgr_interface.h"
 #include "../../server/loginapp/loginapp_interface.h"
+#include "teleport_release.h"
 
 namespace KBEngine{
 
@@ -2006,9 +2007,7 @@ void Cellapp::reqTeleportToCellApp(Network::Channel* pChannel, MemoryStream& s)
 		// 平衡上方 Py_INCREF(e)，并释放残余引用。无论实体是否入 map，
 		// 销毁路径会递减对象基础引用；若 createFromStream 已触发
 		// onDestroy(true)，destroy() 因幂等跳过、不再递减，需额外递减一次。
-		Py_DECREF(e);
-		if(wasDestroyed)
-			Py_DECREF(e);
+		releaseTeleportFailureEntityRefs(e, wasDestroyed);
 
 		s.done();
 		return;
@@ -2143,7 +2142,8 @@ void Cellapp::reqTeleportToCellAppCB(Network::Channel* pChannel, MemoryStream& s
 	Py_INCREF(entity);
 	entity->changeToReal(0, s);
 
-	if(entity->isDestroyed())
+	bool wasAlreadyDestroyed = entity->isDestroyed();
+	if(wasAlreadyDestroyed)
 	{
 		// createFromStream 遇到未知 scriptUType 已标记销毁并执行 onDestroy。
 		// 此处必须移除并释放实体：否则已销毁实体滞留 pEntities_，且 destroy()
@@ -2156,8 +2156,7 @@ void Cellapp::reqTeleportToCellAppCB(Network::Channel* pChannel, MemoryStream& s
 
 		// destroyEntity/destroy 已释放映射引用；destroy() 幂等跳过基础引用，
 		// 需两次递减：一次平衡上方 Py_INCREF，一次释放 createObject 基础引用。
-		Py_DECREF(entity);
-		Py_DECREF(entity);
+		releaseTeleportFailureEntityRefs(entity, wasAlreadyDestroyed);
 	}
 	else
 	{
