@@ -2,7 +2,6 @@
 
 #include "pyscript/python_wrapper.h"
 
-#include <filesystem>
 #include <string>
 
 #include "helper/debug_helper.h"
@@ -86,98 +85,39 @@ protected:
       Py_Initialize();
     }
 
-    // Debian/Ubuntu ships CPython's C-extension modules (_struct, _pickle, ...)
-    // in <stdlib>/lib-dynload, which a bare Py_Initialize() from the build tree
-    // can leave off sys.path.  When that happens, prepend the lib-dynload
-    // sibling of a stdlib sys.path entry so stdlib imports resolve their C parts.
-    {
-      PyObject* sysPath = PySys_GetObject("path");
-      if (sysPath != NULL && PyList_Check(sysPath))
-      {
-        const Py_ssize_t numPaths = PyList_Size(sysPath);
-        for (Py_ssize_t i = 0; i < numPaths; ++i)
-        {
-          PyObject* entry = PyList_GetItem(sysPath, i);
-          if (entry == NULL || !PyUnicode_Check(entry))
-            continue;
-          const char* entryStr = PyUnicode_AsUTF8(entry);
-          if (entryStr == NULL)
-          {
-            PyErr_Clear();
-            continue;
-          }
-          std::filesystem::path dynload =
-              std::filesystem::path(entryStr) / "lib-dynload";
-          if (!std::filesystem::is_directory(dynload))
-            continue;
-          PyObject* dynloadObj = PyUnicode_DecodeFSDefault(dynload.string().c_str());
-          if (dynloadObj == NULL)
-          {
-            PyErr_Clear();
-            continue;
-          }
-          if (PySequence_Contains(sysPath, dynloadObj) == 0)
-            PyList_Insert(sysPath, 0, dynloadObj);
-          Py_DECREF(dynloadObj);
-          break;
-        }
-      }
-    }
-
-    // Temporary diagnostic: dump the interpreter layout when _struct is still
-    // unresolvable so the CI log reveals which stdlib/lib-dynload the embedded
-    // Python is using and whether the linked libpython is the debug ABI.
+    // A bare Py_Initialize() from the build tree may leave the stdlib C
+    // extensions (_struct, _pickle, ...) unresolvable: some CI images ship a
+    // system python3.12 whose lib-dynload directory is missing the core C
+    // extensions even though the pure-Python stdlib is complete.  When that
+    // happens, locate a compatible lib-dynload directory (matching this
+    // interpreter's SOABI) and prepend it to sys.path so stdlib imports resolve
+    // their C parts.  This is a no-op when the stdlib C extensions are already
+    // importable.
     PyRun_SimpleString(
-        "import sys, os, importlib.util as _u\n"
-        "if _u.find_spec('_struct') is None:\n"
-        "    sys.stderr.write('KBE_DIAG_SYSPATH: %r\\n' % sys.path)\n"
-        "    sys.stderr.write('KBE_DIAG_PREFIX: %r BASE: %r EXE: %r\\n' % (\n"
-        "        sys.prefix, sys.base_prefix, getattr(sys, 'executable', None)))\n"
+        "import sys, os, glob, importlib.util\n"
+        "def _kbe_ensure_struct():\n"
+        "    if importlib.util.find_spec('_struct') is not None:\n"
+        "        return\n"
+        "    soabi = ''\n"
         "    try:\n"
         "        import sysconfig\n"
-        "        sys.stderr.write('KBE_DIAG_SOABI: %r EXT: %r\\n' % (\n"
-        "            sysconfig.get_config_var('SOABI'), sysconfig.get_config_var('EXT_SUFFIX')))\n"
-        "        d = sysconfig.get_config_var('DESTSHARED') or ''\n"
-        "        sys.stderr.write('KBE_DIAG_DESTSHARED: %r isdir=%r\\n' % (d, os.path.isdir(d)))\n"
-        "        if os.path.isdir(d):\n"
-        "            sys.stderr.write('KBE_DIAG_DESTSHARED_LIST: %r\\n' % (\n"
-        "                [x for x in os.listdir(d) if 'struct' in x][:10]))\n"
-        "    except Exception as e:\n"
-        "        sys.stderr.write('KBE_DIAG_SYSCONFIG_ERR: %r\\n' % e)\n"
-        "    for p in sys.path:\n"
-        "        if not isinstance(p, str):\n"
-        "            continue\n"
-        "        ld = os.path.join(p, 'lib-dynload')\n"
-        "        if os.path.isdir(ld):\n"
-        "            sys.stderr.write('KBE_DIAG_LD_OK: %r struct=%r\\n' % (\n"
-        "                ld, [x for x in os.listdir(ld) if 'struct' in x][:10]))\n"
-        "            sys.stderr.write('KBE_DIAG_LD_FULL: %r\\n' % os.listdir(ld)[:80])\n"
-        "        elif os.path.isdir(p):\n"
-        "            sys.stderr.write('KBE_DIAG_DIR_OK: %r struct=%r\\n' % (\n"
-        "                p, [x for x in os.listdir(p) if 'struct' in x][:10]))\n"
-        "    try:\n"
-        "        import glob, shutil\n"
-        "        roots = ['/usr/lib/python3.12/lib-dynload',\n"
-        "                 '/usr/local/lib/python3.12/lib-dynload',\n"
-        "                 '/opt/hostedtoolcache/Python',\n"
-        "                 '/opt/pyenv',\n"
-        "                 '/usr/lib/x86_64-linux-gnu']\n"
-        "        for r in roots:\n"
-        "            hits = glob.glob(r + '/**/_struct*.so', recursive=True)[:5]\n"
-        "            if hits:\n"
-        "                sys.stderr.write('KBE_DIAG_FOUND: %r -> %r\\n' % (r, hits))\n"
-        "        p = shutil.which('python3') or '/usr/bin/python3'\n"
-        "        sys.stderr.write('KBE_DIAG_PYWHICH: %r\\n' % p)\n"
-        "        import subprocess\n"
-        "        clean = {k: v for k, v in os.environ.items()\n"
-        "                 if k not in ('PYTHONHOME', 'PYTHONPATH')}\n"
-        "        r = subprocess.run([p, '-c',\n"
-        "            'import struct;print(struct.__file__)'],\n"
-        "            capture_output=True, text=True, env=clean)\n"
-        "        sys.stderr.write('KBE_DIAG_PYSTRUCT: %r err=%r\\n' % (\n"
-        "            r.stdout.strip(), r.stderr.strip()[:200]))\n"
-        "    except Exception as e:\n"
-        "        sys.stderr.write('KBE_DIAG_PROBE_ERR: %r\\n' % e)\n");
+        "        soabi = sysconfig.get_config_var('SOABI') or ''\n"
+        "    except Exception:\n"
+        "        pass\n"
+        "    ver = '%d.%d' % sys.version_info[:2]\n"
+        "    name = '_struct' + ('.' + soabi + '.so' if soabi else '.so')\n"
+        "    roots = ['/usr/local/lib/python' + ver + '/lib-dynload',\n"
+        "              '/usr/lib/python' + ver + '/lib-dynload']\n"
+        "    for d in roots:\n"
+        "        if os.path.isdir(d) and os.path.exists(os.path.join(d, name)):\n"
+        "            sys.path.insert(0, d)\n"
+        "            return\n"
+        "    for d in glob.glob('/opt/hostedtoolcache/Python/*/x64/lib/python' + ver +\n"
+        "                      '/lib-dynload'):\n"
+        "        if os.path.exists(os.path.join(d, name)):\n"
+        "            sys.path.insert(0, d)\n"
+        "            return\n"
+        "_kbe_ensure_struct()\n");
 
     ASSERT_TRUE(KBEngine::script::Pickler::initialize());
   }
