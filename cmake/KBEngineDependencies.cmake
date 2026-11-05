@@ -286,14 +286,22 @@ if(TARGET Python3::Python)
     # ABI (Py_DEBUG) looks for d-suffixed extension modules such as
     # _struct.cpython-312d-x86_64-linux-gnu.so, which the system stdlib never
     # ships, so embedded-Python binaries cannot import stdlib C extensions.
+    # FindPython names the imported configurations in upper case (RELEASE DEBUG),
+    # so match case-insensitively to recover the real imported config name.
     get_target_property(_kbe_python_configs Python3::Python IMPORTED_CONFIGURATIONS)
 
-    if(_kbe_python_configs MATCHES "Release")
-      message(STATUS "KBEngine: mapping debug Python link to release library")
-      set_property(TARGET Python3::Python PROPERTY MAP_IMPORTED_CONFIG_DEBUG Release)
+    if(_kbe_python_configs)
+      string(TOLOWER "${_kbe_python_configs}" _kbe_python_configs_lower)
+      list(FIND _kbe_python_configs_lower "release" _kbe_python_release_index)
 
-      if(TARGET Python3::Module)
-        set_property(TARGET Python3::Module PROPERTY MAP_IMPORTED_CONFIG_DEBUG Release)
+      if(_kbe_python_release_index GREATER_EQUAL 0)
+        list(GET _kbe_python_configs ${_kbe_python_release_index} _kbe_python_release_config)
+        message(STATUS "KBEngine: mapping debug Python link to ${_kbe_python_release_config} library")
+        set_property(TARGET Python3::Python PROPERTY MAP_IMPORTED_CONFIG_DEBUG "${_kbe_python_release_config}")
+
+        if(TARGET Python3::Module)
+          set_property(TARGET Python3::Module PROPERTY MAP_IMPORTED_CONFIG_DEBUG "${_kbe_python_release_config}")
+        endif()
       endif()
     endif()
   endif()
