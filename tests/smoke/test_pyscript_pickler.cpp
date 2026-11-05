@@ -2,6 +2,7 @@
 
 #include "pyscript/python_wrapper.h"
 
+#include <filesystem>
 #include <string>
 
 #include "helper/debug_helper.h"
@@ -85,21 +86,41 @@ protected:
       Py_Initialize();
     }
 
-    // Debian/Ubuntu splits the CPython extension modules (_struct, _pickle, ...)
-    // into <stdlib>/lib-dynload, which a bare Py_Initialize() from the build tree
-    // leaves off sys.path.  Without it, importing stdlib modules such as pickle
-    // fails with "No module named '_struct'", so make sure the directory is
-    // searchable before the Pickler initialises.
-#ifdef KBE_TEST_PY_LIB_DYNLOAD
+    // Debian/Ubuntu ships CPython's C-extension modules (_struct, _pickle, ...)
+    // in <stdlib>/lib-dynload, which a bare Py_Initialize() from the build tree
+    // leaves off sys.path.  sys.path already contains <stdlib> (that is how
+    // pickle.py and struct.py are found), so prepend the lib-dynload sibling
+    // directory so stdlib imports can resolve their C parts.
     PyObject* sysPath = PySys_GetObject("path");
-    PyObject* dynload = PyUnicode_FromString(KBE_TEST_PY_LIB_DYNLOAD);
-    if (sysPath != NULL && dynload != NULL &&
-        PySequence_Contains(sysPath, dynload) == 0)
+    if (sysPath != NULL && PyList_Check(sysPath))
     {
-      PyList_Insert(sysPath, 0, dynload);
+      const Py_ssize_t numPaths = PyList_Size(sysPath);
+      for (Py_ssize_t i = 0; i < numPaths; ++i)
+      {
+        PyObject* entry = PyList_GetItem(sysPath, i);
+        if (entry == NULL || !PyUnicode_Check(entry))
+          continue;
+        const char* entryStr = PyUnicode_AsUTF8(entry);
+        if (entryStr == NULL)
+        {
+          PyErr_Clear();
+          continue;
+        }
+        std::filesystem::path dynload = std::filesystem::path(entryStr) / "lib-dynload";
+        if (!std::filesystem::is_directory(dynload))
+          continue;
+        PyObject* dynloadObj = PyUnicode_FromString(dynload.c_str());
+        if (dynloadObj == NULL)
+        {
+          PyErr_Clear();
+          continue;
+        }
+        if (PySequence_Contains(sysPath, dynloadObj) == 0)
+          PyList_Insert(sysPath, 0, dynloadObj);
+        Py_DECREF(dynloadObj);
+        break;
+      }
     }
-    Py_XDECREF(dynload);
-#endif
 
     ASSERT_TRUE(KBEngine::script::Pickler::initialize());
   }

@@ -36,10 +36,12 @@ protected:
     {
       KBEngine::DebugHelper::initialize(KBEngine::UNKNOWN_COMPONENT_TYPE);
     }
-    if (KBEngine::Resmgr::getSingletonPtr() != nullptr)
-    {
-      delete KBEngine::Resmgr::getSingletonPtr();
-    }
+    // The linked interface libraries (server_components / server_common) register
+    // static MessageHandlers objects whose constructors run before main() and
+    // create the FixedMessages singleton, which in turn owns the Resmgr singleton
+    // (FixedMessages() news a Resmgr).  Deleting Resmgr here would leave that
+    // singleton dangling, so the later MessageHandlers::loadConfig() call in this
+    // test asserts in Resmgr::getSingleton().  Leave the singleton alone.
   }
 
   void TearDown() override
