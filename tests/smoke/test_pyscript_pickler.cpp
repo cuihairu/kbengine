@@ -144,7 +144,7 @@ protected:
       {
         if (!std::filesystem::is_directory(dynload))
           continue;
-        PyObject* dynloadObj = PyUnicode_FromString(dynload.c_str());
+        PyObject* dynloadObj = PyUnicode_DecodeFSDefault(dynload.string().c_str());
         if (dynloadObj == NULL)
         {
           PyErr_Clear();
@@ -160,12 +160,28 @@ protected:
       }
     }
 
-    // Temporary diagnostic: dump sys.path when _struct is still unresolvable so
-    // the CI log reveals the build-tree interpreter layout.
+    // Temporary diagnostic: dump interpreter layout when _struct is still
+    // unresolvable so the CI log reveals the build-tree Python environment.
     PyRun_SimpleString(
-        "import sys, importlib.util as _u\n"
+        "import sys, os, importlib.util as _u\n"
         "if _u.find_spec('_struct') is None:\n"
-        "    sys.stderr.write('KBE_DIAG_SYSPATH: %r\\n' % sys.path)\n");
+        "    sys.stderr.write('KBE_DIAG_SYSPATH: %r\\n' % sys.path)\n"
+        "    try:\n"
+        "        import sysconfig\n"
+        "        sys.stderr.write('KBE_DIAG_SOABI: %r EXT: %r DESTSHARED: %r\\n' % (\n"
+        "            sysconfig.get_config_var('SOABI'),\n"
+        "            sysconfig.get_config_var('EXT_SUFFIX'),\n"
+        "            sysconfig.get_config_var('DESTSHARED')))\n"
+        "        _d = sysconfig.get_config_var('DESTSHARED') or ''\n"
+        "        sys.stderr.write('KBE_DIAG_DESTSHARED_DIR: %r\\n' % os.path.isdir(_d))\n"
+        "        try:\n"
+        "            sys.stderr.write('KBE_DIAG_DESTSHARED_LIST: %r\\n' % os.listdir(_d)[:25])\n"
+        "        except Exception as _e:\n"
+        "            sys.stderr.write('KBE_DIAG_DESTSHARED_LIST_ERR: %r\\n' % _e)\n"
+        "    except Exception as _e2:\n"
+        "        sys.stderr.write('KBE_DIAG_SYSCONFIG_ERR: %r\\n' % _e2)\n"
+        "    sys.stderr.write('KBE_DIAG_PREFIX: %r BASE: %r EXE: %r\\n' % (\n"
+        "        sys.prefix, sys.base_prefix, getattr(sys, 'executable', None)))\n");
 
     ASSERT_TRUE(KBEngine::script::Pickler::initialize());
   }
