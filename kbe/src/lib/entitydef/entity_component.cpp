@@ -535,6 +535,11 @@ int EntityComponent::onScriptDelAttribute(PyObject* attr)
 //-------------------------------------------------------------------------------------
 void EntityComponent::onEntityDestroy(PyObject* pEntity, ScriptDefModule* pEntityScriptDescrs, bool callScript, bool beforeDestroy)
 {
+	// 未知 scriptUType 反序列化失败时实体 pScriptModule_ 已被置空，
+	// 销毁路径不能再解引用空模块，否则 cellapp 崩溃。
+	if (pEntityScriptDescrs == NULL)
+		return;
+
 	Py_INCREF(pEntity);
 	ScriptDefModule::COMPONENTDESCRIPTION_MAP& componentDescrs = pEntityScriptDescrs->getComponentDescrs();
 

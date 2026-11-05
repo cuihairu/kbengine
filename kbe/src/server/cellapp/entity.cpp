@@ -206,7 +206,10 @@ void Entity::onDestroy(bool callScript)
 	if(callScript && isReal())
 	{
 		SCOPED_PROFILE(SCRIPTCALL_PROFILE);
-		CALL_ENTITY_AND_COMPONENTS_METHOD(this, SCRIPT_OBJECT_CALL_ARGS0(pyTempObj, const_cast<char*>("onDestroy"), GETERR));
+		if(pScriptModule_)
+		{
+			CALL_ENTITY_AND_COMPONENTS_METHOD(this, SCRIPT_OBJECT_CALL_ARGS0(pyTempObj, const_cast<char*>("onDestroy"), GETERR));
+		}
 
 		// 如果不通知脚本， 那么也不会产生这个回调
 		// 通常销毁一个entity不通知脚本可能是迁移或者传送造成的
@@ -4090,6 +4093,9 @@ bool Entity::createFromStream(KBEngine::MemoryStream& s)
 	{
 		ERROR_MSG(fmt::format("Entity::createFromStream({}): unknown scriptUType({})! entity={}\n",
 			id_, scriptUType, id_));
+		// 标记为已销毁，避免调用方随后 destroy(false) 再次进入销毁流程
+		// 并因 pScriptModule_ 为空在 EntityComponent::onEntityDestroy 解引用空模块。
+		isDestroyed_ = true;
 		this->onDestroy(true);
 		return false;
 	}

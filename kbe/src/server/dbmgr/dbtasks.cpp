@@ -1928,7 +1928,9 @@ bool DBTaskQueryEntity::db_thread_process()
 		if(!success_)
 		{
 			KBEEntityLogTable::EntityLog entitylog;
-			KBEEntityLogTable::QueryResult queryResult;
+			// 查询失败视为错误（fail-closed）。若 queryEntity 抛出非断线异常，
+			// 下方 if 分支仍能读到已初始化的 QUERY_ERROR，避免读取未初始化枚举。
+			KBEEntityLogTable::QueryResult queryResult = KBEEntityLogTable::QUERY_ERROR;
 
 			try
 			{
