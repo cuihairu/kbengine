@@ -156,14 +156,28 @@ protected:
         "            sys.stderr.write('KBE_DIAG_DIR_OK: %r struct=%r\\n' % (\n"
         "                p, [x for x in os.listdir(p) if 'struct' in x][:10]))\n"
         "    try:\n"
+        "        import glob, shutil\n"
+        "        roots = ['/usr/lib/python3.12/lib-dynload',\n"
+        "                 '/usr/local/lib/python3.12/lib-dynload',\n"
+        "                 '/opt/hostedtoolcache/Python',\n"
+        "                 '/opt/pyenv',\n"
+        "                 '/usr/lib/x86_64-linux-gnu']\n"
+        "        for r in roots:\n"
+        "            hits = glob.glob(r + '/**/_struct*.so', recursive=True)[:5]\n"
+        "            if hits:\n"
+        "                sys.stderr.write('KBE_DIAG_FOUND: %r -> %r\\n' % (r, hits))\n"
+        "        p = shutil.which('python3') or '/usr/bin/python3'\n"
+        "        sys.stderr.write('KBE_DIAG_PYWHICH: %r\\n' % p)\n"
         "        import subprocess\n"
-        "        r = subprocess.run(['/usr/bin/python3', '-c',\n"
+        "        clean = {k: v for k, v in os.environ.items()\n"
+        "                 if k not in ('PYTHONHOME', 'PYTHONPATH')}\n"
+        "        r = subprocess.run([p, '-c',\n"
         "            'import struct;print(struct.__file__)'],\n"
-        "            capture_output=True, text=True)\n"
-        "        sys.stderr.write('KBE_DIAG_SYS_STRUCT: %r err=%r\\n' % (\n"
+        "            capture_output=True, text=True, env=clean)\n"
+        "        sys.stderr.write('KBE_DIAG_PYSTRUCT: %r err=%r\\n' % (\n"
         "            r.stdout.strip(), r.stderr.strip()[:200]))\n"
         "    except Exception as e:\n"
-        "        sys.stderr.write('KBE_DIAG_SUBPROC_ERR: %r\\n' % e)\n");
+        "        sys.stderr.write('KBE_DIAG_PROBE_ERR: %r\\n' % e)\n");
 
     ASSERT_TRUE(KBEngine::script::Pickler::initialize());
   }
