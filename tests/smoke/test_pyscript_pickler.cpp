@@ -124,6 +124,37 @@ protected:
       }
     }
 
+    // Temporary diagnostic: dump the interpreter layout when _struct is still
+    // unresolvable so the CI log reveals which stdlib/lib-dynload the embedded
+    // Python is using and whether the linked libpython is the debug ABI.
+    PyRun_SimpleString(
+        "import sys, os, importlib.util as _u\n"
+        "if _u.find_spec('_struct') is None:\n"
+        "    sys.stderr.write('KBE_DIAG_SYSPATH: %r\\n' % sys.path)\n"
+        "    sys.stderr.write('KBE_DIAG_PREFIX: %r BASE: %r EXE: %r\\n' % (\n"
+        "        sys.prefix, sys.base_prefix, getattr(sys, 'executable', None)))\n"
+        "    try:\n"
+        "        import sysconfig\n"
+        "        sys.stderr.write('KBE_DIAG_SOABI: %r EXT: %r\\n' % (\n"
+        "            sysconfig.get_config_var('SOABI'), sysconfig.get_config_var('EXT_SUFFIX')))\n"
+        "        d = sysconfig.get_config_var('DESTSHARED') or ''\n"
+        "        sys.stderr.write('KBE_DIAG_DESTSHARED: %r isdir=%r\\n' % (d, os.path.isdir(d)))\n"
+        "        if os.path.isdir(d):\n"
+        "            sys.stderr.write('KBE_DIAG_DESTSHARED_LIST: %r\\n' % (\n"
+        "                [x for x in os.listdir(d) if 'struct' in x][:10]))\n"
+        "    except Exception as e:\n"
+        "        sys.stderr.write('KBE_DIAG_SYSCONFIG_ERR: %r\\n' % e)\n"
+        "    for p in sys.path:\n"
+        "        if not isinstance(p, str):\n"
+        "            continue\n"
+        "        ld = os.path.join(p, 'lib-dynload')\n"
+        "        if os.path.isdir(ld):\n"
+        "            sys.stderr.write('KBE_DIAG_LD_OK: %r struct=%r\\n' % (\n"
+        "                ld, [x for x in os.listdir(ld) if 'struct' in x][:10]))\n"
+        "        elif os.path.isdir(p):\n"
+        "            sys.stderr.write('KBE_DIAG_DIR_OK: %r struct=%r\\n' % (\n"
+        "                p, [x for x in os.listdir(p) if 'struct' in x][:10]))\n");
+
     ASSERT_TRUE(KBEngine::script::Pickler::initialize());
   }
 
