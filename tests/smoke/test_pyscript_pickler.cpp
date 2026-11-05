@@ -4,7 +4,6 @@
 
 #include <filesystem>
 #include <string>
-#include <vector>
 
 #include "helper/debug_helper.h"
 #include "pyscript/pickler.h"
@@ -89,15 +88,9 @@ protected:
 
     // Debian/Ubuntu ships CPython's C-extension modules (_struct, _pickle, ...)
     // in <stdlib>/lib-dynload, which a bare Py_Initialize() from the build tree
-    // leaves off sys.path, so stdlib imports such as pickle fail with
-    // "No module named '_struct'".  Locate the directory and prepend it.
+    // can leave off sys.path.  When that happens, prepend the lib-dynload
+    // sibling of a stdlib sys.path entry so stdlib imports resolve their C parts.
     {
-      const std::string ver =
-          std::to_string(PY_MAJOR_VERSION) + "." + std::to_string(PY_MINOR_VERSION);
-      std::vector<std::filesystem::path> candidates;
-
-      // Preferred: sys.path already contains <stdlib> (that is how pickle.py and
-      // struct.py are found), so its lib-dynload sibling is the exact directory.
       PyObject* sysPath = PySys_GetObject("path");
       if (sysPath != NULL && PyList_Check(sysPath))
       {
@@ -113,75 +106,23 @@ protected:
             PyErr_Clear();
             continue;
           }
-          candidates.emplace_back(std::filesystem::path(entryStr) / "lib-dynload");
-        }
-      }
-
-      // Fallbacks for build trees where getpath() cannot fully resolve the
-      // installed interpreter layout.
-      if (wchar_t* prefix = Py_GetPrefix())
-      {
-        PyObject* prefixObj = PyUnicode_FromWideChar(prefix, -1);
-        if (prefixObj != NULL)
-        {
-          const char* prefixStr = PyUnicode_AsUTF8(prefixObj);
-          if (prefixStr != NULL)
+          std::filesystem::path dynload =
+              std::filesystem::path(entryStr) / "lib-dynload";
+          if (!std::filesystem::is_directory(dynload))
+            continue;
+          PyObject* dynloadObj = PyUnicode_DecodeFSDefault(dynload.string().c_str());
+          if (dynloadObj == NULL)
           {
-            candidates.emplace_back(
-                std::filesystem::path(prefixStr) / "lib" / ("python" + ver) / "lib-dynload");
+            PyErr_Clear();
+            continue;
           }
-          Py_DECREF(prefixObj);
+          if (PySequence_Contains(sysPath, dynloadObj) == 0)
+            PyList_Insert(sysPath, 0, dynloadObj);
+          Py_DECREF(dynloadObj);
+          break;
         }
-        else
-        {
-          PyErr_Clear();
-        }
-      }
-      candidates.emplace_back(std::filesystem::path("/usr/lib/python" + ver + "/lib-dynload"));
-      candidates.emplace_back(std::filesystem::path("/usr/local/lib/python" + ver + "/lib-dynload"));
-
-      for (const auto& dynload : candidates)
-      {
-        if (!std::filesystem::is_directory(dynload))
-          continue;
-        PyObject* dynloadObj = PyUnicode_DecodeFSDefault(dynload.string().c_str());
-        if (dynloadObj == NULL)
-        {
-          PyErr_Clear();
-          continue;
-        }
-        if (sysPath != NULL && PyList_Check(sysPath) &&
-            PySequence_Contains(sysPath, dynloadObj) == 0)
-        {
-          PyList_Insert(sysPath, 0, dynloadObj);
-        }
-        Py_DECREF(dynloadObj);
-        break;
       }
     }
-
-    // Temporary diagnostic: dump interpreter layout when _struct is still
-    // unresolvable so the CI log reveals the build-tree Python environment.
-    PyRun_SimpleString(
-        "import sys, os, importlib.util as _u\n"
-        "if _u.find_spec('_struct') is None:\n"
-        "    sys.stderr.write('KBE_DIAG_SYSPATH: %r\\n' % sys.path)\n"
-        "    try:\n"
-        "        import sysconfig\n"
-        "        sys.stderr.write('KBE_DIAG_SOABI: %r EXT: %r DESTSHARED: %r\\n' % (\n"
-        "            sysconfig.get_config_var('SOABI'),\n"
-        "            sysconfig.get_config_var('EXT_SUFFIX'),\n"
-        "            sysconfig.get_config_var('DESTSHARED')))\n"
-        "        _d = sysconfig.get_config_var('DESTSHARED') or ''\n"
-        "        sys.stderr.write('KBE_DIAG_DESTSHARED_DIR: %r\\n' % os.path.isdir(_d))\n"
-        "        try:\n"
-        "            sys.stderr.write('KBE_DIAG_DESTSHARED_LIST: %r\\n' % os.listdir(_d)[:25])\n"
-        "        except Exception as _e:\n"
-        "            sys.stderr.write('KBE_DIAG_DESTSHARED_LIST_ERR: %r\\n' % _e)\n"
-        "    except Exception as _e2:\n"
-        "        sys.stderr.write('KBE_DIAG_SYSCONFIG_ERR: %r\\n' % _e2)\n"
-        "    sys.stderr.write('KBE_DIAG_PREFIX: %r BASE: %r EXE: %r\\n' % (\n"
-        "        sys.prefix, sys.base_prefix, getattr(sys, 'executable', None)))\n");
 
     ASSERT_TRUE(KBEngine::script::Pickler::initialize());
   }

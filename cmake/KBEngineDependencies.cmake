@@ -281,6 +281,21 @@ if(TARGET Python3::Python)
         set_property(TARGET Python3::Python PROPERTY IMPORTED_LOCATION_DEBUG "${_kbe_python_location_release}")
       endif()
     endif()
+  else()
+    # Debug builds must link the release libpython on Linux/macOS too: the debug
+    # ABI (Py_DEBUG) looks for d-suffixed extension modules such as
+    # _struct.cpython-312d-x86_64-linux-gnu.so, which the system stdlib never
+    # ships, so embedded-Python binaries cannot import stdlib C extensions.
+    get_target_property(_kbe_python_configs Python3::Python IMPORTED_CONFIGURATIONS)
+
+    if(_kbe_python_configs MATCHES "Release")
+      message(STATUS "KBEngine: mapping debug Python link to release library")
+      set_property(TARGET Python3::Python PROPERTY MAP_IMPORTED_CONFIG_DEBUG Release)
+
+      if(TARGET Python3::Module)
+        set_property(TARGET Python3::Module PROPERTY MAP_IMPORTED_CONFIG_DEBUG Release)
+      endif()
+    endif()
   endif()
 endif()
 
