@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include <string>
+#include <vector>
 
 #include "helper/debug_helper.h"
 #include "pyscript/pickler.h"
@@ -88,25 +89,59 @@ protected:
 
     // Debian/Ubuntu ships CPython's C-extension modules (_struct, _pickle, ...)
     // in <stdlib>/lib-dynload, which a bare Py_Initialize() from the build tree
-    // leaves off sys.path.  sys.path already contains <stdlib> (that is how
-    // pickle.py and struct.py are found), so prepend the lib-dynload sibling
-    // directory so stdlib imports can resolve their C parts.
-    PyObject* sysPath = PySys_GetObject("path");
-    if (sysPath != NULL && PyList_Check(sysPath))
+    // leaves off sys.path, so stdlib imports such as pickle fail with
+    // "No module named '_struct'".  Locate the directory and prepend it.
     {
-      const Py_ssize_t numPaths = PyList_Size(sysPath);
-      for (Py_ssize_t i = 0; i < numPaths; ++i)
+      const std::string ver =
+          std::to_string(PY_MAJOR_VERSION) + "." + std::to_string(PY_MINOR_VERSION);
+      std::vector<std::filesystem::path> candidates;
+
+      // Preferred: sys.path already contains <stdlib> (that is how pickle.py and
+      // struct.py are found), so its lib-dynload sibling is the exact directory.
+      PyObject* sysPath = PySys_GetObject("path");
+      if (sysPath != NULL && PyList_Check(sysPath))
       {
-        PyObject* entry = PyList_GetItem(sysPath, i);
-        if (entry == NULL || !PyUnicode_Check(entry))
-          continue;
-        const char* entryStr = PyUnicode_AsUTF8(entry);
-        if (entryStr == NULL)
+        const Py_ssize_t numPaths = PyList_Size(sysPath);
+        for (Py_ssize_t i = 0; i < numPaths; ++i)
+        {
+          PyObject* entry = PyList_GetItem(sysPath, i);
+          if (entry == NULL || !PyUnicode_Check(entry))
+            continue;
+          const char* entryStr = PyUnicode_AsUTF8(entry);
+          if (entryStr == NULL)
+          {
+            PyErr_Clear();
+            continue;
+          }
+          candidates.emplace_back(std::filesystem::path(entryStr) / "lib-dynload");
+        }
+      }
+
+      // Fallbacks for build trees where getpath() cannot fully resolve the
+      // installed interpreter layout.
+      if (wchar_t* prefix = Py_GetPrefix())
+      {
+        PyObject* prefixObj = PyUnicode_FromWideChar(prefix, -1);
+        if (prefixObj != NULL)
+        {
+          const char* prefixStr = PyUnicode_AsUTF8(prefixObj);
+          if (prefixStr != NULL)
+          {
+            candidates.emplace_back(
+                std::filesystem::path(prefixStr) / "lib" / ("python" + ver) / "lib-dynload");
+          }
+          Py_DECREF(prefixObj);
+        }
+        else
         {
           PyErr_Clear();
-          continue;
         }
-        std::filesystem::path dynload = std::filesystem::path(entryStr) / "lib-dynload";
+      }
+      candidates.emplace_back(std::filesystem::path("/usr/lib/python" + ver + "/lib-dynload"));
+      candidates.emplace_back(std::filesystem::path("/usr/local/lib/python" + ver + "/lib-dynload"));
+
+      for (const auto& dynload : candidates)
+      {
         if (!std::filesystem::is_directory(dynload))
           continue;
         PyObject* dynloadObj = PyUnicode_FromString(dynload.c_str());
@@ -115,12 +150,22 @@ protected:
           PyErr_Clear();
           continue;
         }
-        if (PySequence_Contains(sysPath, dynloadObj) == 0)
+        if (sysPath != NULL && PyList_Check(sysPath) &&
+            PySequence_Contains(sysPath, dynloadObj) == 0)
+        {
           PyList_Insert(sysPath, 0, dynloadObj);
+        }
         Py_DECREF(dynloadObj);
         break;
       }
     }
+
+    // Temporary diagnostic: dump sys.path when _struct is still unresolvable so
+    // the CI log reveals the build-tree interpreter layout.
+    PyRun_SimpleString(
+        "import sys, importlib.util as _u\n"
+        "if _u.find_spec('_struct') is None:\n"
+        "    sys.stderr.write('KBE_DIAG_SYSPATH: %r\\n' % sys.path)\n");
 
     ASSERT_TRUE(KBEngine::script::Pickler::initialize());
   }
