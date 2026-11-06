@@ -36,12 +36,22 @@ protected:
     {
       KBEngine::DebugHelper::initialize(KBEngine::UNKNOWN_COMPONENT_TYPE);
     }
-    // The linked interface libraries (server_components / server_common) register
-    // static MessageHandlers objects whose constructors run before main() and
-    // create the FixedMessages singleton, which in turn owns the Resmgr singleton
-    // (FixedMessages() news a Resmgr).  Deleting Resmgr here would leave that
-    // singleton dangling, so the later MessageHandlers::loadConfig() call in this
-    // test asserts in Resmgr::getSingleton().  Leave the singleton alone.
+    // The linked interface libraries register static MessageHandlers objects
+    // whose constructors run before main() and create the FixedMessages
+    // singleton, which in turn news a Resmgr.  Earlier tests (e.g.
+    // ServerServerConfig via ScopedResmgrEnvironment, or NetworkFixedMessages)
+    // may also create/destroy these singletons at runtime.  Reset both so the
+    // test body below reconstructs a consistent FixedMessages+Resmgr pair:
+    // leaving FixedMessages alive while deleting Resmgr makes its later
+    // loadConfig() assert in Resmgr::getSingleton().
+    if (KBEngine::Network::FixedMessages::getSingletonPtr() != nullptr)
+    {
+      delete KBEngine::Network::FixedMessages::getSingletonPtr();
+    }
+    if (KBEngine::Resmgr::getSingletonPtr() != nullptr)
+    {
+      delete KBEngine::Resmgr::getSingletonPtr();
+    }
   }
 
   void TearDown() override
