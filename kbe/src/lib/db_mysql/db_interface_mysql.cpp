@@ -179,7 +179,17 @@ bool DBInterfaceMysql::attach(const char* databaseName)
 			ERROR_MSG("DBInterfaceMysql::attach: mysql_init error!\n");
 			return false;
 		}
-		
+		// encrypt=false (kbengine.xml) must not fail on TLS cert verification:
+		// vcpkg libmariadb 3.4 verifies the server cert by default and dies
+		// with mysql_errno=2026 ("certificate is NOT trusted") against the
+		// self-signed-cert MySQL on the LAN. Linux libmysqlclient never
+		// verified by default, so disable verification to match that surface
+		// (libmariadb 3.4 has no MYSQL_OPT_SSL_MODE).
+		{
+			char certVerify = 0;
+			mysql_options(pMysql_, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char*)&certVerify);
+		}
+
 		DEBUG_MSG(fmt::format("DBInterfaceMysql::attach: connect: {}:{} starting...\n", db_ip_, db_port_));
 
 		int ntry = 0;
@@ -212,6 +222,10 @@ __RECONNECT:
 				{
 					ERROR_MSG("DBInterfaceMysql::attach: mysql_init error!\n");
 					return false;
+				}
+				{
+					char certVerify = 0;
+					mysql_options(pMysql_, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char*)&certVerify);
 				}
 
 				if (mysql_real_connect(mysql(), db_ip_, db_username_,
