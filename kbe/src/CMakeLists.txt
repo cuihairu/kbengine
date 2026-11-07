@@ -1,3 +1,9 @@
+# Python 3.12+ requires PY_SSIZE_T_CLEAN for '#' PyArg formats ("s#", "u#");
+# the codebase still uses them without the macro, which raised
+# SystemError("PY_SSIZE_T_CLEAN macro must be defined for '#' formats") and
+# aborted every server process at runtime on Windows/Python3.12 builds.
+add_compile_definitions(PY_SSIZE_T_CLEAN)
+
 add_subdirectory(lib)
 
 function(kbe_add_server_executable target_name output_name compile_define)
