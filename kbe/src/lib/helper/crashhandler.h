@@ -43,9 +43,9 @@ BOOL CALLBACK dumpCallback(
 	#define THREAD_HANDLE_CRASH  }__except(exceptionCode = GetExceptionCode(), KBEngine::exception::createMiniDump(GetExceptionInformation()),						\
 															EXCEPTION_EXECUTE_HANDLER) {																			\
 									printf("%x\n", exceptionCode);																									\
-									wchar_t msg[512];																												\
-									wsprintf(msg, L"Exception happened. Exception code is %x.", exceptionCode);														\
-									MessageBox(NULL, msg, L"Exception", MB_OK);																						\
+									wchar_t msg[512];																															\
+									wsprintfW(msg, L"Exception happened. Exception code is %x.", exceptionCode);																\
+									MessageBoxW(NULL, msg, L"Exception", MB_OK);																								\
 								}
 #else
 	#define THREAD_TRY_EXECUTION 
