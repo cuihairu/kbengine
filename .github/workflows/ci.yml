@@ -45,7 +45,7 @@ jobs:
             os: windows-2022
             timeout: 65
           - name: macOS CMake
-            os: macos-latest
+            os: macos-15
             timeout: 70
 
     steps:
